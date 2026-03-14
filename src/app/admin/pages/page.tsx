@@ -173,7 +173,7 @@ export default function AdminPagesManager() {
                     <td className="px-6 py-6 border-zinc-800">
                       <div className="flex items-center justify-end gap-2">
                         <Link 
-                          href={`/home-2?slug=${page.slug}`}
+                          href={`/home-2?page=${page.slug}&builder=true`}
                           className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:bg-zinc-800 hover:text-white transition-all text-zinc-400 flex items-center gap-2"
                         >
                           <Settings className="w-4 h-4" />

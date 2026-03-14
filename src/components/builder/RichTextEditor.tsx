@@ -22,7 +22,9 @@ import {
   AlignJustify,
   Type,
   Baseline,
-  ChevronDown
+  ChevronDown,
+  ArrowLeftRight,
+  FoldVertical
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -33,6 +35,14 @@ declare module '@tiptap/core' {
     fontSize: {
       setFontSize: (size: string) => ReturnType;
       unsetFontSize: () => ReturnType;
+    }
+    letterSpacing: {
+      setLetterSpacing: (spacing: string) => ReturnType;
+      unsetLetterSpacing: () => ReturnType;
+    }
+    lineHeight: {
+      setLineHeight: (height: string) => ReturnType;
+      unsetLineHeight: () => ReturnType;
     }
   }
 }
@@ -82,6 +92,94 @@ const FontSize = Extension.create({
   },
 });
 
+const LetterSpacing = Extension.create({
+  name: 'letterSpacing',
+  addOptions() {
+    return {
+      types: ['textStyle', 'heading', 'paragraph'],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          letterSpacing: {
+            default: null,
+            parseHTML: element => element.style.letterSpacing,
+            renderHTML: attributes => {
+              if (!attributes.letterSpacing) return {};
+              return { style: `letter-spacing: ${attributes.letterSpacing} !important` };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setLetterSpacing: (spacing: string) => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { letterSpacing: spacing })
+          .updateAttributes('heading', { letterSpacing: spacing })
+          .updateAttributes('paragraph', { letterSpacing: spacing })
+          .run();
+      },
+      unsetLetterSpacing: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { letterSpacing: null })
+          .updateAttributes('heading', { letterSpacing: null })
+          .updateAttributes('paragraph', { letterSpacing: null })
+          .run();
+      },
+    };
+  },
+});
+
+const LineHeight = Extension.create({
+  name: 'lineHeight',
+  addOptions() {
+    return {
+      types: ['textStyle', 'heading', 'paragraph'],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          lineHeight: {
+            default: null,
+            parseHTML: element => element.style.lineHeight,
+            renderHTML: attributes => {
+              if (!attributes.lineHeight) return {};
+              return { style: `line-height: ${attributes.lineHeight} !important` };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setLineHeight: (height: string) => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { lineHeight: height })
+          .updateAttributes('heading', { lineHeight: height })
+          .updateAttributes('paragraph', { lineHeight: height })
+          .run();
+      },
+      unsetLineHeight: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { lineHeight: null })
+          .updateAttributes('heading', { lineHeight: null })
+          .updateAttributes('paragraph', { lineHeight: null })
+          .run();
+      },
+    };
+  },
+});
+
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -115,6 +213,29 @@ const SIZES = [
   { label: '128px', value: '128px' },
 ];
 
+const SPACINGS = [
+  { label: 'Mặc định', value: '' },
+  { label: '-0.05em', value: '-0.05em' },
+  { label: '-0.025em', value: '-0.025em' },
+  { label: '0px', value: '0px' },
+  { label: '0.025em', value: '0.025em' },
+  { label: '0.05em', value: '0.05em' },
+  { label: '0.1em', value: '0.1em' },
+  { label: '0.15em', value: '0.15em' },
+  { label: '0.2em', value: '0.2em' },
+  { label: '0.25em', value: '0.25em' },
+  { label: '0.5em', value: '0.5em' },
+];
+
+const LINE_HEIGHTS = [
+  { label: 'Mặc định', value: '' },
+  { label: '1', value: '1' },
+  { label: '1.25', value: '1.25' },
+  { label: '1.5', value: '1.5' },
+  { label: '1.75', value: '1.75' },
+  { label: '2', value: '2' },
+];
+
 
 export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTextEditorProps) {
   const { isEditMode } = useAdmin();
@@ -122,11 +243,15 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
   const [showFontMenu, setShowFontMenu] = useState(false);
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
+  const [showSpacingMenu, setShowSpacingMenu] = useState(false);
+  const [showLineHeightMenu, setShowLineHeightMenu] = useState(false);
 
   const closeAllMenus = () => {
     setShowFontMenu(false);
     setShowSizeMenu(false);
     setShowColorMenu(false);
+    setShowSpacingMenu(false);
+    setShowLineHeightMenu(false);
   };
 
   const editor = useEditor({
@@ -141,6 +266,8 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
       FontFamily,
       Color,
       FontSize,
+      LetterSpacing,
+      LineHeight,
     ],
     content,
     immediatelyRender: false,
@@ -366,6 +493,88 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
             </div>
           )}
         </div>
+
+        {/* Letter Spacing Selector */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              const newState = !showSpacingMenu;
+              closeAllMenus();
+              setShowSpacingMenu(newState);
+            }}
+            className={cn(
+              "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
+              showSpacingMenu && "bg-zinc-800 border-zinc-700 text-white"
+            )}
+            title="Khoảng cách chữ (Kerning)"
+          >
+            <ArrowLeftRight className="w-4 h-4" />
+          </button>
+          {showSpacingMenu && (
+            <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
+              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                Letter Spacing
+              </div>
+              {SPACINGS.map(s => (
+                <button
+                  key={s.label}
+                  onClick={() => {
+                    if (s.value) editor.chain().focus().setLetterSpacing(s.value).run();
+                    else editor.chain().focus().unsetLetterSpacing().run();
+                    closeAllMenus();
+                  }}
+                  className={cn(
+                    "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
+                    editor.isActive('textStyle', { letterSpacing: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Line Height Selector */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              const newState = !showLineHeightMenu;
+              closeAllMenus();
+              setShowLineHeightMenu(newState);
+            }}
+            className={cn(
+              "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
+              showLineHeightMenu && "bg-zinc-800 border-zinc-700 text-white"
+            )}
+            title="Khoảng cách dòng (Line Height)"
+          >
+            <FoldVertical className="w-4 h-4" />
+          </button>
+          {showLineHeightMenu && (
+            <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
+              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                Line Height
+              </div>
+              {LINE_HEIGHTS.map(s => (
+                <button
+                  key={s.label}
+                  onClick={() => {
+                    if (s.value) editor.chain().focus().setLineHeight(s.value).run();
+                    else editor.chain().focus().unsetLineHeight().run();
+                    closeAllMenus();
+                  }}
+                  className={cn(
+                    "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
+                    editor.isActive('textStyle', { lineHeight: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         
         <div className="w-px h-6 bg-zinc-800 mx-1" />
 
@@ -431,7 +640,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
         .custom-tiptap-content h2[style*="font-size"],
         .custom-tiptap-content h3[style*="font-size"],
         .custom-tiptap-content p[style*="font-size"] {
-          line-height: 1.2;
+          /* remove forced line-height: 1.2 to allow custom line heights */
         }
         
         /* Chỉnh sửa giao diện của SketchPicker cho Dark Mode */
