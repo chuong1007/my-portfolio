@@ -327,6 +327,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
                   }}
                   disableAlpha={true}
                   width="220px"
+                  className="custom-sketch-picker"
                   styles={{
                     default: {
                       picker: {
@@ -431,6 +432,33 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
         .custom-tiptap-content h3[style*="font-size"],
         .custom-tiptap-content p[style*="font-size"] {
           line-height: 1.2;
+        }
+        
+        /* Chỉnh sửa giao diện của SketchPicker cho Dark Mode */
+        .custom-sketch-picker {
+          box-sizing: border-box !important;
+        }
+        .custom-sketch-picker input {
+          background-color: #09090b !important;
+          color: #e4e4e7 !important;
+          border: 1px solid #27272a !important;
+          box-shadow: none !important;
+          border-radius: 6px !important;
+          font-family: inherit !important;
+          padding: 6px !important;
+          font-size: 11px !important;
+          text-align: center !important;
+        }
+        .custom-sketch-picker label {
+          color: #71717a !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.05em !important;
+          font-size: 10px !important;
+          padding-top: 4px !important;
+          padding-bottom: 2px !important;
+        }
+        .custom-sketch-picker > div:last-child {
+          border-top: none !important;
         }
       `}</style>
     </div>

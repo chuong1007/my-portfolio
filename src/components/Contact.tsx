@@ -85,7 +85,7 @@ export function Contact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className={cn("flex flex-col", isContactPage ? "gap-6" : "gap-12")}
+            className={cn("flex flex-col", isContactPage ? "gap-4" : "gap-6")}
           >
             <div className="flex flex-col gap-2 md:gap-3">
               {heading && (
