@@ -27,6 +27,8 @@ export function Contact() {
   const [isVisible, setIsVisible] = useState(true);
   const [headingFontSize, setHeadingFontSize] = useState("");
   const [headingFontFamily, setHeadingFontFamily] = useState("");
+  const [subtitleFontSize, setSubtitleFontSize] = useState("");
+  const [subtitleFontFamily, setSubtitleFontFamily] = useState("");
   const { isAdmin } = useAdmin();
 
   const fetchContent = async () => {
@@ -53,6 +55,8 @@ export function Contact() {
       setShowEmail(d.showEmail !== false);
       setHeadingFontSize(d.headingFontSize || "");
       setHeadingFontFamily(d.headingFontFamily || "");
+      setSubtitleFontSize(d.subtitleFontSize || "");
+      setSubtitleFontFamily(d.subtitleFontFamily || "");
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
     }
   };
@@ -67,7 +71,7 @@ export function Contact() {
   return (
     <SectionEditor
       sectionId="contact"
-      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible, headingFontSize, headingFontFamily }}
+      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible, headingFontSize, headingFontFamily, subtitleFontSize, subtitleFontFamily }}
       onSave={fetchContent}
       isVisible={isVisible}
     >
@@ -104,10 +108,16 @@ export function Contact() {
               >
                 {heading}
               </h2>
-              <p className={cn(
-                "text-zinc-400",
-                isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl"
-              )}>
+              <p 
+                className={cn(
+                  "text-zinc-400",
+                  !subtitleFontSize && (isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl")
+                )}
+                style={{
+                  fontSize: subtitleFontSize ? subtitleFontSize : undefined,
+                  fontFamily: subtitleFontFamily ? subtitleFontFamily : undefined
+                }}
+              >
                 {subtitle}
               </p>
             </div>
