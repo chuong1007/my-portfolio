@@ -318,7 +318,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
             />
           </button>
           {showColorMenu && (
-            <div className="absolute top-full left-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+            <div className="absolute top-full right-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
               <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
                 <SketchPicker
                   color={editor.getAttributes('textStyle').color || '#ffffff'}
