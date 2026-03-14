@@ -87,11 +87,12 @@ export function Contact() {
             transition={{ duration: 0.8 }}
             className={cn("flex flex-col", isContactPage ? "gap-6" : "gap-12")}
           >
+            <div className="flex flex-col gap-2 md:gap-3">
               {heading && (
                 <div 
                   className={cn(
-                    "tracking-tighter text-zinc-50 mb-2",
-                    isContactPage ? "[&_h1]:text-3xl [&_h2]:text-2xl" : "[&_h1]:text-6xl [&_h1]:md:text-8xl [&_h2]:text-4xl [&_h2]:md:text-6xl mb-4"
+                    "tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    isContactPage ? "[&_h1]:text-3xl [&_h2]:text-2xl" : "[&_h1]:text-6xl [&_h1]:md:text-8xl [&_h2]:text-4xl [&_h2]:md:text-6xl"
                   )}
                   dangerouslySetInnerHTML={{ __html: heading }}
                 />
@@ -99,12 +100,13 @@ export function Contact() {
               {subtitle && (
                 <div 
                   className={cn(
-                    "text-zinc-400",
+                    "text-zinc-400 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                     isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl"
                   )}
                   dangerouslySetInnerHTML={{ __html: subtitle }}
                 />
               )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {showPhone && (
