@@ -25,10 +25,6 @@ export function Contact() {
   const [showPhone, setShowPhone] = useState(true);
   const [showEmail, setShowEmail] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
-  const [headingFontSize, setHeadingFontSize] = useState("");
-  const [headingFontFamily, setHeadingFontFamily] = useState("");
-  const [subtitleFontSize, setSubtitleFontSize] = useState("");
-  const [subtitleFontFamily, setSubtitleFontFamily] = useState("");
   const { isAdmin } = useAdmin();
 
   const fetchContent = async () => {
@@ -40,7 +36,7 @@ export function Contact() {
       .single();
 
     if (data?.data) {
-      const d = data.data as any;
+      const d = data.data as Record<string, any>;
       setHeading(d.heading || "Let's Connect");
       setSubtitle(d.subtitle || "Anh/ chị có dự án cần thực hiện:");
       setPhone(d.phone || "038 429 7019");
@@ -53,10 +49,6 @@ export function Contact() {
       setShowZalo(d.showZalo !== false);
       setShowPhone(d.showPhone !== false);
       setShowEmail(d.showEmail !== false);
-      setHeadingFontSize(d.headingFontSize || "");
-      setHeadingFontFamily(d.headingFontFamily || "");
-      setSubtitleFontSize(d.subtitleFontSize || "");
-      setSubtitleFontFamily(d.subtitleFontFamily || "");
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
     }
   };
@@ -71,7 +63,7 @@ export function Contact() {
   return (
     <SectionEditor
       sectionId="contact"
-      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible, headingFontSize, headingFontFamily, subtitleFontSize, subtitleFontFamily }}
+      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible }}
       onSave={fetchContent}
       isVisible={isVisible}
     >
@@ -95,32 +87,24 @@ export function Contact() {
             transition={{ duration: 0.8 }}
             className={cn("flex flex-col", isContactPage ? "gap-6" : "gap-12")}
           >
-            <div className={cn(isContactPage ? "text-left" : "text-center")}>
-              <h2 
-                className={cn(
-                  "font-bold tracking-tighter text-zinc-50 mb-2",
-                  !headingFontSize && (isContactPage ? "text-3xl md:text-4xl" : "text-6xl md:text-8xl mb-4")
-                )}
-                style={{ 
-                  fontSize: headingFontSize ? headingFontSize : undefined,
-                  fontFamily: headingFontFamily ? headingFontFamily : undefined
-                }}
-              >
-                {heading}
-              </h2>
-              <p 
-                className={cn(
-                  "text-zinc-400",
-                  !subtitleFontSize && (isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl")
-                )}
-                style={{
-                  fontSize: subtitleFontSize ? subtitleFontSize : undefined,
-                  fontFamily: subtitleFontFamily ? subtitleFontFamily : undefined
-                }}
-              >
-                {subtitle}
-              </p>
-            </div>
+              {heading && (
+                <div 
+                  className={cn(
+                    "tracking-tighter text-zinc-50 mb-2",
+                    isContactPage ? "[&_h1]:text-3xl [&_h2]:text-2xl" : "[&_h1]:text-6xl [&_h1]:md:text-8xl [&_h2]:text-4xl [&_h2]:md:text-6xl mb-4"
+                  )}
+                  dangerouslySetInnerHTML={{ __html: heading }}
+                />
+              )}
+              {subtitle && (
+                <div 
+                  className={cn(
+                    "text-zinc-400",
+                    isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl"
+                  )}
+                  dangerouslySetInnerHTML={{ __html: subtitle }}
+                />
+              )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               {showPhone && (

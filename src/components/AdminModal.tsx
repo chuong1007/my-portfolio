@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Eye, EyeOff, Upload, Loader2, Palette } from "lucide-react";
+import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette } from 'lucide-react';
 import { createClient } from "@/lib/supabase";
+import { RichTextEditor } from "./builder/RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 
@@ -10,12 +11,12 @@ type AdminModalProps = {
   isOpen: boolean;
   onClose: () => void;
   sectionId: string;
-  initialData: any;
+  initialData: Record<string, unknown>;
   onSave: () => void;
 };
 
 export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: AdminModalProps) {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState<Record<string, any>>(initialData);
   const [loading, setLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
     });
   }, [initialData, isOpen]);
 
-  const handleBlockDataChange = (newData: any) => {
+  const handleBlockDataChange = (newData: Record<string, any>) => {
     setData({ ...data, data: { ...data.data, ...newData } });
   };
 
@@ -64,8 +65,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
         .getPublicUrl(filePath);
 
       setData({ ...data, logoImageUrl: publicUrl });
-    } catch (err: any) {
-      setError(`Lỗi tải ảnh: ${err.message}`);
+    } catch (err) {
+      setError(`Lỗi tải ảnh: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLogoUploading(false);
     }
@@ -294,80 +295,27 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           )}
 
           {sectionId === 'contact' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Heading</label>
-                <input
-                  type="text"
-                  value={data.heading}
-                  onChange={(e) => setData({ ...data, heading: e.target.value })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
-                />
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Subtitle</label>
-                <textarea
-                  value={data.subtitle}
-                  onChange={(e) => setData({ ...data, subtitle: e.target.value })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none"
-                  rows={2}
-                />
-              </div>
-
-              {/* Font Settings for Contact Heading */}
-              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Cấu hình Font chữ Tiêu đề</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Cỡ chữ (VD: 5rem, 64px...)</label>
-                    <input
-                      type="text"
-                      value={data.headingFontSize || ''}
-                      placeholder="Mặc định: 6xl - 8xl"
-                      onChange={(e) => setData({ ...data, headingFontSize: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Font chữ (CSS Family)</label>
-                    <input
-                      type="text"
-                      value={data.headingFontFamily || ''}
-                      placeholder="VD: 'Inter', sans-serif"
-                      onChange={(e) => setData({ ...data, headingFontFamily: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
-                    />
-                  </div>
-                </div>
-                <p className="text-[10px] text-zinc-500 italic">* Để trống để sử dụng cỡ chữ mặc định của giao diện.</p>
-              </div>
-
-              {/* Font Settings for Contact Subtitle */}
-              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Cấu hình Font chữ Title (Subtitle)</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Cỡ chữ (VD: 1.2rem, 18px...)</label>
-                    <input
-                      type="text"
-                      value={data.subtitleFontSize || ''}
-                      placeholder="Mặc định: xl - 2xl"
-                      onChange={(e) => setData({ ...data, subtitleFontSize: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Font chữ (CSS Family)</label>
-                    <input
-                      type="text"
-                      value={data.subtitleFontFamily || ''}
-                      placeholder="VD: 'Inter', sans-serif"
-                      onChange={(e) => setData({ ...data, subtitleFontFamily: e.target.value })}
-                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
-                    />
-                  </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="col-span-1 md:col-span-2 space-y-4">
+                <label className="block text-sm font-bold text-zinc-300">Tiêu đề chính (Heading)</label>
+                <div className="bg-zinc-950/50 rounded-2xl border border-zinc-800 p-1">
+                  <RichTextEditor
+                    content={data.heading || ''}
+                    onChange={(val) => setData({ ...data, heading: val })}
+                  />
                 </div>
               </div>
+
+              <div className="col-span-1 md:col-span-2 space-y-4">
+                <label className="block text-sm font-bold text-zinc-300">Tiêu đề phụ (Subtitle)</label>
+                <div className="bg-zinc-950/50 rounded-2xl border border-zinc-800 p-1">
+                  <RichTextEditor
+                    content={data.subtitle || ''}
+                    onChange={(val) => setData({ ...data, subtitle: val })}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Số điện thoại</label>
@@ -389,6 +337,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
                 />
               </div>
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Email</label>
@@ -410,6 +359,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
                 />
               </div>
+
               <div className="col-span-1 md:col-span-2 space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Kết nối Facebook</label>
@@ -492,7 +442,6 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
             </div>
           )}
 
-          {/* UX Builder Block Editor */}
           {sectionId.includes('col-') && (
             <div className="space-y-6">
               <div className="p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
@@ -567,8 +516,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                               if (upError) throw upError;
                               const { data: { publicUrl } } = supabase.storage.from("project-images").getPublicUrl(`site/${fileName}`);
                               handleBlockDataChange({ url: publicUrl });
-                            } catch (err: any) {
-                              setError(err.message);
+                            } catch (err) {
+                              setError(err instanceof Error ? err.message : String(err));
                             } finally {
                               setLogoUploading(false);
                             }

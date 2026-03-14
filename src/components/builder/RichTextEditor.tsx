@@ -15,19 +15,27 @@ import {
   Strikethrough, 
   Heading1, 
   Heading2, 
-  Heading3, 
-  List, 
-  AlignLeft, 
-  AlignCenter, 
-  AlignRight, 
+  Heading3,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
   AlignJustify,
   Type,
   Baseline,
-  ChevronDown,
-  Eye
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { SketchPicker } from 'react-color';
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (size: string) => ReturnType;
+      unsetFontSize: () => ReturnType;
+    }
+  }
+}
 
 // Custom Font Size extension using Global Attributes for textStyle
 const FontSize = Extension.create({
@@ -107,14 +115,6 @@ const SIZES = [
   { label: '128px', value: '128px' },
 ];
 
-const COLORS = [
-  { label: 'White', value: '#ffffff' },
-  { label: 'Gray', value: '#a1a1aa' },
-  { label: 'Blue', value: '#3b82f6' },
-  { label: 'Green', value: '#22c55e' },
-  { label: 'Red', value: '#ef4444' },
-  { label: 'Yellow', value: '#eab308' },
-];
 
 export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTextEditorProps) {
   const { isEditMode } = useAdmin();
@@ -199,13 +199,13 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
           {[1, 2, 3].map((level) => (
             <button
               key={level}
-              onClick={() => { editor.chain().focus().toggleHeading({ level: level as any }).run(); closeAllMenus(); }}
-              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('heading', { level: level }) && "text-white bg-zinc-800")}
-              title={`Heading ${level}`}
-            >
-              {level === 1 ? <Heading1 className="w-4 h-4" /> : level === 2 ? <Heading2 className="w-4 h-4" /> : <Heading3 className="w-4 h-4" />}
-            </button>
-          ))}
+            onClick={() => { editor.chain().focus().toggleHeading({ level: level as 1 | 2 | 3 }).run(); closeAllMenus(); }}
+            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('heading', { level: level }) && "text-white bg-zinc-800")}
+            title={`Heading ${level}`}
+          >
+            {level === 1 ? <Heading1 className="w-4 h-4" /> : level === 2 ? <Heading2 className="w-4 h-4" /> : <Heading3 className="w-4 h-4" />}
+          </button>
+        ))}
         </div>
 
         <div className="w-px h-6 bg-zinc-800 mx-1" />
@@ -282,7 +282,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
                 <button
                   key={s.value}
                   onClick={() => {
-                    (editor.chain().focus() as any).setFontSize(s.value).run();
+                    editor.chain().focus().setFontSize(s.value).run();
                     closeAllMenus();
                   }}
                   className={cn(
@@ -318,34 +318,50 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
             />
           </button>
           {showColorMenu && (
-            <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-2xl p-4 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
-              <div className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] mb-3">Text Color</div>
-              <div className="grid grid-cols-5 gap-2">
-                {COLORS.map(c => (
-                  <button
-                    key={c.value}
-                    onClick={() => {
-                      editor.chain().focus().setColor(c.value).run();
-                      closeAllMenus();
-                    }}
-                    className={cn(
-                      "w-6 h-6 rounded-full border border-white/10 transition-transform hover:scale-125",
-                      editor.isActive('textStyle', { color: c.value }) && "ring-2 ring-blue-500 ring-offset-2 ring-offset-zinc-950"
-                    )}
-                    style={{ backgroundColor: c.value }}
-                    title={c.label}
-                  />
-                ))}
+            <div className="absolute top-full left-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
+                <SketchPicker
+                  color={editor.getAttributes('textStyle').color || '#ffffff'}
+                  onChange={(color) => {
+                    editor.chain().focus().setColor(color.hex).run();
+                  }}
+                  disableAlpha={true}
+                  width="220px"
+                  styles={{
+                    default: {
+                      picker: {
+                        background: '#1a1a1a',
+                        border: 'none',
+                        borderRadius: '0',
+                        boxShadow: 'none',
+                      },
+                      saturation: {
+                        borderRadius: '8px 8px 0 0',
+                      },
+                      controls: {
+                        background: '#1a1a1a',
+                        padding: '12px',
+                      },
+                    }
+                  }}
+                />
+                <div className="p-3 border-t border-zinc-800 bg-zinc-900/50 flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400">
+                      {editor.getAttributes('textStyle').color?.toUpperCase() || '#FFFFFF'}
+                    </div>
+                    <button
+                      onClick={() => {
+                        editor.chain().focus().unsetColor().run();
+                        closeAllMenus();
+                      }}
+                      className="px-3 py-1.5 text-[9px] uppercase font-bold tracking-widest text-zinc-500 hover:text-white border border-zinc-800 rounded-lg transition-colors bg-zinc-950"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
               </div>
-              <button
-                onClick={() => {
-                  editor.chain().focus().unsetColor().run();
-                  closeAllMenus();
-                }}
-                className="w-full mt-4 text-[9px] uppercase font-black tracking-widest text-zinc-500 hover:text-white py-2 border border-zinc-900 rounded-lg transition-colors"
-              >
-                Reset Color
-              </button>
             </div>
           )}
         </div>
