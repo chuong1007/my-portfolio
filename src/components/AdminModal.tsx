@@ -313,6 +313,34 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   rows={2}
                 />
               </div>
+
+              {/* Font Settings for Contact Heading */}
+              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
+                <label className="block text-sm font-bold text-zinc-300">Cấu hình Font chữ Tiêu đề</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Cỡ chữ (VD: 5rem, 64px...)</label>
+                    <input
+                      type="text"
+                      value={data.headingFontSize || ''}
+                      placeholder="Mặc định: 6xl - 8xl"
+                      onChange={(e) => setData({ ...data, headingFontSize: e.target.value })}
+                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Font chữ (CSS Family)</label>
+                    <input
+                      type="text"
+                      value={data.headingFontFamily || ''}
+                      placeholder="VD: 'Inter', sans-serif"
+                      onChange={(e) => setData({ ...data, headingFontFamily: e.target.value })}
+                      className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-zinc-500 italic">* Để trống để sử dụng cỡ chữ mặc định của giao diện.</p>
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Số điện thoại</label>

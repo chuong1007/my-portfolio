@@ -25,6 +25,8 @@ export function Contact() {
   const [showPhone, setShowPhone] = useState(true);
   const [showEmail, setShowEmail] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
+  const [headingFontSize, setHeadingFontSize] = useState("");
+  const [headingFontFamily, setHeadingFontFamily] = useState("");
   const { isAdmin } = useAdmin();
 
   const fetchContent = async () => {
@@ -49,6 +51,8 @@ export function Contact() {
       setShowZalo(d.showZalo !== false);
       setShowPhone(d.showPhone !== false);
       setShowEmail(d.showEmail !== false);
+      setHeadingFontSize(d.headingFontSize || "");
+      setHeadingFontFamily(d.headingFontFamily || "");
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
     }
   };
@@ -63,7 +67,7 @@ export function Contact() {
   return (
     <SectionEditor
       sectionId="contact"
-      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible }}
+      initialData={{ heading, subtitle, phone, email, facebook, facebookLabel, showFacebook, zalo, zaloLabel, showZalo, showPhone, showEmail, isVisible, headingFontSize, headingFontFamily }}
       onSave={fetchContent}
       isVisible={isVisible}
     >
@@ -88,10 +92,16 @@ export function Contact() {
             className={cn("flex flex-col", isContactPage ? "gap-6" : "gap-12")}
           >
             <div className={cn(isContactPage ? "text-left" : "text-center")}>
-              <h2 className={cn(
-                "font-bold tracking-tighter text-zinc-50 mb-2",
-                isContactPage ? "text-3xl md:text-4xl" : "text-6xl md:text-8xl mb-4"
-              )}>
+              <h2 
+                className={cn(
+                  "font-bold tracking-tighter text-zinc-50 mb-2",
+                  !headingFontSize && (isContactPage ? "text-3xl md:text-4xl" : "text-6xl md:text-8xl mb-4")
+                )}
+                style={{ 
+                  fontSize: headingFontSize ? headingFontSize : undefined,
+                  fontFamily: headingFontFamily ? headingFontFamily : undefined
+                }}
+              >
                 {heading}
               </h2>
               <p className={cn(
