@@ -148,7 +148,7 @@ export function BlogDetail({ slug }: { slug: string }) {
 
         {/* Content */}
         <div 
-          className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content"
+          className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
 

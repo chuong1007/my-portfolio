@@ -8,16 +8,17 @@ import { generateSlug } from "@/lib/utils";
 import { RichTextEditor } from "@/components/builder/RichTextEditor";
 
 const AVAILABLE_TAGS = [
-  "Human-Centric",
-  "AI-Partnered",
-  "Neo-Minimalism",
-  "Spatial UI",
-  "Motion Kinetic",
-  "Eco-Design",
-  "Retro-Futurism",
-  "Experimental Type",
-  "Chaos Branding",
-  "Tactile Visuals"
+  "Branding",
+  "UI/UX Design",
+  "Graphic Design",
+  "AI Tools",
+  "Digital Marketing",
+  "Content Strategy",
+  "Storytelling",
+  "Minimalism",
+  "Typography",
+  "Career Tips",
+  "AI Innovation"
 ];
 
 type BlogFormProps = {
