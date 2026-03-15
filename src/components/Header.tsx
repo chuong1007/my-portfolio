@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase";
 
 
 import { useAdmin } from "@/context/AdminContext";
-import { Eye, EyeOff, LogOut, Edit2 } from "lucide-react";
+import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout } from "lucide-react";
 
 const STATIC_NAV_ITEMS = [
   { label: "Projects", href: "/projects" },
@@ -32,6 +32,7 @@ export function Header() {
     url: '',
     color: '#FFFFFF'
   });
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -86,6 +87,16 @@ export function Header() {
     window.addEventListener('contentUpdated', fetchConfig);
     return () => window.removeEventListener('contentUpdated', fetchConfig);
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (adminMenuOpen && !(event.target as Element).closest('.admin-menu-container')) {
+        setAdminMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [adminMenuOpen]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -155,39 +166,49 @@ export function Header() {
             )}
 
             {isAdmin && isEditMode && (
-              <Link
-                href="/admin"
-                className={cn(
-                  "transition-all text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:text-amber-300 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 whitespace-nowrap",
-                  (pathname === "/admin" || pathname === "/admin/") && "bg-amber-500/20 text-amber-300"
-                )}
-              >
-                Dự án
-              </Link>
-            )}
+              <div className="relative admin-menu-container">
+                <button
+                  onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+                  className={cn(
+                    "flex items-center justify-center w-9 h-9 rounded-full transition-all border active:scale-95",
+                    adminMenuOpen 
+                      ? "bg-zinc-800 border-zinc-700 text-white" 
+                      : "bg-transparent border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 shadow-lg"
+                  )}
+                  title="Quản lý"
+                >
+                  <Settings className={cn("w-4 h-4 transition-transform duration-300", adminMenuOpen && "rotate-90")} />
+                </button>
 
-            {isAdmin && isEditMode && (
-              <Link
-                href="/admin/blogs"
-                className={cn(
-                  "transition-all text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 whitespace-nowrap",
-                  pathname === "/admin/blogs" && "bg-emerald-500/20 text-emerald-300"
+                {adminMenuOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[100] animate-in fade-in zoom-in-95 duration-200">
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-500/10 transition-colors"
+                      onClick={() => setAdminMenuOpen(false)}
+                    >
+                      <Briefcase className="w-4 h-4" />
+                      Dự án
+                    </Link>
+                    <Link
+                      href="/admin/blogs"
+                      className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                      onClick={() => setAdminMenuOpen(false)}
+                    >
+                      <FileText className="w-4 h-4" />
+                      Blog
+                    </Link>
+                    <Link
+                      href="/admin/pages"
+                      className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500/10 transition-colors"
+                      onClick={() => setAdminMenuOpen(false)}
+                    >
+                      <Layout className="w-4 h-4" />
+                      Trang
+                    </Link>
+                  </div>
                 )}
-              >
-                Blog
-              </Link>
-            )}
-
-            {isAdmin && isEditMode && (
-              <Link
-                href="/admin/pages"
-                className={cn(
-                  "transition-all text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 whitespace-nowrap",
-                  pathname === "/admin/pages" && "bg-blue-500/20 text-blue-300"
-                )}
-              >
-                Trang
-              </Link>
+              </div>
             )}
 
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
