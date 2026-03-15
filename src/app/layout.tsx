@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 import { AdminProvider } from "@/context/AdminContext";
+import { AdminEditButton } from "@/components/builder/AdminEditButton";
 
 export default function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default function RootLayout({
             {children}
           </main>
           <Contact />
+          <AdminEditButton />
         </AdminProvider>
       </body>
     </html>
