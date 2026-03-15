@@ -586,7 +586,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
                   <SketchPicker
                     color={editor.getAttributes('textStyle').color || '#ffffff'}
                     onChange={(color) => {
-                      editor.chain().setColor(color.hex).run();
+                      editor.chain().focus().setColor(color.hex).run();
                     }}
                     disableAlpha={true}
                     width="220px"
@@ -852,7 +852,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
             />
           </div>
         ) : (
-          <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-8 pb-12" : "")}>
+          <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-4 md:p-6 pb-12" : "")}>
             <EditorContent 
               editor={editor} 
               className={cn("prose prose-invert max-w-none focus:outline-none h-full", !isPreviewingLocal ? "custom-tiptap-content" : "")}
@@ -874,6 +874,17 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
         .custom-tiptap-content .ProseMirror {
           min-height: 400px;
           outline: none;
+        }
+        /* Reset margins for first elements in editor to avoid excessive gaps */
+        .custom-tiptap-content .ProseMirror > *:first-child {
+          margin-top: 0 !important;
+        }
+        /* Reduce heading margins in editor for better fit */
+        .custom-tiptap-content .ProseMirror h1,
+        .custom-tiptap-content .ProseMirror h2,
+        .custom-tiptap-content .ProseMirror h3 {
+          margin-top: 1rem;
+          margin-bottom: 0.5rem;
         }
       `}</style>
     </div>
