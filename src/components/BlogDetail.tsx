@@ -156,7 +156,7 @@ export function BlogDetail({ slug }: { slug: string }) {
         <div className="mt-24 pt-12 border-t border-zinc-900">
           <h3 className="text-xl font-bold text-zinc-50 mb-8 uppercase tracking-widest text-center">Tag Nổi Bật</h3>
           <div className="flex flex-wrap justify-center gap-3">
-            {["Human-Centric", "AI-Partnered", "Neo-Minimalism", "Spatial UI", "Motion Kinetic", "Eco-Design", "Retro-Futurism"].map(tag => (
+            {["Branding", "UI/UX Design", "Graphic Design", "AI Tools", "Digital Marketing", "Storytelling", "Minimalism"].map(tag => (
               <Link 
                 key={tag} 
                 href={`/#blog`}

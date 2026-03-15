@@ -13,16 +13,17 @@ import { useAdmin } from "@/context/AdminContext";
 
 const BLOG_TAGS = [
   "All",
-  "Human-Centric",
-  "AI-Partnered",
-  "Neo-Minimalism",
-  "Spatial UI",
-  "Motion Kinetic",
-  "Eco-Design",
-  "Retro-Futurism",
-  "Experimental Type",
-  "Chaos Branding",
-  "Tactile Visuals"
+  "Branding",
+  "UI/UX Design",
+  "Graphic Design",
+  "AI Tools",
+  "Digital Marketing",
+  "Content Strategy",
+  "Storytelling",
+  "Minimalism",
+  "Typography",
+  "Career Tips",
+  "AI Innovation"
 ];
 
 type BlogProps = {
