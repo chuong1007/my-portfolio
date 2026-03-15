@@ -10,37 +10,41 @@ export type ResponsiveValue = string | {
 } | null;
 
 /**
- * Get value for a specific device with fallback chain:
- * mobile → tablet → desktop → fallback
- * 
- * Also handles legacy flat string format for backward compatibility.
+ * Safely parses and retrieves a responsive value for a given device.
+ * If the value is a string or number, it's treated as the 'desktop' (default) value.
+ * If it's a JSON string, it's parsed first.
  */
 export function getResponsiveValue(
   field: ResponsiveValue,
-  device: DeviceMode,
+  device: DeviceMode = 'desktop',
   fallback: string = ''
 ): string {
-  // Null/undefined check
+  // 1. Initial defensive checks
   if (field === null || field === undefined) return fallback;
 
-  // Primitive check: string or number
-  if (typeof field === 'string') return field;
-  if (typeof field === 'number') return (field as number).toString();
-  
-  // Object check
-  if (typeof field !== 'object') return fallback;
+  let value: any = field;
 
-  // Fallback chain: requested device → larger device → desktop → fallback
-  const chain: DeviceMode[] = 
-    device === 'mobile'  ? ['mobile', 'tablet', 'desktop'] :
-    device === 'tablet'  ? ['tablet', 'desktop'] :
-                           ['desktop'];
+  // 2. Try to parse if it's a string that looks like JSON
+  if (typeof field === 'string' && field.trim().startsWith('{')) {
+    try {
+      value = JSON.parse(field);
+    } catch (e) {
+      // If parsing fails, treat it as a literal string
+      value = field;
+    }
+  }
 
-  const f = field as any;
-  for (const d of chain) {
-    const val = f[d];
-    if (val !== null && val !== undefined && val !== '') {
-      return val.toString();
+  // 3. Handle primary types (String/Number)
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return value.toString();
+
+  // 4. Handle object (Responsive object)
+  if (typeof value === 'object' && value !== null) {
+    // If it's a responsive object, try to get requested device or fallback to desktop
+    const deviceVal = value[device] ?? value['desktop'];
+    
+    if (deviceVal !== undefined && deviceVal !== null) {
+      return deviceVal.toString();
     }
   }
 
@@ -56,9 +60,7 @@ export function setResponsiveValue(
   device: DeviceMode,
   value: string
 ): Record<DeviceMode, string | null> {
-  // Giải quyết giá trị hiển thị hiện tại cho TẤT CẢ thiết bị
-  // Để đảm bảo khi ta thay đổi một thiết bị, các thiết bị khác giữ nguyên giao diện hiện tại của chúng
-  // chứ không bị thụt lùi hay nhận giá trị thừa kế mới.
+  // Resolve current values for all devices to preserve existing look
   const resolvedDesktop = getResponsiveValue(current, 'desktop', '');
   const resolvedTablet = getResponsiveValue(current, 'tablet', '');
   const resolvedMobile = getResponsiveValue(current, 'mobile', '');

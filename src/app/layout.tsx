@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 import { AdminProvider } from "@/context/AdminContext";
 import { AdminEditButton } from "@/components/builder/AdminEditButton";
-import { RootLayoutClient } from "./layout-client";
+import { GlobalPreviewWrapper } from "./GlobalPreviewWrapper";
 
 export default function RootLayout({
   children,
@@ -33,9 +33,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-zinc-50 selection:text-zinc-950 bg-zinc-950 text-zinc-50 min-h-screen font-sans flex flex-col`}
       >
         <AdminProvider>
-          <RootLayoutClient>
+          <GlobalPreviewWrapper>
             {children}
-          </RootLayoutClient>
+          </GlobalPreviewWrapper>
         </AdminProvider>
       </body>
     </html>

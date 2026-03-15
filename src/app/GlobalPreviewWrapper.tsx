@@ -21,7 +21,7 @@ const DEVICE_HEIGHTS = {
 
 import { AdminModal } from "@/components/AdminModal";
 
-export function RootLayoutClient({ children }: { children: React.ReactNode }) {
+export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isBuilder = pathname === "/admin/builder";
