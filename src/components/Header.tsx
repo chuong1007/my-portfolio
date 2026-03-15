@@ -142,7 +142,7 @@ export function Header() {
               <button
                 onClick={toggleEditMode}
                 className={cn(
-                  "flex items-center justify-center gap-2 w-[140px] py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border active:scale-95",
+                  "flex items-center justify-center gap-2 w-[110px] py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border active:scale-95",
                   isEditMode 
                     ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20 hover:bg-blue-500" 
                     : "bg-transparent text-green-400 border-green-400/50 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:border-green-400 hover:text-green-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
@@ -150,19 +150,31 @@ export function Header() {
                 title={isEditMode ? "Đang ở chế độ chỉnh sửa" : "Đang ở chế độ xem"}
               >
                 {isEditMode ? <Edit2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                {isEditMode ? "Admin Mode" : "Preview Mode"}
+                {isEditMode ? "Admin" : "Preview"}
               </button>
+            )}
+
+            {isAdmin && isEditMode && (
+              <Link
+                href="/admin"
+                className={cn(
+                  "transition-all text-[10px] font-bold uppercase tracking-widest text-amber-400 hover:text-amber-300 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 whitespace-nowrap",
+                  (pathname === "/admin" || pathname === "/admin/") && "bg-amber-500/20 text-amber-300"
+                )}
+              >
+                Dự án
+              </Link>
             )}
 
             {isAdmin && isEditMode && (
               <Link
                 href="/admin/blogs"
                 className={cn(
-                  "transition-all text-sm font-bold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20",
+                  "transition-all text-[10px] font-bold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 whitespace-nowrap",
                   pathname === "/admin/blogs" && "bg-emerald-500/20 text-emerald-300"
                 )}
               >
-                Quản lý Blog
+                Blog
               </Link>
             )}
 
@@ -170,11 +182,11 @@ export function Header() {
               <Link
                 href="/admin/pages"
                 className={cn(
-                  "transition-all text-sm font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20",
+                  "transition-all text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 whitespace-nowrap",
                   pathname === "/admin/pages" && "bg-blue-500/20 text-blue-300"
                 )}
               >
-                Quản lý Trang
+                Trang
               </Link>
             )}
 

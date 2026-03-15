@@ -16,8 +16,8 @@
 
 /* Prose Invert (Dark mode) */
 .prose-invert { color: #d4d4d8; }
-.prose-invert h1, .prose-invert h2, .prose-invert h3, .prose-invert h4 { color: #fafafa; }
-.prose-invert a { color: #60a5fa; }
+/* Allow inline styles to override heading colors */
+.prose-invert h1, .prose-invert h2, .prose-invert h3, .prose-invert h4 { color: inherit; }
 .prose-invert strong { color: #fafafa; }
 .prose-invert blockquote { border-color: #3f3f46; color: #a1a1aa; }
 .prose-invert code { color: #a5f3fc; background-color: rgba(255,255,255,0.06); }
