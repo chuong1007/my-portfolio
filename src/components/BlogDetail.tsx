@@ -10,12 +10,15 @@ import type { DbBlog } from "@/lib/types";
 
 export function BlogDetail({ slug }: { slug: string }) {
   const [blog, setBlog] = useState<DbBlog | null>(null);
+  const [suggestedPosts, setSuggestedPosts] = useState<DbBlog[]>([]);
   const [loading, setLoading] = useState(true);
   const { isAdmin, isEditMode } = useAdmin();
 
   useEffect(() => {
     async function fetchBlog() {
       const supabase = createClient();
+      
+      // Fetch current blog
       const { data } = await supabase
         .from("blogs")
         .select("*")
@@ -24,6 +27,18 @@ export function BlogDetail({ slug }: { slug: string }) {
 
       if (data) {
         setBlog(data);
+        
+        // Fetch suggested posts (exclude current, limit 3)
+        const { data: suggested } = await supabase
+          .from("blogs")
+          .select("*")
+          .neq("slug", slug)
+          .order("created_at", { ascending: false })
+          .limit(3);
+          
+        if (suggested) {
+          setSuggestedPosts(suggested);
+        }
       }
       
       setLoading(false);
@@ -136,6 +151,56 @@ export function BlogDetail({ slug }: { slug: string }) {
           className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
+
+        {/* Notable Tags */}
+        <div className="mt-24 pt-12 border-t border-zinc-900">
+          <h3 className="text-xl font-bold text-zinc-50 mb-8 uppercase tracking-widest text-center">Tag Nổi Bật</h3>
+          <div className="flex flex-wrap justify-center gap-3">
+            {["Human-Centric", "AI-Partnered", "Neo-Minimalism", "Spatial UI", "Motion Kinetic", "Eco-Design", "Retro-Futurism"].map(tag => (
+              <Link 
+                key={tag} 
+                href={`/#blog`}
+                className="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-sm text-zinc-400 hover:text-white hover:border-zinc-700 transition-all duration-300"
+              >
+                {tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Suggested Posts */}
+        {suggestedPosts.length > 0 && (
+          <div className="mt-32 pb-24">
+            <div className="flex items-center justify-between mb-12">
+              <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">Bài viết gợi ý</h3>
+              <Link href="/blog" className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+                Xem tất cả
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {suggestedPosts.map((post) => (
+                <Link key={post.id} href={`/blog/${post.slug}`} className="group">
+                  <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4">
+                    <img 
+                      src={post.image_url} 
+                      alt={post.title} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                    <span>{post.tags?.[0] || "Blog"}</span>
+                    <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                    <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                    {post.title}
+                  </h4>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
     </main>
   );
