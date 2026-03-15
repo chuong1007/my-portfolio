@@ -586,7 +586,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
                   <SketchPicker
                     color={editor.getAttributes('textStyle').color || '#ffffff'}
                     onChange={(color) => {
-                      editor.chain().focus().setColor(color.hex).run();
+                      editor.chain().setColor(color.hex).run();
                     }}
                     disableAlpha={true}
                     width="220px"

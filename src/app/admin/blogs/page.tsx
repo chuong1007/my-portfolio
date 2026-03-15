@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, FileText, ExternalLink, Image as ImageIcon, ArrowLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, ExternalLink, Image as ImageIcon, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { BlogForm } from "@/components/admin/BlogForm";
@@ -45,6 +45,15 @@ export default function AdminBlogsPage() {
     if (!confirm("Bạn chắc chắn muốn xóa bài viết này?")) return;
     const supabase = createClient();
     await supabase.from("blogs").delete().eq("id", id);
+    fetchData();
+  };
+
+  const handleToggleVisibility = async (id: string, currentStatus: boolean | undefined) => {
+    const supabase = createClient();
+    await supabase
+      .from("blogs")
+      .update({ is_published: !(currentStatus ?? true) })
+      .eq("id", id);
     fetchData();
   };
 
@@ -179,13 +188,24 @@ export default function AdminBlogsPage() {
                     Sửa
                   </button>
                   <button
+                    onClick={() => handleToggleVisibility(blog.id, blog.is_published)}
+                    className={`flex items-center gap-1.5 text-sm transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-800 ${
+                      (blog.is_published ?? true) 
+                        ? "text-emerald-400 hover:text-emerald-300" 
+                        : "text-zinc-500 hover:text-zinc-400"
+                    }`}
+                  >
+                    {(blog.is_published ?? true) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {(blog.is_published ?? true) ? "Công khai" : "Đang ẩn"}
+                  </button>
+                  <button
                     onClick={() => handleDeleteBlog(blog.id)}
-                    className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-400/10"
+                    className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 ml-auto md:ml-0"
                   >
                     <Trash2 className="w-4 h-4" />
                     Xóa
                   </button>
-                  <span className="ml-auto text-xs text-zinc-600">
+                  <span className="ml-auto text-xs text-zinc-600 hidden md:block">
                     {new Date(blog.created_at).toLocaleDateString("vi-VN")}
                   </span>
                 </div>
