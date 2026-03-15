@@ -48,14 +48,14 @@ export function Header() {
       const { data: contentData } = await supabase.from('site_content').select('id, data');
       if (contentData) {
         // Logo config from hero
-        const heroRow = contentData.find(row => row.id === 'hero');
+        const heroRow = contentData.find(row => row?.id === 'hero');
         if (heroRow?.data) {
           const hd = heroRow.data as any;
           setLogoConfig({
-            type: hd.logoType || 'text',
-            text: hd.logoText || 'CHUONG.GRAPHIC',
-            url: hd.logoImageUrl || '',
-            color: hd.logoColor || '#FFFFFF'
+            type: hd?.logoType || 'text',
+            text: hd?.logoText || 'CHUONG.GRAPHIC',
+            url: hd?.logoImageUrl || '',
+            color: hd?.logoColor || '#FFFFFF'
           });
         }
       }
@@ -70,8 +70,8 @@ export function Header() {
 
       if (pagesData) {
         setDynamicNavItems(pagesData.map(p => ({
-          label: p.title,
-          href: p.slug === 'home' || p.slug === '/' ? '/' : `/${p.slug.replace(/^\//, '')}`
+          label: p?.title || 'Trang',
+          href: p?.slug === 'home' || p?.slug === '/' ? '/' : `/${(p?.slug || '').replace(/^\//, '')}`
         })));
       } else {
         // Fallback or default items if none found

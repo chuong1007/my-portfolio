@@ -100,38 +100,38 @@ export function BlogDetail({ slug }: { slug: string }) {
         {/* Header */}
         <header className="mb-12">
           <div className="flex flex-wrap items-center gap-4 mb-6">
-             <div className="flex gap-2">
-               {blog.tags?.map((tag) => (
-                 <span
-                   key={tag}
-                   className="text-xs px-3 py-1 bg-zinc-800/50 text-emerald-400 rounded-full border border-zinc-800"
-                 >
-                   {tag}
-                 </span>
-               ))}
-             </div>
-             <span className="w-1 h-1 rounded-full bg-zinc-700" />
-             <div className="flex items-center gap-2 text-sm text-zinc-500">
-               <Calendar className="w-4 h-4" />
-               {new Date(blog.created_at).toLocaleDateString("vi-VN", {
-                 year: 'numeric',
-                 month: 'long',
-                 day: 'numeric'
-               })}
-             </div>
+              <div className="flex gap-2">
+                {blog?.tags?.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs px-3 py-1 bg-zinc-800/50 text-emerald-400 rounded-full border border-zinc-800"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <span className="w-1 h-1 rounded-full bg-zinc-700" />
+              <div className="flex items-center gap-2 text-sm text-zinc-500">
+                <Calendar className="w-4 h-4" />
+                {blog?.created_at ? new Date(blog.created_at).toLocaleDateString("vi-VN", {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : '---'}
+              </div>
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-zinc-50 tracking-tight leading-tight mb-6">
-            {blog.title}
+            {blog?.title}
           </h1>
 
           <p className="text-xl text-zinc-400 leading-relaxed">
-            {blog.excerpt}
+            {blog?.excerpt}
           </p>
         </header>
 
         {/* Hero Image */}
-        {blog.image_url && (
+        {blog?.image_url && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -139,7 +139,7 @@ export function BlogDetail({ slug }: { slug: string }) {
           >
             <img
               src={blog.image_url}
-              alt={blog.title}
+              alt={blog?.title}
               referrerPolicy="no-referrer"
               className="w-full h-full object-cover"
             />
@@ -147,18 +147,18 @@ export function BlogDetail({ slug }: { slug: string }) {
         )}
 
         {/* Custom CSS */}
-        {blog.custom_css && (
+        {blog?.custom_css && (
           <style dangerouslySetInnerHTML={{ __html: blog.custom_css }} />
         )}
 
         {/* Content */}
         <div 
           className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
-          dangerouslySetInnerHTML={{ __html: blog.content }}
+          dangerouslySetInnerHTML={{ __html: blog?.content || "" }}
         />
 
         {/* Custom HTML Layout */}
-        {blog.custom_html && (
+        {blog?.custom_html && (
           <div 
             className="mt-12 custom-html-section"
             dangerouslySetInnerHTML={{ __html: blog.custom_html }}
@@ -182,7 +182,7 @@ export function BlogDetail({ slug }: { slug: string }) {
         </div>
 
         {/* Suggested Posts */}
-        {suggestedPosts.length > 0 && (
+        {(suggestedPosts?.length || 0) > 0 && (
           <div className="mt-32 pb-24">
             <div className="flex items-center justify-between mb-12">
               <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">Bài viết gợi ý</h3>
@@ -193,22 +193,24 @@ export function BlogDetail({ slug }: { slug: string }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {suggestedPosts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`} className="group">
+              {suggestedPosts?.map((post) => (
+                <Link key={post?.id} href={`/blog/${post?.slug}`} className="group">
                   <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4">
-                    <img 
-                      src={post.image_url} 
-                      alt={post.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                    {post?.image_url && (
+                      <img 
+                        src={post.image_url} 
+                        alt={post?.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
                   </div>
                   <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                    <span>{post.tags?.[0] || "Blog"}</span>
+                    <span>{post?.tags?.[0] || "Blog"}</span>
                     <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                    <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
+                    <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : '---'}</span>
                   </div>
                   <h4 className="text-lg font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
-                    {post.title}
+                    {post?.title}
                   </h4>
                 </Link>
               ))}
