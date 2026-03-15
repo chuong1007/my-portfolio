@@ -45,6 +45,7 @@ import {
   Redo,
   Quote,
   Code,
+  Code2,
   List,
   ListOrdered,
   Youtube as YoutubeIcon
@@ -272,6 +273,8 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
   const [showColorMenu, setShowColorMenu] = useState(false);
   const [showSpacingMenu, setShowSpacingMenu] = useState(false);
   const [showLineHeightMenu, setShowLineHeightMenu] = useState(false);
+  const [showHtmlEditor, setShowHtmlEditor] = useState(false);
+  const [htmlSource, setHtmlSource] = useState('');
 
   const closeAllMenus = () => {
     setShowFontMenu(false);
@@ -795,6 +798,35 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
               <TableIcon className="w-4 h-4" />
             </button>
           </div>
+
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* HTML Source Toggle */}
+          <div className="flex items-center">
+            <button
+              onClick={() => {
+                closeAllMenus();
+                if (!showHtmlEditor) {
+                  setHtmlSource(editor.getHTML());
+                  setShowHtmlEditor(true);
+                } else {
+                  editor.commands.setContent(htmlSource, { emitUpdate: false });
+                  onChange(htmlSource);
+                  setShowHtmlEditor(false);
+                }
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 rounded text-[10px] font-bold uppercase tracking-wider transition-all border",
+                showHtmlEditor
+                  ? "bg-amber-500/20 text-amber-400 border-amber-500/30"
+                  : "text-zinc-400 hover:bg-zinc-800 border-transparent"
+              )}
+              title="Chế độ Mã nguồn HTML"
+            >
+              <Code2 className="w-4 h-4" />
+              <span>HTML</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -805,13 +837,29 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
           className
         )}
       >
-        <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-8 pb-12" : "")}>
-          <EditorContent 
-            editor={editor} 
-            className={cn("prose prose-invert max-w-none focus:outline-none h-full", !isPreviewingLocal ? "custom-tiptap-content" : "")}
-          />
-        </div>
-        {!isPreviewingLocal && (
+        {showHtmlEditor && editable ? (
+          <div className="flex-1 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Code2 className="w-4 h-4 text-amber-400" />
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em]">Chế độ Mã nguồn HTML</span>
+            </div>
+            <textarea
+              value={htmlSource}
+              onChange={(e) => setHtmlSource(e.target.value)}
+              className="w-full h-[500px] bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm font-mono text-emerald-400 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 resize-y custom-scrollbar"
+              placeholder="Dán hoặc chỉnh sửa mã HTML tại đây..."
+              spellCheck={false}
+            />
+          </div>
+        ) : (
+          <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-8 pb-12" : "")}>
+            <EditorContent 
+              editor={editor} 
+              className={cn("prose prose-invert max-w-none focus:outline-none h-full", !isPreviewingLocal ? "custom-tiptap-content" : "")}
+            />
+          </div>
+        )}
+        {!isPreviewingLocal && !showHtmlEditor && (
           <div className="absolute bottom-0 right-0 w-6 h-6 pointer-events-none flex items-end justify-end p-1 text-zinc-600 opacity-50 group-hover:opacity-100 transition-opacity z-10 bg-black/20 rounded-tl">
             <svg width="8" height="8" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 0L0 10H10V0Z" fill="currentColor"/>

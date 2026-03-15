@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Link2 } from "lucide-react";
+import { ArrowLeft, Upload, X, Link2, Code2, Palette } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
@@ -37,6 +37,8 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [tags, setTags] = useState<string[]>(blog?.tags || []);
   const [coverImage, setCoverImage] = useState<string>(blog?.image_url || "");
   const [featured, setFeatured] = useState<boolean>(blog?.featured || false);
+  const [customCss, setCustomCss] = useState(blog?.custom_css || "");
+  const [customHtml, setCustomHtml] = useState(blog?.custom_html || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -105,6 +107,8 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             tags,
             image_url: coverImage,
             featured,
+            custom_css: customCss,
+            custom_html: customHtml,
           })
           .eq("id", blog.id);
       } else {
@@ -119,6 +123,8 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             tags,
             image_url: coverImage,
             featured,
+            custom_css: customCss,
+            custom_html: customHtml,
           });
       }
 
@@ -225,6 +231,46 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             <label htmlFor="featured-toggle" className="text-zinc-200 cursor-pointer select-none">
               Đặt làm bài viết Nổi bật (Hiển thị đầu trang chủ)
             </label>
+          </div>
+
+          {/* Custom CSS & HTML */}
+          <div className="mt-8 pt-8 border-t border-zinc-800 space-y-6">
+            <h3 className="text-lg font-bold text-zinc-200 flex items-center gap-2">
+              <Code2 className="w-5 h-5 text-amber-400" />
+              Tùy biến Giao diện (Nâng cao)
+            </h3>
+
+            {/* Custom CSS */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                <Palette className="w-4 h-4" />
+                Custom CSS
+              </label>
+              <textarea
+                value={customCss}
+                onChange={(e) => setCustomCss(e.target.value)}
+                placeholder={`.blog-title { color: #ff6b6b; }\n.custom-section { background: linear-gradient(...); }`}
+                rows={6}
+                className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-emerald-400 font-mono text-sm placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all resize-y custom-scrollbar"
+                spellCheck={false}
+              />
+            </div>
+
+            {/* Custom HTML */}
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-zinc-400 mb-2">
+                <Code2 className="w-4 h-4" />
+                Custom HTML Layout
+              </label>
+              <textarea
+                value={customHtml}
+                onChange={(e) => setCustomHtml(e.target.value)}
+                placeholder={`<div class="custom-widget">\n  <!-- Widget hoặc bố cục đặc biệt -->\n</div>`}
+                rows={6}
+                className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-sky-400 font-mono text-sm placeholder:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition-all resize-y custom-scrollbar"
+                spellCheck={false}
+              />
+            </div>
           </div>
         </div>
 

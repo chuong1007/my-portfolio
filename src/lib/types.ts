@@ -24,6 +24,8 @@ export type DbBlog = {
   tags: string[];
   image_url: string;
   featured: boolean;
+  custom_css?: string;
+  custom_html?: string;
   created_at: string;
 };
 

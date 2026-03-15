@@ -146,11 +146,24 @@ export function BlogDetail({ slug }: { slug: string }) {
           </motion.div>
         )}
 
+        {/* Custom CSS */}
+        {blog.custom_css && (
+          <style dangerouslySetInnerHTML={{ __html: blog.custom_css }} />
+        )}
+
         {/* Content */}
         <div 
           className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
           dangerouslySetInnerHTML={{ __html: blog.content }}
         />
+
+        {/* Custom HTML Layout */}
+        {blog.custom_html && (
+          <div 
+            className="mt-12 custom-html-section"
+            dangerouslySetInnerHTML={{ __html: blog.custom_html }}
+          />
+        )}
 
         {/* Notable Tags */}
         <div className="mt-24 pt-12 border-t border-zinc-900">
