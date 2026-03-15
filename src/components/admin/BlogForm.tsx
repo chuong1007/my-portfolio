@@ -42,6 +42,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [customHtml, setCustomHtml] = useState(blog?.custom_html || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const handleCopyUrl = () => {
@@ -140,7 +141,13 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           });
       }
 
-      onClose();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+      // Only close if it was a NEW post, otherwise stay to continue editing
+      if (!isEditing) {
+        onClose();
+      }
     } catch (err) {
       console.error("Error saving blog:", err);
     }
@@ -201,10 +208,12 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           >
             {saving ? (
               <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+            ) : saveSuccess ? (
+              <Check className="w-4 h-4 text-emerald-600" />
             ) : (
               <SaveIcon className="w-4 h-4" />
             )}
-            <span>{isEditing ? "Cập nhật" : "Đăng bài"}</span>
+            <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Đăng bài"}</span>
           </button>
         </div>
       </div>
@@ -421,14 +430,21 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           onClick={onClose}
           className="px-6 py-3 text-zinc-400 hover:text-zinc-200 transition-colors font-medium"
         >
-          Hủy bỏ
+          {isEditing ? "Đóng" : "Hủy bỏ"}
         </button>
         <button
           onClick={handleSave}
           disabled={saving || !title.trim() || !coverImage}
-          className="px-8 py-3 bg-zinc-50 text-zinc-950 font-semibold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-zinc-50 text-zinc-950 font-semibold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center gap-2"
         >
-          {saving ? "Đang lưu..." : isEditing ? "Cập nhật" : "Đăng bài viết"}
+          {saving ? (
+            <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+          ) : saveSuccess ? (
+            <Check className="w-4 h-4 text-emerald-600" />
+          ) : (
+            <SaveIcon className="w-4 h-4" />
+          )}
+          <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Đăng bài viết"}</span>
         </button>
       </div>
     </div>
