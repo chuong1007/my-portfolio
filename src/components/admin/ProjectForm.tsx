@@ -4,7 +4,8 @@ import { useState } from "react";
 import { ArrowLeft, Upload, X, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbProject, DbProjectImage } from "@/lib/types";
-import { RichTextEditor } from "@/components/builder/RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
 const AVAILABLE_TAGS = ["Poster", "Branding", "Logo Design", "UX/UI"];
 

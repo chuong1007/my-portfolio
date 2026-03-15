@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Contact } from "@/components/Contact";
@@ -22,12 +23,22 @@ const DEVICE_HEIGHTS = {
 import { AdminModal } from "@/components/AdminModal";
 
 export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false); // Added
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isBuilder = pathname === "/admin/builder";
   const { globalPreviewMode, isAdmin, modalState, closeEditor } = useAdmin();
 
-  // If inside an iframe (loaded via ?iframe=1), render content only
+  useEffect(() => { // Added
+    setIsMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch: render children only until client is ready
+  if (!isMounted) { // Added
+    return <>{children}</>;
+  }
+
+  // If inside an nested context or certain builder pages that don't need root framing
   const isInsideIframe = searchParams.get("iframe") === "1";
   if (isInsideIframe) {
     return (
@@ -49,43 +60,39 @@ export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }
 
       {isPreviewActive ? (
         // Device Frame Container
-        <div className="fixed inset-0 z-40 bg-zinc-950 flex items-start justify-center pt-20 overflow-auto">
+        <div className="fixed inset-0 z-40 bg-zinc-950 flex items-start justify-center pt-24 overflow-auto pb-12">
           {/* Dark overlay behind device */}
           <div className="absolute inset-0 bg-zinc-950" />
           
-          {/* Device Frame */}
+          {/* Device Frame - Use Div instead of Iframe to prevent crash with {children} */}
           <div
             className={cn(
               "relative z-10 transition-all duration-500 ease-in-out flex flex-col",
-              "border-[6px] border-zinc-800 rounded-[2.5rem] shadow-2xl shadow-black/80 overflow-hidden"
+              "border-[12px] border-zinc-800 rounded-[3rem] shadow-2xl shadow-black/80 bg-zinc-950",
+              globalPreviewMode === 'mobile' ? "w-[375px] h-[812px]" : "w-[1024px] h-[768px]"
             )}
-            style={{
-              width: DEVICE_WIDTHS[globalPreviewMode],
-              height: DEVICE_HEIGHTS[globalPreviewMode],
-            }}
           >
             {/* Device Notch */}
-            <div className="h-5 w-full bg-zinc-800 flex items-center justify-center shrink-0">
-              <div className="w-16 h-1 bg-zinc-700 rounded-full" />
+            <div className="h-6 w-full bg-zinc-800 flex items-center justify-center shrink-0">
+              <div className="w-20 h-1.5 bg-zinc-700 rounded-full" />
             </div>
 
-            {/* iframe loads current page */}
-            <iframe
-              id="preview-iframe"
-              src={`${pathname}?iframe=1&mode=${globalPreviewMode}`}
-              className="flex-1 w-full border-none bg-zinc-950"
-              title="Responsive Preview"
-            />
+            {/* Scrollable Content Area */}
+            <div className="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+              <main className="min-h-full">
+                {children}
+              </main>
+              {!isBuilder && <Contact />}
+            </div>
 
             {/* Device Bottom Bar */}
-            <div className="h-4 w-full bg-zinc-800 flex items-center justify-center shrink-0">
-              <div className="w-24 h-1 bg-zinc-700 rounded-full" />
+            <div className="h-6 w-full bg-zinc-800 flex items-center justify-center shrink-0">
+              <div className="w-32 h-1.5 bg-zinc-700 rounded-full" />
             </div>
           </div>
         </div>
       ) : (
         <>
-          {!isBuilder && <style>{""}</style>}
           <main className="flex-grow">
             {children}
           </main>
@@ -102,12 +109,7 @@ export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }
           initialData={modalState.initialData}
           onClose={closeEditor}
           onSave={() => {
-            // Signal to the iframe to re-fetch data if needed
-            const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
-            if (iframe && iframe.contentWindow) {
-              iframe.contentWindow.postMessage({ type: 'CONTENT_UPDATED' }, '*');
-            }
-            // Also dispatch locally for non-preview mode
+            // Re-fetch logic or local events
             window.dispatchEvent(new Event('contentUpdated'));
           }}
         />

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
-import { RichTextEditor } from "./RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("./RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { Trash2, Image as ImageIcon, Briefcase, Type, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 

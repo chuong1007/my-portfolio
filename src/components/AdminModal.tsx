@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { createClient } from "@/lib/supabase";
-import { RichTextEditor } from "./builder/RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("./builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 import { useAdmin } from "@/context/AdminContext";

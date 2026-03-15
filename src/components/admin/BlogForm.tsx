@@ -5,7 +5,8 @@ import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink,
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
-import { RichTextEditor } from "@/components/builder/RichTextEditor";
+import dynamic from "next/dynamic";
+const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
 const AVAILABLE_TAGS = [
   "Branding",
