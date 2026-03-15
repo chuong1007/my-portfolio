@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase";
 
 
 import { useAdmin } from "@/context/AdminContext";
-import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout } from "lucide-react";
+import { Eye, EyeOff, LogOut, Edit2, Settings } from "lucide-react";
 
 const STATIC_NAV_ITEMS = [
   { label: "Projects", href: "/projects" },
@@ -187,7 +187,6 @@ export function Header() {
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >
-                      <Briefcase className="w-4 h-4" />
                       💼 Quản lý Dự án
                     </Link>
                     <Link
@@ -195,7 +194,6 @@ export function Header() {
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >
-                      <FileText className="w-4 h-4" />
                       📝 Quản lý Blog
                     </Link>
                     <Link
@@ -203,7 +201,6 @@ export function Header() {
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >
-                      <Layout className="w-4 h-4" />
                       📄 Quản lý Trang
                     </Link>
                   </div>
