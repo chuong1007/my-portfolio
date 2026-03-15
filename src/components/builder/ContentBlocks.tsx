@@ -72,7 +72,9 @@ export function ContentBlock({ rowId, colId, block, onUpdate, onRemove, isPrevie
   return (
     <div className={cn(
       "group/block relative transition-all rounded-2xl",
-      !isPreviewingLocal ? "p-4 bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700" : ""
+      !isPreviewingLocal 
+        ? (block.type === 'text' ? "" : "p-4 bg-zinc-900/40 border border-zinc-800/50 hover:border-zinc-700") 
+        : ""
     )}>
       {!isPreviewingLocal && (
         <div className="absolute -right-2 -top-2 opacity-0 group-hover/block:opacity-100 transition-all z-10">

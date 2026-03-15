@@ -365,7 +365,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
       className
     )}>
       {editable && (
-        <div className="flex flex-wrap items-center gap-y-2 gap-x-1 p-2 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md rounded-t-2xl z-20 sticky top-0">
+        <div className="flex items-center gap-y-2 gap-x-1 p-2 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md rounded-t-2xl z-20 sticky top-0 overflow-x-auto custom-scrollbar flex-nowrap hide-scrollbar">
           
           {/* History */}
           <div className="flex items-center gap-0.5 bg-zinc-900/50 p-1 rounded-lg">
@@ -908,6 +908,13 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
       <style jsx global>{`
         .resize-y::-webkit-resizer {
           background-color: transparent; 
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
         }
         .custom-tiptap-content .ProseMirror {
           min-height: 400px;
