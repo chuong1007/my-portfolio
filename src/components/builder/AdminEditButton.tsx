@@ -30,8 +30,15 @@ export function AdminEditButton({ slug }: { slug?: string }) {
     }
   }
 
-  // Hide the button if we are inside the admin panel, the builder itself, or on the home page
-  if (pathname?.startsWith('/admin') || pathname === '/home-2' || pathname === '/') return null;
+  // Hide the button if we are inside the admin panel, the builder itself, or on excluded pages (Home, Projects, Blog, Contact)
+  if (
+    pathname?.startsWith('/admin') || 
+    pathname === '/home-2' || 
+    pathname === '/' ||
+    pathname === '/projects' ||
+    pathname === '/blog' ||
+    pathname === '/contact'
+  ) return null;
 
   const handleClick = () => {
     if (isBlogMode) {

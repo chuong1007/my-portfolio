@@ -76,9 +76,9 @@ declare module '@tiptap/core' {
   }
 }
 
-// Custom Font Size extension using Global Attributes for textStyle
-const FontSize = Extension.create({
-  name: 'fontSize',
+// Consolidated extension to handle all custom inline styles without conflicts
+const TextStylesExtended = Extension.create({
+  name: 'textStylesExtended',
   addOptions() {
     return {
       types: ['textStyle', 'heading', 'paragraph'],
@@ -93,8 +93,52 @@ const FontSize = Extension.create({
             default: null,
             parseHTML: element => element.style.fontSize,
             renderHTML: attributes => {
-              if (!attributes.fontSize) return {};
-              return { style: `font-size: ${attributes.fontSize} !important` };
+              const styles: string[] = [];
+              if (attributes.fontSize) styles.push(`font-size: ${attributes.fontSize} !important`);
+              if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
+              if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
+              if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (styles.length === 0) return {};
+              return { style: styles.join('; ') };
+            },
+          },
+          letterSpacing: {
+            default: null,
+            parseHTML: element => element.style.letterSpacing,
+            renderHTML: attributes => {
+              const styles: string[] = [];
+              if (attributes.fontSize) styles.push(`font-size: ${attributes.fontSize} !important`);
+              if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
+              if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
+              if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (styles.length === 0) return {};
+              return { style: styles.join('; ') };
+            },
+          },
+          lineHeight: {
+            default: null,
+            parseHTML: element => element.style.lineHeight,
+            renderHTML: attributes => {
+              const styles: string[] = [];
+              if (attributes.fontSize) styles.push(`font-size: ${attributes.fontSize} !important`);
+              if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
+              if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
+              if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (styles.length === 0) return {};
+              return { style: styles.join('; ') };
+            },
+          },
+          color: {
+            default: null,
+            parseHTML: element => element.style.color,
+            renderHTML: attributes => {
+              const styles: string[] = [];
+              if (attributes.fontSize) styles.push(`font-size: ${attributes.fontSize} !important`);
+              if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
+              if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
+              if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (styles.length === 0) return {};
+              return { style: styles.join('; ') };
             },
           },
         },
@@ -103,146 +147,56 @@ const FontSize = Extension.create({
   },
   addCommands() {
     return {
-      setFontSize: (size: string) => ({ chain }) => {
+      setFontSize: (size: string) => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { fontSize: size })
           .updateAttributes('heading', { fontSize: size })
           .updateAttributes('paragraph', { fontSize: size })
           .run();
       },
-      unsetFontSize: () => ({ chain }) => {
+      unsetFontSize: () => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { fontSize: null })
           .updateAttributes('heading', { fontSize: null })
           .updateAttributes('paragraph', { fontSize: null })
           .run();
       },
-    };
-  },
-});
-
-const LetterSpacing = Extension.create({
-  name: 'letterSpacing',
-  addOptions() {
-    return {
-      types: ['textStyle', 'heading', 'paragraph'],
-    };
-  },
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          letterSpacing: {
-            default: null,
-            parseHTML: element => element.style.letterSpacing,
-            renderHTML: attributes => {
-              if (!attributes.letterSpacing) return {};
-              return { style: `letter-spacing: ${attributes.letterSpacing} !important` };
-            },
-          },
-        },
-      },
-    ];
-  },
-  addCommands() {
-    return {
-      setLetterSpacing: (spacing: string) => ({ chain }) => {
+      setLetterSpacing: (spacing: string) => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { letterSpacing: spacing })
           .updateAttributes('heading', { letterSpacing: spacing })
           .updateAttributes('paragraph', { letterSpacing: spacing })
           .run();
       },
-      unsetLetterSpacing: () => ({ chain }) => {
+      unsetLetterSpacing: () => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { letterSpacing: null })
           .updateAttributes('heading', { letterSpacing: null })
           .updateAttributes('paragraph', { letterSpacing: null })
           .run();
       },
-    };
-  },
-});
-
-const LineHeight = Extension.create({
-  name: 'lineHeight',
-  addOptions() {
-    return {
-      types: ['textStyle', 'heading', 'paragraph'],
-    };
-  },
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          lineHeight: {
-            default: null,
-            parseHTML: element => element.style.lineHeight,
-            renderHTML: attributes => {
-              if (!attributes.lineHeight) return {};
-              return { style: `line-height: ${attributes.lineHeight} !important` };
-            },
-          },
-        },
-      },
-    ];
-  },
-  addCommands() {
-    return {
-      setLineHeight: (height: string) => ({ chain }) => {
+      setLineHeight: (height: string) => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { lineHeight: height })
           .updateAttributes('heading', { lineHeight: height })
           .updateAttributes('paragraph', { lineHeight: height })
           .run();
       },
-      unsetLineHeight: () => ({ chain }) => {
+      unsetLineHeight: () => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { lineHeight: null })
           .updateAttributes('heading', { lineHeight: null })
           .updateAttributes('paragraph', { lineHeight: null })
           .run();
       },
-    };
-  },
-});
-
-const ColorExtra = Extension.create({
-  name: 'colorExtra',
-  addOptions() {
-    return {
-      types: ['textStyle', 'heading', 'paragraph'],
-    };
-  },
-  addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          color: {
-            default: null,
-            parseHTML: element => element.style.color,
-            renderHTML: attributes => {
-              if (!attributes.color) return {};
-              return { style: `color: ${attributes.color} !important` };
-            },
-          },
-        },
-      },
-    ];
-  },
-  addCommands() {
-    return {
-      setColor: (color: string) => ({ chain }) => {
+      setColor: (color: string) => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { color: color })
           .updateAttributes('heading', { color: color })
           .updateAttributes('paragraph', { color: color })
           .run();
       },
-      unsetColor: () => ({ chain }) => {
+      unsetColor: () => ({ chain }: any) => {
         return chain()
           .setMark('textStyle', { color: null })
           .updateAttributes('heading', { color: null })
@@ -252,6 +206,7 @@ const ColorExtra = Extension.create({
     };
   },
 });
+
 
 interface RichTextEditorProps {
   content: string;
@@ -360,11 +315,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
       Underline,
       TextStyle,
       FontFamily,
-      // Color extension removed – ColorExtra handles color with !important
-      ColorExtra,
-      FontSize,
-      LetterSpacing,
-      LineHeight,
+      TextStylesExtended,
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -641,7 +592,13 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
               <Baseline className="w-4 h-4" />
               <div
                 className="w-3 h-3 rounded-full border border-zinc-800"
-                style={{ backgroundColor: editor.getAttributes('textStyle').color || '#FFFFFF' }}
+                style={{ 
+                  backgroundColor: 
+                    editor.getAttributes('textStyle').color || 
+                    editor.getAttributes('heading').color || 
+                    editor.getAttributes('paragraph').color || 
+                    '#FFFFFF' 
+                }}
               />
             </button>
           </div>
@@ -659,8 +616,13 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
               >
                 <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
                   <SketchPicker
-                    color={editor.getAttributes('textStyle').color || editor.getAttributes('heading').color || '#ffffff'}
-                    onChange={(color) => {
+                    color={
+                      editor.getAttributes('textStyle').color || 
+                      editor.getAttributes('heading').color || 
+                      editor.getAttributes('paragraph').color || 
+                      '#ffffff'
+                    }
+                    onChangeComplete={(color) => {
                       editor.chain().focus().setColor(color.hex).run();
                     }}
                     disableAlpha={true}
