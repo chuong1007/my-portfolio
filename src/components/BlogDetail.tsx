@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Clock, Calendar, Pencil } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Pencil, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { useAdmin } from "@/context/AdminContext";
@@ -173,8 +173,9 @@ export function BlogDetail({ slug }: { slug: string }) {
           <div className="mt-32 pb-24">
             <div className="flex items-center justify-between mb-12">
               <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">Bài viết gợi ý</h3>
-              <Link href="/blog" className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+              <Link href="/blog" className="group/all flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
                 Xem tất cả
+                <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" />
               </Link>
             </div>
             
