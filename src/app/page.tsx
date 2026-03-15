@@ -14,8 +14,6 @@ export default function Home() {
       <About />
       <Gallery />
       <Blog variant="homepage" />
-      <Contact />
-      <PageRenderer pageSelector="home" />
     </main>
   );
 }
