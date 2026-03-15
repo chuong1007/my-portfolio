@@ -19,10 +19,24 @@ const AdminContext = createContext<AdminContextType>({
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(true); // Default to true initially
   const [loading, setLoading] = useState(true);
 
-  const toggleEditMode = () => setIsEditMode(prev => !prev);
+  // Initialize from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('admin_edit_mode');
+    if (saved !== null) {
+      setIsEditMode(saved === 'true');
+    }
+  }, []);
+
+  const toggleEditMode = () => {
+    setIsEditMode(prev => {
+      const next = !prev;
+      localStorage.setItem('admin_edit_mode', next.toString());
+      return next;
+    });
+  };
 
   useEffect(() => {
     const supabase = createClient();
