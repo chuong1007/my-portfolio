@@ -1,6 +1,7 @@
 "use client";
 
 import { PageRenderer } from "@/components/builder/PageRenderer";
+import { AdminEditButton } from "@/components/builder/AdminEditButton";
 import { useParams } from "next/navigation";
 
 export default function DynamicPage() {
@@ -12,6 +13,7 @@ export default function DynamicPage() {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <PageRenderer pageSelector={slug} />
       </div>
+      <AdminEditButton slug={slug} />
     </main>
   );
 }

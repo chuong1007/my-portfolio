@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Link2, Code2, Palette } from "lucide-react";
+import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink, Save as SaveIcon, Copy, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
@@ -37,10 +37,20 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [tags, setTags] = useState<string[]>(blog?.tags || []);
   const [coverImage, setCoverImage] = useState<string>(blog?.image_url || "");
   const [featured, setFeatured] = useState<boolean>(blog?.featured || false);
+  const [isPublished, setIsPublished] = useState<boolean>(blog?.is_published ?? true);
   const [customCss, setCustomCss] = useState(blog?.custom_css || "");
   const [customHtml, setCustomHtml] = useState(blog?.custom_html || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyUrl = () => {
+    if (!slug) return;
+    const fullUrl = `https://chuong-graphic.vercel.app/blog/${slug}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   // Auto-generate slug from title when not manually edited
   const handleTitleChange = (newTitle: string) => {
@@ -107,6 +117,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             tags,
             image_url: coverImage,
             featured,
+            is_published: isPublished,
             custom_css: customCss,
             custom_html: customHtml,
           })
@@ -123,6 +134,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             tags,
             image_url: coverImage,
             featured,
+            is_published: isPublished,
             custom_css: customCss,
             custom_html: customHtml,
           });
@@ -137,18 +149,64 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   };
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-10">
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold">
-          {isEditing ? "Chỉnh sửa bài viết" : "Thêm bài viết mới"}
-        </h1>
+    <div className="relative">
+      {/* Sticky Quick Actions Bar */}
+      <div className="sticky top-0 z-[60] -mx-4 px-4 py-4 mb-8 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 flex items-center justify-between gap-4 rounded-b-2xl shadow-xl shadow-black/50">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors p-2 hover:bg-zinc-900 rounded-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-bold truncate max-w-[200px] md:max-w-md">
+              {isEditing ? `Sửa: ${title}` : "Thêm bài viết mới"}
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Visibility Toggle */}
+          <button
+            onClick={() => setIsPublished(!isPublished)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${
+              isPublished 
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20" 
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800"
+            }`}
+          >
+            {isPublished ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            <span className="hidden xs:inline">{isPublished ? "Công khai" : "Đang ẩn"}</span>
+          </button>
+
+          {/* Preview Button */}
+          {isEditing && (
+            <a
+              href={`/blog/${slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 rounded-xl transition-all text-xs font-bold uppercase tracking-wider"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="hidden xs:inline">Xem trước</span>
+            </a>
+          )}
+
+          {/* Quick Save */}
+          <button
+            onClick={handleSave}
+            disabled={saving || !title.trim() || !coverImage}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-950 font-bold rounded-xl hover:bg-zinc-200 transition-all text-xs uppercase tracking-wider disabled:opacity-50"
+          >
+            {saving ? (
+              <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <SaveIcon className="w-4 h-4" />
+            )}
+            <span>{isEditing ? "Cập nhật" : "Đăng bài"}</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -175,18 +233,30 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
               Đường dẫn (Slug)
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-600 shrink-0">/blog/</span>
-              <input
-                type="text"
-                value={slug}
-                onChange={(e) => handleSlugChange(e.target.value)}
-                placeholder="tu-dong-tao-tu-tieu-de"
-                className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 font-mono text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
-              />
+              <div className="flex-1 flex items-center bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-zinc-600 transition-all overflow-hidden line-clamp-1">
+                <span className="text-sm text-zinc-500 shrink-0 whitespace-nowrap hidden sm:inline-block">https://chuong-graphic.vercel.app/blog/</span>
+                <span className="text-sm text-zinc-500 shrink-0 whitespace-nowrap sm:hidden">.../blog/</span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="tu-dong-tao-tu-tieu-de"
+                  className="flex-1 bg-transparent text-zinc-50 font-mono text-sm placeholder:text-zinc-600 focus:outline-none min-w-0 ml-1"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                disabled={!slug}
+                className="shrink-0 p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Copy link"
+              >
+                {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5" />}
+              </button>
             </div>
             {slug && (
-              <p className="text-xs text-zinc-600 mt-1.5">
-                URL: <span className="text-zinc-500 font-mono">/blog/{slug}</span>
+              <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5">
+                URL: <a href={`https://chuong-graphic.vercel.app/blog/${slug}`} target="_blank" rel="noopener noreferrer" className="text-zinc-400 font-mono hover:text-white transition-colors break-all">https://chuong-graphic.vercel.app/blog/{slug}</a>
               </p>
             )}
           </div>

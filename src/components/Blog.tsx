@@ -57,10 +57,18 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
       
       const { data: authData } = await supabase.auth.getUser();
 
-      const { data } = await supabase
+      let query = supabase
         .from("blogs")
         .select("*")
         .order("created_at", { ascending: false });
+
+      // If not admin, only show published posts
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        query = query.eq("is_published", true);
+      }
+
+      const { data } = await query;
 
       if (data) setBlogs(data);
       setLoading(false);
@@ -201,6 +209,11 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                             {tag}
                           </span>
                         ))}
+                        {isAdmin && !featured.is_published && (
+                          <span className="text-[10px] px-3 py-1 bg-zinc-800 text-zinc-500 rounded-full border border-zinc-700 font-bold tracking-widest uppercase">
+                            Bản nháp
+                          </span>
+                        )}
                         <span className="text-[10px] text-zinc-600 font-bold tracking-widest uppercase ml-auto">
                           {new Date(featured.created_at).toLocaleDateString("vi-VN")}
                         </span>
@@ -246,6 +259,11 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             {new Date(post.created_at).toLocaleDateString("vi-VN")}
                           </span>
+                          {isAdmin && !post.is_published && (
+                            <span className="text-[9px] px-2 py-0.5 bg-zinc-800 text-zinc-500 rounded-md border border-zinc-700 font-bold uppercase ml-1">
+                              Ẩn
+                            </span>
+                          )}
                         </div>
                         <h4 className="text-xl md:text-2xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2 mb-4 tracking-tight">
                           {post.title}
@@ -290,6 +308,11 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                       <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
                         {post.tags?.[0] || "Blog"}
                       </span>
+                      {isAdmin && !post.is_published && (
+                        <span className="text-[8px] px-1.5 py-0.5 bg-zinc-800 text-zinc-500 rounded-md border border-zinc-700 font-bold uppercase ml-auto">
+                          Bản nháp
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-lg font-bold text-zinc-100 mb-2 group-hover:text-white transition-colors leading-tight">
                       <Link href={`/blog/${post.slug}`}>
