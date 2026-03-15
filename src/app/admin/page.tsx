@@ -202,10 +202,18 @@ export default function AdminPage() {
           <div className="flex items-center gap-2 mt-2 bg-zinc-900 p-1 rounded-lg w-fit border border-zinc-800">
             <Link
               href="/admin/blogs"
-              className="px-4 py-1.5 rounded-md text-sm font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 border border-emerald-500/20 transition-all flex items-center gap-1.5 mr-auto"
+              className="px-4 py-1.5 rounded-md text-sm font-medium text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all flex items-center gap-1.5"
             >
               <FileText className="w-4 h-4" />
-              Quản lý Blog
+              Blog
+            </Link>
+            <div className="w-px h-4 bg-zinc-800 mx-1" />
+            <Link
+              href="/admin/pages"
+              className="px-4 py-1.5 rounded-md text-sm font-medium text-zinc-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all flex items-center gap-1.5"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              Trang
             </Link>
             <div className="w-px h-4 bg-zinc-800 mx-1" />
             <button
