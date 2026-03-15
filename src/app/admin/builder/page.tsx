@@ -226,7 +226,7 @@ export default function BuilderPage() {
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#050505] relative pt-0">
         <header className="sticky top-0 z-50 bg-[#050505]/95 backdrop-blur-md border-b border-zinc-900/80 pt-6 pb-4 px-6 shadow-2xl transition-all">
           <div className="w-full flex justify-between items-center">
-            <div className="flex items-baseline gap-4">
+            <div className="flex items-baseline gap-3">
               <h1 className="text-2xl font-bold text-zinc-600 tracking-tighter uppercase">UX Builder</h1>
               <span className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase opacity-50">v2.1</span>
             </div>

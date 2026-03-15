@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette } from 'lucide-react';
+import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { createClient } from "@/lib/supabase";
 import { RichTextEditor } from "./builder/RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
+import { useAdmin } from "@/context/AdminContext";
+import { getResponsiveValue, setResponsiveValue, type DeviceMode } from "@/lib/responsive-helpers";
 
 type AdminModalProps = {
   isOpen: boolean;
@@ -15,8 +17,21 @@ type AdminModalProps = {
   onSave: () => void;
 };
 
+const DEVICE_ICONS: Record<DeviceMode, typeof Monitor> = {
+  desktop: Monitor,
+  tablet: Tablet,
+  mobile: Smartphone,
+};
+const DEVICE_LABELS: Record<DeviceMode, string> = {
+  desktop: 'Desktop',
+  tablet: 'Tablet',
+  mobile: 'Mobile',
+};
+
 export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: AdminModalProps) {
+  const { globalPreviewMode } = useAdmin();
   const [data, setData] = useState<Record<string, any>>(initialData);
+  const DeviceIcon = DEVICE_ICONS[globalPreviewMode];
   const [loading, setLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +59,24 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   const handleBlockDataChange = (newData: Record<string, any>) => {
     setData({ ...data, data: { ...data.data, ...newData } });
   };
+
+  // Real-time Preview Synchronization
+  useEffect(() => {
+    if (isOpen) {
+      // Local sync (for non-iframe mode)
+      window.dispatchEvent(new CustomEvent('previewUpdate', { detail: { sectionId, data } }));
+      
+      // Cross-window sync (for parent to iframe preview)
+      const iframe = document.getElementById('preview-iframe') as HTMLIFrameElement;
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ 
+          type: 'PREVIEW_UPDATE', 
+          sectionId, 
+          data 
+        }, '*');
+      }
+    }
+  }, [data, sectionId, isOpen]);
 
   const handleLogoUpload = async (file: File) => {
     setLogoUploading(true);
@@ -106,18 +139,35 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+    <div className="fixed inset-0 z-[9999] flex justify-end pointer-events-none">
+      {/* Backdrop mờ để user vẫn thấy nội dung website phía sau mà không bị che khuất */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-auto" onClick={onClose} />
       
-      <div className="relative bg-zinc-900 border border-zinc-800 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl">
+      {/* Sidebar Panel - Pinned to the right */}
+      <div className="relative bg-zinc-950/95 backdrop-blur-xl border-l border-zinc-800 w-full md:max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto">
         <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold text-white capitalize">Edit {sectionId} Section</h2>
-          <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white capitalize">Edit {sectionId} Section</h2>
+            {/* Device Indicator */}
+            <div className={cn(
+              "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border",
+              globalPreviewMode === 'desktop' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
+              globalPreviewMode === 'tablet' ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
+              "bg-orange-500/10 text-orange-400 border-orange-500/20"
+            )}>
+              <DeviceIcon className="w-3.5 h-3.5" />
+              {DEVICE_LABELS[globalPreviewMode]}
+            </div>
+          </div>
+          <button onClick={() => {
+            window.dispatchEvent(new CustomEvent('previewUpdate', { detail: { sectionId, data: initialData } }));
+            onClose();
+          }} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
             <X className="w-5 h-5 text-zinc-400" />
           </button>
         </div>
 
-        <div className="p-8 max-h-[70vh] overflow-y-auto space-y-6">
+        <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
           {sectionId === 'hero' && (
             <div className="space-y-4">
               <div className="p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
@@ -233,21 +283,60 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Main Title</label>
+                <label className="block text-sm text-zinc-500 mb-2 font-medium">Main Title <span className="text-xs opacity-60">({DEVICE_LABELS[globalPreviewMode]})</span></label>
                 <textarea
-                  value={data.title}
-                  onChange={(e) => setData({ ...data, title: e.target.value })}
+                  value={getResponsiveValue(data.title, globalPreviewMode)}
+                  onChange={(e) => setData({ ...data, title: setResponsiveValue(data.title, globalPreviewMode, e.target.value) })}
                   className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none text-lg"
                   rows={2}
+                  placeholder={`Hiển thị trên ${DEVICE_LABELS[globalPreviewMode]}...`}
                 />
               </div>
+
+              {/* Sliders for Max Width & Padding */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Title Max Width (%)</label>
+                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.titleMaxWidth, globalPreviewMode) || 100}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="1"
+                    value={getResponsiveValue(data.titleMaxWidth, globalPreviewMode) || "100"}
+                    onChange={(e) => setData({ ...data, titleMaxWidth: setResponsiveValue(data.titleMaxWidth, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic">Dùng để ép văn bản tự rớt dòng (text-balance) đẹp hơn.</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.paddingTop, globalPreviewMode) || 80}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía trên Section.</p>
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Subtitle</label>
-                <input
-                  type="text"
-                  value={data.subtitle}
-                  onChange={(e) => setData({ ...data, subtitle: e.target.value })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                <label className="block text-sm text-zinc-500 mb-2 font-medium">Subtitle <span className="text-xs opacity-60">({DEVICE_LABELS[globalPreviewMode]})</span></label>
+                <textarea
+                  value={getResponsiveValue(data.subtitle, globalPreviewMode)}
+                  onChange={(e) => setData({ ...data, subtitle: setResponsiveValue(data.subtitle, globalPreviewMode, e.target.value) })}
+                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none h-24"
+                  placeholder={`Subtitle cho ${DEVICE_LABELS[globalPreviewMode]}...`}
                 />
               </div>
             </div>
@@ -289,6 +378,46 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       rows={3}
                     />
                   ))}
+                </div>
+              </div>
+
+              {/* Padding Top Slider for About */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-3 mt-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section About.</p>
                 </div>
               </div>
             </div>
@@ -439,6 +568,112 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               <p className="text-zinc-400 text-sm italic py-4">
                 Cấu hình hiển thị cho section {sectionId === 'gallery' ? 'Dự án' : 'Blog'}.
               </p>
+
+              {/* Padding Top Slider for Gallery/Blog */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-3 mt-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section này.</p>
+                </div>
+              </div>
+
+              {(sectionId === 'gallery' || sectionId === 'blog') && (
+                <>
+                  {/* Items to Show */}
+                  <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị ({sectionId === 'gallery' ? 'D:16, T:6, M:4' : 'D:3, T:3, M:3'})</label>
+                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                          {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (sectionId === 'gallery' ? (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16') : '3')} bài
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="50"
+                        step="1"
+                        value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (sectionId === 'gallery' ? (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16') : '3')}
+                        onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
+                        className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* See All Button */}
+                  <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
+                      <button
+                        onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
+                        className={cn(
+                          "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                          data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                        )}
+                      >
+                        {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
+                      </button>
+                    </div>
+                    
+                    {data.showSeeAll && (
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                          <input
+                            type="text"
+                            value={data.seeAllLabel || (sectionId === 'gallery' ? 'Xem tất cả dự án' : 'Xem tất cả bài viết')}
+                            onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                            placeholder="Xem tất cả..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                          <input
+                            type="text"
+                            value={data.seeAllLink || (sectionId === 'gallery' ? '/projects' : '/blog')}
+                            onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
+                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                            placeholder={sectionId === 'gallery' ? '/projects' : '/blog'}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -586,9 +821,12 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           </div>
         )}
 
-        <div className="p-6 border-t border-zinc-800 bg-zinc-900/50 flex justify-end gap-3">
+        <div className="p-6 border-t border-zinc-800 bg-zinc-950 shrink-0 flex justify-end gap-3">
           <button
-            onClick={onClose}
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent('previewUpdate', { detail: { sectionId, data: initialData } }));
+              onClose();
+            }}
             className="px-6 py-3 rounded-2xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
           >
             Cancel

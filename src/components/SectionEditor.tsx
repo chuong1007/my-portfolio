@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Pencil, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAdmin } from "@/context/AdminContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { AdminModal } from "./AdminModal";
 import { createClient } from "@/lib/supabase";
@@ -18,9 +18,33 @@ type SectionEditorProps = {
 };
 
 export function SectionEditor({ sectionId, children, initialData, onSave, isVisible = true, extraActions }: SectionEditorProps) {
-  const { isAdmin, isEditMode } = useAdmin();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isAdmin, isEditMode, openEditor } = useAdmin();
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Cross-window re-fetch listener
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'CONTENT_UPDATED') {
+        onSave(); // Parent re-fetch
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [onSave]);
+
+  const handleOpenEditor = () => {
+    // If inside iframe, tell parent to open editor
+    if (window.parent !== window) {
+      window.parent.postMessage({ 
+        type: 'OPEN_ADMIN_MODAL', 
+        sectionId, 
+        data: initialData 
+      }, '*');
+    } else {
+      // Normal mode: use context directly
+      openEditor(sectionId, initialData);
+    }
+  };
 
   const handleToggleVisibility = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,6 +68,10 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
 
       if (!error) {
         onSave(); // Trigger parent re-fetch
+        // Also tell parent if we are in an iframe
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'CONTENT_UPDATED' }, '*');
+        }
       } else {
         console.error("Toggle visibility error:", error);
       }
@@ -95,7 +123,7 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
 
         {/* Edit Button */}
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenEditor}
           className="bg-white text-black p-3 rounded-full border border-white/20 hover:bg-zinc-200 transition-all duration-300 shadow-xl"
           title="Chỉnh sửa nội dung"
         >
@@ -104,14 +132,6 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
       </div>
 
       {children}
-
-      <AdminModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        sectionId={sectionId}
-        initialData={initialData}
-        onSave={onSave}
-      />
     </div>
   );
 }

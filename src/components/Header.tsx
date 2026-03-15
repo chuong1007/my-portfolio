@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase";
 
 
 import { useAdmin } from "@/context/AdminContext";
-import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout } from "lucide-react";
+import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout, Monitor, Tablet, Smartphone, Menu, X } from "lucide-react";
 
 const STATIC_NAV_ITEMS = [
   { label: "Projects", href: "/projects" },
@@ -22,7 +22,7 @@ const STATIC_NAV_ITEMS = [
 
 export function Header() {
   const pathname = usePathname();
-  const { isAdmin, isEditMode, toggleEditMode } = useAdmin();
+  const { isAdmin, isEditMode, toggleEditMode, globalPreviewMode, setGlobalPreviewMode } = useAdmin();
   const [scrolled, setScrolled] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [dynamicNavItems, setDynamicNavItems] = useState<{ label: string, href: string }[]>([]);
@@ -33,6 +33,18 @@ export function Header() {
     color: '#FFFFFF'
   });
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Auto close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -85,7 +97,43 @@ export function Header() {
     fetchConfig();
 
     window.addEventListener('contentUpdated', fetchConfig);
-    return () => window.removeEventListener('contentUpdated', fetchConfig);
+    
+    // Real-time Preview Listener
+    const handlePreviewUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.sectionId === 'hero') {
+        const d = customEvent.detail.data;
+        if (d.logoType !== undefined || d.logoText !== undefined || d.logoColor !== undefined || d.logoImageUrl !== undefined) {
+          setLogoConfig({
+            type: d.logoType || 'text',
+            text: d.logoText || 'CHUONG.GRAPHIC',
+            url: d.logoImageUrl || '',
+            color: d.logoColor || '#FFFFFF'
+          });
+        }
+      }
+    };
+
+    const handleParentMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'PREVIEW_UPDATE' && event.data.sectionId === 'hero') {
+        const d = event.data.data;
+        setLogoConfig({
+          type: d.logoType || 'text',
+          text: d.logoText || 'CHUONG.GRAPHIC',
+          url: d.logoImageUrl || '',
+          color: d.logoColor || '#FFFFFF'
+        });
+      }
+    };
+
+    window.addEventListener('previewUpdate', handlePreviewUpdate);
+    window.addEventListener('message', handleParentMessage);
+
+    return () => {
+      window.removeEventListener('contentUpdated', fetchConfig);
+      window.removeEventListener('previewUpdate', handlePreviewUpdate);
+      window.removeEventListener('message', handleParentMessage);
+    };
   }, []);
 
   useEffect(() => {
@@ -113,7 +161,7 @@ export function Header() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 md:px-12 transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
           scrolled ? "bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900" : "bg-transparent"
         )}
       >
@@ -148,7 +196,7 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-6">
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden lg:flex items-center gap-6">
             {isAdmin && (
               <button
                 onClick={toggleEditMode}
@@ -163,6 +211,31 @@ export function Header() {
                 {isEditMode ? <Edit2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                 {isEditMode ? "Admin" : "Preview"}
               </button>
+            )}
+
+            {/* Global Responsive Preview Toggle - Admin Only */}
+            {isAdmin && (
+              <div className="flex bg-zinc-900/80 rounded-full border border-zinc-800 p-0.5">
+                {([
+                  { mode: 'desktop' as const, icon: Monitor, label: 'Desktop' },
+                  { mode: 'tablet' as const, icon: Tablet, label: 'Tablet' },
+                  { mode: 'mobile' as const, icon: Smartphone, label: 'Mobile' },
+                ]).map(({ mode, icon: Icon, label }) => (
+                  <button
+                    key={mode}
+                    onClick={() => setGlobalPreviewMode(mode)}
+                    className={cn(
+                      "p-1.5 rounded-full transition-all duration-200",
+                      globalPreviewMode === mode
+                        ? "text-blue-500"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    )}
+                    title={label}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                  </button>
+                ))}
+              </div>
             )}
 
             {isAdmin && isEditMode && (
@@ -232,29 +305,145 @@ export function Header() {
                   </Link>
                 );
               })}
+              
+            {/* Desktop Auth Buttons */}
+            {isAdmin && isEditMode ? (
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors ml-4"
+                aria-label="Admin Logout"
+                title="Đăng xuất"
+              >
+                <LogOut className="w-5 h-5 text-zinc-400 hover:text-red-400" />
+              </button>
+            ) : !isAdmin && (
+              <button
+                onClick={() => setLoginOpen(true)}
+                className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors ml-4"
+                aria-label="Admin Login"
+                title="Đăng nhập Admin"
+              >
+                <User className="w-5 h-5 text-zinc-400" />
+              </button>
+            )}
           </nav>
 
-          {isAdmin && isEditMode ? (
-            <button
-              onClick={handleLogout}
-              className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors"
-              aria-label="Admin Logout"
-              title="Đăng xuất"
-            >
-              <LogOut className="w-5 h-5 text-zinc-400 hover:text-red-400" />
-            </button>
-          ) : !isAdmin && (
-            <button
-              onClick={() => setLoginOpen(true)}
-              className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors"
-              aria-label="Admin Login"
-              title="Đăng nhập Admin"
-            >
-              <User className="w-5 h-5 text-zinc-400" />
-            </button>
-          )}
+          {/* Mobile Menu Toggle Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="lg:hidden flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+            aria-label="Open Mobile Menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
       </header>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] bg-zinc-950/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="absolute top-6 right-6 flex items-center justify-center w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors"
+            aria-label="Close Mobile Menu"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <nav className="flex flex-col items-center gap-8 w-full mt-12 overflow-y-auto">
+            {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
+              .filter((item, index, self) => 
+                index === self.findIndex((t) => t.href === item.href)
+              )
+              .map((item) => {
+                const isActive = pathname === item.href || 
+                                 pathname.startsWith(item.href + '/') || 
+                                 (item.href === '/projects' && pathname.startsWith('/project/'));
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      "transition-colors text-2xl font-bold uppercase tracking-widest",
+                      isActive ? "text-emerald-400" : "text-zinc-300 hover:text-white"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+            {isAdmin && (
+              <div className="flex flex-col items-center gap-6 w-full">
+                <button
+                  onClick={() => toggleEditMode()}
+                  className={cn(
+                    "flex items-center justify-center gap-3 px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all border",
+                    isEditMode 
+                      ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20" 
+                      : "bg-transparent text-green-400 border-green-400/50"
+                  )}
+                >
+                  {isEditMode ? <Edit2 className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {isEditMode ? "Admin Mode: ON" : "Edit Mode: OFF"}
+                </button>
+
+                <div className="flex bg-zinc-900/80 rounded-full border border-zinc-800 p-1">
+                  {([
+                    { mode: 'desktop' as const, icon: Monitor, label: 'Desktop' },
+                    { mode: 'tablet' as const, icon: Tablet, label: 'Tablet' },
+                    { mode: 'mobile' as const, icon: Smartphone, label: 'Mobile' },
+                  ]).map(({ mode, icon: Icon, label }) => (
+                    <button
+                      key={mode}
+                      onClick={() => {
+                        setGlobalPreviewMode(mode);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={cn(
+                        "p-3 rounded-full transition-all duration-200",
+                        globalPreviewMode === mode
+                          ? "text-blue-500 bg-blue-500/10"
+                          : "text-zinc-500 hover:text-zinc-300"
+                      )}
+                    >
+                      <Icon className="w-6 h-6" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="w-16 h-px bg-zinc-800 my-4" />
+
+            {/* Mobile Auth Buttons */}
+            {isAdmin ? (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center gap-3 px-6 py-3 border border-red-500/20 bg-red-500/10 text-red-400 rounded-full text-sm font-bold uppercase tracking-wider uppercase transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                Đăng xuất Admin
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setLoginOpen(true);
+                }}
+                className="flex items-center justify-center w-12 h-12 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white text-zinc-500 transition-colors mt-auto"
+                title="Đăng nhập Admin"
+              >
+                <User className="w-5 h-5" />
+              </button>
+            )}
+          </nav>
+        </div>
+      )}
 
       <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </>

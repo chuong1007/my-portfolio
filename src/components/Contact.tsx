@@ -117,9 +117,9 @@ export function Contact() {
                   <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors">
                     <Phone className="w-6 h-6 text-zinc-300 group-hover:text-red-400 transition-colors" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="block text-sm text-zinc-500 mb-1">Phone Number</span>
-                    <span className="text-xl font-medium text-zinc-200">{phone}</span>
+                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{phone}</span>
                   </div>
                 </a>
               )}
@@ -132,9 +132,9 @@ export function Contact() {
                   <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors">
                     <Mail className="w-6 h-6 text-zinc-300 group-hover:text-orange-400 transition-colors" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="block text-sm text-zinc-500 mb-1">Email Address</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200">{email}</span>
+                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{email}</span>
                   </div>
                 </a>
               )}
@@ -150,9 +150,9 @@ export function Contact() {
                   <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
                     <Facebook className="w-6 h-6 text-zinc-300 group-hover:text-blue-500 transition-colors" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="block text-sm text-zinc-500 mb-1">Facebook</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200">{facebookLabel}</span>
+                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{facebookLabel}</span>
                   </div>
                 </a>
               )}
@@ -168,9 +168,9 @@ export function Contact() {
                   <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
                     <MessageSquare className="w-6 h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <span className="block text-sm text-zinc-500 mb-1">Zalo</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200">{zaloLabel}</span>
+                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{zaloLabel}</span>
                   </div>
                 </a>
               )}
