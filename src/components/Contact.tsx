@@ -114,8 +114,8 @@ export function Contact() {
                   href={`tel:${phone.replace(/\s/g, '')}`}
                   className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
-                    <Phone className="w-6 h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors">
+                    <Phone className="w-6 h-6 text-zinc-300 group-hover:text-red-400 transition-colors" />
                   </div>
                   <div>
                     <span className="block text-sm text-zinc-500 mb-1">Phone Number</span>
@@ -129,8 +129,8 @@ export function Contact() {
                   href={`mailto:${email}`}
                   className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-emerald-500/10 transition-colors">
-                    <Mail className="w-6 h-6 text-zinc-300 group-hover:text-emerald-400 transition-colors" />
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors">
+                    <Mail className="w-6 h-6 text-zinc-300 group-hover:text-orange-400 transition-colors" />
                   </div>
                   <div>
                     <span className="block text-sm text-zinc-500 mb-1">Email Address</span>
@@ -147,8 +147,8 @@ export function Contact() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-zinc-700 transition-colors">
-                    <Facebook className="w-6 h-6 text-zinc-300" />
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
+                    <Facebook className="w-6 h-6 text-zinc-300 group-hover:text-blue-500 transition-colors" />
                   </div>
                   <div>
                     <span className="block text-sm text-zinc-500 mb-1">Facebook</span>
@@ -165,10 +165,8 @@ export function Contact() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-violet-500/10 transition-colors">
-                    <svg className="w-7 h-7 text-white transition-colors" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 2C6.477 2 2 6.477 2 12c0 2.01.593 3.88 1.616 5.45L2 22l4.55-1.616C7.94 21.407 9.89 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
+                    <MessageSquare className="w-6 h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
                   </div>
                   <div>
                     <span className="block text-sm text-zinc-500 mb-1">Zalo</span>

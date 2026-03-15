@@ -35,7 +35,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const [loading, setLoading] = useState(true);
   const [activeTag, setActiveTag] = useState("All");
   const [isVisible, setIsVisible] = useState(true);
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isEditMode } = useAdmin();
 
   const fetchContent = async () => {
     try {
@@ -99,9 +99,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         onSave={fetchContent} 
         isVisible={isVisible}
         extraActions={
-          isAdmin && variant === 'homepage' ? (
+          isAdmin && isEditMode && variant === 'homepage' ? (
             <Link
-              href="/admin?tab=blogs"
+              href="/admin/blogs"
               className="px-4 py-3 bg-zinc-900/80 backdrop-blur-md hover:bg-zinc-800 border border-zinc-700/50 rounded-full transition-all duration-300 shadow-xl group/admin-btn"
             >
               <span className="text-[10px] font-bold text-zinc-400 group-hover/admin-btn:text-white uppercase tracking-widest">
@@ -174,7 +174,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                   transition={{ duration: 0.5 }}
                 >
                   {featured && (
-                  <Link href={`/blog/${featured.id}`} className="group block">
+                  <Link href={`/blog/${featured.slug}`} className="group block">
                     <div className="relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800">
                       <img
                         src={featured.image_url}
@@ -227,7 +227,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                     transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                     className="group"
                   >
-                    <Link href={`/blog/${post.id}`} className="flex flex-row gap-8 items-center">
+                    <Link href={`/blog/${post.slug}`} className="flex flex-row gap-8 items-center">
                       <div className="w-[54%] relative aspect-[4/2.85] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 shrink-0">
                         <img
                           src={post.image_url}
@@ -291,7 +291,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                       </span>
                     </div>
                     <h3 className="text-lg font-bold text-zinc-100 mb-2 group-hover:text-white transition-colors leading-tight">
-                      <Link href={`/blog/${post.id}`}>
+                      <Link href={`/blog/${post.slug}`}>
                         {post.title}
                       </Link>
                     </h3>

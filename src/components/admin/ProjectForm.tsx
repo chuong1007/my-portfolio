@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeft, Upload, X, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbProject, DbProjectImage } from "@/lib/types";
+import { RichTextEditor } from "@/components/builder/RichTextEditor";
 
 const AVAILABLE_TAGS = ["Poster", "Branding", "Logo Design", "UX/UI"];
 
@@ -182,16 +183,16 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           </div>
 
           {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-zinc-400">
               Mô tả dự án
             </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Viết mô tả sơ lược dự án..."
-              rows={4}
-              className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all resize-none"
+            <RichTextEditor
+              content={description}
+              onChange={setDescription}
+              placeholder="Viết mô tả dự án tuyệt vời của bạn ở đây..."
+              className="bg-zinc-900 border-zinc-800"
+              editable={true}
             />
           </div>
 

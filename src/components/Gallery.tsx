@@ -40,7 +40,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [isVisible, setIsVisible] = useState(true);
   const [dbProjects, setDbProjects] = useState<any[]>([]);
-  const { isAdmin } = useAdmin();
+  const { isAdmin, isEditMode } = useAdmin();
 
   const fetchContent = async () => {
     try {
@@ -96,7 +96,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
       onSave={fetchContent} 
       isVisible={isVisible}
       extraActions={
-        isAdmin && (
+        isAdmin && isEditMode && (
           <Link
             href="/admin?tab=projects"
             className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded-lg text-xs font-medium hover:bg-zinc-700 transition-colors border border-zinc-700"

@@ -154,7 +154,19 @@ export function Header() {
               </button>
             )}
 
-            {isAdmin && (
+            {isAdmin && isEditMode && (
+              <Link
+                href="/admin/blogs"
+                className={cn(
+                  "transition-all text-sm font-bold uppercase tracking-widest text-emerald-400 hover:text-emerald-300 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20",
+                  pathname === "/admin/blogs" && "bg-emerald-500/20 text-emerald-300"
+                )}
+              >
+                Quản lý Blog
+              </Link>
+            )}
+
+            {isAdmin && isEditMode && (
               <Link
                 href="/admin/pages"
                 className={cn(
@@ -189,7 +201,7 @@ export function Header() {
               })}
           </nav>
 
-          {isAdmin ? (
+          {isAdmin && isEditMode ? (
             <button
               onClick={handleLogout}
               className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors"
@@ -198,7 +210,7 @@ export function Header() {
             >
               <LogOut className="w-5 h-5 text-zinc-400 hover:text-red-400" />
             </button>
-          ) : (
+          ) : !isAdmin && (
             <button
               onClick={() => setLoginOpen(true)}
               className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors"

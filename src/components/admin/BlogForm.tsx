@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Link2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
+import { generateSlug } from "@/lib/utils";
+import { RichTextEditor } from "@/components/builder/RichTextEditor";
 
 const AVAILABLE_TAGS = [
   "Human-Centric",
@@ -27,6 +29,8 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const isEditing = !!blog;
 
   const [title, setTitle] = useState(blog?.title || "");
+  const [slug, setSlug] = useState(blog?.slug || "");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!blog?.slug);
   const [excerpt, setExcerpt] = useState(blog?.excerpt || "");
   const [content, setContent] = useState(blog?.content || "");
   const [tags, setTags] = useState<string[]>(blog?.tags || []);
@@ -34,6 +38,21 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [featured, setFeatured] = useState<boolean>(blog?.featured || false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Auto-generate slug from title when not manually edited
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!slugManuallyEdited) {
+      setSlug(generateSlug(newTitle));
+    }
+  };
+
+  const handleSlugChange = (newSlug: string) => {
+    // Only allow URL-safe characters
+    const sanitized = newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    setSlug(sanitized);
+    setSlugManuallyEdited(true);
+  };
 
   const toggleTag = (tag: string) => {
     setTags((prev) =>
@@ -71,12 +90,15 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
         await supabase.from("blogs").update({ featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000"); // A dummy UUID just to ensure it's not null when creating
       }
 
+      const finalSlug = slug || generateSlug(title);
+
       if (isEditing && blog?.id) {
         // Update existing blog
         await supabase
           .from("blogs")
           .update({
             title,
+            slug: finalSlug,
             excerpt,
             content,
             tags,
@@ -90,6 +112,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           .from("blogs")
           .insert({
             title,
+            slug: finalSlug,
             excerpt,
             content,
             tags,
@@ -132,10 +155,33 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Nhập tiêu đề..."
               className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
             />
+          </div>
+
+          {/* Slug */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-2">
+              <Link2 className="w-4 h-4 inline mr-1.5" />
+              Đường dẫn (Slug)
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-600 shrink-0">/blog/</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => handleSlugChange(e.target.value)}
+                placeholder="tu-dong-tao-tu-tieu-de"
+                className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 font-mono text-sm placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
+              />
+            </div>
+            {slug && (
+              <p className="text-xs text-zinc-600 mt-1.5">
+                URL: <span className="text-zinc-500 font-mono">/blog/{slug}</span>
+              </p>
+            )}
           </div>
 
           {/* Excerpt */}
@@ -153,16 +199,16 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           </div>
 
           {/* Content */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-zinc-400">
               Nội dung bài viết
             </label>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Nhập nội dung đầy đủ bài viết (hỗ trợ văn bản thuần)..."
-              rows={10}
-              className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all resize-none"
+            <RichTextEditor 
+              content={content}
+              onChange={setContent}
+              placeholder="Viết nội dung bài viết tuyệt vời của bạn ở đây..."
+              className="bg-zinc-900 border-zinc-800"
+              editable={true}
             />
           </div>
 

@@ -7,6 +7,17 @@ import { Underline } from '@tiptap/extension-underline';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Youtube from '@tiptap/extension-youtube';
+import Placeholder from '@tiptap/extension-placeholder';
+import Highlight from '@tiptap/extension-highlight';
+import TaskList from '@tiptap/extension-task-list';
+import TaskItem from '@tiptap/extension-task-item';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import { useAdmin } from "@/context/AdminContext";
 import { 
   Bold, 
@@ -24,7 +35,19 @@ import {
   Baseline,
   ChevronDown,
   ArrowLeftRight,
-  FoldVertical
+  FoldVertical,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Table as TableIcon,
+  Highlighter,
+  CheckSquare,
+  Undo,
+  Redo,
+  Quote,
+  Code,
+  List,
+  ListOrdered,
+  Youtube as YoutubeIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -184,6 +207,9 @@ interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
   isPreviewingLocal?: boolean;
+  placeholder?: string;
+  className?: string;
+  editable?: boolean;
 }
 
 const FONTS = [
@@ -237,9 +263,10 @@ const LINE_HEIGHTS = [
 ];
 
 
-export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTextEditorProps) {
-  const { isEditMode } = useAdmin();
-  const editable = isEditMode && !isPreviewingLocal;
+export function RichTextEditor({ content, onChange, isPreviewingLocal, placeholder = "Bắt đầu viết...", className, editable: forceEditable }: RichTextEditorProps) {
+  const adminContext = useAdmin();
+  const isEditMode = adminContext ? adminContext.isEditMode : true; // Fallback for specialized pages
+  const editable = forceEditable !== undefined ? forceEditable : (isEditMode && !isPreviewingLocal);
   const [showFontMenu, setShowFontMenu] = useState(false);
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
@@ -256,7 +283,11 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        heading: {
+          levels: [1, 2, 3],
+        },
+      }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right', 'justify'],
@@ -268,6 +299,37 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
       FontSize,
       LetterSpacing,
       LineHeight,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-400 underline cursor-pointer',
+        },
+      }),
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-xl border border-zinc-800 my-8 shadow-2xl',
+        },
+      }),
+      Placeholder.configure({
+        placeholder,
+      }),
+      Highlight.configure({ multicolor: true }),
+      TaskList,
+      TaskItem.configure({
+        nested: true,
+      }),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Youtube.configure({
+        HTMLAttributes: {
+          class: 'rounded-xl overflow-hidden my-8 shadow-2xl mx-auto',
+        },
+      }),
     ],
     content,
     immediatelyRender: false,
@@ -281,336 +343,466 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
 
   return (
     <div className={cn(
-      "relative",
-      !isPreviewingLocal ? "overflow-hidden border border-zinc-800 rounded-xl bg-zinc-900/50" : ""
+      "relative transition-all duration-300",
+      !isPreviewingLocal ? "overflow-hidden border border-zinc-800/50 rounded-2xl bg-zinc-900/30 backdrop-blur-xl shadow-2xl ring-1 ring-white/5" : "",
+      className
     )}>
       {editable && (
-        <div className="flex flex-wrap items-center gap-1 p-2 border-b border-zinc-800 bg-zinc-900 rounded-t-xl z-20">
-        
-        {/* Basic Formatting */}
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => { editor.chain().focus().toggleBold().run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('bold') && "text-white bg-zinc-800")}
-            title="In đậm"
-          >
-            <Bold className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().toggleItalic().run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('italic') && "text-white bg-zinc-800")}
-            title="In nghiêng"
-          >
-            <Italic className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().toggleUnderline().run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('underline') && "text-white bg-zinc-800")}
-            title="Gạch chân"
-          >
-            <UnderlineIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().toggleStrike().run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('strike') && "text-white bg-zinc-800")}
-            title="Gạch ngang"
-          >
-            <Strikethrough className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="w-px h-6 bg-zinc-800 mx-1" />
-
-        {/* Headings */}
-        <div className="flex items-center gap-0.5">
-          {[1, 2, 3].map((level) => (
+        <div className="flex flex-wrap items-center gap-1.5 p-3 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md rounded-t-2xl z-20 sticky top-0">
+          
+          {/* History */}
+          <div className="flex items-center gap-0.5">
             <button
-              key={level}
-            onClick={() => { editor.chain().focus().toggleHeading({ level: level as 1 | 2 | 3 }).run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('heading', { level: level }) && "text-white bg-zinc-800")}
-            title={`Heading ${level}`}
-          >
-            {level === 1 ? <Heading1 className="w-4 h-4" /> : level === 2 ? <Heading2 className="w-4 h-4" /> : <Heading3 className="w-4 h-4" />}
-          </button>
-        ))}
-        </div>
+              onClick={() => editor.chain().focus().undo().run()}
+              disabled={!editor.can().undo()}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400 disabled:opacity-20 translate-y-[1px]"
+              title="Hoàn tác (Ctrl+Z)"
+            >
+              <Undo className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().redo().run()}
+              disabled={!editor.can().redo()}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400 disabled:opacity-20 translate-y-[1px]"
+              title="Làm lại (Ctrl+Y)"
+            >
+              <Redo className="w-4 h-4" />
+            </button>
+          </div>
 
-        <div className="w-px h-6 bg-zinc-800 mx-1" />
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
 
-        {/* Font Family Selector */}
-        <div className="relative">
-          <button
-            onClick={() => { 
-              const newState = !showFontMenu;
-              closeAllMenus();
-              setShowFontMenu(newState);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded hover:bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-transparent",
-              showFontMenu && "bg-zinc-800 border-zinc-700 text-white"
-            )}
-          >
-            <Type className="w-3.5 h-3.5" />
-            <span className="w-16 truncate text-left">
-              {FONTS.find(f => editor.isActive('textStyle', { fontFamily: f.value }) || editor.isActive('heading', { fontFamily: f.value }) || editor.isActive('paragraph', { fontFamily: f.value }))?.label || 'Font'}
-            </span>
-            <ChevronDown className="w-3 h-3" />
-          </button>
-          {showFontMenu && (
-            <div className="absolute top-full left-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
-              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
-                Select Font
+          {/* Basic Formatting */}
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => { editor.chain().focus().toggleBold().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('bold') && "text-white bg-zinc-800")}
+              title="In đậm"
+            >
+              <Bold className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleItalic().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('italic') && "text-white bg-zinc-800")}
+              title="In nghiêng"
+            >
+              <Italic className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleUnderline().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('underline') && "text-white bg-zinc-800")}
+              title="Gạch chân"
+            >
+              <UnderlineIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleStrike().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('strike') && "text-white bg-zinc-800")}
+              title="Gạch ngang"
+            >
+              <Strikethrough className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleCode().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('code') && "text-white bg-zinc-800")}
+              title="Code"
+            >
+              <Code className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleHighlight().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('highlight') && "text-amber-400 bg-amber-400/10")}
+              title="Highlight"
+            >
+              <Highlighter className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* Lists & Blocks */}
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => { editor.chain().focus().toggleBulletList().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('bulletList') && "text-white bg-zinc-800")}
+              title="Danh sách"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleOrderedList().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('orderedList') && "text-white bg-zinc-800")}
+              title="Danh sách số"
+            >
+              <ListOrdered className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleTaskList().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('taskList') && "text-white bg-zinc-800")}
+              title="Task List"
+            >
+              <CheckSquare className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().toggleBlockquote().run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('blockquote') && "text-white bg-zinc-800")}
+              title="Trích dẫn"
+            >
+              <Quote className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* Headings */}
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3].map((level) => (
+              <button
+                key={level}
+              onClick={() => { editor.chain().focus().toggleHeading({ level: level as 1 | 2 | 3 }).run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('heading', { level: level }) && "text-white bg-zinc-800")}
+              title={`Heading ${level}`}
+            >
+              {level === 1 ? <Heading1 className="w-4 h-4" /> : level === 2 ? <Heading2 className="w-4 h-4" /> : <Heading3 className="w-4 h-4" />}
+            </button>
+          ))}
+          </div>
+
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* Font Family Selector */}
+          <div className="relative">
+            <button
+              onClick={() => { 
+                const newState = !showFontMenu;
+                closeAllMenus();
+                setShowFontMenu(newState);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 rounded hover:bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-transparent",
+                showFontMenu && "bg-zinc-800 border-zinc-700 text-white"
+              )}
+            >
+              <Type className="w-3.5 h-3.5" />
+              <span className="w-16 truncate text-left">
+                {FONTS.find(f => editor.isActive('textStyle', { fontFamily: f.value }) || editor.isActive('heading', { fontFamily: f.value }) || editor.isActive('paragraph', { fontFamily: f.value }))?.label || 'Font'}
+              </span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {showFontMenu && (
+              <div className="absolute top-full left-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                  Select Font
+                </div>
+                {FONTS.map(f => (
+                  <button
+                    key={f.label}
+                    onClick={() => {
+                      if (f.value) editor.chain().focus().setFontFamily(f.value).run();
+                      else editor.chain().focus().unsetFontFamily().run();
+                      closeAllMenus();
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-900 transition-colors",
+                      editor.isActive('textStyle', { fontFamily: f.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                    )}
+                    style={{ fontFamily: f.value }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
               </div>
-              {FONTS.map(f => (
-                <button
-                  key={f.label}
-                  onClick={() => {
-                    if (f.value) editor.chain().focus().setFontFamily(f.value).run();
-                    else editor.chain().focus().unsetFontFamily().run();
-                    closeAllMenus();
-                  }}
-                  className={cn(
-                    "w-full text-left px-3 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-zinc-900 transition-colors",
-                    editor.isActive('textStyle', { fontFamily: f.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
-                  )}
-                  style={{ fontFamily: f.value }}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Font Size Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              const newState = !showSizeMenu;
-              closeAllMenus();
-              setShowSizeMenu(newState);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-2 rounded hover:bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-transparent",
-              showSizeMenu && "bg-zinc-800 border-zinc-700 text-white"
             )}
-          >
-            <span className="w-10 truncate text-left">
-              {SIZES.find(s => editor.isActive('textStyle', { fontSize: s.value }) || editor.isActive('heading', { fontSize: s.value }) || editor.isActive('paragraph', { fontSize: s.value }))?.label || 'Size'}
-            </span>
-            <ChevronDown className="w-3 h-3" />
-          </button>
-          {showSizeMenu && (
-            <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
-              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
-                Font Size
+          </div>
+
+          {/* Font Size Selector */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                const newState = !showSizeMenu;
+                closeAllMenus();
+                setShowSizeMenu(newState);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-2 rounded hover:bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-transparent",
+                showSizeMenu && "bg-zinc-800 border-zinc-700 text-white"
+              )}
+            >
+              <span className="w-10 truncate text-left">
+                {SIZES.find(s => editor.isActive('textStyle', { fontSize: s.value }) || editor.isActive('heading', { fontSize: s.value }) || editor.isActive('paragraph', { fontSize: s.value }))?.label || 'Size'}
+              </span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {showSizeMenu && (
+              <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
+                <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                  Font Size
+                </div>
+                {SIZES.map(s => (
+                  <button
+                    key={s.value}
+                    onClick={() => {
+                      editor.chain().focus().setFontSize(s.value).run();
+                      closeAllMenus();
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
+                      editor.isActive('textStyle', { fontSize: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
               </div>
-              {SIZES.map(s => (
-                <button
-                  key={s.value}
-                  onClick={() => {
-                    editor.chain().focus().setFontSize(s.value).run();
-                    closeAllMenus();
-                  }}
-                  className={cn(
-                    "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
-                    editor.isActive('textStyle', { fontSize: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
-                  )}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Color Picker */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              const newState = !showColorMenu;
-              closeAllMenus();
-              setShowColorMenu(newState);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
-              showColorMenu && "bg-zinc-800 border-zinc-700 text-white"
             )}
-            title="Màu chữ"
-          >
-            <Baseline className="w-4 h-4" />
-            <div 
-              className="w-3 h-3 rounded-full border border-zinc-800"
-              style={{ backgroundColor: editor.getAttributes('textStyle').color || 'currentColor' }}
-            />
-          </button>
-          {showColorMenu && (
-            <div className="absolute top-full right-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
-              <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
-                <SketchPicker
-                  color={editor.getAttributes('textStyle').color || '#ffffff'}
-                  onChange={(color) => {
-                    editor.chain().focus().setColor(color.hex).run();
-                  }}
-                  disableAlpha={true}
-                  width="220px"
-                  className="custom-sketch-picker"
-                  styles={{
-                    default: {
-                      picker: {
-                        background: '#1a1a1a',
-                        border: 'none',
-                        borderRadius: '0',
-                        boxShadow: 'none',
-                      },
-                      saturation: {
-                        borderRadius: '8px 8px 0 0',
-                      },
-                      controls: {
-                        background: '#1a1a1a',
-                        padding: '12px',
-                      },
-                    }
-                  }}
-                />
-                <div className="p-3 border-t border-zinc-800 bg-zinc-900/50 flex flex-col gap-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex-1 px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400">
-                      {editor.getAttributes('textStyle').color?.toUpperCase() || '#FFFFFF'}
+          </div>
+
+          {/* Color Picker */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                const newState = !showColorMenu;
+                closeAllMenus();
+                setShowColorMenu(newState);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
+                showColorMenu && "bg-zinc-800 border-zinc-700 text-white"
+              )}
+              title="Màu chữ"
+            >
+              <Baseline className="w-4 h-4" />
+              <div 
+                className="w-3 h-3 rounded-full border border-zinc-800"
+                style={{ backgroundColor: editor.getAttributes('textStyle').color || 'currentColor' }}
+              />
+            </button>
+            {showColorMenu && (
+              <div className="absolute top-full right-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
+                  <SketchPicker
+                    color={editor.getAttributes('textStyle').color || '#ffffff'}
+                    onChange={(color) => {
+                      editor.chain().focus().setColor(color.hex).run();
+                    }}
+                    disableAlpha={true}
+                    width="220px"
+                    className="custom-sketch-picker"
+                    styles={{
+                      default: {
+                        picker: {
+                          background: '#1a1a1a',
+                          border: 'none',
+                          borderRadius: '0',
+                          boxShadow: 'none',
+                        },
+                        saturation: {
+                          borderRadius: '8px 8px 0 0',
+                        },
+                        controls: {
+                          background: '#1a1a1a',
+                          padding: '12px',
+                        },
+                      }
+                    }}
+                  />
+                  <div className="p-3 border-t border-zinc-800 bg-zinc-900/50 flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex-1 px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400">
+                        {editor.getAttributes('textStyle').color?.toUpperCase() || '#FFFFFF'}
+                      </div>
+                      <button
+                        onClick={() => {
+                          editor.chain().focus().unsetColor().run();
+                          closeAllMenus();
+                        }}
+                        className="px-3 py-1.5 text-[9px] uppercase font-bold tracking-widest text-zinc-500 hover:text-white border border-zinc-800 rounded-lg transition-colors bg-zinc-950"
+                      >
+                        Reset
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        editor.chain().focus().unsetColor().run();
-                        closeAllMenus();
-                      }}
-                      className="px-3 py-1.5 text-[9px] uppercase font-bold tracking-widest text-zinc-500 hover:text-white border border-zinc-800 rounded-lg transition-colors bg-zinc-950"
-                    >
-                      Reset
-                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* Letter Spacing Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              const newState = !showSpacingMenu;
-              closeAllMenus();
-              setShowSpacingMenu(newState);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
-              showSpacingMenu && "bg-zinc-800 border-zinc-700 text-white"
             )}
-            title="Khoảng cách chữ (Kerning)"
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-          </button>
-          {showSpacingMenu && (
-            <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
-              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
-                Letter Spacing
-              </div>
-              {SPACINGS.map(s => (
-                <button
-                  key={s.label}
-                  onClick={() => {
-                    if (s.value) editor.chain().focus().setLetterSpacing(s.value).run();
-                    else editor.chain().focus().unsetLetterSpacing().run();
-                    closeAllMenus();
-                  }}
-                  className={cn(
-                    "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
-                    editor.isActive('textStyle', { letterSpacing: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
-                  )}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
 
-        {/* Line Height Selector */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              const newState = !showLineHeightMenu;
-              closeAllMenus();
-              setShowLineHeightMenu(newState);
-            }}
-            className={cn(
-              "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
-              showLineHeightMenu && "bg-zinc-800 border-zinc-700 text-white"
+          {/* Letter Spacing Selector */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                const newState = !showSpacingMenu;
+                closeAllMenus();
+                setShowSpacingMenu(newState);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
+                showSpacingMenu && "bg-zinc-800 border-zinc-700 text-white"
+              )}
+              title="Khoảng cách chữ (Kerning)"
+            >
+              <ArrowLeftRight className="w-4 h-4" />
+            </button>
+            {showSpacingMenu && (
+              <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
+                <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                  Letter Spacing
+                </div>
+                {SPACINGS.map(s => (
+                  <button
+                    key={s.label}
+                    onClick={() => {
+                      if (s.value) editor.chain().focus().setLetterSpacing(s.value).run();
+                      else editor.chain().focus().unsetLetterSpacing().run();
+                      closeAllMenus();
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
+                      editor.isActive('textStyle', { letterSpacing: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             )}
-            title="Khoảng cách dòng (Line Height)"
-          >
-            <FoldVertical className="w-4 h-4" />
-          </button>
-          {showLineHeightMenu && (
-            <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
-              <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
-                Line Height
-              </div>
-              {LINE_HEIGHTS.map(s => (
-                <button
-                  key={s.label}
-                  onClick={() => {
-                    if (s.value) editor.chain().focus().setLineHeight(s.value).run();
-                    else editor.chain().focus().unsetLineHeight().run();
-                    closeAllMenus();
-                  }}
-                  className={cn(
-                    "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
-                    editor.isActive('textStyle', { lineHeight: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
-                  )}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        <div className="w-px h-6 bg-zinc-800 mx-1" />
+          </div>
 
-        {/* Alignment */}
-        <div className="flex items-center gap-0.5">
-          <button
-            onClick={() => { editor.chain().focus().setTextAlign('left').run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'left' }) && "text-white bg-zinc-800")}
-          >
-            <AlignLeft className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().setTextAlign('center').run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'center' }) && "text-white bg-zinc-800")}
-          >
-            <AlignCenter className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().setTextAlign('right').run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'right' }) && "text-white bg-zinc-800")}
-          >
-            <AlignRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => { editor.chain().focus().setTextAlign('justify').run(); closeAllMenus(); }}
-            className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'justify' }) && "text-white bg-zinc-800")}
-          >
-            <AlignJustify className="w-4 h-4" />
-          </button>
+          {/* Line Height Selector */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                const newState = !showLineHeightMenu;
+                closeAllMenus();
+                setShowLineHeightMenu(newState);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 p-2 rounded hover:bg-zinc-800 text-zinc-400 transition-all border border-transparent",
+                showLineHeightMenu && "bg-zinc-800 border-zinc-700 text-white"
+              )}
+              title="Khoảng cách dòng (Line Height)"
+            >
+              <FoldVertical className="w-4 h-4" />
+            </button>
+            {showLineHeightMenu && (
+              <div className="absolute top-full left-0 mt-2 w-32 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200 max-h-56 overflow-y-auto custom-scrollbar">
+                <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                  Line Height
+                </div>
+                {LINE_HEIGHTS.map(s => (
+                  <button
+                    key={s.label}
+                    onClick={() => {
+                      if (s.value) editor.chain().focus().setLineHeight(s.value).run();
+                      else editor.chain().focus().unsetLineHeight().run();
+                      closeAllMenus();
+                    }}
+                    className={cn(
+                      "w-full text-left px-3 py-2 rounded-lg text-[10px] font-bold hover:bg-zinc-900 transition-colors",
+                      editor.isActive('textStyle', { lineHeight: s.value }) ? "text-blue-500 bg-zinc-900" : "text-zinc-500"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* Alignment */}
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => { editor.chain().focus().setTextAlign('left').run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'left' }) && "text-white bg-zinc-800")}
+            >
+              <AlignLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().setTextAlign('center').run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'center' }) && "text-white bg-zinc-800")}
+            >
+              <AlignCenter className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().setTextAlign('right').run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'right' }) && "text-white bg-zinc-800")}
+            >
+              <AlignRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => { editor.chain().focus().setTextAlign('justify').run(); closeAllMenus(); }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive({ textAlign: 'justify' }) && "text-white bg-zinc-800")}
+            >
+              <AlignJustify className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="w-px h-6 bg-zinc-800 mx-1" />
+
+          {/* Media & Advanced */}
+          <div className="flex items-center gap-0.5">
+            <button
+              onClick={() => {
+                const url = window.prompt('Nhập địa chỉ Link:');
+                if (url) {
+                  editor.chain().focus().setLink({ href: url }).run();
+                } else if (url === '') {
+                  editor.chain().focus().unsetLink().run();
+                }
+                closeAllMenus();
+              }}
+              className={cn("p-2 rounded hover:bg-zinc-800 text-zinc-400", editor.isActive('link') && "text-blue-400 bg-blue-400/10")}
+              title="Thêm Link"
+            >
+              <LinkIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                const url = window.prompt('Nhập địa chỉ Ảnh:');
+                if (url) {
+                  editor.chain().focus().setImage({ src: url }).run();
+                }
+                closeAllMenus();
+              }}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400"
+              title="Thêm Ảnh (URL)"
+            >
+              <ImageIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                const url = window.prompt('Nhập địa chỉ YouTube:');
+                if (url) {
+                  editor.chain().focus().setYoutubeVideo({ src: url }).run();
+                }
+                closeAllMenus();
+              }}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400"
+              title="Thêm Video YouTube"
+            >
+              <YoutubeIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                closeAllMenus();
+              }}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400"
+              title="Thêm Bảng"
+            >
+              <TableIcon className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-      </div>
-    )}
+      )}
+
       <div 
         className={cn(
           "relative group flex flex-col", 
-          !isPreviewingLocal ? "rounded-b-xl resize-y overflow-hidden min-h-[300px] bg-black/20" : ""
+          !isPreviewingLocal ? "rounded-b-xl resize-y overflow-hidden min-h-[400px] bg-black/20" : "",
+          className
         )}
       >
         <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-8 pb-12" : "")}>
@@ -632,42 +824,8 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal }: RichTex
           background-color: transparent; 
         }
         .custom-tiptap-content .ProseMirror {
-          min-height: 250px;
+          min-height: 400px;
           outline: none;
-        }
-        .custom-tiptap-content span[style*="font-size"],
-        .custom-tiptap-content h1[style*="font-size"],
-        .custom-tiptap-content h2[style*="font-size"],
-        .custom-tiptap-content h3[style*="font-size"],
-        .custom-tiptap-content p[style*="font-size"] {
-          /* remove forced line-height: 1.2 to allow custom line heights */
-        }
-        
-        /* Chỉnh sửa giao diện của SketchPicker cho Dark Mode */
-        .custom-sketch-picker {
-          box-sizing: border-box !important;
-        }
-        .custom-sketch-picker input {
-          background-color: #09090b !important;
-          color: #e4e4e7 !important;
-          border: 1px solid #27272a !important;
-          box-shadow: none !important;
-          border-radius: 6px !important;
-          font-family: inherit !important;
-          padding: 6px !important;
-          font-size: 11px !important;
-          text-align: center !important;
-        }
-        .custom-sketch-picker label {
-          color: #71717a !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.05em !important;
-          font-size: 10px !important;
-          padding-top: 4px !important;
-          padding-bottom: 2px !important;
-        }
-        .custom-sketch-picker > div:last-child {
-          border-top: none !important;
         }
       `}</style>
     </div>

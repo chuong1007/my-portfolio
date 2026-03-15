@@ -101,7 +101,7 @@ function RenderBlock({ block }: { block: BlockData }) {
   if (block.type === 'text') {
     content = (
       <div 
-        className="prose prose-invert max-w-none text-zinc-300"
+        className="prose prose-invert max-w-none text-zinc-300 custom-tiptap-content"
         dangerouslySetInnerHTML={{ __html: block.content || "" }}
       />
     );

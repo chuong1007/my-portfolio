@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, Image as ImageIcon, FileText, Save, LayoutDashboard, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { getAllProjects } from "@/lib/data";
-import type { DbProject, DbProjectImage, DbBlog } from "@/lib/types";
+import type { DbProject, DbProjectImage } from "@/lib/types";
 import { ProjectForm } from "@/components/admin/ProjectForm";
-import { BlogForm } from "@/components/admin/BlogForm";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 // Convert mock projects to DbProject format for admin display
 function getMockProjectsAsDb(): (DbProject & { images: DbProjectImage[]; isMock?: boolean })[] {
@@ -36,13 +36,11 @@ export default function AdminPage() {
   const tabParam = searchParams.get("tab");
 
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
-  const [blogs, setBlogs] = useState<DbBlog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'blogs' | 'homepage'>(tabParam === 'blogs' ? 'blogs' : tabParam === 'homepage' ? 'homepage' : 'projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage'>(tabParam === 'homepage' ? 'homepage' : 'projects');
   
   useEffect(() => {
-    if (tabParam === 'blogs') setActiveTab('blogs');
     if (tabParam === 'homepage') setActiveTab('homepage');
   }, [tabParam]);
 
@@ -56,9 +54,6 @@ export default function AdminPage() {
   const [saveSuccess, setSaveSuccess] = useState('');
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [editingProject, setEditingProject] = useState<(DbProject & { images: DbProjectImage[] }) | null>(null);
-
-  const [showBlogForm, setShowBlogForm] = useState(false);
-  const [editingBlog, setEditingBlog] = useState<DbBlog | null>(null);
 
   const fetchData = useCallback(async () => {
     const supabase = createClient();
@@ -82,7 +77,7 @@ export default function AdminPage() {
       );
       setProjects(projectsWithImages);
 
-      if (editId && tabParam !== 'blogs') {
+      if (editId) {
         const projectToEdit = projectsWithImages.find((p) => p.id === editId);
         if (projectToEdit) setEditingProject(projectToEdit);
       }
@@ -91,26 +86,9 @@ export default function AdminPage() {
       const mockProjects = getMockProjectsAsDb();
       setProjects(mockProjects);
 
-      if (editId && tabParam !== 'blogs') {
+      if (editId) {
         const projectToEdit = mockProjects.find((p) => p.id === editId);
         if (projectToEdit) setEditingProject(projectToEdit);
-      }
-    }
-
-    // Fetch Blogs
-    const { data: blogsData } = await supabase
-      .from("blogs")
-      .select("*")
-      .order("created_at", { ascending: false });
-    
-    if (blogsData) {
-      setBlogs(blogsData);
-      
-      if (editId && tabParam === 'blogs') {
-        const blogToEdit = blogsData.find((b) => b.id === editId);
-        if (blogToEdit) {
-          setEditingBlog(blogToEdit);
-        }
       }
     }
 
@@ -176,18 +154,11 @@ export default function AdminPage() {
     fetchData();
   };
 
-  const handleDeleteBlog = async (id: string) => {
-    if (!confirm("Bạn chắc chắn muốn xóa bài viết này?")) return;
-    const supabase = createClient();
-    await supabase.from("blogs").delete().eq("id", id);
-    fetchData();
-  };
+
 
   const handleFormClose = () => {
     setShowProjectForm(false);
-    setShowBlogForm(false);
     setEditingProject(null);
-    setEditingBlog(null);
     fetchData();
   };
 
@@ -222,15 +193,6 @@ export default function AdminPage() {
     );
   }
 
-  if (showBlogForm || editingBlog) {
-    return (
-      <BlogForm
-        blog={editingBlog}
-        onClose={handleFormClose}
-      />
-    );
-  }
-
   return (
     <div>
       {/* Header */}
@@ -238,6 +200,14 @@ export default function AdminPage() {
         <div>
           <h1 className="text-3xl font-bold">Trang Quản Trị</h1>
           <div className="flex items-center gap-2 mt-2 bg-zinc-900 p-1 rounded-lg w-fit border border-zinc-800">
+            <Link
+              href="/admin/blogs"
+              className="px-4 py-1.5 rounded-md text-sm font-medium bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 border border-emerald-500/20 transition-all flex items-center gap-1.5 mr-auto"
+            >
+              <FileText className="w-4 h-4" />
+              Quản lý Blog
+            </Link>
+            <div className="w-px h-4 bg-zinc-800 mx-1" />
             <button
               onClick={() => setActiveTab('projects')}
               className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
@@ -247,16 +217,6 @@ export default function AdminPage() {
               }`}
             >
               Dự án ({projects.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('blogs')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'blogs'
-                  ? 'bg-zinc-800 text-zinc-50'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              Bài viết ({blogs.length})
             </button>
             <button
               onClick={() => setActiveTab('homepage')}
@@ -273,11 +233,11 @@ export default function AdminPage() {
         </div>
         {activeTab !== 'homepage' && (
         <button
-          onClick={() => activeTab === 'projects' ? setShowProjectForm(true) : setShowBlogForm(true)}
+          onClick={() => setShowProjectForm(true)}
           className="flex items-center gap-2 bg-zinc-50 text-zinc-950 px-5 py-3 rounded-xl font-semibold hover:bg-zinc-200 transition-colors w-fit"
         >
           <Plus className="w-5 h-5" />
-          {activeTab === 'projects' ? "Thêm dự án mới" : "Thêm bài viết mới"}
+          Thêm dự án mới
         </button>
         )}
       </div>
@@ -297,13 +257,7 @@ export default function AdminPage() {
           <p className="text-zinc-600 text-sm mt-1">Nhấn "Thêm dự án mới" để bắt đầu</p>
         </div>
       )}
-      {!loading && activeTab === 'blogs' && blogs.length === 0 && (
-        <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl">
-          <FileText className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-          <p className="text-zinc-500 text-lg">Chưa có bài viết nào</p>
-          <p className="text-zinc-600 text-sm mt-1">Nhấn "Thêm bài viết mới" để bắt đầu</p>
-        </div>
-      )}
+
 
       {/* Project List */}
       {activeTab === 'projects' && (
@@ -386,78 +340,6 @@ export default function AdminPage() {
                 </button>
                 <span className="ml-auto text-xs text-zinc-600">
                   {project.images?.length || 0} ảnh
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-      )}
-
-      {/* Blog List */}
-      {activeTab === 'blogs' && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {blogs.map((blog) => (
-          <div
-            key={blog.id}
-            className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group"
-          >
-            {/* Cover */}
-            <div className="aspect-video bg-zinc-800 overflow-hidden relative">
-              {blog.image_url ? (
-                <img
-                  src={blog.image_url}
-                  alt={blog.title}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <ImageIcon className="w-10 h-10 text-zinc-700" />
-                </div>
-              )}
-              {blog.featured && (
-                <div className="absolute top-2 left-2 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded">
-                  Nổi bật
-                </div>
-              )}
-            </div>
-
-            {/* Info */}
-            <div className="p-5">
-              <h3 className="text-lg font-bold text-zinc-200 mb-1">{blog.title}</h3>
-              <p className="text-sm text-zinc-500 line-clamp-2 mb-3">{blog.excerpt}</p>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {blog.tags?.map((tag: string) => (
-                  <span
-                    key={tag}
-                    className="text-xs px-2 py-1 bg-zinc-800 text-zinc-400 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
-                <button
-                  onClick={() => setEditingBlog(blog)}
-                  className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-100 transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-800"
-                >
-                  <Pencil className="w-4 h-4" />
-                  Sửa
-                </button>
-                <button
-                  onClick={() => handleDeleteBlog(blog.id)}
-                  className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-400/10"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Xóa
-                </button>
-                <span className="ml-auto text-xs text-zinc-600">
-                  {new Date(blog.created_at).toLocaleDateString("vi-VN")}
                 </span>
               </div>
             </div>

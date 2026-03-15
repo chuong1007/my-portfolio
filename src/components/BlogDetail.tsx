@@ -5,12 +5,13 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, Pencil } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { useAdmin } from "@/context/AdminContext";
 import type { DbBlog } from "@/lib/types";
 
-export function BlogDetail({ id }: { id: string }) {
+export function BlogDetail({ slug }: { slug: string }) {
   const [blog, setBlog] = useState<DbBlog | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, isEditMode } = useAdmin();
 
   useEffect(() => {
     async function fetchBlog() {
@@ -18,20 +19,17 @@ export function BlogDetail({ id }: { id: string }) {
       const { data } = await supabase
         .from("blogs")
         .select("*")
-        .eq("id", id)
+        .eq("slug", slug)
         .single();
 
       if (data) {
         setBlog(data);
       }
       
-      const { data: authData } = await supabase.auth.getUser();
-      if (authData.user) setIsAdmin(true);
-      
       setLoading(false);
     }
     fetchBlog();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (
@@ -73,9 +71,9 @@ export function BlogDetail({ id }: { id: string }) {
             <span>Quay lại Blogs</span>
           </Link>
 
-          {isAdmin && (
+          {isAdmin && isEditMode && (
             <Link
-              href={`/admin?edit=${blog.id}&tab=blogs`}
+              href={`/admin/blogs?edit=${blog.id}`}
               className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
             >
               <Pencil className="w-4 h-4 text-zinc-300" />
@@ -134,14 +132,10 @@ export function BlogDetail({ id }: { id: string }) {
         )}
 
         {/* Content */}
-        <div className="prose prose-invert prose-lg max-w-none text-zinc-300">
-          {/* For now we just render newline delimited text. If you want rich text or markdown you can use react-markdown here */}
-          {blog.content.split('\n').map((paragraph, index) => (
-            <p key={index} className="mb-6 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
-        </div>
+        <div 
+          className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content"
+          dangerouslySetInnerHTML={{ __html: blog.content }}
+        />
       </article>
     </main>
   );

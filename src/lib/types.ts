@@ -18,6 +18,7 @@ export type DbProjectImage = {
 export type DbBlog = {
   id: string;
   title: string;
+  slug: string;
   excerpt: string;
   content: string;
   tags: string[];
