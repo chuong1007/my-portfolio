@@ -142,18 +142,20 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const defaultCount = variant === 'homepage' 
     ? (currentDevice === 'mobile' ? 5 : currentDevice === 'tablet' ? 6 : 3)
     : 50;
-  const itemsToShow = parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString()));
+  // Defensive itemsToShow
+  const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
 
   const filteredBlogs = useMemo(() => {
+    if (!Array.isArray(filteredBlogsTotal)) return [];
     return filteredBlogsTotal.slice(0, itemsToShow);
   }, [filteredBlogsTotal, itemsToShow]);
 
   const featured = variant === 'homepage' 
-    ? (filteredBlogsTotal.find((p) => p.featured) || filteredBlogsTotal[0])
+    ? (filteredBlogsTotal?.find((p) => p.featured) || filteredBlogsTotal?.[0])
     : null; 
   
   const sidePosts = variant === 'homepage'
-    ? filteredBlogsTotal.filter((p) => p.id !== featured?.id).slice(0, itemsToShow - 1)
+    ? (Array.isArray(filteredBlogsTotal) ? filteredBlogsTotal.filter((p) => p && p.id !== featured?.id).slice(0, Math.max(0, itemsToShow - 1)) : [])
     : filteredBlogs;
 
   if (!isVisible && !isAdmin) return null;

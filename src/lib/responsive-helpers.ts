@@ -20,11 +20,15 @@ export function getResponsiveValue(
   device: DeviceMode,
   fallback: string = ''
 ): string {
-  // Legacy: flat string — same for all devices
+  // Null/undefined check
+  if (field === null || field === undefined) return fallback;
+
+  // Primitive check: string or number
   if (typeof field === 'string') return field;
+  if (typeof field === 'number') return (field as number).toString();
   
-  // Null/undefined
-  if (!field || typeof field !== 'object') return fallback;
+  // Object check
+  if (typeof field !== 'object') return fallback;
 
   // Fallback chain: requested device → larger device → desktop → fallback
   const chain: DeviceMode[] = 
@@ -32,9 +36,12 @@ export function getResponsiveValue(
     device === 'tablet'  ? ['tablet', 'desktop'] :
                            ['desktop'];
 
+  const f = field as any;
   for (const d of chain) {
-    const val = field[d];
-    if (val !== null && val !== undefined && val !== '') return val;
+    const val = f[d];
+    if (val !== null && val !== undefined && val !== '') {
+      return val.toString();
+    }
   }
 
   return fallback;

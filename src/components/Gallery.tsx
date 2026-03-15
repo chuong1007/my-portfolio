@@ -154,9 +154,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   // Get items count based on responsive value or defaults
   const currentDevice = globalPreviewMode ?? 'desktop';
   const defaultCount = currentDevice === 'mobile' ? 4 : currentDevice === 'tablet' ? 6 : 16;
-  const itemsToShow = parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString()));
+  const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
 
-  const displayedProjects = filteredProjects.slice(0, itemsToShow);
+  const displayedProjects = useMemo(() => {
+    if (!Array.isArray(filteredProjects)) return [];
+    return filteredProjects.slice(0, itemsToShow);
+  }, [filteredProjects, itemsToShow]);
 
   return (
     <SectionEditor 
