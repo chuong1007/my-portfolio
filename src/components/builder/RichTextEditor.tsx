@@ -890,7 +890,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
             />
           </div>
         ) : (
-          <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-4 md:p-6 pb-12" : "")}>
+          <div className={cn("flex-1", !isPreviewingLocal ? "overflow-y-auto custom-scrollbar p-2 md:p-4 pb-8" : "")}>
             <EditorContent 
               editor={editor} 
               className={cn("prose prose-invert max-w-none focus:outline-none h-full", !isPreviewingLocal ? "custom-tiptap-content" : "")}

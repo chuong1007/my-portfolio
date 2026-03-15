@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function AdminLayout({
   children,
@@ -19,6 +21,7 @@ export default function AdminLayout({
     color: '#FFFFFF'
   });
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const supabase = createClient();
@@ -111,7 +114,10 @@ export default function AdminLayout({
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-10">
+      <main className={cn(
+        "mx-auto",
+        pathname === "/admin/builder" ? "max-w-none w-full p-0" : "max-w-7xl px-6 py-10"
+      )}>
         {children}
       </main>
     </div>

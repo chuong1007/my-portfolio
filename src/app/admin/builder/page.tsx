@@ -221,13 +221,14 @@ export default function BuilderPage() {
 
   // --- ADMIN/BUILDER VIEW ---
   return (
-    <div className="flex h-screen bg-black text-zinc-300 overflow-hidden font-sans pt-16">
+    <div className="flex h-screen bg-black text-zinc-300 overflow-hidden font-sans pt-1">
       {/* AREA: CANVAS (LEFT) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#050505] relative">
-        <header className="sticky top-0 z-50 bg-[#050505]/95 backdrop-blur-md border-b border-zinc-900/80 pt-8 pb-6 md:pt-12 md:pb-8 px-8 md:px-16 shadow-2xl transition-all">
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#050505] relative pt-0">
+        <header className="sticky top-0 z-50 bg-[#050505]/95 backdrop-blur-md border-b border-zinc-900/80 pt-6 pb-4 px-6 shadow-2xl transition-all">
           <div className="w-full flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold text-zinc-500 tracking-tighter uppercase drop-shadow-md">UX Builder</h1>
+            <div className="flex items-baseline gap-4">
+              <h1 className="text-2xl font-bold text-zinc-600 tracking-tighter uppercase">UX Builder</h1>
+              <span className="text-[10px] text-zinc-600 font-mono tracking-widest uppercase opacity-50">v2.1</span>
             </div>
             <div className="flex items-center gap-4">
               <div className="flex bg-zinc-900 rounded-2xl border border-zinc-800 p-1 mr-4 shadow-xl">
@@ -297,14 +298,13 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        <div className="w-full space-y-16 pb-64 pt-12">
-          <div className="space-y-12">
+        <div className="w-full space-y-4 pb-32 pt-4 px-4">
+          <div className="space-y-6">
             {pageData.map((row: RowData) => (
                   <section 
                     key={row.id} 
                     className={cn(
-                      "group relative bg-zinc-900/10 rounded-[3rem] p-10 min-h-[200px] transition-all",
-                      !isPreviewingLocal ? "border-2 border-zinc-800/40 hover:bg-zinc-900/20" : "border-2 border-transparent",
+                      "group relative bg-zinc-900/10 rounded-[1.5rem] p-6 min-h-[150px] transition-all border-2 border-transparent hover:border-zinc-800/40 hover:bg-zinc-900/20",
                       selectedElement?.type === 'row' && selectedElement.rowId === row.id && !isPreviewingLocal ? "border-blue-500/50" : "",
                       row.visibility?.hideOnMobile && "opacity-40",
                       row.visibility?.hideOnDesktop && "opacity-40"
@@ -337,7 +337,7 @@ export default function BuilderPage() {
                       </div>
                     )}
                     
-                    <div className="grid grid-cols-12 gap-10">
+                    <div className="grid grid-cols-12 gap-6">
                       {row.columns.map((col: ColumnData) => (
                           <div 
                             key={col.id} 
