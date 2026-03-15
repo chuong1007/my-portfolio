@@ -1,12 +1,13 @@
 "use client";
 
 import { useEditor, EditorContent, Extension } from '@tiptap/react';
+import { createPortal } from 'react-dom';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { Underline } from '@tiptap/extension-underline';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
+// Color extension removed – ColorExtra handles color with !important
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Youtube from '@tiptap/extension-youtube';
@@ -51,7 +52,7 @@ import {
   Youtube as YoutubeIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
 
 declare module '@tiptap/core' {
@@ -67,6 +68,10 @@ declare module '@tiptap/core' {
     lineHeight: {
       setLineHeight: (height: string) => ReturnType;
       unsetLineHeight: () => ReturnType;
+    }
+    colorExtra: {
+      setColor: (color: string) => ReturnType;
+      unsetColor: () => ReturnType;
     }
   }
 }
@@ -204,6 +209,50 @@ const LineHeight = Extension.create({
   },
 });
 
+const ColorExtra = Extension.create({
+  name: 'colorExtra',
+  addOptions() {
+    return {
+      types: ['textStyle', 'heading', 'paragraph'],
+    };
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          color: {
+            default: null,
+            parseHTML: element => element.style.color,
+            renderHTML: attributes => {
+              if (!attributes.color) return {};
+              return { style: `color: ${attributes.color} !important` };
+            },
+          },
+        },
+      },
+    ];
+  },
+  addCommands() {
+    return {
+      setColor: (color: string) => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { color: color })
+          .updateAttributes('heading', { color: color })
+          .updateAttributes('paragraph', { color: color })
+          .run();
+      },
+      unsetColor: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { color: null })
+          .updateAttributes('heading', { color: null })
+          .updateAttributes('paragraph', { color: null })
+          .run();
+      },
+    };
+  },
+});
+
 interface RichTextEditorProps {
   content: string;
   onChange: (content: string) => void;
@@ -273,6 +322,19 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
   const [showColorMenu, setShowColorMenu] = useState(false);
   const [showSpacingMenu, setShowSpacingMenu] = useState(false);
   const [showLineHeightMenu, setShowLineHeightMenu] = useState(false);
+  const colorBtnRef = useRef<HTMLButtonElement>(null);
+  const [colorPickerPos, setColorPickerPos] = useState({ top: 0, left: 0 });
+
+  // Recalculate picker position whenever it opens
+  useEffect(() => {
+    if (showColorMenu && colorBtnRef.current) {
+      const rect = colorBtnRef.current.getBoundingClientRect();
+      setColorPickerPos({
+        top: rect.bottom + 8,
+        left: rect.left,
+      });
+    }
+  }, [showColorMenu]);
   const [showHtmlEditor, setShowHtmlEditor] = useState(false);
   const [htmlSource, setHtmlSource] = useState('');
 
@@ -298,7 +360,8 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
       Underline,
       TextStyle,
       FontFamily,
-      Color,
+      // Color extension removed – ColorExtra handles color with !important
+      ColorExtra,
       FontSize,
       LetterSpacing,
       LineHeight,
@@ -560,9 +623,10 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
             )}
           </div>
 
-          {/* Color Picker */}
+          {/* Color Picker – renders via portal to escape overflow-hidden */}
           <div className="relative">
             <button
+              ref={colorBtnRef}
               onClick={() => {
                 const newState = !showColorMenu;
                 closeAllMenus();
@@ -575,16 +639,27 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
               title="Màu chữ"
             >
               <Baseline className="w-4 h-4" />
-              <div 
+              <div
                 className="w-3 h-3 rounded-full border border-zinc-800"
-                style={{ backgroundColor: editor.getAttributes('textStyle').color || 'currentColor' }}
+                style={{ backgroundColor: editor.getAttributes('textStyle').color || '#FFFFFF' }}
               />
             </button>
-            {showColorMenu && (
-              <div className="absolute top-full right-0 mt-2 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+          </div>
+          {/* Portal: color picker floats over everything */}
+          {showColorMenu && typeof document !== 'undefined' && createPortal(
+            <>
+              {/* Backdrop – click outside to close */}
+              <div
+                className="fixed inset-0 z-[9998]"
+                onClick={() => setShowColorMenu(false)}
+              />
+              <div
+                className="fixed z-[9999] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200"
+                style={{ top: colorPickerPos.top, left: colorPickerPos.left }}
+              >
                 <div className="bg-[#1a1a1a] border border-zinc-800 rounded-2xl p-0 overflow-hidden shadow-2xl">
                   <SketchPicker
-                    color={editor.getAttributes('textStyle').color || '#ffffff'}
+                    color={editor.getAttributes('textStyle').color || editor.getAttributes('heading').color || '#ffffff'}
                     onChange={(color) => {
                       editor.chain().focus().setColor(color.hex).run();
                     }}
@@ -612,12 +687,12 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
                   <div className="p-3 border-t border-zinc-800 bg-zinc-900/50 flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex-1 px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[10px] font-mono text-zinc-400">
-                        {editor.getAttributes('textStyle').color?.toUpperCase() || '#FFFFFF'}
+                        {(editor.getAttributes('textStyle').color || editor.getAttributes('heading').color || '#FFFFFF').toUpperCase()}
                       </div>
                       <button
                         onClick={() => {
                           editor.chain().focus().unsetColor().run();
-                          closeAllMenus();
+                          setShowColorMenu(false);
                         }}
                         className="px-3 py-1.5 text-[9px] uppercase font-bold tracking-widest text-zinc-500 hover:text-white border border-zinc-800 rounded-lg transition-colors bg-zinc-950"
                       >
@@ -627,8 +702,9 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </>,
+            document.body
+          )}
 
           {/* Letter Spacing Selector */}
           <div className="relative">

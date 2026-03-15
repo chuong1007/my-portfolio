@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { BlogForm } from "@/components/admin/BlogForm";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function AdminBlogsPage() {
   const searchParams = useSearchParams();
@@ -207,33 +208,37 @@ export default function AdminBlogsPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
+                  <div className="flex items-center gap-1.5 pt-3 border-t border-zinc-800 flex-nowrap overflow-x-auto custom-scrollbar-hidden">
                     <button
                       onClick={() => setEditingBlog(blog)}
-                      className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-100 transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-800"
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 hover:text-zinc-100 transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800 shrink-0"
                     >
-                      <Pencil className="w-4 h-4" />
-                      Sửa
+                      <Pencil className="w-3 h-3" />
+                      Nội dung
                     </button>
+                    
                     <button
                       onClick={() => handleToggleVisibility(blog.id, blog.is_published)}
-                      className={`flex items-center gap-1.5 text-sm transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-800 ${
+                      className={cn(
+                        "flex items-center gap-1 text-[10px] uppercase font-bold transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800 shrink-0",
                         (blog.is_published ?? true) 
                           ? "text-emerald-400 hover:text-emerald-300" 
                           : "text-zinc-500 hover:text-zinc-400"
-                      }`}
+                      )}
                     >
-                      {(blog.is_published ?? true) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      {(blog.is_published ?? true) ? "Công khai" : "Đang ẩn"}
+                      {(blog.is_published ?? true) ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                      {(blog.is_published ?? true) ? "Hiện" : "Ẩn"}
                     </button>
+
                     <button
                       onClick={() => handleDeleteBlog(blog.id)}
-                      className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 ml-auto md:ml-0"
+                      className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-500 hover:text-red-400 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-500/10 shrink-0 mr-auto"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                       Xóa
                     </button>
-                    <span className="ml-auto text-xs text-zinc-600 hidden md:block">
+
+                    <span className="text-[9px] text-zinc-600 font-medium shrink-0">
                       {new Date(blog.created_at).toLocaleDateString("vi-VN")}
                     </span>
                   </div>

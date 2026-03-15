@@ -188,7 +188,7 @@ export function Header() {
                       onClick={() => setAdminMenuOpen(false)}
                     >
                       <Briefcase className="w-4 h-4" />
-                      Dự án
+                      💼 Quản lý Dự án
                     </Link>
                     <Link
                       href="/admin/blogs"
@@ -196,7 +196,7 @@ export function Header() {
                       onClick={() => setAdminMenuOpen(false)}
                     >
                       <FileText className="w-4 h-4" />
-                      Blog
+                      📝 Quản lý Blog
                     </Link>
                     <Link
                       href="/admin/pages"
@@ -204,7 +204,7 @@ export function Header() {
                       onClick={() => setAdminMenuOpen(false)}
                     >
                       <Layout className="w-4 h-4" />
-                      Trang
+                      📄 Quản lý Trang
                     </Link>
                   </div>
                 )}

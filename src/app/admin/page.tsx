@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight } from "lucide-react";
+import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { getAllProjects } from "@/lib/data";
 import type { DbProject, DbProjectImage } from "@/lib/types";
@@ -319,11 +319,11 @@ export default function AdminPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
+              <div className="flex items-center gap-1.5 pt-3 border-t border-zinc-800 flex-nowrap overflow-x-auto custom-scrollbar-hidden">
                 <button
                   onClick={() => handleToggleProjectVisibility(project.id, project.is_visible)}
                   className={cn(
-                    "p-2 rounded-lg transition-colors border",
+                    "p-1.5 rounded-lg transition-colors border shrink-0",
                     project.is_visible 
                       ? "text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-100" 
                       : "text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10"
@@ -332,23 +332,29 @@ export default function AdminPage() {
                 >
                   {project.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
+                
+                <Link
+                  href={`/project/${project.id}`}
+                  className="flex items-center gap-1 bg-amber-400 text-black px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-amber-300 transition-colors shrink-0"
+                >
+                  <Palette className="w-3 h-3" />
+                  Thiết kế
+                </Link>
+
                 <button
                   onClick={() => setEditingProject(project)}
-                  className="flex items-center gap-1.5 text-sm text-zinc-400 hover:text-zinc-100 transition-colors px-3 py-1.5 rounded-lg hover:bg-zinc-800"
+                  className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 hover:text-zinc-100 transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800 border border-transparent shrink-0"
                 >
-                  <Pencil className="w-4 h-4" />
+                  <Pencil className="w-3 h-3" />
                   Sửa
                 </button>
                 <button
                   onClick={() => handleDeleteProject(project.id)}
-                  className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-400/10"
+                  className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400/80 hover:text-red-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-400/10 border border-transparent shrink-0"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-3 h-3" />
                   Xóa
                 </button>
-                <span className="ml-auto text-xs text-zinc-600">
-                  {project.images?.length || 0} ảnh
-                </span>
               </div>
             </div>
           </div>
