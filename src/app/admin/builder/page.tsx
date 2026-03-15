@@ -31,6 +31,7 @@ import {
   Redo,
   UploadCloud
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useBuilderStore, type BlockType, type RowData, type ColumnData, type BlockData, type ElementStyles, type ElementVisibility, type SelectedElement } from '@/store/useBuilderStore';
 import { ContentBlock } from '@/components/builder/ContentBlocks';
 import { cn } from '@/lib/utils';
@@ -39,8 +40,10 @@ import { PageRenderer } from '@/components/builder/PageRenderer';
 
 import { useAdmin } from '@/context/AdminContext';
 
-export default function Home2Builder() {
+export default function BuilderPage() {
   const { isAdmin, isEditMode, loading: adminLoading, toggleEditMode } = useAdmin();
+  const router = useRouter();
+  const [currentSlug, setCurrentSlug] = useState<string>('home');
   const { 
     pageData, 
     pagesList,
@@ -142,17 +145,18 @@ export default function Home2Builder() {
   const { importTemplate } = useBuilderStore();
 
   useEffect(() => {
-    let pageToLoad = 'home-2';
-    let launchBuilder = false;
-    
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('page')) pageToLoad = params.get('page') as string;
-      if (params.get('builder') === 'true') launchBuilder = true;
+    const params = new URLSearchParams(window.location.search);
+    const pageFromUrl = params.get('page');
+    const isBuilderFromUrl = params.get('builder') === 'true';
+
+    if (pageFromUrl) {
+      setCurrentSlug(pageFromUrl);
+      loadPage(pageFromUrl);
+    } else {
+      loadPage('home');
     }
-    
-    loadPage(pageToLoad);
-    if (launchBuilder) {
+
+    if (isBuilderFromUrl) {
       setIsBuilderActive(true);
     }
   }, [loadPage]);
@@ -166,7 +170,7 @@ export default function Home2Builder() {
 
   const handleSave = async (isPublished: boolean = false) => {
     setIsSaving(true);
-    const result = await savePage('home-2', isPublished);
+    const result = await savePage(currentSlug, isPublished);
     setIsSaving(false);
     if (result.success) {
       alert(isPublished ? "Xuất bản thành công! ✨" : "Lưu nháp thành công! 📝");
@@ -517,8 +521,8 @@ export default function Home2Builder() {
                       key={page.id} 
                       className="p-4 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl hover:border-zinc-700 transition-all cursor-pointer group hover:bg-zinc-900/60"
                       onClick={() => {
-                        if (confirm(`Switch to edit /${page.slug}? Unsaved changes will be lost.`)) {
-                          loadPage(page.slug);
+                        if (confirm(`Chuyển sang chỉnh sửa trang /${page.slug}? Các thay đổi chưa lưu sẽ bị mất.`)) {
+                          router.push(`/admin/builder?page=${page.slug}&builder=true`);
                         }
                       }}
                     >

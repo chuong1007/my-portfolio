@@ -33,7 +33,7 @@ export function AdminEditButton({ slug }: { slug?: string }) {
   // Hide the button if we are inside the admin panel, the builder itself, or on excluded pages (Home, Projects, Blog, Contact)
   if (
     pathname?.startsWith('/admin') || 
-    pathname === '/home-2' || 
+    pathname === '/admin/builder' || 
     pathname === '/' ||
     pathname === '/projects' ||
     pathname === '/blog' ||
@@ -46,7 +46,7 @@ export function AdminEditButton({ slug }: { slug?: string }) {
       // For now, redirect to blog list
       router.push('/admin/blogs');
     } else {
-      router.push(`/home-2?page=${targetSlug || 'home'}&builder=true`);
+      router.push(`/admin/builder?page=${targetSlug || 'home'}&builder=true`);
     }
   };
 

@@ -57,7 +57,7 @@ export function Contact() {
     fetchContent();
   }, []);
 
-  if (pathname === '/home-2') return null;
+  if (pathname === '/admin/builder') return null;
   if (!isVisible && !isAdmin) return null;
 
   return (

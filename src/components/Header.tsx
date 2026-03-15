@@ -78,7 +78,7 @@ export function Header() {
         setDynamicNavItems([
           { label: "Dự án", href: "/projects" },
           { label: "Blog", href: "/blog" },
-          { label: "Người mới", href: "/home-2" }
+          { label: "Thiết kế", href: "/admin/builder" }
         ]);
       }
     };
@@ -107,7 +107,7 @@ export function Header() {
   }, []);
 
   // Remove special hiding for home-2 to allow guest mode
-  // if (pathname === '/home-2') return null;
+  // if (pathname === '/admin/builder') return null;
 
   return (
     <>
