@@ -56,9 +56,9 @@ export function About({ sectionId = "about" }: AboutProps) {
           paddingTop?: ResponsiveValue;
           paddingBottom?: ResponsiveValue;
         };
-        if (d.heading && d.heading.trim()) setHeading(d.heading);
-        if (d.subheading && d.subheading.trim()) setSubheading(d.subheading);
-        if (d.paragraphs && d.paragraphs.length > 0 && d.paragraphs[0].trim()) {
+        if (d.heading && typeof d.heading === 'string' && d.heading.trim()) setHeading(d.heading);
+        if (d.subheading && typeof d.subheading === 'string' && d.subheading.trim()) setSubheading(d.subheading);
+        if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0 && typeof d.paragraphs[0] === 'string' && d.paragraphs[0].trim()) {
           setParagraphs(d.paragraphs);
         }
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
@@ -142,17 +142,12 @@ export function About({ sectionId = "about" }: AboutProps) {
             className="space-y-8"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-50">
-              {heading}
-            </h2>
-
-            <h3 className="text-xl md:text-2xl font-bold text-zinc-300">
-              {subheading}
-            </h3>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-50" dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode ?? 'desktop') }} />
+            <h3 className="text-xl md:text-2xl font-bold text-zinc-300" dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') }} />
             
             <div className="space-y-6 text-xl md:text-3xl leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
               {paragraphs.map((p, i) => (
-                <p key={i}>{p}</p>
+                <p key={i} dangerouslySetInnerHTML={{ __html: typeof p === 'string' ? p : JSON.stringify(p) }} />
               ))}
             </div>
           </motion.div>

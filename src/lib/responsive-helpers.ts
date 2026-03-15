@@ -36,15 +36,20 @@ export function getResponsiveValue(
 
   // 3. Handle primary types (String/Number)
   if (typeof value === 'string') return value;
-  if (typeof value === 'number') return value.toString();
+  if (typeof value === 'number') return String(value);
 
   // 4. Handle object (Responsive object)
   if (typeof value === 'object' && value !== null) {
-    // If it's a responsive object, try to get requested device or fallback to desktop
-    const deviceVal = value[device] ?? value['desktop'];
+    // If it doesn't look like our expected device object, stringify it
+    if (!('desktop' in value) && !('tablet' in value) && !('mobile' in value)) {
+      return JSON.stringify(value);
+    }
+
+    // Try to get requested device or fallback to desktop or whatever is available
+    const deviceVal = value[device] ?? value['desktop'] ?? value['tablet'] ?? value['mobile'];
     
     if (deviceVal !== undefined && deviceVal !== null) {
-      return deviceVal.toString();
+      return typeof deviceVal === 'object' ? JSON.stringify(deviceVal) : String(deviceVal);
     }
   }
 
