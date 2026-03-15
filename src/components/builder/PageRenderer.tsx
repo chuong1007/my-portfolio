@@ -51,19 +51,19 @@ export function PageRenderer({ pageSelector, data }: PageRendererProps) {
         <div 
           key={row.id} 
           className={cn(
-            "grid gap-8 w-full",
+            "grid grid-cols-12 gap-8 w-full",
             row.styles?.backgroundColor,
             row.styles?.padding,
             row.visibility?.hideOnMobile && "hidden md:grid",
             row.visibility?.hideOnDesktop && "md:hidden"
           )}
-          style={{ gridTemplateColumns: `repeat(${row.columns.length}, minmax(0, 1fr))` }}
         >
           {row.columns.map((col: ColumnData) => (
             <div 
               key={col.id} 
               className={cn(
                 "space-y-6",
+                col.span === 12 ? "col-span-12" : col.span === 6 ? "col-span-6" : col.span === 4 ? "col-span-4" : "col-span-3",
                 col.styles?.backgroundColor,
                 col.styles?.padding,
                 col.styles?.textAlign === 'center' ? 'text-center' : col.styles?.textAlign === 'right' ? 'text-right' : col.styles?.textAlign === 'justify' ? 'text-justify' : 'text-left',

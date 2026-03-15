@@ -197,7 +197,7 @@ export default function BuilderPage() {
   if (!adminLoading && (!isAdmin || !isEditMode || !isBuilderActive)) {
     return (
       <main className="min-h-screen bg-black pt-24 relative">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+        <div className="w-full">
           {pageData.length > 0 ? (
             <PageRenderer data={pageData} />
           ) : (
@@ -225,7 +225,7 @@ export default function BuilderPage() {
       {/* AREA: CANVAS (LEFT) */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#050505] relative">
         <header className="sticky top-0 z-50 bg-[#050505]/95 backdrop-blur-md border-b border-zinc-900/80 pt-8 pb-6 md:pt-12 md:pb-8 px-8 md:px-16 shadow-2xl transition-all">
-          <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="w-full flex justify-between items-center">
             <div>
               <h1 className="text-4xl font-bold text-zinc-500 tracking-tighter uppercase drop-shadow-md">UX Builder</h1>
             </div>
@@ -297,7 +297,7 @@ export default function BuilderPage() {
           </div>
         </header>
 
-        <div className="max-w-6xl mx-auto px-8 md:px-16 space-y-16 pb-64 pt-12">
+        <div className="w-full space-y-16 pb-64 pt-12">
           <div className="space-y-12">
             {pageData.map((row: RowData) => (
                   <section 

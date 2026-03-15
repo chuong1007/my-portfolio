@@ -1,16 +1,11 @@
-import { Hero } from "@/components/Hero";
-import { Gallery } from "@/components/Gallery";
-import { About } from "@/components/About";
-import { Blog } from "@/components/Blog";
+"use client";
+
+import { PageRenderer } from "@/components/builder/PageRenderer";
 
 export default function Home() {
   return (
-    <>
-      <Hero />
-      <Gallery />
-      <About />
-      <Blog variant="homepage" />
-    </>
+    <main className="min-h-screen pt-24 w-full">
+      <PageRenderer pageSelector="home" />
+    </main>
   );
 }
-

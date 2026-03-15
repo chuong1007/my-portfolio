@@ -8,10 +8,8 @@ export default function DynamicPage() {
   const slug = params.slug as string;
 
   return (
-    <main className="min-h-screen pt-24">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <PageRenderer pageSelector={slug} />
-      </div>
+    <main className="min-h-screen pt-24 w-full">
+      <PageRenderer pageSelector={slug} />
     </main>
   );
 }
