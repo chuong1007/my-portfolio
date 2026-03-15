@@ -94,7 +94,7 @@ export function Contact() {
                     "tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                     isContactPage ? "[&_h1]:text-3xl [&_h2]:text-2xl" : "[&_h1]:text-6xl [&_h1]:md:text-8xl [&_h2]:text-4xl [&_h2]:md:text-6xl"
                   )}
-                  dangerouslySetInnerHTML={{ __html: heading }}
+                  dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? heading : String(heading) }}
                 />
               )}
               {subtitle && (
@@ -103,7 +103,7 @@ export function Contact() {
                     "text-zinc-400 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                     isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl"
                   )}
-                  dangerouslySetInnerHTML={{ __html: subtitle }}
+                  dangerouslySetInnerHTML={{ __html: typeof subtitle === 'string' ? subtitle : String(subtitle) }}
                 />
               )}
             </div>

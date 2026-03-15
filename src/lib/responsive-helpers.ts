@@ -15,45 +15,38 @@ export type ResponsiveValue = string | {
  * If it's a JSON string, it's parsed first.
  */
 export function getResponsiveValue(
-  field: ResponsiveValue,
+  field: any,
   device: DeviceMode = 'desktop',
   fallback: string = ''
 ): string {
-  // 1. Initial defensive checks
-  if (field === null || field === undefined) return fallback;
+  try {
+    if (field === null || field === undefined) return String(fallback);
 
-  let value: any = field;
-
-  // 2. Try to parse if it's a string that looks like JSON
-  if (typeof field === 'string' && field.trim().startsWith('{')) {
-    try {
-      value = JSON.parse(field);
-    } catch (e) {
-      // If parsing fails, treat it as a literal string
-      value = field;
+    // If data in DB is already a string (legacy format or plain text), use it directly.
+    // Do NOT try to JSON.parse it to avoid 'Unexpected token o' crashes.
+    if (typeof field === 'string') {
+      return field;
     }
+
+    if (typeof field === 'number' || typeof field === 'boolean') {
+      return String(field);
+    }
+
+    // Handle object forms
+    if (typeof field === 'object') {
+      const val = field[device] ?? field['desktop'] ?? field['tablet'] ?? field['mobile'];
+      if (val !== undefined && val !== null) {
+        return typeof val === 'object' ? JSON.stringify(val) : String(val);
+      }
+      // If we can't find a responsive key, stringify the whole object so it doesn't crash React
+      return JSON.stringify(field);
+    }
+
+    return String(fallback);
+  } catch (err) {
+    console.error('getResponsiveValue error:', err);
+    return String(fallback);
   }
-
-  // 3. Handle primary types (String/Number)
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number') return String(value);
-
-  // 4. Handle object (Responsive object)
-  if (typeof value === 'object' && value !== null) {
-    // If it doesn't look like our expected device object, stringify it
-    if (!('desktop' in value) && !('tablet' in value) && !('mobile' in value)) {
-      return JSON.stringify(value);
-    }
-
-    // Try to get requested device or fallback to desktop or whatever is available
-    const deviceVal = value[device] ?? value['desktop'] ?? value['tablet'] ?? value['mobile'];
-    
-    if (deviceVal !== undefined && deviceVal !== null) {
-      return typeof deviceVal === 'object' ? JSON.stringify(deviceVal) : String(deviceVal);
-    }
-  }
-
-  return fallback;
 }
 
 /**

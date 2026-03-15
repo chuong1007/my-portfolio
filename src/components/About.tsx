@@ -142,8 +142,8 @@ export function About({ sectionId = "about" }: AboutProps) {
             className="space-y-8"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-50" dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode ?? 'desktop') }} />
-            <h3 className="text-xl md:text-2xl font-bold text-zinc-300" dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') }} />
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-50" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
+            <h3 className="text-xl md:text-2xl font-bold text-zinc-300" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
             
             <div className="space-y-6 text-xl md:text-3xl leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
               {paragraphs.map((p, i) => (

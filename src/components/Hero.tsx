@@ -153,11 +153,11 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: desktopTitle }} />
+            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: typeof desktopTitle === 'string' ? desktopTitle : String(desktopTitle) }} />
             {/* Tablet variant */}
-            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: tabletTitle }} />
+            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: typeof tabletTitle === 'string' ? tabletTitle : String(tabletTitle) }} />
             {/* Mobile variant */}
-            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: mobileTitle }} />
+            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: typeof mobileTitle === 'string' ? mobileTitle : String(mobileTitle) }} />
           </motion.h1>
         </div>
         
@@ -168,9 +168,9 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
           className="mt-12 mb-10 flex flex-col items-center gap-2 text-zinc-500"
         >
           {/* Subtitle with responsive variants */}
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" dangerouslySetInnerHTML={{ __html: desktopSubtitle }} />
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: tabletSubtitle }} />
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: mobileSubtitle }} />
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof desktopSubtitle === 'string' ? desktopSubtitle : String(desktopSubtitle) }} />
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof tabletSubtitle === 'string' ? tabletSubtitle : String(tabletSubtitle) }} />
+          <span className="text-[10px] uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof mobileSubtitle === 'string' ? mobileSubtitle : String(mobileSubtitle) }} />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div
               className="absolute top-0 w-full h-full bg-zinc-400"
