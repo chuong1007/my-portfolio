@@ -144,7 +144,7 @@ const formatFs = (val: string, fallback: string) => {
       <section 
         className="relative flex flex-col items-center px-6 text-center min-h-[90vh]"
         style={{
-          paddingTop: `${180 + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
+          paddingTop: `${220 + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
