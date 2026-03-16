@@ -14,8 +14,21 @@ import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpe
 import type { RichTextData } from "./RichTextEditor";
 
 const normalize = (val: any): RichTextData => {
-  if (typeof val === 'object' && val !== null && 'content' in val) return val;
-  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+  const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
+  const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  
+  if (typeof val === 'object' && val !== null && 'content' in val) {
+    return {
+      ...val,
+      fontSize: val.fontSize || defaultFS,
+      lineHeight: val.lineHeight || defaultLH
+    };
+  }
+  return { 
+    content: val || '', 
+    fontSize: defaultFS,
+    lineHeight: defaultLH
+  };
 };
 
 const CATEGORIES = ["All", "Poster", "Branding", "Logo Design", "UX/UI"];
@@ -36,9 +49,10 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   const [showSeeAll, setShowSeeAll] = useState(false);
   const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả dự án");
   const [seeAllLink, setSeeAllLink] = useState("/projects");
+  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>("bottom");
   const [dbProjects, setDbProjects] = useState<any[]>([]);
-  const [titleData, setTitleData] = useState<RichTextData>({ content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 } });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 } });
+  const [titleData, setTitleData] = useState<RichTextData>({ content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
@@ -58,6 +72,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
         if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
         if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
         if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+        if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
         if (d.columns !== undefined) setColumnsData(d.columns);
       }
 
@@ -90,6 +105,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
       if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
       if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
       if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+      if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
       if (d.columns !== undefined) setColumnsData(d.columns);
     };
 
@@ -153,6 +169,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     showSeeAll,
     seeAllLabel,
     seeAllLink,
+    seeAllPosition: seeAllPositionData,
     columns: columnsData
   };
 
@@ -165,6 +182,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
       gap: currentDevice === 'mobile' ? '1.5rem' : '2rem',
       gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
     };
+
+  const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
   return (
     <SectionEditor 
@@ -220,12 +239,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
               />
             </div>
 
-            {!showSeeAll && (
+            {((showSeeAll && currentSeeAllPos === 'top') || (!showSeeAll)) && (
               <Link 
-                href="/projects"
+                href={showSeeAll ? seeAllLink : "/projects"}
                 className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
               >
-                Xem tất cả
+                {showSeeAll ? seeAllLabel : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
@@ -300,8 +319,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             ))}
           </div>
 
-          {/* See All */}
-          {(showSeeAll || !showSeeAll) && (
+          {((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -314,13 +332,13 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
               {showSeeAll ? (
                 <Link 
                   href={seeAllLink}
-                  className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden"
+                  className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
                     {seeAllLabel}
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg]">
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
                     <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
                   </div>
                 </Link>

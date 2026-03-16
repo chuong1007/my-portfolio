@@ -12,15 +12,35 @@ import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpe
 import type { RichTextData } from "./RichTextEditor";
 const normalize = (val: any): RichTextData => {
   if (typeof val === 'object' && val !== null && 'content' in val) return val;
-  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+  return { 
+    content: val || '', 
+    fontSize: { mobile: 16, tablet: 18, desktop: 20 },
+    lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' }
+  };
 };
 
 const DEFAULTS = {
-  heading: { content: "About", fontSize: { desktop: 30, tablet: 24, mobile: 18 } },
-  subheading: { content: "Senior Graphic Designer | 7 Years of Experience", fontSize: { desktop: 16, tablet: 14, mobile: 12 } },
+  heading: { 
+    content: "About", 
+    fontSize: { desktop: 30, tablet: 24, mobile: 18 },
+    lineHeight: { desktop: '1.2', tablet: '1.2', mobile: '1.2' }
+  },
+  subheading: { 
+    content: "Senior Graphic Designer | 7 Years of Experience", 
+    fontSize: { desktop: 16, tablet: 14, mobile: 12 },
+    lineHeight: { desktop: '1.4', tablet: '1.4', mobile: '1.4' }
+  },
   paragraphs: [
-    { content: "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.", fontSize: { desktop: 18, tablet: 16, mobile: 14 } },
-    { content: "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.", fontSize: { desktop: 18, tablet: 16, mobile: 14 } },
+    { 
+      content: "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.", 
+      fontSize: { desktop: 18, tablet: 16, mobile: 14 },
+      lineHeight: { desktop: '1.6', tablet: '1.6', mobile: '1.6' }
+    },
+    { 
+      content: "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.", 
+      fontSize: { desktop: 18, tablet: 16, mobile: 14 },
+      lineHeight: { desktop: '1.6', tablet: '1.6', mobile: '1.6' }
+    },
   ],
 };
 
@@ -143,13 +163,19 @@ export function About({ sectionId = "about" }: AboutProps) {
             style={{ opacity: loaded ? undefined : 1 }}
           >
             <div 
-              className="font-bold tracking-tighter text-zinc-50 text-balance [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-              style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px` }}
+              className="font-bold tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+              style={{ 
+                fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
+                lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
+              }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }} 
             />
             <div 
-              className="font-bold text-zinc-400 text-balance [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-              style={{ fontSize: `${subheading.fontSize?.[globalPreviewMode || 'desktop'] || 16}px` }}
+              className="font-bold text-zinc-400 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+              style={{ 
+                fontSize: `${subheading.fontSize?.[globalPreviewMode || 'desktop'] || 16}px`,
+                lineHeight: subheading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4'
+              }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading, globalPreviewMode || 'desktop') }} 
             />
             
@@ -157,8 +183,11 @@ export function About({ sectionId = "about" }: AboutProps) {
               {paragraphs.map((p, i) => (
                 <div 
                   key={i} 
-                  style={{ fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` }}
-                  className="[&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
+                  style={{ 
+                    fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
+                    lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6'
+                  }}
+                  className="whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(p, globalPreviewMode || 'desktop') }} 
                 />
               ))}

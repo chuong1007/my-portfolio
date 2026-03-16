@@ -11,50 +11,71 @@ import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
 import { getResponsiveValue } from '@/lib/responsive-helpers';
 
-// --- Custom Font Size Extension ---
+// --- Custom Extensions ---
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     fontSize: {
       setFontSize: (size: string) => ReturnType;
       unsetFontSize: () => ReturnType;
     };
+    lineHeight: {
+      setLineHeight: (lineHeight: string) => ReturnType;
+      unsetLineHeight: () => ReturnType;
+    };
   }
 }
 
 const FontSize = Extension.create({
   name: 'fontSize',
-
-  addOptions() {
-    return {
-      types: ['textStyle'],
-    };
-  },
-
+  addOptions() { return { types: ['textStyle'] }; },
   addGlobalAttributes() {
-    return [
-      {
-        types: this.options.types,
-        attributes: {
-          fontSize: {
-            default: null,
-            parseHTML: element => element.style.fontSize.replace(/['"]+/g, ''),
-            renderHTML: attributes => {
-              if (!attributes.fontSize) return {};
-              return { style: `font-size: ${attributes.fontSize}` };
-            },
+    return [{
+      types: this.options.types,
+      attributes: {
+        fontSize: {
+          default: null,
+          parseHTML: element => element.style.fontSize.replace(/['"]+/g, ''),
+          renderHTML: attributes => {
+            if (!attributes.fontSize) return {};
+            return { style: `font-size: ${attributes.fontSize}` };
           },
         },
       },
-    ];
+    }];
   },
-
   addCommands() {
     return {
-      setFontSize: fontSize => ({ chain }) => {
-        return chain().setMark('textStyle', { fontSize }).run();
+      setFontSize: fontSize => ({ chain }) => chain().setMark('textStyle', { fontSize }).run(),
+      unsetFontSize: () => ({ chain }) => chain().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run(),
+    };
+  },
+});
+
+const LineHeight = Extension.create({
+  name: 'lineHeight',
+  addOptions() { return { types: ['paragraph', 'heading'] }; },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        lineHeight: {
+          default: null,
+          parseHTML: element => element.style.lineHeight,
+          renderHTML: attributes => {
+            if (!attributes.lineHeight) return {};
+            return { style: `line-height: ${attributes.lineHeight}` };
+          },
+        },
       },
-      unsetFontSize: () => ({ chain }) => {
-        return chain().setMark('textStyle', { fontSize: null }).removeEmptyTextStyle().run();
+    }];
+  },
+  addCommands() {
+    return {
+      setLineHeight: lineHeight => ({ commands }) => {
+        return this.options.types.every((type: string) => commands.updateAttributes(type, { lineHeight }));
+      },
+      unsetLineHeight: () => ({ commands }) => {
+        return this.options.types.every((type: string) => commands.updateAttributes(type, { lineHeight: null }));
       },
     };
   },
@@ -72,9 +93,16 @@ export type ResponsiveContent = {
   desktop: string;
 };
 
+export type ResponsiveLineHeight = {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+};
+
 export type RichTextData = {
   content: string | ResponsiveContent;
   fontSize: ResponsiveFontSize;
+  lineHeight: ResponsiveLineHeight;
 };
 
 type RichTextEditorProps = {
@@ -92,6 +120,11 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     tablet: 18,
     desktop: 20
   });
+  const [localLineHeight, setLocalLineHeight] = useState<ResponsiveLineHeight>({
+    mobile: '1.5',
+    tablet: '1.5',
+    desktop: '1.5'
+  });
   const [localContent, setLocalContent] = useState<ResponsiveContent>({
     mobile: '',
     tablet: '',
@@ -101,12 +134,19 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
 
   // Normalize initial value
   const normalize = (v: any): RichTextData => {
-    if (v === null || v === undefined) return { content: { mobile: '', tablet: '', desktop: '' }, fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
+    const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+    const defaultContent = { mobile: '', tablet: '', desktop: '' };
+
+    if (v === null || v === undefined) {
+      return { content: defaultContent, fontSize: defaultFS, lineHeight: defaultLH };
+    }
     
     if (typeof v === 'string') {
       return { 
         content: { mobile: v, tablet: v, desktop: v }, 
-        fontSize: { mobile: 16, tablet: 18, desktop: 20 } 
+        fontSize: defaultFS,
+        lineHeight: defaultLH
       };
     }
 
@@ -114,23 +154,30 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       ? v.content
       : { mobile: v.content || '', tablet: v.content || '', desktop: v.content || '' };
     
-    const fontSize = v.fontSize || { mobile: 16, tablet: 18, desktop: 20 };
+    const fontSize = v.fontSize || defaultFS;
+    const lineHeight = v.lineHeight || defaultLH;
 
-    return { content, fontSize };
+    return { content, fontSize, lineHeight };
   };
 
   const normalizedValue = normalize(value);
 
   useEffect(() => {
     setLocalFontSize(normalizedValue.fontSize);
+    setLocalLineHeight(normalizedValue.lineHeight);
     setLocalContent(normalizedValue.content as ResponsiveContent);
   }, [value]);
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        hardBreak: {
+          keepMarks: true,
+        },
+      }),
       TextStyle,
       FontSize,
+      LineHeight,
       ...(enterAsBreak ? [
         Extension.create({
           name: 'enterHandler',
@@ -152,7 +199,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       
       onChange({
         content: updatedContent,
-        fontSize: localFontSize
+        fontSize: localFontSize,
+        lineHeight: localLineHeight
       });
     },
     editorProps: {
@@ -190,9 +238,22 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     setLocalFontSize(updatedSizes);
     onChange({
       content: localContent,
-      fontSize: updatedSizes
+      fontSize: updatedSizes,
+      lineHeight: localLineHeight
     });
   };
+
+  const updateLineHeight = (newLineHeight: string) => {
+    const updatedLH = { ...localLineHeight, [globalPreviewMode]: newLineHeight };
+    setLocalLineHeight(updatedLH);
+    onChange({
+      content: localContent,
+      fontSize: localFontSize,
+      lineHeight: updatedLH
+    });
+  };
+
+  const currentLineHeight = localLineHeight[globalPreviewMode] || '1.5';
 
   if (!editor) return null;
 
@@ -239,6 +300,26 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
                 <button onClick={() => updateFontSize(currentSize + 1)} className="hover:text-zinc-300"><Plus className="w-2.5 h-2.5" /></button>
                 <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="hover:text-zinc-300"><Minus className="w-2.5 h-2.5" /></button>
             </div>
+          </div>
+
+          <div className="w-px h-4 bg-zinc-800 mx-1" />
+
+          {/* Line Height Selector */}
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950 rounded border border-zinc-800">
+            <span className="text-[10px] text-zinc-500 font-bold uppercase">LH</span>
+            <select 
+              value={currentLineHeight}
+              onChange={(e) => updateLineHeight(e.target.value)}
+              className="bg-transparent text-[10px] font-bold text-blue-400 focus:outline-none cursor-pointer"
+            >
+              <option value="1">1.0</option>
+              <option value="1.2">1.2</option>
+              <option value="1.4">1.4</option>
+              <option value="1.5">1.5</option>
+              <option value="1.6">1.6</option>
+              <option value="1.8">1.8</option>
+              <option value="2">2.0</option>
+            </select>
           </div>
           <span className="ml-2 text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase font-bold">{globalPreviewMode}</span>
         </div>

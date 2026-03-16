@@ -12,8 +12,16 @@ import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpe
 import type { RichTextData } from "./RichTextEditor";
 
 const DEFAULTS = {
-  heading: { content: "Let's Connect", fontSize: { desktop: 80, tablet: 48, mobile: 32 } },
-  subtitle: { content: "Anh/ chị có dự án cần thực hiện:", fontSize: { desktop: 24, tablet: 20, mobile: 18 } },
+  heading: { 
+    content: "Let's Connect", 
+    fontSize: { desktop: 80, tablet: 48, mobile: 32 },
+    lineHeight: { desktop: '1.1', tablet: '1.1', mobile: '1.1' }
+  },
+  subtitle: { 
+    content: "Anh/ chị có dự án cần thực hiện:", 
+    fontSize: { desktop: 24, tablet: 20, mobile: 18 },
+    lineHeight: { desktop: '1.4', tablet: '1.4', mobile: '1.4' }
+  },
 };
 
 export function Contact() {
@@ -38,7 +46,11 @@ export function Contact() {
 
   const normalize = useCallback((val: any, defaultSize: number = 16): RichTextData => {
     if (typeof val === 'object' && val !== null && 'content' in val) return val;
-    return { content: val || '', fontSize: { mobile: defaultSize, tablet: defaultSize + 2, desktop: defaultSize + 4 } };
+    return { 
+      content: val || '', 
+      fontSize: { mobile: defaultSize, tablet: defaultSize + 2, desktop: defaultSize + 4 },
+      lineHeight: { mobile: '1.4', tablet: '1.4', desktop: '1.4' }
+    };
   }, []);
 
   const fetchContent = useCallback(async () => {
@@ -157,18 +169,24 @@ export function Contact() {
               {heading && (
                 <div 
                   className={cn(
-                    "tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    "tracking-tighter text-zinc-50 whitespace-pre-wrap break-words w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
-                  style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px` }}
+                  style={{ 
+                    fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px`,
+                    lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
+                  }}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }}
                 />
               )}
               {subtitle && (
                 <div 
                   className={cn(
-                    "text-zinc-400 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    "text-zinc-400 whitespace-pre-wrap break-words w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
-                  style={{ fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px` }}
+                  style={{ 
+                    fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px`,
+                    lineHeight: subtitle.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4'
+                  }}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle, globalPreviewMode || 'desktop') }}
                 />
               )}

@@ -47,6 +47,24 @@ const DEVICE_LABELS: Record<DeviceMode, string> = {
   mobile: 'Mobile',
 };
 
+const normalize = (val: any): RichTextData => {
+  const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
+  const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  
+  if (typeof val === 'object' && val !== null && 'content' in val) {
+    return {
+      ...val,
+      fontSize: val.fontSize || defaultFS,
+      lineHeight: val.lineHeight || defaultLH
+    };
+  }
+  return { 
+    content: val || '', 
+    fontSize: defaultFS,
+    lineHeight: defaultLH
+  };
+};
+
 export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: AdminModalProps) {
   const { globalPreviewMode } = useAdmin();
   const [data, setData] = useState<Record<string, any>>(initialData);
@@ -57,13 +75,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   useEffect(() => {
-    // Helper to normalize content to RichTextData object
-    const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { 
-        content: val || '', 
-        fontSize: { mobile: 16, tablet: 18, desktop: 20 } 
-      };
+    // Generic normalizer for responsive values
+    const normResp = (val: any, fallback: any = ''): any => {
+      if (typeof val === 'object' && val !== null && ('mobile' in val || 'tablet' in val || 'desktop' in val)) return val;
+      return { mobile: val || fallback, tablet: val || fallback, desktop: val || fallback };
     };
 
     setData({
@@ -73,24 +88,37 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       heading: normalize(initialData?.heading),
       subheading: normalize(initialData?.subheading),
       paragraphs: Array.isArray(initialData?.paragraphs) ? initialData.paragraphs.map((p: any) => normalize(p)) : [],
-      facebook: initialData?.facebook || '',
-      facebookLabel: initialData?.facebookLabel || 'Visit Profile',
-      showFacebook: initialData?.showFacebook !== false,
-      zalo: initialData?.zalo || '',
-      zaloLabel: initialData?.zaloLabel || 'Chat on Zalo',
-      showZalo: initialData?.showZalo !== false,
-      showPhone: initialData?.showPhone !== false,
-      showEmail: initialData?.showEmail !== false,
-      isVisible: initialData?.isVisible !== false,
+      
+      // Responsive identity fields
+      phone: normResp(initialData?.phone, ''),
+      email: normResp(initialData?.email, ''),
+      facebook: normResp(initialData?.facebook, ''),
+      facebookLabel: normResp(initialData?.facebookLabel, 'Visit Profile'),
+      showFacebook: normResp(initialData?.showFacebook, true),
+      zalo: normResp(initialData?.zalo, ''),
+      zaloLabel: normResp(initialData?.zaloLabel, 'Chat on Zalo'),
+      showZalo: normResp(initialData?.showZalo, true),
+      showPhone: normResp(initialData?.showPhone, true),
+      showEmail: normResp(initialData?.showEmail, true),
+      isVisible: normResp(initialData?.isVisible, true),
+
+      // Logo settings
+      logoType: normResp(initialData?.logoType, 'text'),
+      logoText: normResp(initialData?.logoText, 'CHUONG.GRAPHIC'),
+      logoColor: normResp(initialData?.logoColor, '#FFFFFF'),
+      logoImageUrl: normResp(initialData?.logoImageUrl, ''),
+
       // For UX Builder Blocks
       type: initialData?.type || 'text',
       span: initialData?.span || 12,
       data: initialData?.data || { title: normalize(''), content: normalize('') },
-      // Ensure responsive values are initialized correctly
-      columns: initialData?.columns || { mobile: 1, tablet: 2, desktop: 3 },
-      itemsToShow: initialData?.itemsToShow || { mobile: 4, tablet: 6, desktop: 16 },
-      seeAllLink: initialData?.seeAllLink || '',
-      seeAllLabel: initialData?.seeAllLabel || '',
+      
+      // Gallery/Blog settings
+      columns: normResp(initialData?.columns, { mobile: 1, tablet: 2, desktop: 3 }),
+      itemsToShow: normResp(initialData?.itemsToShow, { mobile: 4, tablet: 6, desktop: 16 }),
+      seeAllLink: normResp(initialData?.seeAllLink, ''),
+      seeAllLabel: normResp(initialData?.seeAllLabel, ''),
+      showSeeAll: normResp(initialData?.showSeeAll, false),
     });
   }, [initialData, isOpen]);
 
@@ -135,7 +163,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
         .from("project-images")
         .getPublicUrl(filePath);
 
-      setData({ ...data, logoImageUrl: publicUrl });
+      setData({ 
+        ...data, 
+        logoImageUrl: setResponsiveValue(data.logoImageUrl, globalPreviewMode, publicUrl) 
+      });
     } catch (err) {
       setError(`Lỗi tải ảnh: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
@@ -215,26 +246,26 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 <label className="block text-sm font-bold text-zinc-300">Cấu hình Logo Header</label>
                 <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
                   <button
-                    onClick={() => setData({ ...data, logoType: 'text' })}
+                    onClick={() => setData({ ...data, logoType: setResponsiveValue(data.logoType, globalPreviewMode, 'text') })}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-sm font-medium transition-all",
-                      (data.logoType || 'text') === 'text' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                      (getResponsiveValue(data.logoType, globalPreviewMode) || 'text') === 'text' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                     )}
                   >
                     Text Logo
                   </button>
                   <button
-                    onClick={() => setData({ ...data, logoType: 'image' })}
+                    onClick={() => setData({ ...data, logoType: setResponsiveValue(data.logoType, globalPreviewMode, 'image') })}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-sm font-medium transition-all",
-                      data.logoType === 'image' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                      getResponsiveValue(data.logoType, globalPreviewMode) === 'image' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
                     )}
                   >
                     Image Logo
                   </button>
                 </div>
 
-                {(data.logoType || 'text') === 'text' ? (
+                {(getResponsiveValue(data.logoType, globalPreviewMode) || 'text') === 'text' ? (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Logo Text</label>
@@ -255,8 +286,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                           className="w-full flex items-center justify-between bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 hover:border-zinc-500 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 rounded-md shadow-sm border border-zinc-700" style={{ backgroundColor: data.logoColor || '#FFFFFF' }} />
-                            <span className="text-sm font-mono text-zinc-300">{data.logoColor || '#FFFFFF'}</span>
+                            <div className="w-6 h-6 rounded-md shadow-sm border border-zinc-700" style={{ backgroundColor: getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF' }} />
+                            <span className="text-sm font-mono text-zinc-300">{getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF'}</span>
                           </div>
                           <Palette className="w-4 h-4 text-zinc-500" />
                         </button>
@@ -266,8 +297,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                             <div className="fixed inset-0" onClick={() => setShowColorPicker(false)} />
                             <div className="relative z-10 p-2 bg-[#1a1a1a] border border-[#222] rounded-xl shadow-2xl">
                               <SketchPicker
-                                color={data.logoColor || '#FFFFFF'}
-                                onChange={(color) => setData({ ...data, logoColor: color.hex })}
+                                color={getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF'}
+                                onChange={(color) => setData({ ...data, logoColor: setResponsiveValue(data.logoColor, globalPreviewMode, color.hex) })}
                                 className="!bg-[#222] !shadow-none !border-none"
                                 styles={{
                                   default: {
@@ -289,9 +320,9 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                         <div className="flex items-center gap-3">
                           <input
                             type="text"
-                            value={data.logoImageUrl || ''}
+                            value={getResponsiveValue(data.logoImageUrl, globalPreviewMode) || ''}
                             placeholder="https://path-to-your-logo.png"
-                            onChange={(e) => setData({ ...data, logoImageUrl: e.target.value })}
+                            onChange={(e) => setData({ ...data, logoImageUrl: setResponsiveValue(data.logoImageUrl, globalPreviewMode, e.target.value) })}
                             className="flex-1 bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                           />
                           <label className="cursor-pointer bg-white text-black px-4 py-3 rounded-xl flex items-center justify-center hover:bg-zinc-200 transition-all shrink-0">
@@ -311,7 +342,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                         {data.logoImageUrl && (
                           <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center justify-center">
                             <img 
-                              src={data.logoImageUrl} 
+                              src={getResponsiveValue(data.logoImageUrl, globalPreviewMode)} 
                               alt="Logo Preview" 
                               className="h-12 w-auto object-contain"
                             />
@@ -338,19 +369,19 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Title Max Width (%)</label>
-                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.titleMaxWidth, globalPreviewMode) || 100}%</span>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Scroll Button Offset (px)</label>
+                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.scrollOffset, globalPreviewMode) || 0}px</span>
                   </div>
                   <input
                     type="range"
-                    min="10"
-                    max="100"
+                    min="-200"
+                    max="500"
                     step="1"
-                    value={getResponsiveValue(data.titleMaxWidth, globalPreviewMode) || "100"}
-                    onChange={(e) => setData({ ...data, titleMaxWidth: setResponsiveValue(data.titleMaxWidth, globalPreviewMode, e.target.value) })}
+                    value={getResponsiveValue(data.scrollOffset, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, scrollOffset: setResponsiveValue(data.scrollOffset, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Dùng để ép văn bản tự rớt dòng (text-balance) đẹp hơn.</p>
+                  <p className="text-[10px] text-zinc-500 italic">Chỉnh vị trí nút kéo xuống (Margin Top).</p>
                 </div>
 
                 <div className="space-y-3">
@@ -496,69 +527,69 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Số điện thoại</label>
                   <button
-                    onClick={() => setData({ ...data, showPhone: !data.showPhone })}
+                    onClick={() => setData({ ...data, showPhone: setResponsiveValue(data.showPhone, globalPreviewMode, !(getResponsiveValue(data.showPhone, globalPreviewMode) !== false)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      data.showPhone !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showPhone !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                    {data.showPhone !== false ? "Đang hiện" : "Đang ẩn"}
+                    {getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? "Đang hiện" : "Đang ẩn"}
                   </button>
                 </div>
                 <input
                   type="text"
-                  value={data.phone}
-                  onChange={(e) => setData({ ...data, phone: e.target.value })}
+                  value={getResponsiveValue(data.phone, globalPreviewMode)}
+                  onChange={(e) => setData({ ...data, phone: setResponsiveValue(data.phone, globalPreviewMode, e.target.value) })}
                   className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
                 />
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Email</label>
                   <button
-                    onClick={() => setData({ ...data, showEmail: !data.showEmail })}
+                    onClick={() => setData({ ...data, showEmail: setResponsiveValue(data.showEmail, globalPreviewMode, !(getResponsiveValue(data.showEmail, globalPreviewMode) !== false)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      data.showEmail !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showEmail !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                    {data.showEmail !== false ? "Đang hiện" : "Đang ẩn"}
+                    {getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? "Đang hiện" : "Đang ẩn"}
                   </button>
                 </div>
                 <input
                   type="text"
-                  value={data.email}
-                  onChange={(e) => setData({ ...data, email: e.target.value })}
+                  value={getResponsiveValue(data.email, globalPreviewMode)}
+                  onChange={(e) => setData({ ...data, email: setResponsiveValue(data.email, globalPreviewMode, e.target.value) })}
                   className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
                 />
               </div>
 
               <div className="col-span-1 md:col-span-2 space-y-3">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Kết nối Facebook</label>
                   <button
-                    onClick={() => setData({ ...data, showFacebook: !data.showFacebook })}
+                    onClick={() => setData({ ...data, showFacebook: setResponsiveValue(data.showFacebook, globalPreviewMode, !getResponsiveValue(data.showFacebook, globalPreviewMode)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      data.showFacebook ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showFacebook, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showFacebook ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                    {data.showFacebook ? "Đang hiện" : "Đang ẩn"}
+                    {getResponsiveValue(data.showFacebook, globalPreviewMode) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {getResponsiveValue(data.showFacebook, globalPreviewMode) ? "Đang hiện" : "Đang ẩn"}
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2">
                     <input
                       type="text"
-                      value={data.facebook || ''}
-                      onChange={(e) => setData({ ...data, facebook: e.target.value })}
+                      value={getResponsiveValue(data.facebook, globalPreviewMode) || ''}
+                      onChange={(e) => setData({ ...data, facebook: setResponsiveValue(data.facebook, globalPreviewMode, e.target.value) })}
                       className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Link Facebook (https://...)"
                     />
@@ -566,8 +597,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <div>
                     <input
                       type="text"
-                      value={data.facebookLabel || ''}
-                      onChange={(e) => setData({ ...data, facebookLabel: e.target.value })}
+                      value={getResponsiveValue(data.facebookLabel, globalPreviewMode) || ''}
+                      onChange={(e) => setData({ ...data, facebookLabel: setResponsiveValue(data.facebookLabel, globalPreviewMode, e.target.value) })}
                       className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Nhãn (VD: Ghé thăm)"
                     />
@@ -576,25 +607,25 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               <div className="col-span-1 md:col-span-2 space-y-3">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-sm text-zinc-500 font-medium">Kết nối Zalo</label>
                   <button
-                    onClick={() => setData({ ...data, showZalo: !data.showZalo })}
+                    onClick={() => setData({ ...data, showZalo: setResponsiveValue(data.showZalo, globalPreviewMode, !getResponsiveValue(data.showZalo, globalPreviewMode)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      data.showZalo ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showZalo, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showZalo ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                    {data.showZalo ? "Đang hiện" : "Đang ẩn"}
+                    {getResponsiveValue(data.showZalo, globalPreviewMode) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                    {getResponsiveValue(data.showZalo, globalPreviewMode) ? "Đang hiện" : "Đang ẩn"}
                   </button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="md:col-span-2">
                     <input
                       type="text"
-                      value={data.zalo || ''}
-                      onChange={(e) => setData({ ...data, zalo: e.target.value })}
+                      value={getResponsiveValue(data.zalo, globalPreviewMode) || ''}
+                      onChange={(e) => setData({ ...data, zalo: setResponsiveValue(data.zalo, globalPreviewMode, e.target.value) })}
                       className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Zalo (Số điện thoại hoặc Link)"
                     />
@@ -602,8 +633,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <div>
                     <input
                       type="text"
-                      value={data.zaloLabel || ''}
-                      onChange={(e) => setData({ ...data, zaloLabel: e.target.value })}
+                      value={getResponsiveValue(data.zaloLabel, globalPreviewMode) || ''}
+                      onChange={(e) => setData({ ...data, zaloLabel: setResponsiveValue(data.zaloLabel, globalPreviewMode, e.target.value) })}
                       className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Nhãn (VD: Nhắn Zalo)"
                     />
@@ -752,40 +783,66 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               {/* See All Button */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-4">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
                   <button
-                    onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
+                    onClick={() => setData({ ...data, showSeeAll: setResponsiveValue(data.showSeeAll, globalPreviewMode, !getResponsiveValue(data.showSeeAll, globalPreviewMode)) })}
                     className={cn(
                       "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                      data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
+                    {getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "ĐANG HIỆN" : "ĐANG ẨN"}
                   </button>
                 </div>
                 
-                {data.showSeeAll && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
-                      <input
-                        type="text"
-                        value={data.seeAllLabel || 'Xem tất cả dự án'}
-                        onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                        placeholder="Xem tất cả..."
-                      />
+                {getResponsiveValue(data.showSeeAll, globalPreviewMode) && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                        <input
+                          type="text"
+                          value={getResponsiveValue(data.seeAllLabel, globalPreviewMode) || 'Xem tất cả dự án'}
+                          onChange={(e) => setData({ ...data, seeAllLabel: setResponsiveValue(data.seeAllLabel, globalPreviewMode, e.target.value) })}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          placeholder="Xem tất cả..."
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                        <input
+                          type="text"
+                          value={getResponsiveValue(data.seeAllLink, globalPreviewMode) || '/projects'}
+                          onChange={(e) => setData({ ...data, seeAllLink: setResponsiveValue(data.seeAllLink, globalPreviewMode, e.target.value) })}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          placeholder="/projects"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
-                      <input
-                        type="text"
-                        value={data.seeAllLink || '/projects'}
-                        onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                        placeholder="/projects"
-                      />
+                    
+                    <div className="space-y-2">
+                       <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
+                       <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                        <button
+                          onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'top') })}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                          )}
+                        >
+                          Cạnh tiêu đề
+                        </button>
+                        <button
+                          onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'bottom') })}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                          )}
+                        >
+                          Dưới cùng
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -893,40 +950,66 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               {/* See All Button for Blog */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-4">
-                <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
                   <button
-                    onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
+                    onClick={() => setData({ ...data, showSeeAll: setResponsiveValue(data.showSeeAll, globalPreviewMode, !getResponsiveValue(data.showSeeAll, globalPreviewMode)) })}
                     className={cn(
                       "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                      data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
                     )}
                   >
-                    {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
+                    {getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "ĐANG HIỆN" : "ĐANG ẨN"}
                   </button>
                 </div>
                 
-                {data.showSeeAll && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
-                      <input
-                        type="text"
-                        value={data.seeAllLabel || 'Xem tất cả bài viết'}
-                        onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                        placeholder="Xem tất cả..."
-                      />
+                {getResponsiveValue(data.showSeeAll, globalPreviewMode) && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                        <input
+                          type="text"
+                          value={getResponsiveValue(data.seeAllLabel, globalPreviewMode) || 'Xem tất cả bài viết'}
+                          onChange={(e) => setData({ ...data, seeAllLabel: setResponsiveValue(data.seeAllLabel, globalPreviewMode, e.target.value) })}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          placeholder="Xem tất cả..."
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                        <input
+                          type="text"
+                          value={getResponsiveValue(data.seeAllLink, globalPreviewMode) || '/blog'}
+                          onChange={(e) => setData({ ...data, seeAllLink: setResponsiveValue(data.seeAllLink, globalPreviewMode, e.target.value) })}
+                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          placeholder="/blog"
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
-                      <input
-                        type="text"
-                        value={data.seeAllLink || '/blog'}
-                        onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                        placeholder="/blog"
-                      />
+
+                    <div className="space-y-2">
+                       <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
+                       <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                        <button
+                          onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'top') })}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                          )}
+                        >
+                          Cạnh tiêu đề
+                        </button>
+                        <button
+                          onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'bottom') })}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                          )}
+                        >
+                          Dưới cùng
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1038,27 +1121,27 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           )}
 
           {/* Visibility Toggle for all sections */}
-          <button
-            onClick={() => setData({ ...data, isVisible: !data.isVisible })}
+           <button
+            onClick={() => setData({ ...data, isVisible: setResponsiveValue(data.isVisible, globalPreviewMode, !(getResponsiveValue(data.isVisible, globalPreviewMode) === true)) })}
             className={cn(
               "flex items-center gap-3 w-full p-4 rounded-2xl border transition-all duration-300",
-              data.isVisible !== false 
+              getResponsiveValue(data.isVisible, globalPreviewMode) === true 
                 ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.05)]" 
                 : "bg-zinc-800/30 border-zinc-800 text-zinc-500"
             )}
           >
             <div className={cn(
               "p-2 rounded-lg transition-colors",
-              data.isVisible !== false ? "bg-emerald-500/10" : "bg-zinc-800"
+              getResponsiveValue(data.isVisible, globalPreviewMode) === true ? "bg-emerald-500/10" : "bg-zinc-800"
             )}>
-              {data.isVisible !== false ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+              {getResponsiveValue(data.isVisible, globalPreviewMode) === true ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
             </div>
             <div className="flex flex-col items-start gap-0.5">
               <span className="text-sm font-bold">
-                {data.isVisible !== false ? "Section đang hiện" : "Section đang ẩn"}
+                {getResponsiveValue(data.isVisible, globalPreviewMode) === true ? "Section đang hiện" : "Section đang ẩn"}
               </span>
               <span className="text-xs opacity-60">
-                {data.isVisible !== false ? "Click để ẩn khỏi trang chủ" : "Click để hiện lại trên trang chủ"}
+                {getResponsiveValue(data.isVisible, globalPreviewMode) === true ? "Click để ẩn trên giao diện " + DEVICE_LABELS[globalPreviewMode] : "Click để hiện lại trên giao diện " + DEVICE_LABELS[globalPreviewMode]}
               </span>
             </div>
           </button>

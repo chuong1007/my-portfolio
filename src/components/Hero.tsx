@@ -8,8 +8,21 @@ import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
 const normalize = (val: any): RichTextData => {
-  if (typeof val === 'object' && val !== null && 'content' in val) return val;
-  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+  const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
+  const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  
+  if (typeof val === 'object' && val !== null && 'content' in val) {
+    return {
+      ...val,
+      fontSize: val.fontSize || defaultFS,
+      lineHeight: val.lineHeight || defaultLH
+    };
+  }
+  return { 
+    content: val || '', 
+    fontSize: defaultFS,
+    lineHeight: defaultLH
+  };
 };
 
 type HeroProps = {
@@ -17,9 +30,13 @@ type HeroProps = {
 };
 
 export function Hero({ sectionId = "hero" }: HeroProps) {
-  const [titleData, setTitleData] = useState<RichTextData>({ content: "Visual Designer based in Ho Chi Minh City", fontSize: { desktop: 80, tablet: 60, mobile: 32 } });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 } });
-  const [titleMaxWidthData, setTitleMaxWidthData] = useState<ResponsiveValue>("100");
+  const [titleData, setTitleData] = useState<RichTextData>({ 
+    content: "Visual Designer based in Ho Chi Minh City", 
+    fontSize: { desktop: 80, tablet: 60, mobile: 32 },
+    lineHeight: { desktop: '1.1', tablet: '1.1', mobile: '1.1' }
+  });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 }, lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' } });
+  const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>("48");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
   const [isVisible, setIsVisible] = useState(true);
@@ -52,7 +69,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-        if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
+        if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
       }
     } catch (error) {
       console.error("Error fetching hero content:", error);
@@ -71,7 +88,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
     if (d.title !== undefined) setTitleData(normalize(d.title));
     if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
-    if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
+    if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
     if (d.logoText !== undefined) setLogoText(d.logoText);
     if (d.logoImageUrl !== undefined) setLogoImageUrl(d.logoImageUrl);
     if (d.logoColor !== undefined) setLogoColor(d.logoColor);
@@ -119,7 +136,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     paddingBottom: paddingBottomData,
     title: titleData,
     subtitle: subtitleData,
-    titleMaxWidth: titleMaxWidthData,
+    scrollOffset: scrollOffset,
     logoType,
     logoText,
     logoColor,
@@ -144,7 +161,7 @@ const formatFs = (val: string, fallback: string) => {
       <section 
         className="relative flex flex-col items-center px-6 text-center min-h-[90vh]"
         style={{
-          paddingTop: `${(globalPreviewMode === 'mobile' ? 100 : globalPreviewMode === 'tablet' ? 120 : 140) + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
+          paddingTop: `${parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
@@ -153,24 +170,24 @@ const formatFs = (val: string, fallback: string) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            className="font-bold tracking-tighter text-zinc-50 leading-none text-balance mx-auto whitespace-pre-line sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
             style={{
-              "--mw-desk": `${getResponsiveValue(titleMaxWidthData, 'desktop') ?? 100}%`,
-              "--mw-tab": `${getResponsiveValue(titleMaxWidthData, 'tablet') ?? 100}%`,
-              "--mw-mob": `${getResponsiveValue(titleMaxWidthData, 'mobile') ?? 100}%`,
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
               "--fs-mob": `${titleData.fontSize?.mobile || 32}px`,
-              maxWidth: "var(--mw-mob)",
-              fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)'
+              "--lh-desk": titleData.lineHeight?.desktop || '1.1',
+              "--lh-tab": titleData.lineHeight?.tablet || '1.1',
+              "--lh-mob": titleData.lineHeight?.mobile || '1.1',
+              fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)',
+              lineHeight: globalPreviewMode === 'mobile' ? 'var(--lh-mob)' : globalPreviewMode === 'tablet' ? 'var(--lh-tab)' : 'var(--lh-desk)'
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
+            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
             {/* Tablet variant */}
-            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
+            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
             {/* Mobile variant */}
-            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
+            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
           </motion.h1>
         </div>
         
@@ -178,27 +195,31 @@ const formatFs = (val: string, fallback: string) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
-          className="mt-12 mb-10 flex flex-col items-center gap-2 text-zinc-500"
+          className="flex flex-col items-center gap-2 text-zinc-500"
           style={{
+            marginTop: `${getResponsiveValue(scrollOffset, globalPreviewMode) || 48}px`,
             "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
             "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
             "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
+            "--lh-sub-desk": subtitleData.lineHeight?.desktop || '1.5',
+            "--lh-sub-tab": subtitleData.lineHeight?.tablet || '1.5',
+            "--lh-sub-mob": subtitleData.lineHeight?.mobile || '1.5',
           } as React.CSSProperties}
         >
           {/* Subtitle with responsive variants */}
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-wrap [&_p]:m-0" 
-            style={{ fontSize: "var(--fs-sub-desk)" }}
+            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ fontSize: "var(--fs-sub-desk)", lineHeight: "var(--lh-sub-desk)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'desktop') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0" 
-            style={{ fontSize: "var(--fs-sub-tab)" }}
+            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ fontSize: "var(--fs-sub-tab)", lineHeight: "var(--lh-sub-tab)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'tablet') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-wrap [&_p]:m-0" 
-            style={{ fontSize: "var(--fs-sub-mob)" }}
+            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ fontSize: "var(--fs-sub-mob)", lineHeight: "var(--lh-sub-mob)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'mobile') }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">

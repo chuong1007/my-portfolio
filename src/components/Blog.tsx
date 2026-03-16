@@ -17,8 +17,21 @@ import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpe
 import type { RichTextData } from "./RichTextEditor";
 
 const normalize = (val: any): RichTextData => {
-  if (typeof val === 'object' && val !== null && 'content' in val) return val;
-  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+  const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
+  const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  
+  if (typeof val === 'object' && val !== null && 'content' in val) {
+    return {
+      ...val,
+      fontSize: val.fontSize || defaultFS,
+      lineHeight: val.lineHeight || defaultLH
+    };
+  }
+  return { 
+    content: val || '', 
+    fontSize: defaultFS,
+    lineHeight: defaultLH
+  };
 };
 
 const BLOG_TAGS = [
@@ -52,9 +65,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const [showSeeAll, setShowSeeAll] = useState(false);
   const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả bài viết");
   const [seeAllLink, setSeeAllLink] = useState("/blog");
-  const [titleData, setTitleData] = useState<RichTextData>({ content: "Blog", fontSize: { desktop: 48, tablet: 40, mobile: 32 } });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 } });
+  const [titleData, setTitleData] = useState<RichTextData>({ content: "Blog", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
+  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>("bottom");
   const { isAdmin, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
@@ -72,6 +86,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
         if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
         if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+        if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
         if (d.columns !== undefined) setColumnsData(d.columns);
       }
     } catch (e) {
@@ -105,6 +120,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
       if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
       if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
       if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+      if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
       if (d.columns !== undefined) setColumnsData(d.columns);
     };
 
@@ -140,12 +156,15 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     showSeeAll,
     seeAllLabel,
     seeAllLink,
+    seeAllPosition: seeAllPositionData,
     columns: columnsData
   };
 
   const desktopCols = parseInt(getResponsiveValue(columnsData, 'desktop') || "3");
   const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
   const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
+
+  const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
   const gridColsClass = cn(
     `grid-cols-${mobileCols}`,
@@ -187,9 +206,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, globalPreviewMode || 'desktop') }} 
               />
             </div>
-            {variant === 'homepage' && !showSeeAll && (
-              <Link href="/blog" className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight">
-                Xem tất cả
+            {((showSeeAll && currentSeeAllPos === 'top') || (variant === 'homepage' && !showSeeAll)) && (
+              <Link 
+                href={showSeeAll ? seeAllLink : "/blog"}
+                className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
+              >
+                {showSeeAll ? seeAllLabel : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
@@ -230,22 +252,29 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             </div>
           )}
 
-          {(showSeeAll || variant === 'homepage') && (
+          {((showSeeAll && currentSeeAllPos === 'bottom') || (variant === 'homepage' && !showSeeAll)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className={cn("mt-20 flex justify-center", !showSeeAll && "lg:hidden")}
             >
-              <Link href={seeAllLink} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                  {seeAllLabel}
-                </span>
-                <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-active flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
-                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
-                </div>
-              </Link>
+              {showSeeAll ? (
+                <Link href={seeAllLink} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
+                    {seeAllLabel}
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
+                    <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                  </div>
+                </Link>
+              ) : (
+                <Link href="/blog" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest border border-zinc-800 px-6 py-3 rounded-full hover:border-zinc-500 w-full md:w-auto text-center justify-center">
+                  Xem tất cả bài viết
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              )}
             </motion.div>
           )}
 
