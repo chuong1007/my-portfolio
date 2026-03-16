@@ -9,13 +9,14 @@ import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
+import type { RichTextData } from "./RichTextEditor";
 
 const DEFAULTS = {
-  heading: "About",
-  subheading: "Senior Graphic Designer | 7 Years of Experience",
+  heading: { content: "About", fontSize: { desktop: 30, tablet: 24, mobile: 18 } },
+  subheading: { content: "Senior Graphic Designer | 7 Years of Experience", fontSize: { desktop: 16, tablet: 14, mobile: 12 } },
   paragraphs: [
-    "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.",
-    "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.",
+    { content: "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.", fontSize: { desktop: 18, tablet: 16, mobile: 14 } },
+    { content: "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.", fontSize: { desktop: 18, tablet: 16, mobile: 14 } },
   ],
 };
 
@@ -26,9 +27,9 @@ type AboutProps = {
 export function About({ sectionId = "about" }: AboutProps) {
   const pathname = usePathname();
   const isContactPage = pathname === "/contact";
-  const [heading, setHeading] = useState(DEFAULTS.heading);
-  const [subheading, setSubheading] = useState(DEFAULTS.subheading);
-  const [paragraphs, setParagraphs] = useState<string[]>(DEFAULTS.paragraphs);
+  const [heading, setHeading] = useState<RichTextData>(DEFAULTS.heading);
+  const [subheading, setSubheading] = useState<RichTextData>(DEFAULTS.subheading);
+  const [paragraphs, setParagraphs] = useState<RichTextData[]>(DEFAULTS.paragraphs);
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(isContactPage ? "80" : "128");
   const [isVisible, setIsVisible] = useState(true);
@@ -39,8 +40,18 @@ export function About({ sectionId = "about" }: AboutProps) {
     // Prevent overwrite if realtime data is already active
     if ((window as any)._aboutRealtimeActive) return;
 
+    const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    };
+
     try {
-      const supabase = createClient();
+      const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    };
+
+    const supabase = createClient();
       const { data } = await supabase
         .from("site_content")
         .select("data")
@@ -56,16 +67,10 @@ export function About({ sectionId = "about" }: AboutProps) {
           paddingTop?: ResponsiveValue;
           paddingBottom?: ResponsiveValue;
         };
-        if (d.heading) {
-          if (typeof d.heading === 'string' && d.heading.trim()) setHeading(d.heading);
-          else if (typeof d.heading === 'object') setHeading(getResponsiveValue(d.heading, 'desktop'));
-        }
-        if (d.subheading) {
-          if (typeof d.subheading === 'string' && d.subheading.trim()) setSubheading(d.subheading);
-          else if (typeof d.subheading === 'object') setSubheading(getResponsiveValue(d.subheading, 'desktop'));
-        }
+        if (d.heading) setHeading(normalize(d.heading));
+        if (d.subheading) setSubheading(normalize(d.subheading));
         if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0) {
-          setParagraphs(d.paragraphs.map((p: any) => typeof p === 'string' ? p : JSON.stringify(p)));
+          setParagraphs(d.paragraphs.map(p => normalize(p)));
         }
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
@@ -83,11 +88,16 @@ export function About({ sectionId = "about" }: AboutProps) {
 
   // Listen for real-time preview updates from AdminModal
   useEffect(() => {
+    const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    };
+
     const applyUpdate = (d: any) => {
       (window as any)._aboutRealtimeActive = true;
-      if (d.heading !== undefined) setHeading(typeof d.heading === 'object' ? getResponsiveValue(d.heading, globalPreviewMode ?? 'desktop') : d.heading);
-      if (d.subheading !== undefined) setSubheading(typeof d.subheading === 'object' ? getResponsiveValue(d.subheading, globalPreviewMode ?? 'desktop') : d.subheading);
-      if (d.paragraphs !== undefined) setParagraphs(Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => typeof p === 'string' ? p : JSON.stringify(p)) : d.paragraphs);
+      if (d.heading !== undefined) setHeading(normalize(d.heading));
+      if (d.subheading !== undefined) setSubheading(normalize(d.subheading));
+      if (d.paragraphs !== undefined) setParagraphs(Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => normalize(p)) : []);
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -148,12 +158,24 @@ export function About({ sectionId = "about" }: AboutProps) {
             className="space-y-6"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 className="text-lg sm:text-xl md:text-3xl font-bold tracking-tighter text-zinc-50 text-balance" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
-            <h3 className="text-xs sm:text-sm md:text-base font-bold text-zinc-400 text-balance" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
+            <h2 
+              className="font-bold tracking-tighter text-zinc-50 text-balance" 
+              style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px` }}
+              dangerouslySetInnerHTML={{ __html: heading.content }} 
+            />
+            <h3 
+              className="font-bold text-zinc-400 text-balance" 
+              style={{ fontSize: `${subheading.fontSize?.[globalPreviewMode || 'desktop'] || 16}px` }}
+              dangerouslySetInnerHTML={{ __html: subheading.content }} 
+            />
             
-            <div className="space-y-4 text-sm sm:text-base md:text-lg leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
+            <div className="space-y-4 text-zinc-400 font-light whitespace-pre-wrap">
               {paragraphs.map((p, i) => (
-                <p key={i} dangerouslySetInnerHTML={{ __html: typeof p === 'string' ? p : JSON.stringify(p) }} />
+                <p 
+                  key={i} 
+                  style={{ fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` }}
+                  dangerouslySetInnerHTML={{ __html: p.content }} 
+                />
               ))}
             </div>
           </motion.div>

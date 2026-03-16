@@ -8,12 +8,18 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
+import type { RichTextData } from "./RichTextEditor";
+
+const DEFAULTS = {
+  heading: { content: "Let's Connect", fontSize: { desktop: 80, tablet: 48, mobile: 32 } },
+  subtitle: { content: "Anh/ chị có dự án cần thực hiện:", fontSize: { desktop: 24, tablet: 20, mobile: 18 } },
+};
 
 export function Contact() {
   const pathname = usePathname();
   const isContactPage = pathname === "/contact";
-  const [heading, setHeading] = useState("Let's Connect");
-  const [subtitle, setSubtitle] = useState("Anh/ chị có dự án cần thực hiện:");
+  const [heading, setHeading] = useState<RichTextData>(DEFAULTS.heading);
+  const [subtitle, setSubtitle] = useState<RichTextData>(DEFAULTS.subtitle);
   const [phone, setPhone] = useState("038 429 7019");
   const [email, setEmail] = useState("chuong.thanh1007@gmail.com");
   const [facebook, setFacebook] = useState("");
@@ -25,9 +31,14 @@ export function Contact() {
   const [showPhone, setShowPhone] = useState(true);
   const [showEmail, setShowEmail] = useState(true);
   const [isVisible, setIsVisible] = useState(true);
-  const { isAdmin } = useAdmin();
+  const { isAdmin, globalPreviewMode } = useAdmin();
 
   const fetchContent = async () => {
+    const normalize = (val: any, defaultSize: number = 16): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: defaultSize, tablet: defaultSize + 2, desktop: defaultSize + 4 } };
+    };
+    
     const supabase = createClient();
     const { data } = await supabase
       .from("site_content")
@@ -37,24 +48,15 @@ export function Contact() {
 
     if (data?.data) {
       const d = data.data as Record<string, any>;
-      // Guard against responsive objects {mobile, tablet, desktop}
-      const safeStr = (val: any, fallback: string) => {
-        if (val === null || val === undefined) return fallback;
-        if (typeof val === 'string') return val;
-        if (typeof val === 'object') {
-          return val.desktop || val.tablet || val.mobile || fallback;
-        }
-        return String(val);
-      };
-      setHeading(safeStr(d.heading, "Let's Connect"));
-      setSubtitle(safeStr(d.subtitle, "Anh/ chị có dự án cần thực hiện:"));
-      setPhone(safeStr(d.phone, "038 429 7019"));
-      setEmail(safeStr(d.email, "chuong.thanh1007@gmail.com"));
-      setFacebook(safeStr(d.facebook, ""));
-      setFacebookLabel(safeStr(d.facebookLabel, "Visit Profile"));
+      setHeading(normalize(d.heading, 60));
+      setSubtitle(normalize(d.subtitle, 24));
+      setPhone(d.phone || "038 429 7019");
+      setEmail(d.email || "chuong.thanh1007@gmail.com");
+      setFacebook(d.facebook || "");
+      setFacebookLabel(d.facebookLabel || "Visit Profile");
       setShowFacebook(d.showFacebook !== false);
-      setZalo(safeStr(d.zalo, ""));
-      setZaloLabel(safeStr(d.zaloLabel, "Chat on Zalo"));
+      setZalo(d.zalo || "");
+      setZaloLabel(d.zaloLabel || "Chat on Zalo");
       setShowZalo(d.showZalo !== false);
       setShowPhone(d.showPhone !== false);
       setShowEmail(d.showEmail !== false);
@@ -64,6 +66,40 @@ export function Contact() {
 
   useEffect(() => {
     fetchContent();
+  }, []);
+
+  // Real-time updates
+  useEffect(() => {
+    const normalize = (val: any, defaultSize: number = 16): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: defaultSize, tablet: defaultSize + 2, desktop: defaultSize + 4 } };
+    };
+
+    const applyUpdate = (d: any) => {
+      if (d.heading !== undefined) setHeading(normalize(d.heading, 60));
+      if (d.subtitle !== undefined) setSubtitle(normalize(d.subtitle, 24));
+      if (d.phone !== undefined) setPhone(d.phone);
+      if (d.email !== undefined) setEmail(d.email);
+      if (d.facebook !== undefined) setFacebook(d.facebook);
+      if (d.facebookLabel !== undefined) setFacebookLabel(d.facebookLabel);
+      if (d.showFacebook !== undefined) setShowFacebook(d.showFacebook);
+      if (d.zalo !== undefined) setZalo(d.zalo);
+      if (d.zaloLabel !== undefined) setZaloLabel(d.zaloLabel);
+      if (d.showZalo !== undefined) setShowZalo(d.showZalo);
+      if (d.showPhone !== undefined) setShowPhone(d.showPhone);
+      if (d.showEmail !== undefined) setShowEmail(d.showEmail);
+      if (d.isVisible !== undefined) setIsVisible(d.isVisible);
+    };
+
+    const handlePreviewUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.sectionId === 'contact') {
+        applyUpdate(customEvent.detail.data);
+      }
+    };
+
+    window.addEventListener('previewUpdate', handlePreviewUpdate);
+    return () => window.removeEventListener('previewUpdate', handlePreviewUpdate);
   }, []);
 
   if (pathname === '/admin/builder') return null;
@@ -101,18 +137,18 @@ export function Contact() {
                 <div 
                   className={cn(
                     "tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                    isContactPage ? "[&_h1]:text-3xl [&_h2]:text-2xl" : "[&_h1]:text-6xl [&_h1]:md:text-8xl [&_h2]:text-4xl [&_h2]:md:text-6xl"
                   )}
-                  dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? heading : String(heading) }}
+                  style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px` }}
+                  dangerouslySetInnerHTML={{ __html: heading.content }}
                 />
               )}
               {subtitle && (
                 <div 
                   className={cn(
                     "text-zinc-400 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                    isContactPage ? "text-base md:text-lg" : "text-xl md:text-2xl"
                   )}
-                  dangerouslySetInnerHTML={{ __html: typeof subtitle === 'string' ? subtitle : String(subtitle) }}
+                  style={{ fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px` }}
+                  dangerouslySetInnerHTML={{ __html: subtitle.content }}
                 />
               )}
             </div>

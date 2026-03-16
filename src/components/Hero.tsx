@@ -6,19 +6,18 @@ import { createClient } from "@/lib/supabase";
 import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
+import type { RichTextData } from "./RichTextEditor";
 
 type HeroProps = {
   sectionId?: string;
 };
 
 export function Hero({ sectionId = "hero" }: HeroProps) {
-  const [titleData, setTitleData] = useState<ResponsiveValue>("Visual Designer based in Ho Chi Minh City");
-  const [subtitleData, setSubtitleData] = useState<ResponsiveValue>("Scroll to explore");
+  const [titleData, setTitleData] = useState<RichTextData>({ content: "Visual Designer based in Ho Chi Minh City", fontSize: { desktop: 80, tablet: 60, mobile: 32 } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 } });
   const [titleMaxWidthData, setTitleMaxWidthData] = useState<ResponsiveValue>("100");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
-  const [titleFontSizeData, setTitleFontSizeData] = useState<ResponsiveValue>("desktop: 8xl, tablet: 6xl, mobile: 3xl");
-  const [subtitleFontSizeData, setSubtitleFontSizeData] = useState<ResponsiveValue>("10");
   const [isVisible, setIsVisible] = useState(true);
   const [logoType, setLogoType] = useState<'text' | 'image'>('text');
   const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
@@ -27,6 +26,11 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const { isAdmin, globalPreviewMode } = useAdmin();
 
   const fetchContent = async () => {
+    const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    };
+
     const supabase = createClient();
     try {
       const { data } = await supabase
@@ -38,13 +42,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
       if (data?.data) {
         const d = data.data as any;
         // Keep raw data (could be string or responsive object)
-        if (d.title !== undefined) setTitleData(d.title);
-        if (d.subtitle !== undefined) setSubtitleData(d.subtitle);
-        if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
-        if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
-        if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-        if (d.titleFontSize !== undefined) setTitleFontSizeData(d.titleFontSize);
-        if (d.subtitleFontSize !== undefined) setSubtitleFontSizeData(d.subtitleFontSize);
+        if (d.title !== undefined) setTitleData(normalize(d.title));
+        if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.logoType) setLogoType(d.logoType);
         if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
@@ -62,17 +61,17 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
 
   // Listen for real-time preview updates from AdminModal
   useEffect(() => {
+    const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    };
+
     const applyUpdate = (d: any) => {
       // Mark that we are receiving realtime data to prevent fetchContent from overwriting
       (window as any)._heroRealtimeLoaded = true;
       
-      if (d.title !== undefined) setTitleData(d.title);
-      if (d.subtitle !== undefined) setSubtitleData(d.subtitle);
-      if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
-      if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
-      if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-      if (d.titleFontSize !== undefined) setTitleFontSizeData(d.titleFontSize);
-      if (d.subtitleFontSize !== undefined) setSubtitleFontSizeData(d.subtitleFontSize);
+      if (d.title !== undefined) setTitleData(normalize(d.title));
+      if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.logoType) setLogoType(d.logoType);
       if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
@@ -119,9 +118,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     paddingTop: paddingTopData,
     paddingBottom: paddingBottomData,
     title: titleData,
-    titleFontSize: titleFontSizeData,
     subtitle: subtitleData,
-    subtitleFontSize: subtitleFontSizeData,
     titleMaxWidth: titleMaxWidthData,
     logoType,
     logoText,
@@ -155,7 +152,7 @@ const formatFs = (val: string, fallback: string) => {
             paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
           }}
         >
-          <motion.h1
+            <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -164,19 +161,19 @@ const formatFs = (val: string, fallback: string) => {
               "--mw-desk": `${getResponsiveValue(titleMaxWidthData, 'desktop') ?? 100}%`,
               "--mw-tab": `${getResponsiveValue(titleMaxWidthData, 'tablet') ?? 100}%`,
               "--mw-mob": `${getResponsiveValue(titleMaxWidthData, 'mobile') ?? 100}%`,
-              "--fs-desk": formatFs(getResponsiveValue(titleFontSizeData, 'desktop'), '8rem'),
-              "--fs-tab": formatFs(getResponsiveValue(titleFontSizeData, 'tablet'), '3.75rem'),
-              "--fs-mob": formatFs(getResponsiveValue(titleFontSizeData, 'mobile'), '1.875rem'),
+              "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
+              "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
+              "--fs-mob": `${titleData.fontSize?.mobile || 32}px`,
               maxWidth: "var(--mw-mob)",
               fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)'
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: typeof desktopTitle === 'string' ? desktopTitle : String(desktopTitle) }} />
+            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
             {/* Tablet variant */}
-            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: typeof tabletTitle === 'string' ? tabletTitle : String(tabletTitle) }} />
+            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
             {/* Mobile variant */}
-            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: typeof mobileTitle === 'string' ? mobileTitle : String(mobileTitle) }} />
+            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
           </motion.h1>
         </div>
         
@@ -186,26 +183,26 @@ const formatFs = (val: string, fallback: string) => {
           transition={{ delay: 0.5, duration: 1 }}
           className="mt-12 mb-10 flex flex-col items-center gap-2 text-zinc-500"
           style={{
-            "--fs-sub-desk": formatFs(getResponsiveValue(subtitleFontSizeData, 'desktop'), '10px'),
-            "--fs-sub-tab": formatFs(getResponsiveValue(subtitleFontSizeData, 'tablet'), '10px'),
-            "--fs-sub-mob": formatFs(getResponsiveValue(subtitleFontSizeData, 'mobile'), '10px'),
+            "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
+            "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
+            "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
           } as React.CSSProperties}
         >
           {/* Subtitle with responsive variants */}
           <span 
             className="uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-desk)" }}
-            dangerouslySetInnerHTML={{ __html: typeof desktopSubtitle === 'string' ? desktopSubtitle : String(desktopSubtitle) }} 
+            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
           />
           <span 
             className="uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-tab)" }}
-            dangerouslySetInnerHTML={{ __html: typeof tabletSubtitle === 'string' ? tabletSubtitle : String(tabletSubtitle) }} 
+            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
           />
           <span 
             className="uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-mob)" }}
-            dangerouslySetInnerHTML={{ __html: typeof mobileSubtitle === 'string' ? mobileSubtitle : String(mobileSubtitle) }} 
+            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div

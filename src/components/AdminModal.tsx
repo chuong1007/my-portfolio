@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette, Monitor, Tablet, Smartphone } from 'lucide-react';
 import { createClient } from "@/lib/supabase";
 import dynamic from "next/dynamic";
-const RichTextEditor = dynamic(() => import("./builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
+import { RichTextEditor, type RichTextData } from "./RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 import { useAdmin } from "@/context/AdminContext";
@@ -39,8 +39,22 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   useEffect(() => {
+    // Helper to normalize content to RichTextData object
+    const normalize = (val: any): RichTextData => {
+      if (typeof val === 'object' && val !== null && 'content' in val) return val;
+      return { 
+        content: val || '', 
+        fontSize: { mobile: 16, tablet: 18, desktop: 20 } 
+      };
+    };
+
     setData({
       ...initialData,
+      title: normalize(initialData?.title),
+      subtitle: normalize(initialData?.subtitle),
+      heading: normalize(initialData?.heading),
+      subheading: normalize(initialData?.subheading),
+      paragraphs: Array.isArray(initialData?.paragraphs) ? initialData.paragraphs.map((p: any) => normalize(p)) : [],
       facebook: initialData?.facebook || '',
       facebookLabel: initialData?.facebookLabel || 'Visit Profile',
       showFacebook: initialData?.showFacebook !== false,
@@ -53,7 +67,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       // For UX Builder Blocks
       type: initialData?.type || 'text',
       span: initialData?.span || 12,
-      data: initialData?.data || { title: '', content: '' }
+      data: initialData?.data || { title: normalize(''), content: normalize('') }
     });
   }, [initialData, isOpen]);
 
@@ -283,49 +297,15 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Main Title <span className="text-xs opacity-60">({DEVICE_LABELS[globalPreviewMode]})</span></label>
-                <textarea
-                  value={getResponsiveValue(data.title, globalPreviewMode)}
-                  onChange={(e) => setData({ ...data, title: setResponsiveValue(data.title, globalPreviewMode, e.target.value) })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none text-lg"
-                  rows={2}
-                  placeholder={`Hiển thị trên ${DEVICE_LABELS[globalPreviewMode]}...`}
+              <div className="space-y-4">
+                <RichTextEditor
+                  label="Title"
+                  value={data.title}
+                  onChange={(val) => setData({ ...data, title: val })}
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Kích thước Title</label>
-                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.titleFontSize, globalPreviewMode) || 80}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="10"
-                    max="200"
-                    step="1"
-                    value={getResponsiveValue(data.titleFontSize, globalPreviewMode) || "80"}
-                    onChange={(e) => setData({ ...data, titleFontSize: setResponsiveValue(data.titleFontSize, globalPreviewMode, e.target.value) })}
-                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Kích thước Subtitle</label>
-                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || 10}px</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="8"
-                    max="60"
-                    step="1"
-                    value={getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || "10"}
-                    onChange={(e) => setData({ ...data, subtitleFontSize: setResponsiveValue(data.subtitleFontSize, globalPreviewMode, e.target.value) })}
-                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
-                  />
-                </div>
-              </div>
+              {/* Font sizes are now controlled inside RichTextEditor */}
 
               {/* Sliders for Max Width & Padding */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
@@ -364,13 +344,11 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Subtitle <span className="text-xs opacity-60">({DEVICE_LABELS[globalPreviewMode]})</span></label>
-                <textarea
-                  value={getResponsiveValue(data.subtitle, globalPreviewMode)}
-                  onChange={(e) => setData({ ...data, subtitle: setResponsiveValue(data.subtitle, globalPreviewMode, e.target.value) })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none h-24"
-                  placeholder={`Subtitle cho ${DEVICE_LABELS[globalPreviewMode]}...`}
+              <div className="space-y-4">
+                <RichTextEditor
+                  label="Subtitle"
+                  value={data.subtitle}
+                  onChange={(val) => setData({ ...data, subtitle: val })}
                 />
               </div>
             </div>
@@ -378,40 +356,56 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
           {sectionId === 'about' && (
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Heading</label>
-                <input
-                  type="text"
+              <div className="space-y-6">
+                <RichTextEditor
+                  label="Heading"
                   value={data.heading}
-                  onChange={(e) => setData({ ...data, heading: e.target.value })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                  onChange={(val) => setData({ ...data, heading: val })}
                 />
-              </div>
-              <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Subheading</label>
-                <input
-                  type="text"
+                
+                <RichTextEditor
+                  label="Subheading"
                   value={data.subheading}
-                  onChange={(e) => setData({ ...data, subheading: e.target.value })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                  onChange={(val) => setData({ ...data, subheading: val })}
                 />
-              </div>
-              <div>
-                <label className="block text-sm text-zinc-500 mb-2 font-medium">Paragraphs</label>
-                <div className="space-y-3">
-                  {data.paragraphs?.map((p: string, i: number) => (
-                    <textarea
-                      key={i}
-                      value={p}
-                      onChange={(e) => {
-                        const updated = [...data.paragraphs];
-                        updated[i] = e.target.value;
-                        setData({ ...data, paragraphs: updated });
-                      }}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none"
-                      rows={3}
-                    />
-                  ))}
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Paragraphs</label>
+                    <button 
+                      onClick={() => setData({ ...data, paragraphs: [...data.paragraphs, { content: '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } }] })}
+                      className="p-1 hover:bg-zinc-800 rounded-lg text-emerald-500 transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-4">
+                    {data.paragraphs?.map((p: any, i: number) => (
+                      <div key={i} className="relative group">
+                         <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => {
+                                const updated = [...data.paragraphs];
+                                updated.splice(i, 1);
+                                setData({ ...data, paragraphs: updated });
+                              }}
+                              className="p-2 hover:bg-red-500/10 text-red-500 rounded-full"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                         </div>
+                         <RichTextEditor
+                            label={`Paragraph ${i + 1}`}
+                            value={p}
+                            onChange={(val) => {
+                              const updated = [...data.paragraphs];
+                              updated[i] = val;
+                              setData({ ...data, paragraphs: updated });
+                            }}
+                          />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -459,24 +453,18 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
           {sectionId === 'contact' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="col-span-1 md:col-span-2 space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Tiêu đề chính (Heading)</label>
-                <div className="bg-zinc-950/50 rounded-2xl border border-zinc-800 p-1">
-                  <RichTextEditor
-                    content={data.heading || ''}
-                    onChange={(val) => setData({ ...data, heading: val })}
-                  />
-                </div>
-              </div>
-
-              <div className="col-span-1 md:col-span-2 space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Tiêu đề phụ (Subtitle)</label>
-                <div className="bg-zinc-950/50 rounded-2xl border border-zinc-800 p-1">
-                  <RichTextEditor
-                    content={data.subtitle || ''}
-                    onChange={(val) => setData({ ...data, subtitle: val })}
-                  />
-                </div>
+              <div className="col-span-1 md:col-span-2 space-y-8">
+                <RichTextEditor
+                  label="Heading"
+                  value={data.heading}
+                  onChange={(val) => setData({ ...data, heading: val })}
+                />
+                
+                <RichTextEditor
+                  label="Subtitle"
+                  value={data.subtitle}
+                  onChange={(val) => setData({ ...data, subtitle: val })}
+                />
               </div>
 
               <div className="space-y-3">
@@ -734,25 +722,17 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               {data.type === 'text' && (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Tiêu đề</label>
-                    <input
-                      type="text"
-                      value={data.data?.title || ''}
-                      onChange={(e) => handleBlockDataChange({ title: e.target.value })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Nội dung</label>
-                    <textarea
-                      value={data.data?.content || ''}
-                      onChange={(e) => handleBlockDataChange({ content: e.target.value })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500 resize-none"
-                      rows={5}
-                    />
-                  </div>
+                <div className="space-y-6">
+                  <RichTextEditor
+                    label="Tiêu đề"
+                    value={data.data?.title}
+                    onChange={(val) => handleBlockDataChange({ title: val })}
+                  />
+                  <RichTextEditor
+                    label="Nội dung"
+                    value={data.data?.content}
+                    onChange={(val) => handleBlockDataChange({ content: val })}
+                  />
                 </div>
               )}
 
