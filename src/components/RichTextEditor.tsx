@@ -111,9 +111,10 @@ type RichTextEditorProps = {
   onChange: (value: RichTextData) => void;
   placeholder?: string;
   enterAsBreak?: boolean;
+  hideLineHeight?: boolean;
 };
 
-export function RichTextEditor({ label, value, onChange, placeholder, enterAsBreak = false }: RichTextEditorProps) {
+export function RichTextEditor({ label, value, onChange, placeholder, enterAsBreak = false, hideLineHeight = false }: RichTextEditorProps) {
   const { globalPreviewMode } = useAdmin();
   const [localFontSize, setLocalFontSize] = useState<ResponsiveFontSize>({
     mobile: 16,
@@ -302,25 +303,29 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             </div>
           </div>
 
-          <div className="w-px h-4 bg-zinc-800 mx-1" />
+          {!hideLineHeight && (
+            <>
+              <div className="w-px h-4 bg-zinc-800 mx-1" />
 
-          {/* Line Height Selector */}
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950 rounded border border-zinc-800">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase">LH</span>
-            <select 
-              value={currentLineHeight}
-              onChange={(e) => updateLineHeight(e.target.value)}
-              className="bg-transparent text-[10px] font-bold text-blue-400 focus:outline-none cursor-pointer"
-            >
-              <option value="1">1.0</option>
-              <option value="1.2">1.2</option>
-              <option value="1.4">1.4</option>
-              <option value="1.5">1.5</option>
-              <option value="1.6">1.6</option>
-              <option value="1.8">1.8</option>
-              <option value="2">2.0</option>
-            </select>
-          </div>
+              {/* Line Height Selector */}
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950 rounded border border-zinc-800">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase">LH</span>
+                <select 
+                  value={currentLineHeight}
+                  onChange={(e) => updateLineHeight(e.target.value)}
+                  className="bg-transparent text-[10px] font-bold text-blue-400 focus:outline-none cursor-pointer"
+                >
+                  <option value="1">1.0</option>
+                  <option value="1.2">1.2</option>
+                  <option value="1.4">1.4</option>
+                  <option value="1.5">1.5</option>
+                  <option value="1.6">1.6</option>
+                  <option value="1.8">1.8</option>
+                  <option value="2">2.0</option>
+                </select>
+              </div>
+            </>
+          )}
           <span className="ml-2 text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase font-bold">{globalPreviewMode}</span>
         </div>
       </div>

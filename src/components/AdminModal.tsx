@@ -442,7 +442,26 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   value={data.subtitle}
                   onChange={(val) => setData({ ...data, subtitle: val })}
                   enterAsBreak={true}
+                  hideLineHeight={true}
                 />
+              </div>
+
+              {/* Slider for Padding Top Text Scroll */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top Text Scroll (px)</label>
+                  <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.paddingTopTextScroll, globalPreviewMode) || 0}px</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="200"
+                  step="1"
+                  value={getResponsiveValue(data.paddingTopTextScroll, globalPreviewMode) || "0"}
+                  onChange={(e) => setData({ ...data, paddingTopTextScroll: setResponsiveValue(data.paddingTopTextScroll, globalPreviewMode, e.target.value) })}
+                  className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                />
+                <p className="text-[10px] text-zinc-500 italic">Điều chỉnh khoảng cách phía trên cụm chữ Scroll Down.</p>
               </div>
             </div>
           )}

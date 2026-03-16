@@ -39,6 +39,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>("48");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
+  const [paddingTopTextScroll, setPaddingTopTextScroll] = useState<ResponsiveValue>("0");
   const [isVisible, setIsVisible] = useState(true);
   const [logoType, setLogoType] = useState<'text' | 'image'>('text');
   const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
@@ -69,6 +70,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+        if (d.paddingTopTextScroll !== undefined) setPaddingTopTextScroll(d.paddingTopTextScroll);
         if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
       }
     } catch (error) {
@@ -86,6 +88,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     if (d.isVisible !== undefined) setIsVisible(d.isVisible);
     if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
     if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+    if (d.paddingTopTextScroll !== undefined) setPaddingTopTextScroll(d.paddingTopTextScroll);
     if (d.title !== undefined) setTitleData(normalize(d.title));
     if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
     if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
@@ -137,6 +140,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     title: titleData,
     subtitle: subtitleData,
     scrollOffset: scrollOffset,
+    paddingTopTextScroll: paddingTopTextScroll,
     logoType,
     logoText,
     logoColor,
@@ -198,6 +202,7 @@ const formatFs = (val: string, fallback: string) => {
           className="flex flex-col items-center gap-2 text-zinc-500"
           style={{
             marginTop: `${getResponsiveValue(scrollOffset, globalPreviewMode) || 48}px`,
+            paddingTop: `${getResponsiveValue(paddingTopTextScroll, globalPreviewMode) || 0}px`,
             "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
             "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
             "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,

@@ -180,7 +180,7 @@ export function Header() {
             </span>
           ) : (
             <img
-              src={getResponsiveValue(logoConfig.url, globalPreviewMode ?? 'desktop')}
+              src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
               alt="Logo"
               className={cn(
                 "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
