@@ -200,9 +200,9 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Logo Text</label>
                       <input
                         type="text"
-                        value={data.logoText || ''}
+                        value={getResponsiveValue(data.logoText, globalPreviewMode) || ''}
                         placeholder="VD: CHUONG.GRAPHIC"
-                        onChange={(e) => setData({ ...data, logoText: e.target.value })}
+                        onChange={(e) => setData({ ...data, logoText: setResponsiveValue(data.logoText, globalPreviewMode, e.target.value) })}
                         className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
                       />
                     </div>

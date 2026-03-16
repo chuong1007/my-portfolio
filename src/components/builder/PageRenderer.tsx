@@ -164,8 +164,12 @@ function ProjectRenderer({ projectId }: { projectId?: string }) {
         <img src={project?.image_url} alt={project?.title} className="w-full aspect-video object-cover" />
       )}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-zinc-50 mb-2">{project?.title}</h3>
-        <p className="text-zinc-400 text-sm line-clamp-2">{project?.description}</p>
+        <h3 className="text-xl font-bold text-zinc-50 mb-2">
+          {typeof project?.title === 'string' ? project?.title : String(project?.title || '')}
+        </h3>
+        <p className="text-zinc-400 text-sm line-clamp-2">
+          {typeof project?.description === 'string' ? project?.description : String(project?.description || '')}
+        </p>
       </div>
     </motion.div>
   );

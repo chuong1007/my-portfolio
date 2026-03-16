@@ -56,10 +56,16 @@ export function About({ sectionId = "about" }: AboutProps) {
           paddingTop?: ResponsiveValue;
           paddingBottom?: ResponsiveValue;
         };
-        if (d.heading && typeof d.heading === 'string' && d.heading.trim()) setHeading(d.heading);
-        if (d.subheading && typeof d.subheading === 'string' && d.subheading.trim()) setSubheading(d.subheading);
-        if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0 && typeof d.paragraphs[0] === 'string' && d.paragraphs[0].trim()) {
-          setParagraphs(d.paragraphs);
+        if (d.heading) {
+          if (typeof d.heading === 'string' && d.heading.trim()) setHeading(d.heading);
+          else if (typeof d.heading === 'object') setHeading(getResponsiveValue(d.heading, 'desktop'));
+        }
+        if (d.subheading) {
+          if (typeof d.subheading === 'string' && d.subheading.trim()) setSubheading(d.subheading);
+          else if (typeof d.subheading === 'object') setSubheading(getResponsiveValue(d.subheading, 'desktop'));
+        }
+        if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0) {
+          setParagraphs(d.paragraphs.map((p: any) => typeof p === 'string' ? p : JSON.stringify(p)));
         }
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
@@ -79,9 +85,9 @@ export function About({ sectionId = "about" }: AboutProps) {
   useEffect(() => {
     const applyUpdate = (d: any) => {
       (window as any)._aboutRealtimeActive = true;
-      if (d.heading !== undefined) setHeading(d.heading);
-      if (d.subheading !== undefined) setSubheading(d.subheading);
-      if (d.paragraphs !== undefined) setParagraphs(d.paragraphs);
+      if (d.heading !== undefined) setHeading(typeof d.heading === 'object' ? getResponsiveValue(d.heading, globalPreviewMode ?? 'desktop') : d.heading);
+      if (d.subheading !== undefined) setSubheading(typeof d.subheading === 'object' ? getResponsiveValue(d.subheading, globalPreviewMode ?? 'desktop') : d.subheading);
+      if (d.paragraphs !== undefined) setParagraphs(Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => typeof p === 'string' ? p : JSON.stringify(p)) : d.paragraphs);
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);

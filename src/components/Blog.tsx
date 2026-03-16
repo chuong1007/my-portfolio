@@ -436,9 +436,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
               className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                {seeAllLabel}
-              </span>
+                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
+                  {typeof seeAllLabel === 'string' ? seeAllLabel : String(seeAllLabel)}
+                </span>
               <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg]">
                 <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
               </div>

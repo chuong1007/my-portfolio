@@ -122,11 +122,11 @@ export function BlogDetail({ slug }: { slug: string }) {
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-zinc-50 tracking-tight leading-tight mb-6">
-            {blog?.title}
+            {typeof blog?.title === 'string' ? blog?.title : String(blog?.title || '')}
           </h1>
 
           <p className="text-xl text-zinc-400 leading-relaxed">
-            {blog?.excerpt}
+            {typeof blog?.excerpt === 'string' ? blog?.excerpt : String(blog?.excerpt || '')}
           </p>
         </header>
 
@@ -161,7 +161,7 @@ export function BlogDetail({ slug }: { slug: string }) {
         {blog?.custom_html && (
           <div 
             className="mt-12 custom-html-section"
-            dangerouslySetInnerHTML={{ __html: blog.custom_html }}
+            dangerouslySetInnerHTML={{ __html: typeof blog.custom_html === 'string' ? blog.custom_html : String(blog.custom_html || '') }}
           />
         )}
 
@@ -210,7 +210,7 @@ export function BlogDetail({ slug }: { slug: string }) {
                     <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : '---'}</span>
                   </div>
                   <h4 className="text-lg font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
-                    {post?.title}
+                    {typeof post?.title === 'string' ? post?.title : String(post?.title || '')}
                   </h4>
                 </Link>
               ))}

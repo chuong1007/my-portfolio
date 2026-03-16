@@ -319,8 +319,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                    {seeAllLabel}
-                  </span>
+                  {typeof seeAllLabel === 'string' ? seeAllLabel : String(seeAllLabel)}
+                </span>
                   <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg]">
                     <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
                   </div>

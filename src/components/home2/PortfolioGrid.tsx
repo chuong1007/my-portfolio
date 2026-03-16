@@ -77,7 +77,7 @@ export function PortfolioGrid() {
               <div className="flex justify-between items-start px-2">
                 <div>
                   <h3 className="text-2xl font-bold text-zinc-50 group-hover:text-zinc-400 transition-colors uppercase tracking-tight">
-                    {project.title}
+                    {typeof project.title === 'string' ? project.title : String(project.title)}
                   </h3>
                   <p className="text-zinc-500 font-medium tracking-wide mt-1 uppercase text-xs">
                     {project.category}

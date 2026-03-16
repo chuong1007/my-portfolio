@@ -63,7 +63,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         {/* Project Info */}
         <div className="flex flex-col gap-6">
           <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
-            {project.title}
+            {typeof project.title === 'string' ? project.title : String(project.title)}
           </h1>
 
           {/* Tags */}
@@ -85,7 +85,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             transition={{ delay: 0.3, duration: 0.6 }}
             className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl"
           >
-            {project.description}
+            {typeof project.description === 'string' ? project.description : String(project.description)}
           </motion.p>
         </div>
       </motion.section>

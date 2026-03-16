@@ -43,9 +43,9 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.logoType) setLogoType(d.logoType);
-        if (d.logoText) setLogoText(d.logoText);
-        if (d.logoColor) setLogoColor(d.logoColor);
-        if (d.logoImageUrl) setLogoImageUrl(d.logoImageUrl);
+        if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
+        if (d.logoColor) setLogoColor(typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : d.logoColor);
+        if (d.logoImageUrl) setLogoImageUrl(typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : d.logoImageUrl);
       }
     } catch (error) {
       console.error("Error fetching hero content:", error);
@@ -69,9 +69,9 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.logoType) setLogoType(d.logoType);
-      if (d.logoText) setLogoText(d.logoText);
-      if (d.logoColor) setLogoColor(d.logoColor);
-      if (d.logoImageUrl) setLogoImageUrl(d.logoImageUrl);
+      if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
+      if (d.logoColor) setLogoColor(typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : d.logoColor);
+      if (d.logoImageUrl) setLogoImageUrl(typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : d.logoImageUrl);
     };
 
     const handlePreviewUpdate = (e: Event) => {

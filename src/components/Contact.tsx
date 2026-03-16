@@ -37,15 +37,24 @@ export function Contact() {
 
     if (data?.data) {
       const d = data.data as Record<string, any>;
-      setHeading(d.heading || "Let's Connect");
-      setSubtitle(d.subtitle || "Anh/ chị có dự án cần thực hiện:");
-      setPhone(d.phone || "038 429 7019");
-      setEmail(d.email || "chuong.thanh1007@gmail.com");
-      setFacebook(d.facebook || "");
-      setFacebookLabel(d.facebookLabel || "Visit Profile");
+      // Guard against responsive objects {mobile, tablet, desktop}
+      const safeStr = (val: any, fallback: string) => {
+        if (val === null || val === undefined) return fallback;
+        if (typeof val === 'string') return val;
+        if (typeof val === 'object') {
+          return val.desktop || val.tablet || val.mobile || fallback;
+        }
+        return String(val);
+      };
+      setHeading(safeStr(d.heading, "Let's Connect"));
+      setSubtitle(safeStr(d.subtitle, "Anh/ chị có dự án cần thực hiện:"));
+      setPhone(safeStr(d.phone, "038 429 7019"));
+      setEmail(safeStr(d.email, "chuong.thanh1007@gmail.com"));
+      setFacebook(safeStr(d.facebook, ""));
+      setFacebookLabel(safeStr(d.facebookLabel, "Visit Profile"));
       setShowFacebook(d.showFacebook !== false);
-      setZalo(d.zalo || "");
-      setZaloLabel(d.zaloLabel || "Chat on Zalo");
+      setZalo(safeStr(d.zalo, ""));
+      setZaloLabel(safeStr(d.zaloLabel, "Chat on Zalo"));
       setShowZalo(d.showZalo !== false);
       setShowPhone(d.showPhone !== false);
       setShowEmail(d.showEmail !== false);

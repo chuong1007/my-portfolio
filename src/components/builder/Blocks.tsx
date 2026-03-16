@@ -4,22 +4,25 @@ import { motion } from "framer-motion";
 import { Gallery } from "../Gallery";
 import { Blog } from "../Blog";
 import { cn } from "@/lib/utils";
+import { getResponsiveValue } from "@/lib/responsive-helpers";
+import { useAdmin } from "@/context/AdminContext";
 
 type BlockProps = {
   data: any;
 };
 
 export function TextBlock({ data }: BlockProps) {
+  const { globalPreviewMode } = useAdmin();
   return (
     <div className="space-y-4 py-4">
       {data.title && (
         <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-zinc-50">
-          {data.title}
+          {getResponsiveValue(data.title, globalPreviewMode)}
         </h2>
       )}
       {data.content && (
         <div className="text-lg md:text-2xl text-zinc-400 font-light leading-relaxed whitespace-pre-wrap">
-          {data.content}
+          {getResponsiveValue(data.content, globalPreviewMode)}
         </div>
       )}
     </div>
@@ -49,18 +52,20 @@ export function ImageBlock({ data }: BlockProps) {
 }
 
 export function ProjectBlock({ data }: BlockProps) {
+  const { globalPreviewMode } = useAdmin();
   return (
     <div className="py-4">
-      {data.title && <h3 className="text-xl font-bold text-zinc-500 mb-8 uppercase tracking-widest">{data.title}</h3>}
+      {data.title && <h3 className="text-xl font-bold text-zinc-500 mb-8 uppercase tracking-widest">{getResponsiveValue(data.title, globalPreviewMode)}</h3>}
       <Gallery sectionId={data.customId || "gallery-block"} />
     </div>
   );
 }
 
 export function BlogBlock({ data }: BlockProps) {
+  const { globalPreviewMode } = useAdmin();
   return (
     <div className="py-4">
-      {data.title && <h3 className="text-xl font-bold text-zinc-500 mb-8 uppercase tracking-widest">{data.title}</h3>}
+      {data.title && <h3 className="text-xl font-bold text-zinc-500 mb-8 uppercase tracking-widest">{getResponsiveValue(data.title, globalPreviewMode)}</h3>}
       <Blog variant="homepage" sectionId={data.customId || "blog-block"} />
     </div>
   );

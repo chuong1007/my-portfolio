@@ -12,6 +12,7 @@ import { createClient } from "@/lib/supabase";
 
 
 import { useAdmin } from "@/context/AdminContext";
+import { getResponsiveValue } from "@/lib/responsive-helpers";
 import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout, Monitor, Tablet, Smartphone, Menu, X } from "lucide-react";
 
 const STATIC_NAV_ITEMS = [
@@ -55,7 +56,7 @@ export function Header() {
   useEffect(() => {
     const fetchConfig = async () => {
       const supabase = createClient();
-      
+
       // Fetch Logo and Site Config
       const { data: contentData } = await supabase.from('site_content').select('id, data');
       if (contentData) {
@@ -65,9 +66,9 @@ export function Header() {
           const hd = heroRow.data as any;
           setLogoConfig({
             type: hd?.logoType || 'text',
-            text: hd?.logoText || 'CHUONG.GRAPHIC',
-            url: hd?.logoImageUrl || '',
-            color: hd?.logoColor || '#FFFFFF'
+            text: typeof hd?.logoText === 'object' ? getResponsiveValue(hd.logoText, 'desktop') : (hd?.logoText || 'CHUONG.GRAPHIC'),
+            url: typeof hd?.logoImageUrl === 'object' ? getResponsiveValue(hd.logoImageUrl, 'desktop') : (hd?.logoImageUrl || ''),
+            color: typeof hd?.logoColor === 'object' ? getResponsiveValue(hd.logoColor, 'desktop') : (hd?.logoColor || '#FFFFFF')
           });
         }
       }
@@ -97,7 +98,7 @@ export function Header() {
     fetchConfig();
 
     window.addEventListener('contentUpdated', fetchConfig);
-    
+
     // Real-time Preview Listener
     const handlePreviewUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -106,9 +107,9 @@ export function Header() {
         if (d.logoType !== undefined || d.logoText !== undefined || d.logoColor !== undefined || d.logoImageUrl !== undefined) {
           setLogoConfig({
             type: d.logoType || 'text',
-            text: d.logoText || 'CHUONG.GRAPHIC',
-            url: d.logoImageUrl || '',
-            color: d.logoColor || '#FFFFFF'
+            text: typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : (d.logoText || 'CHUONG.GRAPHIC'),
+            url: typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : (d.logoImageUrl || ''),
+            color: typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : (d.logoColor || '#FFFFFF')
           });
         }
       }
@@ -119,9 +120,9 @@ export function Header() {
         const d = event.data.data;
         setLogoConfig({
           type: d.logoType || 'text',
-          text: d.logoText || 'CHUONG.GRAPHIC',
-          url: d.logoImageUrl || '',
-          color: d.logoColor || '#FFFFFF'
+          text: typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : (d.logoText || 'CHUONG.GRAPHIC'),
+          url: typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : (d.logoImageUrl || ''),
+          color: typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : (d.logoColor || '#FFFFFF')
         });
       }
     };
@@ -167,16 +168,16 @@ export function Header() {
       >
         <Link href="/" className="flex items-center group">
           {logoConfig.type === 'text' ? (
-            <span 
+            <span
               className="text-xl md:text-2xl font-bold tracking-wider"
               style={{ color: logoConfig.color || '#FFFFFF', fontFamily: 'monospace' }}
             >
               {logoConfig.text}
             </span>
           ) : (
-            <img 
-              src={logoConfig.url} 
-              alt="Logo" 
+            <img
+              src={logoConfig.url}
+              alt="Logo"
               className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
                 // Fallback to text if image fails
@@ -202,8 +203,8 @@ export function Header() {
                 onClick={toggleEditMode}
                 className={cn(
                   "flex items-center justify-center gap-2 w-[110px] py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border active:scale-95",
-                  isEditMode 
-                    ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20 hover:bg-blue-500" 
+                  isEditMode
+                    ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20 hover:bg-blue-500"
                     : "bg-transparent text-green-400 border-green-400/50 shadow-[0_0_15px_rgba(74,222,128,0.2)] hover:border-green-400 hover:text-green-300 hover:shadow-[0_0_20px_rgba(74,222,128,0.4)]"
                 )}
                 title={isEditMode ? "Đang ở chế độ chỉnh sửa" : "Đang ở chế độ xem"}
@@ -244,8 +245,8 @@ export function Header() {
                   onClick={() => setAdminMenuOpen(!adminMenuOpen)}
                   className={cn(
                     "flex items-center justify-center w-9 h-9 rounded-full transition-all border active:scale-95",
-                    adminMenuOpen 
-                      ? "bg-zinc-800 border-zinc-700 text-white" 
+                    adminMenuOpen
+                      ? "bg-zinc-800 border-zinc-700 text-white"
                       : "bg-transparent border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 shadow-lg"
                   )}
                   title="Quản lý"
@@ -285,13 +286,13 @@ export function Header() {
             )}
 
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
-              .filter((item, index, self) => 
+              .filter((item, index, self) =>
                 index === self.findIndex((t) => t.href === item.href)
               )
               .map((item) => {
-                const isActive = pathname === item.href || 
-                                 pathname.startsWith(item.href + '/') || 
-                                 (item.href === '/projects' && pathname.startsWith('/project/'));
+                const isActive = pathname === item.href ||
+                  pathname.startsWith(item.href + '/') ||
+                  (item.href === '/projects' && pathname.startsWith('/project/'));
                 return (
                   <Link
                     key={item.label}
@@ -305,7 +306,7 @@ export function Header() {
                   </Link>
                 );
               })}
-              
+
             {/* Desktop Auth Buttons */}
             {isAdmin && isEditMode ? (
               <button
@@ -352,13 +353,13 @@ export function Header() {
 
           <nav className="flex flex-col items-center gap-8 w-full mt-12 overflow-y-auto">
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
-              .filter((item, index, self) => 
+              .filter((item, index, self) =>
                 index === self.findIndex((t) => t.href === item.href)
               )
               .map((item) => {
-                const isActive = pathname === item.href || 
-                                 pathname.startsWith(item.href + '/') || 
-                                 (item.href === '/projects' && pathname.startsWith('/project/'));
+                const isActive = pathname === item.href ||
+                  pathname.startsWith(item.href + '/') ||
+                  (item.href === '/projects' && pathname.startsWith('/project/'));
                 return (
                   <Link
                     key={item.label}
@@ -380,8 +381,8 @@ export function Header() {
                   onClick={() => toggleEditMode()}
                   className={cn(
                     "flex items-center justify-center gap-3 px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all border",
-                    isEditMode 
-                      ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20" 
+                    isEditMode
+                      ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20"
                       : "bg-transparent text-green-400 border-green-400/50"
                   )}
                 >
