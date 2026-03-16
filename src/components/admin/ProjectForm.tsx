@@ -67,15 +67,13 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const handleSave = async () => {
     if (!title.trim()) return;
     setSaving(true);
-
-    const supabase = createClient();
-
     try {
+      const supabase = createClient();
       let projectId = project?.id;
 
       if (isEditing && projectId) {
         // Update existing project
-        await supabase
+        const { error } = await supabase
           .from("projects")
           .update({
             title,
@@ -83,8 +81,11 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             tags,
             cover_image: coverImage,
             is_visible: isVisible,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", projectId);
+        
+        if (error) throw error;
 
         // Delete removed images from DB
         const existingIds = existingImages.map((img) => img.id);
@@ -92,11 +93,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
         const deletedIds = originalIds.filter((id) => !existingIds.includes(id));
 
         if (deletedIds.length > 0) {
-          await supabase.from("project_images").delete().in("id", deletedIds);
+          const { error: delError } = await supabase.from("project_images").delete().in("id", deletedIds);
+          if (delError) throw delError;
         }
       } else {
         // Insert new project
-        const { data: newProject } = await supabase
+        const { data: newProject, error } = await supabase
           .from("projects")
           .insert({
             title,
@@ -104,10 +106,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             tags,
             cover_image: coverImage,
             is_visible: isVisible,
+            created_at: new Date().toISOString(),
           })
           .select()
           .single();
 
+        if (error) throw error;
         projectId = newProject?.id;
       }
 
@@ -133,22 +137,25 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 display_order: startOrder + i,
               };
             }
+            console.error("Gallery upload error:", error);
             return null;
           })
         );
 
-        const validInserts = imageInserts.filter(Boolean);
+        const validInserts = imageInserts.filter((item): item is any => item !== null);
         if (validInserts.length > 0) {
-          await supabase.from("project_images").insert(validInserts);
+          const { error: insError } = await supabase.from("project_images").insert(validInserts);
+          if (insError) throw insError;
         }
       }
 
       onClose();
     } catch (err) {
-      console.error("Error saving project:", err);
+      console.error("Critical error saving project:", err);
+      alert(`Lỗi khi lưu dự án: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
   };
 
   return (

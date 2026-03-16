@@ -96,64 +96,53 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const handleSave = async () => {
     if (!title.trim() || !coverImage) return;
     setSaving(true);
-
-    const supabase = createClient();
-
     try {
+      const supabase = createClient();
+      
       if (featured) {
-        // If this post is featured, un-feature all other posts first
-        await supabase.from("blogs").update({ featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000"); // A dummy UUID just to ensure it's not null when creating
+        await supabase.from("blogs").update({ featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000");
       }
 
       const finalSlug = slug || generateSlug(title);
+      const blogData = {
+        title,
+        slug: finalSlug,
+        excerpt,
+        content,
+        tags,
+        image_url: coverImage,
+        featured,
+        is_published: isPublished,
+        custom_css: customCss,
+        custom_html: customHtml,
+        updated_at: new Date().toISOString(),
+      };
 
       if (isEditing && blog?.id) {
-        // Update existing blog
-        await supabase
+        const { error } = await supabase
           .from("blogs")
-          .update({
-            title,
-            slug: finalSlug,
-            excerpt,
-            content,
-            tags,
-            image_url: coverImage,
-            featured,
-            is_published: isPublished,
-            custom_css: customCss,
-            custom_html: customHtml,
-          })
+          .update(blogData)
           .eq("id", blog.id);
+        if (error) throw error;
       } else {
-        // Insert new blog
-        await supabase
+        const { error } = await supabase
           .from("blogs")
-          .insert({
-            title,
-            slug: finalSlug,
-            excerpt,
-            content,
-            tags,
-            image_url: coverImage,
-            featured,
-            is_published: isPublished,
-            custom_css: customCss,
-            custom_html: customHtml,
-          });
+          .insert({ ...blogData, created_at: new Date().toISOString() });
+        if (error) throw error;
       }
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
 
-      // Only close if it was a NEW post, otherwise stay to continue editing
       if (!isEditing) {
         onClose();
       }
     } catch (err) {
-      console.error("Error saving blog:", err);
+      console.error("Critical error saving blog:", err);
+      alert(`Lỗi khi lưu blog: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setSaving(false);
     }
-
-    setSaving(false);
   };
 
   return (

@@ -26,6 +26,7 @@ import { RichTextEditor, type RichTextData } from "./RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 import { useAdmin } from "@/context/AdminContext";
+import { motion, AnimatePresence } from "framer-motion";
 import { getResponsiveValue, setResponsiveValue, type DeviceMode, type ResponsiveValue } from "@/lib/responsive-helpers";
 
 type AdminModalProps = {
@@ -66,7 +67,7 @@ const normalize = (val: any): RichTextData => {
 };
 
 export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: AdminModalProps) {
-  const { globalPreviewMode } = useAdmin();
+  const { globalPreviewMode, setGlobalPreviewMode } = useAdmin();
   const [data, setData] = useState<Record<string, any>>(initialData);
   const DeviceIcon = DEVICE_ICONS[globalPreviewMode];
   const [loading, setLoading] = useState(false);
@@ -190,6 +191,11 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
         finalData.facebook = `https://${finalData.facebook}`;
       }
 
+      // Safe check for Zalo if it's a string
+      if (finalData.zalo && typeof finalData.zalo === 'string' && !finalData.zalo.startsWith('http') && /^\d+$/.test(finalData.zalo.replace(/\s/g, ''))) {
+        finalData.zalo = `https://zalo.me/${finalData.zalo.replace(/\s/g, '')}`;
+      }
+
       console.log("Saving payload for section:", sectionId, finalData);
 
       const { error: saveError } = await supabase
@@ -228,14 +234,35 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold text-white capitalize">Edit {sectionId} Section</h2>
             {/* Device Indicator */}
-            <div className={cn(
-              "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border",
-              globalPreviewMode === 'desktop' ? "bg-blue-500/10 text-blue-400 border-blue-500/20" :
-              globalPreviewMode === 'tablet' ? "bg-purple-500/10 text-purple-400 border-purple-500/20" :
-              "bg-orange-500/10 text-orange-400 border-orange-500/20"
-            )}>
-              <DeviceIcon className="w-3.5 h-3.5" />
-              {DEVICE_LABELS[globalPreviewMode]}
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-full p-1 shadow-inner translate-x-3">
+              {(['desktop', 'tablet', 'mobile'] as const).map((mode) => {
+                const Icon = DEVICE_ICONS[mode];
+                const isActive = globalPreviewMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    onClick={() => setGlobalPreviewMode(mode)}
+                    className={cn(
+                      "p-1.5 rounded-full transition-all duration-300 relative group",
+                      isActive 
+                        ? (mode === 'desktop' ? "bg-blue-500/10 text-blue-400" : mode === 'tablet' ? "bg-purple-500/10 text-purple-400" : "bg-orange-500/10 text-orange-400")
+                        : "text-zinc-600 hover:text-zinc-400"
+                    )}
+                    title={`Switch to ${DEVICE_LABELS[mode]}`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    {isActive && (
+                      <motion.div 
+                        layoutId="active-device"
+                        className={cn(
+                          "absolute inset-0 rounded-full border-2",
+                          mode === 'desktop' ? "border-blue-500/20" : mode === 'tablet' ? "border-purple-500/20" : "border-orange-500/20"
+                        )}
+                      />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
           <button onClick={() => {
@@ -782,7 +809,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   max="4"
                   step="1"
                   value={getResponsiveValue(data.columns, globalPreviewMode) || "3"}
-                  onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, e.target.value) })}
+                  onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, parseInt(e.target.value)) })}
                   className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                 />
                 <p className="text-[9px] text-zinc-500 italic">Số lượng cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>

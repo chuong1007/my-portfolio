@@ -95,22 +95,34 @@ export default function AdminPage() {
     // Fetch Site Content
     const { data: siteData } = await supabase.from('site_content').select('*');
     if (siteData) {
+      const getRawText = (val: any): string => {
+        if (typeof val === 'object' && val !== null) {
+          if ('content' in val) {
+            if (typeof val.content === 'object' && val.content !== null) {
+              return val.content.desktop || val.content.mobile || '';
+            }
+            return (val.content as string) || '';
+          }
+        }
+        return typeof val === 'string' ? val : '';
+      };
+
       for (const row of siteData) {
         const d = row.data as Record<string, unknown>;
         if (row.id === 'hero') setHeroData({ 
-          title: (d.title as string) || '', 
-          subtitle: (d.subtitle as string) || '',
+          title: getRawText(d.title), 
+          subtitle: getRawText(d.subtitle),
           isVisible: d.isVisible !== false 
         });
         if (row.id === 'about') setAboutData({ 
-          heading: (d.heading as string) || '', 
-          subheading: (d.subheading as string) || '', 
-          paragraphs: (d.paragraphs as string[]) || [''],
+          heading: getRawText(d.heading), 
+          subheading: getRawText(d.subheading), 
+          paragraphs: Array.isArray(d.paragraphs) ? d.paragraphs.map(p => getRawText(p)) : [''],
           isVisible: d.isVisible !== false
         });
         if (row.id === 'contact') setContactData({ 
-          heading: (d.heading as string) || '', 
-          subtitle: (d.subtitle as string) || '',
+          heading: getRawText(d.heading), 
+          subtitle: getRawText(d.subtitle),
           phone: (d.phone as string) || '', 
           email: (d.email as string) || '',
           isVisible: d.isVisible !== false,
@@ -165,22 +177,79 @@ export default function AdminPage() {
   const handleSaveSiteContent = async (section: 'hero' | 'about' | 'contact' | 'gallery' | 'blog') => {
     setSavingContent(true);
     setSaveSuccess('');
-    const supabase = createClient();
-    let payload: Record<string, unknown> = {};
-    if (section === 'hero') payload = heroData;
-    if (section === 'about') payload = aboutData;
-    if (section === 'contact') payload = contactData;
-    if (section === 'gallery') payload = { isVisible: galleryVisible };
-    if (section === 'blog') payload = { isVisible: blogVisible };
+    try {
+      const supabase = createClient();
+      
+      // Fetch current data to merge
+      const { data: currentDbRow } = await supabase
+        .from('site_content')
+        .select('data')
+        .eq('id', section)
+        .single();
+      
+      const currentData = (currentDbRow?.data as Record<string, any>) || {};
 
-    const { error } = await supabase
-      .from('site_content')
-      .upsert({ id: section, data: payload, updated_at: new Date().toISOString() });
+      const mergeContent = (oldVal: any, newText: string) => {
+        if (typeof oldVal === 'object' && oldVal !== null && 'content' in oldVal) {
+          const newContent = typeof oldVal.content === 'object' && oldVal.content !== null
+            ? { ...oldVal.content, desktop: newText, mobile: newText, tablet: newText }
+            : newText;
+          return { ...oldVal, content: newContent };
+        }
+        return newText;
+      };
 
-    setSavingContent(false);
-    if (!error) {
+      let payload: Record<string, unknown> = {};
+      
+      if (section === 'hero') {
+        payload = {
+          ...currentData,
+          isVisible: heroData.isVisible,
+          title: mergeContent(currentData.title, heroData.title),
+          subtitle: mergeContent(currentData.subtitle, heroData.subtitle)
+        };
+      }
+      
+      if (section === 'about') {
+        payload = {
+          ...currentData,
+          isVisible: aboutData.isVisible,
+          heading: mergeContent(currentData.heading, aboutData.heading),
+          subheading: mergeContent(currentData.subheading, aboutData.subheading),
+          paragraphs: aboutData.paragraphs.map((p, i) => 
+            mergeContent(Array.isArray(currentData.paragraphs) ? currentData.paragraphs[i] : null, p)
+          )
+        };
+      }
+      
+      if (section === 'contact') {
+        payload = {
+          ...currentData,
+          isVisible: contactData.isVisible,
+          showFacebook: contactData.showFacebook,
+          showZalo: contactData.showZalo,
+          heading: mergeContent(currentData.heading, contactData.heading),
+          subtitle: mergeContent(currentData.subtitle, contactData.subtitle),
+          phone: contactData.phone,
+          email: contactData.email
+        };
+      }
+      
+      if (section === 'gallery') payload = { ...currentData, isVisible: galleryVisible };
+      if (section === 'blog') payload = { ...currentData, isVisible: blogVisible };
+
+      const { error } = await supabase
+        .from('site_content')
+        .upsert({ id: section, data: payload, updated_at: new Date().toISOString() });
+
+      if (error) throw error;
       setSaveSuccess(section);
       setTimeout(() => setSaveSuccess(''), 2000);
+    } catch (err) {
+      console.error(`Error saving ${section} content:`, err);
+      alert(`Lỗi khi lưu nội dung ${section}: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setSavingContent(false);
     }
   };
 

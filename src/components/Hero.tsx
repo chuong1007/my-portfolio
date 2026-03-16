@@ -165,12 +165,12 @@ const formatFs = (val: string, fallback: string) => {
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
-        <div className="flex-1 flex flex-col items-center justify-center w-full">
+        <div className="flex-1 flex flex-col items-center w-full">
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-bold tracking-tighter text-zinc-50 leading-none text-balance mx-auto whitespace-pre-line sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            className="font-bold tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
             style={{
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,

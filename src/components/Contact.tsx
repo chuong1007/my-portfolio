@@ -192,7 +192,7 @@ export function Contact() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
               {showPhone && (
                 <a
                   href={`tel:${phone.replace(/\s/g, '')}`}
@@ -244,7 +244,7 @@ export function Contact() {
               {/* Conditional Zalo */}
               {zalo && showZalo && (
                 <a
-                  href={zalo.startsWith('http') ? zalo : `https://zalo.me/${zalo.replace(/\s/g, '')}`}
+                  href={typeof zalo === 'string' && zalo.startsWith('http') ? zalo : `https://zalo.me/${(zalo || '').toString().replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"

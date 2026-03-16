@@ -166,11 +166,11 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
 
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
-  const gridColsClass = cn(
-    `grid-cols-${mobileCols}`,
-    `md:grid-cols-${tabletCols}`,
-    `lg:grid-cols-${desktopCols}`
-  );
+  const gridStyle = {
+    display: 'grid',
+    gap: currentDevice === 'mobile' ? '2rem' : '3rem',
+    gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
+  };
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
@@ -178,15 +178,11 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         id={sectionId} 
         className="px-6 md:px-12 bg-zinc-950 relative"
         style={{
+          paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`
         }}
       >
-        <div 
-          className="max-w-7xl mx-auto"
-          style={{
-            paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`
-          }}
-        >
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -196,20 +192,20 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="font-bold tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="font-bold tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px`,
                   lineHeight: titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.2'
                 }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, globalPreviewMode || 'desktop') }} 
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, globalPreviewMode || 'desktop') || "" }} 
               />
               <div 
-                className="text-zinc-500 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
                   lineHeight: subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5'
                 }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, globalPreviewMode || 'desktop') }} 
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, globalPreviewMode || 'desktop') || "" }} 
               />
             </div>
             {((showSeeAll && currentSeeAllPos === 'top') || (variant === 'homepage' && !showSeeAll)) && (
@@ -243,10 +239,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           )}
 
           {!loading && filteredBlogs.length > 0 && (
-            <div className={cn(
-              "grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12",
-              gridColsClass
-            )}>
+            <div style={gridStyle}>
               {filteredBlogs.map((post, index) => (
                 <BlogCard 
                   key={post.id} 
