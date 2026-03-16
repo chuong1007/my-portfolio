@@ -128,9 +128,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure({
-        paragraph: enterAsBreak ? false : {},
-      }),
+      StarterKit,
       TextStyle,
       FontSize,
       ...(enterAsBreak ? [
