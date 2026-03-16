@@ -168,15 +168,15 @@ export function About({ sectionId = "about" }: AboutProps) {
                 fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
                 lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
               }}
-              dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }} 
+              dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }} 
             />
             <div 
-              className="font-bold text-zinc-400 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+              className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
               style={{ 
-                fontSize: `${subheading.fontSize?.[globalPreviewMode || 'desktop'] || 16}px`,
-                lineHeight: subheading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4'
+                fontSize: `${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px`,
+                lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5'
               }}
-              dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading, globalPreviewMode || 'desktop') }} 
+              dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }} 
             />
             
             <div className="space-y-4 text-zinc-400 font-light">
@@ -188,7 +188,7 @@ export function About({ sectionId = "about" }: AboutProps) {
                     lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6'
                   }}
                   className="whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(p, globalPreviewMode || 'desktop') }} 
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(p.content, globalPreviewMode || 'desktop') }} 
                 />
               ))}
             </div>

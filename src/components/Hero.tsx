@@ -183,11 +183,11 @@ const formatFs = (val: string, fallback: string) => {
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
+            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'desktop') }} />
             {/* Tablet variant */}
-            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
+            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'tablet') }} />
             {/* Mobile variant */}
-            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
+            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'mobile') }} />
           </motion.h1>
         </div>
         
@@ -210,17 +210,17 @@ const formatFs = (val: string, fallback: string) => {
           <div 
             className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
             style={{ fontSize: "var(--fs-sub-desk)", lineHeight: "var(--lh-sub-desk)" }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'desktop') }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'desktop') }} 
           />
           <div 
             className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
             style={{ fontSize: "var(--fs-sub-tab)", lineHeight: "var(--lh-sub-tab)" }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'tablet') }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'tablet') }} 
           />
           <div 
             className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
             style={{ fontSize: "var(--fs-sub-mob)", lineHeight: "var(--lh-sub-mob)" }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'mobile') }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'mobile') }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div

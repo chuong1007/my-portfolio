@@ -228,7 +228,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                   fontSize: `${titleData.fontSize?.[currentDevice] || 48}px`,
                   lineHeight: titleData.lineHeight?.[currentDevice] || '1.1'
                 }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, currentDevice) || "" }} 
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, currentDevice) || "" }} 
               />
               <div 
                 className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
@@ -236,16 +236,16 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                   fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px`,
                   lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5'
                 }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, currentDevice) || "" }} 
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, currentDevice) || "" }} 
               />
             </div>
 
             {((showSeeAll && currentSeeAllPos === 'top') || (!showSeeAll)) && (
               <Link 
-                href={showSeeAll ? seeAllLink : "/projects"}
+                href={showSeeAll ? (getResponsiveValue(seeAllLink, currentDevice) || "/projects") : "/projects"}
                 className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
               >
-                {showSeeAll ? seeAllLabel : "Xem tất cả"}
+                {showSeeAll ? (getResponsiveValue(seeAllLabel, currentDevice) || "Xem tất cả") : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
@@ -332,12 +332,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             >
               {showSeeAll ? (
                 <Link 
-                  href={seeAllLink}
+                  href={getResponsiveValue(seeAllLink, currentDevice) || seeAllLink || "/projects"}
                   className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                    {seeAllLabel}
+                    {getResponsiveValue(seeAllLabel, currentDevice) || seeAllLabel}
                   </span>
                   <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
                     <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />

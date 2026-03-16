@@ -175,7 +175,7 @@ export function Contact() {
                     fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px`,
                     lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
                   }}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }}
                 />
               )}
               {subtitle && (
@@ -187,7 +187,7 @@ export function Contact() {
                     fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px`,
                     lineHeight: subtitle.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4'
                   }}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle, globalPreviewMode || 'desktop') }}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') }}
                 />
               )}
             </div>
