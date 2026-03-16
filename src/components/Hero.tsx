@@ -169,11 +169,11 @@ const formatFs = (val: string, fallback: string) => {
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
+            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
             {/* Tablet variant */}
-            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
+            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
             {/* Mobile variant */}
-            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: titleData.content || '' }} />
+            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
           </motion.h1>
         </div>
         
@@ -192,17 +192,17 @@ const formatFs = (val: string, fallback: string) => {
           <span 
             className="uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-desk)" }}
-            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'desktop') }} 
           />
           <span 
             className="uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-tab)" }}
-            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'tablet') }} 
           />
           <span 
             className="uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" 
             style={{ fontSize: "var(--fs-sub-mob)" }}
-            dangerouslySetInnerHTML={{ __html: subtitleData.content || '' }} 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'mobile') }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div

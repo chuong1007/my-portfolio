@@ -7,9 +7,10 @@ import Paragraph from '@tiptap/extension-paragraph';
 import Text from '@tiptap/extension-text';
 import { Extension } from '@tiptap/core';
 import { Bold, Italic, Type, Plus, Minus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
+import { getResponsiveValue } from '@/lib/responsive-helpers';
 
 // --- Custom Font Size Extension ---
 declare module '@tiptap/core' {
@@ -66,8 +67,14 @@ export type ResponsiveFontSize = {
   desktop: number;
 };
 
+export type ResponsiveContent = {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+};
+
 export type RichTextData = {
-  content: string;
+  content: string | ResponsiveContent;
   fontSize: ResponsiveFontSize;
 };
 
@@ -85,16 +92,38 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
     tablet: 18,
     desktop: 20
   });
+  const [localContent, setLocalContent] = useState<ResponsiveContent>({
+    mobile: '',
+    tablet: '',
+    desktop: ''
+  });
+  const isUpdatingRef = useRef(false);
 
   // Normalize initial value
-  const normalizedValue: RichTextData = typeof value === 'string' 
-    ? { content: value, fontSize: { mobile: 16, tablet: 18, desktop: 20 } }
-    : value;
+  const normalize = (v: any): RichTextData => {
+    if (v === null || v === undefined) return { content: { mobile: '', tablet: '', desktop: '' }, fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+    
+    if (typeof v === 'string') {
+      return { 
+        content: { mobile: v, tablet: v, desktop: v }, 
+        fontSize: { mobile: 16, tablet: 18, desktop: 20 } 
+      };
+    }
+
+    const content = typeof v.content === 'object' && v.content !== null
+      ? v.content
+      : { mobile: v.content || '', tablet: v.content || '', desktop: v.content || '' };
+    
+    const fontSize = v.fontSize || { mobile: 16, tablet: 18, desktop: 20 };
+
+    return { content, fontSize };
+  };
+
+  const normalizedValue = normalize(value);
 
   useEffect(() => {
-    if (normalizedValue.fontSize) {
-      setLocalFontSize(normalizedValue.fontSize);
-    }
+    setLocalFontSize(normalizedValue.fontSize);
+    setLocalContent(normalizedValue.content as ResponsiveContent);
   }, [value]);
 
   const editor = useEditor({
@@ -105,10 +134,16 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
       Paragraph,
       Text,
     ],
-    content: normalizedValue.content,
+    content: getResponsiveValue(normalizedValue.content, globalPreviewMode),
     onUpdate: ({ editor }) => {
+      if (isUpdatingRef.current) return;
+      
+      const newHTML = editor.getHTML();
+      const updatedContent = { ...localContent, [globalPreviewMode]: newHTML };
+      setLocalContent(updatedContent);
+      
       onChange({
-        content: editor.getHTML(),
+        content: updatedContent,
         fontSize: localFontSize
       });
     },
@@ -119,12 +154,29 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
     },
   });
 
-  // Sync editor content when value changes from outside (e.g. section change)
+  // Sync editor content when device mode changes
   useEffect(() => {
-    if (editor && normalizedValue.content !== editor.getHTML()) {
-      editor.commands.setContent(normalizedValue.content);
+    if (editor) {
+      isUpdatingRef.current = true;
+      const modeContent = localContent[globalPreviewMode] || '';
+      if (editor.getHTML() !== modeContent) {
+        editor.commands.setContent(modeContent);
+      }
+      isUpdatingRef.current = false;
     }
-  }, [normalizedValue.content, editor]);
+  }, [globalPreviewMode, editor]);
+
+  // Sync from outside (e.g. section reload)
+  useEffect(() => {
+    if (editor && !isUpdatingRef.current) {
+      const modeContent = getResponsiveValue(normalizedValue.content, globalPreviewMode);
+      if (editor.getHTML() !== modeContent) {
+        isUpdatingRef.current = true;
+        editor.commands.setContent(modeContent);
+        isUpdatingRef.current = false;
+      }
+    }
+  }, [value, globalPreviewMode, editor]);
 
   const currentSize = localFontSize[globalPreviewMode] || 16;
 
@@ -132,7 +184,7 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
     const updatedSizes = { ...localFontSize, [globalPreviewMode]: newSize };
     setLocalFontSize(updatedSizes);
     onChange({
-      content: editor?.getHTML() || '',
+      content: localContent,
       fontSize: updatedSizes
     });
   };
@@ -182,8 +234,8 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
                 <button onClick={() => updateFontSize(currentSize + 1)} className="hover:text-zinc-300"><Plus className="w-2.5 h-2.5" /></button>
                 <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="hover:text-zinc-300"><Minus className="w-2.5 h-2.5" /></button>
             </div>
-            <span className="ml-2 text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase">{globalPreviewMode}</span>
           </div>
+          <span className="ml-2 text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase font-bold">{globalPreviewMode}</span>
         </div>
       </div>
 

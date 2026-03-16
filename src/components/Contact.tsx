@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
+import { getResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
 
 const DEFAULTS = {
@@ -139,7 +140,7 @@ export function Contact() {
                     "tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
                   style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px` }}
-                  dangerouslySetInnerHTML={{ __html: heading.content }}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }}
                 />
               )}
               {subtitle && (
@@ -148,7 +149,7 @@ export function Contact() {
                     "text-zinc-400 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
                   style={{ fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px` }}
-                  dangerouslySetInnerHTML={{ __html: subtitle.content }}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle, globalPreviewMode || 'desktop') }}
                 />
               )}
             </div>

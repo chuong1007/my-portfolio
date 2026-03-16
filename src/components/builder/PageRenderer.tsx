@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useAdmin } from "@/context/AdminContext";
+import { getResponsiveValue } from "@/lib/responsive-helpers";
 
 interface PageRendererProps {
   pageSelector?: string; // slug of the page
@@ -109,11 +111,13 @@ function RenderBlock({ block }: { block: BlockData }) {
 
   let content = null;
 
+  const { globalPreviewMode } = useAdmin();
+
   if (block?.type === 'text') {
     content = (
       <div 
         className="prose prose-invert max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
-        dangerouslySetInnerHTML={{ __html: block?.content || "" }}
+        dangerouslySetInnerHTML={{ __html: getResponsiveValue(block?.content, globalPreviewMode || 'desktop') || "" }}
       />
     );
   } else if (block?.type === 'image') {

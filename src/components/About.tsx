@@ -158,23 +158,24 @@ export function About({ sectionId = "about" }: AboutProps) {
             className="space-y-6"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 
-              className="font-bold tracking-tighter text-zinc-50 text-balance" 
+            <div 
+              className="font-bold tracking-tighter text-zinc-50 text-balance [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
               style={{ fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px` }}
-              dangerouslySetInnerHTML={{ __html: heading.content }} 
+              dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading, globalPreviewMode || 'desktop') }} 
             />
-            <h3 
-              className="font-bold text-zinc-400 text-balance" 
+            <div 
+              className="font-bold text-zinc-400 text-balance [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
               style={{ fontSize: `${subheading.fontSize?.[globalPreviewMode || 'desktop'] || 16}px` }}
-              dangerouslySetInnerHTML={{ __html: subheading.content }} 
+              dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading, globalPreviewMode || 'desktop') }} 
             />
             
-            <div className="space-y-4 text-zinc-400 font-light whitespace-pre-wrap">
+            <div className="space-y-4 text-zinc-400 font-light">
               {paragraphs.map((p, i) => (
-                <p 
+                <div 
                   key={i} 
                   style={{ fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` }}
-                  dangerouslySetInnerHTML={{ __html: p.content }} 
+                  className="[&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(p, globalPreviewMode || 'desktop') }} 
                 />
               ))}
             </div>

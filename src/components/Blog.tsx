@@ -1,11 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { 
+  ArrowRight, 
+  ArrowUpRight,
+} from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { SectionEditor } from "./SectionEditor";
@@ -44,9 +47,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const [showSeeAll, setShowSeeAll] = useState(false);
   const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả bài viết");
   const [seeAllLink, setSeeAllLink] = useState("/blog");
+  const [columns, setColumns] = useState<number>(3);
   const { isAdmin, globalPreviewMode } = useAdmin();
 
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     // Prevent overwrite if realtime data is already active
     if ((window as any)._blogRealtimeActive) return;
 
@@ -62,18 +66,17 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
         if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
         if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+        if (d.columns !== undefined) setColumns(d.columns);
       }
     } catch (e) {
       console.error("Blog visibility error:", e);
     }
-  };
+  }, [sectionId]);
 
   useEffect(() => {
     async function fetchBlogs() {
       const supabase = createClient();
       
-      const { data: authData } = await supabase.auth.getUser();
-
       let query = supabase
         .from("blogs")
         .select("*")
@@ -91,8 +94,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
       setLoading(false);
     }
     fetchBlogs();
-    fetchContent();
-  }, []);
+    fetchContent(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [fetchContent]);
 
   // Listen for real-time preview updates from AdminModal
   useEffect(() => {
@@ -105,6 +108,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
       if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
       if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
       if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+      if (d.columns !== undefined) setColumns(d.columns);
     };
 
     const handlePreviewUpdate = (e: Event) => {
@@ -167,8 +171,15 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     itemsToShow: itemsToShowData,
     showSeeAll,
     seeAllLabel,
-    seeAllLink
+    seeAllLink,
+    columns
   };
+
+  const gridColsClass = 
+    columns === 1 ? 'md:grid-cols-1' :
+    columns === 2 ? 'md:grid-cols-2' :
+    columns === 3 ? 'md:grid-cols-3' :
+    'md:grid-cols-4';
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
@@ -235,182 +246,137 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           {/* Blog Grid Content */}
           {!loading && filteredBlogs.length > 0 && (
             <div className="flex flex-col gap-12">
-              {/* Homepage Layout: 1 Large Left, 2 Side Right on Desktop */}
+              {/* Layout for Homepage */}
               {variant === 'homepage' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
-                  {/* Desktop Only: Large Featured Post */}
-                  <div className="hidden lg:block lg:col-span-8">
-                    {featured && (
-                      <motion.article
-                        initial={{ opacity: 0, x: -20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                        className="group"
-                      >
-                        <Link href={`/blog/${featured.slug}`} className="block">
-                          <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800/50">
-                            <img
-                              src={featured.image_url}
-                              alt={featured.title}
-                              referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                              <span className="flex items-center gap-2 px-6 py-3 border border-zinc-50 rounded-full text-sm font-medium text-zinc-50 backdrop-blur-md bg-white/10">
-                                Đọc bài viết
-                                <ArrowUpRight className="w-4 h-4" />
-                              </span>
-                            </div>
-                          </div>
+                <div className={cn(
+                  "grid grid-cols-1 gap-8 lg:gap-12",
+                  // Only use special layout on desktop when columns is 3
+                  columns === 3 ? "lg:grid-cols-12" : gridColsClass
+                )}>
+                  
+                  {/* FEATURED POST (LARGE) - Special layout only on desktop and only if columns is 3 */}
+                  {columns === 3 ? (
+                    <>
+                      {/* Featured (Lg) on Desktop */}
+                      <div className="hidden lg:block lg:col-span-8">
+                        {featured && (
+                          <motion.article
+                            initial={{ opacity: 0, x: -20 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.6 }}
+                            className="group"
+                          >
+                            <Link href={`/blog/${featured.slug}`} className="block">
+                              <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800/50">
+                                <img
+                                  src={featured.image_url}
+                                  alt={featured.title}
+                                  referrerPolicy="no-referrer"
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <span className="flex items-center gap-2 px-6 py-3 border border-zinc-50 rounded-full text-sm font-medium text-zinc-50 backdrop-blur-md bg-white/10">
+                                    Đọc bài viết
+                                    <ArrowUpRight className="w-4 h-4" />
+                                  </span>
+                                </div>
+                              </div>
 
-                          <div className="mt-8">
-                            <div className="flex items-center gap-3 mb-4">
-                              {featured.tags?.slice(0, 2).map((tag) => (
-                                <span
-                                  key={tag}
-                                  className="text-[10px] px-3 py-1 bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20 font-bold tracking-widest uppercase"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                              <span className="text-[10px] text-zinc-600 font-bold tracking-widest uppercase ml-auto">
-                                {new Date(featured.created_at).toLocaleDateString("vi-VN")}
-                              </span>
-                            </div>
-                            <h3 className="text-3xl lg:text-5xl font-bold text-zinc-100 group-hover:text-white transition-colors leading-tight mb-4 tracking-tighter">
-                              {featured.title}
-                            </h3>
-                            <p className="text-zinc-500 text-lg leading-relaxed line-clamp-2">
-                              {featured.excerpt}
-                            </p>
-                          </div>
-                        </Link>
-                      </motion.article>
-                    )}
-                  </div>
+                              <div className="mt-8">
+                                <div className="flex items-center gap-3 mb-4">
+                                  {featured.tags?.slice(0, 2).map((tag) => (
+                                    <span
+                                      key={tag}
+                                      className="text-[10px] px-3 py-1 bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20 font-bold tracking-widest uppercase"
+                                    >
+                                      {tag}
+                                    </span>
+                                  ))}
+                                  <span className="text-[10px] text-zinc-600 font-bold tracking-widest uppercase ml-auto">
+                                    {new Date(featured.created_at).toLocaleDateString("vi-VN")}
+                                  </span>
+                                </div>
+                                <h3 className="text-3xl lg:text-5xl font-bold text-zinc-100 group-hover:text-white transition-colors leading-tight mb-4 tracking-tighter">
+                                  {featured.title}
+                                </h3>
+                                <p className="text-zinc-500 text-lg leading-relaxed line-clamp-2">
+                                  {featured.excerpt}
+                                </p>
+                              </div>
+                            </Link>
+                          </motion.article>
+                        )}
+                      </div>
 
-                  {/* Desktop Only: Side Posts */}
-                  <div className="hidden lg:block lg:col-span-4">
-                    <div className="grid grid-cols-1 gap-8">
-                      {sidePosts.slice(0, 2).map((post, index) => (
-                        <motion.article
-                          key={post.id}
-                          initial={{ opacity: 0, x: 20 }}
-                          whileInView={{ opacity: 1, x: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                          className="group"
-                        >
-                          <Link href={`/blog/${post.slug}`} className="flex flex-col gap-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 hover:bg-zinc-800/50 transition-all">
-                            <div className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0">
-                              <img
-                                src={post.image_url}
-                                alt={post.title}
-                                referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                              />
-                            </div>
-                            <div className="flex flex-col justify-center">
-                              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                                {post.tags?.[0] || "Blog"}
-                              </span>
-                              <h4 className="text-xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2">
-                                {post.title}
-                              </h4>
-                              <p className="text-zinc-500 text-sm mt-3 line-clamp-2">
-                                {post.excerpt}
-                              </p>
-                            </div>
-                          </Link>
-                        </motion.article>
+                      {/* Side Posts on Desktop */}
+                      <div className="hidden lg:block lg:col-span-4">
+                        <div className="grid grid-cols-1 gap-8">
+                          {sidePosts.slice(0, 2).map((post, index) => (
+                            <motion.article
+                              key={post.id}
+                              initial={{ opacity: 0, x: 20 }}
+                              whileInView={{ opacity: 1, x: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
+                              className="group"
+                            >
+                              <Link href={`/blog/${post.slug}`} className="flex flex-col gap-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 hover:bg-zinc-800/50 transition-all">
+                                <div className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                                  <img
+                                    src={post.image_url}
+                                    alt={post.title}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                  />
+                                </div>
+                                <div className="flex flex-col justify-center">
+                                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
+                                    {post.tags?.[0] || "Blog"}
+                                  </span>
+                                  <h4 className="text-xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2">
+                                    {post.title}
+                                  </h4>
+                                  <p className="text-zinc-500 text-sm mt-3 line-clamp-2">
+                                    {post.excerpt}
+                                  </p>
+                                </div>
+                              </Link>
+                            </motion.article>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* Regular Dynamic Grid for other column counts on Desktop */
+                    <div className={cn("hidden lg:grid gap-8 w-full", gridColsClass, "col-span-full")}>
+                      {filteredBlogs.map((post, index) => (
+                        <BlogCard key={post.id} post={post} index={index} />
                       ))}
                     </div>
-                  </div>
+                  )}
 
-                  {/* Tablet & Mobile: Uniform Grid Layout */}
+                  {/* TABLET & MOBILE: Always uniform full-width grid */}
                   <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-8 col-span-full">
-                    {[featured, ...sidePosts].filter(Boolean).slice(0, itemsToShow).map((post, index) => (
-                      <motion.article
-                        key={post?.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: index * 0.1 }}
-                        className="group flex flex-col gap-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 hover:bg-zinc-800/50 transition-all duration-300"
-                      >
-                        <Link href={`/blog/${post?.slug}`} className="block">
-                          <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800 mb-6">
-                            <img
-                              src={post?.image_url}
-                              alt={post?.title}
-                              referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                          </div>
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                              <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : ""}</span>
-                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-                              <span>{post?.tags?.[0] || "Blog"}</span>
-                            </div>
-                            <h3 className="text-2xl font-bold text-zinc-100 mb-3 group-hover:text-white transition-colors leading-tight">
-                              {post?.title}
-                            </h3>
-                            <p className="text-zinc-500 text-base line-clamp-2 leading-relaxed">
-                              {post?.excerpt}
-                            </p>
-                          </div>
-                        </Link>
-                      </motion.article>
+                    {filteredBlogs.map((post, index) => (
+                      <BlogCard key={post.id} post={post} index={index} />
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Subpage Layout or Fallback: Regular 3-Column Grid */}
+              {/* Subpage or standard layout */}
               {variant === 'subpage' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8", gridColsClass)}>
                   {filteredBlogs.map((post, index) => (
-                    <motion.article
-                      key={post.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: index * 0.05 }}
-                      className="group flex flex-col gap-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 hover:bg-zinc-800/50 transition-all duration-300"
-                    >
-                      <Link href={`/blog/${post.slug}`} className="block h-full">
-                        <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800 mb-4">
-                          <img
-                            src={post.image_url}
-                            alt={post.title}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2 mb-2 text-[10px] font-medium text-zinc-500 uppercase tracking-widest">
-                            <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
-                            <span className="w-1 h-1 rounded-full bg-zinc-800" />
-                            <span>{post.tags?.[0] || "Blog"}</span>
-                          </div>
-                          <h3 className="text-xl font-bold text-zinc-100 mb-2 group-hover:text-white transition-colors leading-tight">
-                            {post.title}
-                          </h3>
-                          <p className="text-zinc-500 text-sm line-clamp-3 leading-relaxed">
-                            {post.excerpt}
-                          </p>
-                        </div>
-                      </Link>
-                    </motion.article>
+                    <BlogCard key={post.id} post={post} index={index} />
                   ))}
                 </div>
               )}
             </div>
           )}
 
-          {/* See All Button / Fallback mobile link */}
+          {/* See All Button at Bottom */}
           {(showSeeAll || (variant === 'homepage')) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -423,20 +389,20 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             >
               <Link 
                 href={seeAllLink}
-                className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden"
+                className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
                   {seeAllLabel}
                 </span>
-                <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-active flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg]">
+                <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-active flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
                   <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
                 </div>
               </Link>
             </motion.div>
           )}
 
-          {/* Empty state for filtered results */}
+          {/* Empty state */}
           {!loading && filteredBlogs.length === 0 && blogs.length > 0 && (
             <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl">
               <p className="text-zinc-500 text-lg">Không có bài viết nào với tag &quot;{activeTag}&quot;</p>
@@ -445,5 +411,42 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         </div>
       </section>
     </SectionEditor>
+  );
+}
+
+// Helper Card Template
+function BlogCard({ post, index }: { post: DbBlog; index: number }) {
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      className="group flex flex-col gap-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 hover:bg-zinc-800/50 transition-all duration-300"
+    >
+      <Link href={`/blog/${post.slug}`} className="block">
+        <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800 mb-6">
+          <img
+            src={post.image_url}
+            alt={post.title}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </div>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+            <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+            <span>{post.tags?.[0] || "Blog"}</span>
+          </div>
+          <h3 className="text-2xl font-bold text-zinc-100 mb-3 group-hover:text-white transition-colors leading-tight line-clamp-2">
+            {post.title}
+          </h3>
+          <p className="text-zinc-500 text-base line-clamp-2 leading-relaxed">
+            {post.excerpt}
+          </p>
+        </div>
+      </Link>
+    </motion.article>
   );
 }

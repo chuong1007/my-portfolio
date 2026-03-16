@@ -23,7 +23,6 @@ export function getResponsiveValue(
     if (field === null || field === undefined) return String(fallback);
 
     // If data in DB is already a string (legacy format or plain text), use it directly.
-    // Do NOT try to JSON.parse it to avoid 'Unexpected token o' crashes.
     if (typeof field === 'string') {
       return field;
     }
@@ -34,12 +33,26 @@ export function getResponsiveValue(
 
     // Handle object forms
     if (typeof field === 'object') {
+      // Special case for RichTextData: { content, fontSize }
+      // If we are asking for a value from a RichTextData and it hasn't been upgraded to responsive content yet
+      if ('content' in field && typeof field.content === 'string') {
+        return field.content;
+      }
+
+      // If content is responsive: { content: { mobile, ... }, fontSize }
+      if ('content' in field && typeof field.content === 'object' && field.content !== null) {
+        const c = field.content[device] ?? field.content['desktop'] ?? field.content['tablet'] ?? field.content['mobile'];
+        return c !== undefined && c !== null ? String(c) : '';
+      }
+
+      // Standard responsive object: { desktop, tablet, mobile }
       const val = field[device] ?? field['desktop'] ?? field['tablet'] ?? field['mobile'];
       if (val !== undefined && val !== null) {
         return typeof val === 'object' ? JSON.stringify(val) : String(val);
       }
-      // If we can't find a responsive key, stringify the whole object so it doesn't crash React
-      return JSON.stringify(field);
+      
+      // If we can't find anything, but it's an object we don't recognize
+      return '';
     }
 
     return String(fallback);

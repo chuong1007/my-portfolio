@@ -1,9 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Upload, Trash2, Eye, EyeOff, Plus, GripVertical, Loader2, Palette, Monitor, Tablet, Smartphone } from 'lucide-react';
+import { 
+  X, 
+  Save,
+  Plus, 
+  Minus, 
+  Monitor, 
+  Tablet, 
+  Smartphone, 
+  Loader2, 
+  Upload,
+  Palette,
+  Trash2,
+  Eye,
+  EyeOff,
+  Image as LucideImage
+} from "lucide-react";
 import { createClient } from "@/lib/supabase";
-import dynamic from "next/dynamic";
 import { RichTextEditor, type RichTextData } from "./RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
@@ -127,7 +141,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
     setError(null);
     
     // Normalize Facebook link
-    let finalData = { ...data };
+    const finalData = { ...data };
     if (finalData.facebook && !finalData.facebook.startsWith('http')) {
       finalData.facebook = `https://${finalData.facebook}`;
     }
@@ -585,13 +599,13 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
             </div>
           )}
 
-          {(sectionId === 'gallery' || sectionId === 'blog') && (
+          {sectionId === 'gallery' && (
             <div className="space-y-4">
               <p className="text-zinc-400 text-sm italic py-4">
-                Cấu hình hiển thị cho section {sectionId === 'gallery' ? 'Dự án' : 'Blog'}.
+                Cấu hình hiển thị cho section Dự án.
               </p>
 
-              {/* Padding Top Slider for Gallery/Blog */}
+              {/* Padding Top Slider for Gallery */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
@@ -631,71 +645,198 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 </div>
               </div>
 
-              {(sectionId === 'gallery' || sectionId === 'blog') && (
-                <>
-                  {/* Items to Show */}
-                  <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị ({sectionId === 'gallery' ? 'D:16, T:6, M:4' : 'D:3, T:3, M:3'})</label>
-                        <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (sectionId === 'gallery' ? (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16') : '3')} bài
-                        </span>
-                      </div>
+              {/* Items to Show */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:16, T:6, M:4)</label>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16')} bài
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    step="1"
+                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16')}
+                    onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* See All Button */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
+                  <button
+                    onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
+                    className={cn(
+                      "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                      data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                    )}
+                  >
+                    {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
+                  </button>
+                </div>
+                
+                {data.showSeeAll && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
                       <input
-                        type="range"
-                        min="1"
-                        max="50"
-                        step="1"
-                        value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (sectionId === 'gallery' ? (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16') : '3')}
-                        onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
-                        className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                        type="text"
+                        value={data.seeAllLabel || 'Xem tất cả dự án'}
+                        onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                        placeholder="Xem tất cả..."
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                      <input
+                        type="text"
+                        value={data.seeAllLink || '/projects'}
+                        onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                        placeholder="/projects"
                       />
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                  {/* See All Button */}
-                  <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
-                      <button
-                        onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
-                        className={cn(
-                          "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                          data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
-                        )}
-                      >
-                        {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
-                      </button>
-                    </div>
-                    
-                    {data.showSeeAll && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
-                          <input
-                            type="text"
-                            value={data.seeAllLabel || (sectionId === 'gallery' ? 'Xem tất cả dự án' : 'Xem tất cả bài viết')}
-                            onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
-                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                            placeholder="Xem tất cả..."
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
-                          <input
-                            type="text"
-                            value={data.seeAllLink || (sectionId === 'gallery' ? '/projects' : '/blog')}
-                            onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
-                            className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
-                            placeholder={sectionId === 'gallery' ? '/projects' : '/blog'}
-                          />
-                        </div>
-                      </div>
-                    )}
+          {sectionId === 'blog' && (
+            <div className="space-y-4">
+              <p className="text-zinc-400 text-sm italic py-4">
+                Cấu hình hiển thị cho section Blog.
+              </p>
+
+              {/* Grid Columns Controller */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị (Desktop)</label>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {data.columns || 3} cột
+                    </span>
                   </div>
-                </>
-              )}
+                  <input
+                    type="range"
+                    min="1"
+                    max="4"
+                    step="1"
+                    value={data.columns || 3}
+                    onChange={(e) => setData({ ...data, columns: parseInt(e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic mt-1">Ghi chú: Mobile & Tablet sẽ luôn hiển thị 1 cột để đảm bảo trải nghiệm.</p>
+                </div>
+              </div>
+
+              {/* Padding Top Slider for Blog */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-3 mt-4">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="600"
+                    step="1"
+                    value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section này.</p>
+                </div>
+              </div>
+              {/* Items to Show for Blog */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:3, T:3, M:3)</label>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '3' : globalPreviewMode === 'tablet' ? '3' : '3')} bài
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    step="1"
+                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '3' : globalPreviewMode === 'tablet' ? '3' : '3')}
+                    onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* See All Button for Blog */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
+                  <button
+                    onClick={() => setData({ ...data, showSeeAll: !data.showSeeAll })}
+                    className={cn(
+                      "px-3 py-1 rounded-lg text-xs font-bold transition-all",
+                      data.showSeeAll ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                    )}
+                  >
+                    {data.showSeeAll ? "ĐANG HIỆN" : "ĐANG ẨN"}
+                  </button>
+                </div>
+                
+                {data.showSeeAll && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                      <input
+                        type="text"
+                        value={data.seeAllLabel || 'Xem tất cả bài viết'}
+                        onChange={(e) => setData({ ...data, seeAllLabel: e.target.value })}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                        placeholder="Xem tất cả..."
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                      <input
+                        type="text"
+                        value={data.seeAllLink || '/blog'}
+                        onChange={(e) => setData({ ...data, seeAllLink: e.target.value })}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                        placeholder="/blog"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

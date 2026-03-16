@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'CHUONG.PORTFOLIO | Visual Designer',
-  description: 'Portfolio của Chương - Visual Designer based in Ho Chi Minh City với hơn 7 năm kinh nghiệm chuyên môn về Graphic, Branding và UX/UI Design.',
+  description: 'Visual Designer based in Ho Chi Minh City.',
   metadataBase: new URL('https://chuong-graphic.vercel.app'),
   alternates: {
     canonical: '/',
