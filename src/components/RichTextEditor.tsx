@@ -4,10 +4,9 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Paragraph from '@tiptap/extension-paragraph';
-import Text from '@tiptap/extension-text';
 import { Extension } from '@tiptap/core';
-import { Bold, Italic, Type, Plus, Minus } from 'lucide-react';
-import { useEffect, useState, useRef } from 'react';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft } from 'lucide-react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
 import { getResponsiveValue } from '@/lib/responsive-helpers';
@@ -83,9 +82,10 @@ type RichTextEditorProps = {
   value: RichTextData | string;
   onChange: (value: RichTextData) => void;
   placeholder?: string;
+  enterAsBreak?: boolean;
 };
 
-export function RichTextEditor({ label, value, onChange, placeholder }: RichTextEditorProps) {
+export function RichTextEditor({ label, value, onChange, placeholder, enterAsBreak = false }: RichTextEditorProps) {
   const { globalPreviewMode } = useAdmin();
   const [localFontSize, setLocalFontSize] = useState<ResponsiveFontSize>({
     mobile: 16,
@@ -128,11 +128,21 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        paragraph: enterAsBreak ? false : {},
+      }),
       TextStyle,
       FontSize,
-      Paragraph,
-      Text,
+      ...(enterAsBreak ? [
+        Extension.create({
+          name: 'enterHandler',
+          addKeyboardShortcuts() {
+            return {
+              Enter: () => this.editor.commands.setHardBreak(),
+            }
+          },
+        })
+      ] : []),
     ],
     content: getResponsiveValue(normalizedValue.content, globalPreviewMode),
     onUpdate: ({ editor }) => {
@@ -154,29 +164,26 @@ export function RichTextEditor({ label, value, onChange, placeholder }: RichText
     },
   });
 
-  // Sync editor content when device mode changes
+  // Sync editor content when device mode changes or value changes from outside
   useEffect(() => {
     if (editor) {
-      isUpdatingRef.current = true;
-      const modeContent = localContent[globalPreviewMode] || '';
-      if (editor.getHTML() !== modeContent) {
-        editor.commands.setContent(modeContent);
-      }
-      isUpdatingRef.current = false;
-    }
-  }, [globalPreviewMode, editor]);
-
-  // Sync from outside (e.g. section reload)
-  useEffect(() => {
-    if (editor && !isUpdatingRef.current) {
       const modeContent = getResponsiveValue(normalizedValue.content, globalPreviewMode);
-      if (editor.getHTML() !== modeContent) {
-        isUpdatingRef.current = true;
-        editor.commands.setContent(modeContent);
-        isUpdatingRef.current = false;
+      const currentHTML = editor.getHTML();
+      
+      // If content differs and we are either NOT focused or it's a device mode change
+      if (currentHTML !== modeContent && !isUpdatingRef.current) {
+        // We only force update if not focused to avoid cursor jumps
+        // OR if the content is completely different (e.g. from a different device mode)
+        if (!editor.isFocused) {
+          isUpdatingRef.current = true;
+          editor.commands.setContent(modeContent);
+          setTimeout(() => {
+            isUpdatingRef.current = false;
+          }, 50);
+        }
       }
     }
-  }, [value, globalPreviewMode, editor]);
+  }, [globalPreviewMode, value, editor]);
 
   const currentSize = localFontSize[globalPreviewMode] || 16;
 

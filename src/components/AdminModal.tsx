@@ -15,14 +15,18 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  Image as LucideImage
+  Image as LucideImage,
+  Phone,
+  Mail,
+  Facebook,
+  MessageSquare
 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { RichTextEditor, type RichTextData } from "./RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 import { useAdmin } from "@/context/AdminContext";
-import { getResponsiveValue, setResponsiveValue, type DeviceMode } from "@/lib/responsive-helpers";
+import { getResponsiveValue, setResponsiveValue, type DeviceMode, type ResponsiveValue } from "@/lib/responsive-helpers";
 
 type AdminModalProps = {
   isOpen: boolean;
@@ -81,7 +85,12 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       // For UX Builder Blocks
       type: initialData?.type || 'text',
       span: initialData?.span || 12,
-      data: initialData?.data || { title: normalize(''), content: normalize('') }
+      data: initialData?.data || { title: normalize(''), content: normalize('') },
+      // Ensure responsive values are initialized correctly
+      columns: initialData?.columns || { mobile: 1, tablet: 2, desktop: 3 },
+      itemsToShow: initialData?.itemsToShow || { mobile: 4, tablet: 6, desktop: 16 },
+      seeAllLink: initialData?.seeAllLink || '',
+      seeAllLabel: initialData?.seeAllLabel || '',
     });
   }, [initialData, isOpen]);
 
@@ -140,13 +149,16 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
     setLoading(true);
     setError(null);
     
-    // Normalize Facebook link
+    const supabase = createClient();
     const finalData = { ...data };
+    
+    // Normalize Facebook link
     if (finalData.facebook && !finalData.facebook.startsWith('http')) {
       finalData.facebook = `https://${finalData.facebook}`;
     }
 
-    const supabase = createClient();
+    console.log("Saving payload for section:", sectionId, finalData);
+
     const { error: saveError } = await supabase
       .from('site_content')
       .upsert({ id: sectionId, data: finalData, updated_at: new Date().toISOString() });
@@ -316,6 +328,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   label="Title"
                   value={data.title}
                   onChange={(val) => setData({ ...data, title: val })}
+                  enterAsBreak={true}
                 />
               </div>
 
@@ -348,7 +361,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
@@ -363,6 +376,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   label="Subtitle"
                   value={data.subtitle}
                   onChange={(val) => setData({ ...data, subtitle: val })}
+                  enterAsBreak={true}
                 />
               </div>
             </div>
@@ -435,7 +449,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
@@ -453,7 +467,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
@@ -596,6 +610,45 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                 </div>
               </div>
+              
+              {/* Padding Sliders for Contact */}
+              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1200"
+                    step="1"
+                    value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1200"
+                    step="1"
+                    value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -604,6 +657,16 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               <p className="text-zinc-400 text-sm italic py-4">
                 Cấu hình hiển thị cho section Dự án.
               </p>
+              <RichTextEditor
+                label="Tiêu đề Section"
+                value={data.title}
+                onChange={(val) => setData({ ...data, title: val })}
+              />
+              <RichTextEditor
+                label="Mô tả Section"
+                value={data.subtitle}
+                onChange={(val) => setData({ ...data, subtitle: val })}
+              />
 
               {/* Padding Top Slider for Gallery */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
@@ -617,7 +680,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
@@ -635,7 +698,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
@@ -657,13 +720,34 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="1"
-                    max="50"
+                    max="100"
                     step="1"
-                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16')}
+                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || "16"}
                     onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
+                  <p className="text-[9px] text-zinc-500 italic">Chỉnh số lượng dự án hiển thị trên mỗi giao diện.</p>
                 </div>
+              </div>
+
+              {/* Column Slider for Gallery */}
+              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
+                  <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                    {getResponsiveValue(data.columns, globalPreviewMode) || "3"} cột
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  step="1"
+                  value={getResponsiveValue(data.columns, globalPreviewMode) || "3"}
+                  onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, e.target.value) })}
+                  className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                />
+                <p className="text-[9px] text-zinc-500 italic">Số lượng cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
               </div>
 
               {/* See All Button */}
@@ -714,14 +798,24 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               <p className="text-zinc-400 text-sm italic py-4">
                 Cấu hình hiển thị cho section Blog.
               </p>
+              <RichTextEditor
+                label="Tiêu đề Section"
+                value={data.title}
+                onChange={(val) => setData({ ...data, title: val })}
+              />
+              <RichTextEditor
+                label="Mô tả Section"
+                value={data.subtitle}
+                onChange={(val) => setData({ ...data, subtitle: val })}
+              />
 
               {/* Grid Columns Controller */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị (Desktop)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      {data.columns || 3} cột
+                      {getResponsiveValue(data.columns, globalPreviewMode) || "3"} cột
                     </span>
                   </div>
                   <input
@@ -729,11 +823,11 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     min="1"
                     max="4"
                     step="1"
-                    value={data.columns || 3}
-                    onChange={(e) => setData({ ...data, columns: parseInt(e.target.value) })}
+                    value={getResponsiveValue(data.columns, globalPreviewMode) || "3"}
+                    onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic mt-1">Ghi chú: Mobile & Tablet sẽ luôn hiển thị 1 cột để đảm bảo trải nghiệm.</p>
+                  <p className="text-[10px] text-zinc-500 italic mt-1">Ghi chú: Chỉnh số cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
                 </div>
               </div>
 
@@ -749,7 +843,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
@@ -767,7 +861,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <input
                     type="range"
                     min="0"
-                    max="600"
+                    max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
@@ -780,9 +874,9 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:3, T:3, M:3)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:3, T:6, M:5)</label>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '3' : globalPreviewMode === 'tablet' ? '3' : '3')} bài
+                      {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '5' : globalPreviewMode === 'tablet' ? '6' : '3')} bài
                     </span>
                   </div>
                   <input
@@ -790,7 +884,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     min="1"
                     max="50"
                     step="1"
-                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '3' : globalPreviewMode === 'tablet' ? '3' : '3')}
+                    value={getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '5' : globalPreviewMode === 'tablet' ? '6' : '3')}
                     onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />

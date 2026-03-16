@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { 
   ArrowRight, 
-  ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -15,6 +14,12 @@ import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
+import type { RichTextData } from "./RichTextEditor";
+
+const normalize = (val: any): RichTextData => {
+  if (typeof val === 'object' && val !== null && 'content' in val) return val;
+  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+};
 
 const BLOG_TAGS = [
   "All",
@@ -47,18 +52,19 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const [showSeeAll, setShowSeeAll] = useState(false);
   const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả bài viết");
   const [seeAllLink, setSeeAllLink] = useState("/blog");
-  const [columns, setColumns] = useState<number>(3);
+  const [titleData, setTitleData] = useState<RichTextData>({ content: "Blog", fontSize: { desktop: 48, tablet: 40, mobile: 32 } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 } });
+  const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
   const { isAdmin, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
-    // Prevent overwrite if realtime data is already active
-    if ((window as any)._blogRealtimeActive) return;
-
     try {
       const supabase = createClient();
       const { data } = await supabase.from('site_content').select('data').eq('id', sectionId).single();
       if (data?.data) {
         const d = data.data as any;
+        if (d.title !== undefined) setTitleData(normalize(d.title));
+        if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -66,7 +72,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
         if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
         if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
-        if (d.columns !== undefined) setColumns(d.columns);
+        if (d.columns !== undefined) setColumnsData(d.columns);
       }
     } catch (e) {
       console.error("Blog visibility error:", e);
@@ -76,31 +82,22 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   useEffect(() => {
     async function fetchBlogs() {
       const supabase = createClient();
-      
-      let query = supabase
-        .from("blogs")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      // If not admin, only show published posts
+      let query = supabase.from("blogs").select("*").order("created_at", { ascending: false });
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        query = query.eq("is_published", true);
-      }
-
+      if (!session) query = query.eq("is_published", true);
       const { data } = await query;
-
       if (data) setBlogs(data);
       setLoading(false);
     }
     fetchBlogs();
-    fetchContent(); // eslint-disable-line react-hooks/set-state-in-effect
+    fetchContent();
   }, [fetchContent]);
 
-  // Listen for real-time preview updates from AdminModal
   useEffect(() => {
     const applyUpdate = (d: any) => {
       (window as any)._blogRealtimeActive = true;
+      if (d.title !== undefined) setTitleData(normalize(d.title));
+      if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -108,59 +105,28 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
       if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
       if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
       if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
-      if (d.columns !== undefined) setColumns(d.columns);
+      if (d.columns !== undefined) setColumnsData(d.columns);
     };
 
     const handlePreviewUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (customEvent.detail.sectionId === sectionId) {
-        applyUpdate(customEvent.detail.data);
-      }
-    };
-
-    const handleParentMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'PREVIEW_UPDATE' && event.data.sectionId === sectionId) {
-        applyUpdate(event.data.data);
-      }
+      if (customEvent.detail.sectionId === sectionId) applyUpdate(customEvent.detail.data);
     };
 
     window.addEventListener('previewUpdate', handlePreviewUpdate);
-    window.addEventListener('message', handleParentMessage);
-    
-    return () => {
-      window.removeEventListener('previewUpdate', handlePreviewUpdate);
-      window.removeEventListener('message', handleParentMessage);
-    };
+    return () => window.removeEventListener('previewUpdate', handlePreviewUpdate);
   }, [sectionId]);
 
-  // Use fixed trending tags for filters
-  const allTags = BLOG_TAGS;
-
-  // Filter blogs by active tag
-  const filteredBlogsTotal = useMemo(() => {
-    return activeTag === "All" ? blogs : blogs.filter((b) => b.tags?.includes(activeTag));
-  }, [blogs, activeTag]);
-
-  // Get items count based on responsive value or defaults
   const currentDevice = globalPreviewMode ?? 'desktop';
   const defaultCount = variant === 'homepage' 
     ? (currentDevice === 'mobile' ? 5 : currentDevice === 'tablet' ? 6 : 3)
     : 50;
-  // Defensive itemsToShow
   const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
 
   const filteredBlogs = useMemo(() => {
-    if (!Array.isArray(filteredBlogsTotal)) return [];
-    return filteredBlogsTotal.slice(0, itemsToShow);
-  }, [filteredBlogsTotal, itemsToShow]);
-
-  const featured = variant === 'homepage' 
-    ? (filteredBlogsTotal?.find((p) => p.featured) || filteredBlogsTotal?.[0])
-    : null; 
-  
-  const sidePosts = variant === 'homepage'
-    ? (Array.isArray(filteredBlogsTotal) ? filteredBlogsTotal.filter((p) => p && p.id !== featured?.id).slice(0, Math.max(0, itemsToShow - 1)) : [])
-    : filteredBlogs;
+    const base = activeTag === "All" ? blogs : blogs.filter((b) => b.tags?.includes(activeTag));
+    return base.slice(0, itemsToShow);
+  }, [blogs, activeTag, itemsToShow]);
 
   if (!isVisible && !isAdmin) return null;
 
@@ -168,18 +134,24 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     isVisible, 
     paddingTop: paddingTopData,
     paddingBottom: paddingBottomData,
+    title: titleData,
+    subtitle: subtitleData,
     itemsToShow: itemsToShowData,
     showSeeAll,
     seeAllLabel,
     seeAllLink,
-    columns
+    columns: columnsData
   };
 
-  const gridColsClass = 
-    columns === 1 ? 'md:grid-cols-1' :
-    columns === 2 ? 'md:grid-cols-2' :
-    columns === 3 ? 'md:grid-cols-3' :
-    'md:grid-cols-4';
+  const desktopCols = parseInt(getResponsiveValue(columnsData, 'desktop') || "3");
+  const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
+  const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
+
+  const gridColsClass = cn(
+    `grid-cols-${mobileCols}`,
+    `md:grid-cols-${tabletCols}`,
+    `lg:grid-cols-${desktopCols}`
+  );
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
@@ -187,16 +159,15 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
         id={sectionId} 
         className="px-6 md:px-12 bg-zinc-950 relative"
         style={{
-          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
+          paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`
         }}
       >
         <div 
           className="max-w-7xl mx-auto"
           style={{
-            paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
+            paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`
           }}
         >
-          {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -204,193 +175,69 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             transition={{ duration: 0.6 }}
             className="mb-16 flex flex-row items-end justify-between border-b border-zinc-900 pb-8"
           >
-            <div>
-              <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-zinc-50 mb-2">Blog</h2>
-              <p className="text-lg md:text-xl text-zinc-500 font-medium">Chia sẻ kiến thức</p>
+            <div className="flex flex-col gap-2">
+              <div 
+                className="font-bold tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                style={{ fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` }}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, globalPreviewMode || 'desktop') }} 
+              />
+              <div 
+                className="text-zinc-500 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                style={{ fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` }}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, globalPreviewMode || 'desktop') }} 
+              />
             </div>
-            
             {variant === 'homepage' && !showSeeAll && (
-              <Link 
-                href="/blog"
-                className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
-              >
+              <Link href="/blog" className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight">
                 Xem tất cả
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
           </motion.div>
 
-          {/* Tag Filters */}
           {!loading && blogs.length > 0 && (
             <div className="flex flex-wrap items-center gap-3 mb-10">
-              {allTags.map((tag) => {
-                const isActive = activeTag === tag;
-                return (
-                  <button
-                    key={tag}
-                    onClick={() => setActiveTag(tag)}
-                    className={cn(
-                      "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
-                      isActive
-                        ? "bg-zinc-50 text-zinc-950 border-zinc-50"
-                        : "bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-zinc-200"
-                    )}
-                  >
-                    {tag}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Blog Grid Content */}
-          {!loading && filteredBlogs.length > 0 && (
-            <div className="flex flex-col gap-12">
-              {/* Layout for Homepage */}
-              {variant === 'homepage' && (
-                <div className={cn(
-                  "grid grid-cols-1 gap-8 lg:gap-12",
-                  // Only use special layout on desktop when columns is 3
-                  columns === 3 ? "lg:grid-cols-12" : gridColsClass
-                )}>
-                  
-                  {/* FEATURED POST (LARGE) - Special layout only on desktop and only if columns is 3 */}
-                  {columns === 3 ? (
-                    <>
-                      {/* Featured (Lg) on Desktop */}
-                      <div className="hidden lg:block lg:col-span-8">
-                        {featured && (
-                          <motion.article
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="group"
-                          >
-                            <Link href={`/blog/${featured.slug}`} className="block">
-                              <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800/50">
-                                <img
-                                  src={featured.image_url}
-                                  alt={featured.title}
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                  <span className="flex items-center gap-2 px-6 py-3 border border-zinc-50 rounded-full text-sm font-medium text-zinc-50 backdrop-blur-md bg-white/10">
-                                    Đọc bài viết
-                                    <ArrowUpRight className="w-4 h-4" />
-                                  </span>
-                                </div>
-                              </div>
-
-                              <div className="mt-8">
-                                <div className="flex items-center gap-3 mb-4">
-                                  {featured.tags?.slice(0, 2).map((tag) => (
-                                    <span
-                                      key={tag}
-                                      className="text-[10px] px-3 py-1 bg-violet-500/10 text-violet-400 rounded-full border border-violet-500/20 font-bold tracking-widest uppercase"
-                                    >
-                                      {tag}
-                                    </span>
-                                  ))}
-                                  <span className="text-[10px] text-zinc-600 font-bold tracking-widest uppercase ml-auto">
-                                    {new Date(featured.created_at).toLocaleDateString("vi-VN")}
-                                  </span>
-                                </div>
-                                <h3 className="text-3xl lg:text-5xl font-bold text-zinc-100 group-hover:text-white transition-colors leading-tight mb-4 tracking-tighter">
-                                  {featured.title}
-                                </h3>
-                                <p className="text-zinc-500 text-lg leading-relaxed line-clamp-2">
-                                  {featured.excerpt}
-                                </p>
-                              </div>
-                            </Link>
-                          </motion.article>
-                        )}
-                      </div>
-
-                      {/* Side Posts on Desktop */}
-                      <div className="hidden lg:block lg:col-span-4">
-                        <div className="grid grid-cols-1 gap-8">
-                          {sidePosts.slice(0, 2).map((post, index) => (
-                            <motion.article
-                              key={post.id}
-                              initial={{ opacity: 0, x: 20 }}
-                              whileInView={{ opacity: 1, x: 0 }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-                              className="group"
-                            >
-                              <Link href={`/blog/${post.slug}`} className="flex flex-col gap-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 hover:bg-zinc-800/50 transition-all">
-                                <div className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0">
-                                  <img
-                                    src={post.image_url}
-                                    alt={post.title}
-                                    referrerPolicy="no-referrer"
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                  />
-                                </div>
-                                <div className="flex flex-col justify-center">
-                                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
-                                    {post.tags?.[0] || "Blog"}
-                                  </span>
-                                  <h4 className="text-xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2">
-                                    {post.title}
-                                  </h4>
-                                  <p className="text-zinc-500 text-sm mt-3 line-clamp-2">
-                                    {post.excerpt}
-                                  </p>
-                                </div>
-                              </Link>
-                            </motion.article>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    /* Regular Dynamic Grid for other column counts on Desktop */
-                    <div className={cn("hidden lg:grid gap-8 w-full", gridColsClass, "col-span-full")}>
-                      {filteredBlogs.map((post, index) => (
-                        <BlogCard key={post.id} post={post} index={index} />
-                      ))}
-                    </div>
+              {BLOG_TAGS.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(tag)}
+                  className={cn(
+                    "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
+                    activeTag === tag
+                      ? "bg-zinc-50 text-zinc-950 border-zinc-50"
+                      : "bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-zinc-200"
                   )}
-
-                  {/* TABLET & MOBILE: Always uniform full-width grid */}
-                  <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-8 col-span-full">
-                    {filteredBlogs.map((post, index) => (
-                      <BlogCard key={post.id} post={post} index={index} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Subpage or standard layout */}
-              {variant === 'subpage' && (
-                <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8", gridColsClass)}>
-                  {filteredBlogs.map((post, index) => (
-                    <BlogCard key={post.id} post={post} index={index} />
-                  ))}
-                </div>
-              )}
+                >
+                  {tag}
+                </button>
+              ))}
             </div>
           )}
 
-          {/* See All Button at Bottom */}
-          {(showSeeAll || (variant === 'homepage')) && (
+          {!loading && filteredBlogs.length > 0 && (
+            <div className={cn(
+              "grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12",
+              gridColsClass
+            )}>
+              {filteredBlogs.map((post, index) => (
+                <BlogCard 
+                  key={post.id} 
+                  post={post} 
+                  index={index} 
+                  isFeatured={variant === 'homepage' && index === 0 && currentDevice === 'desktop' && desktopCols === 3}
+                />
+              ))}
+            </div>
+          )}
+
+          {(showSeeAll || variant === 'homepage') && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className={cn(
-                "mt-20 flex justify-center",
-                !showSeeAll && "lg:hidden" // Hide on desktop if not explicitly enabled (as it's in the header)
-              )}
+              className={cn("mt-20 flex justify-center", !showSeeAll && "lg:hidden")}
             >
-              <Link 
-                href={seeAllLink}
-                className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
-              >
+              <Link href={seeAllLink} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
                   {seeAllLabel}
@@ -402,7 +249,6 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             </motion.div>
           )}
 
-          {/* Empty state */}
           {!loading && filteredBlogs.length === 0 && blogs.length > 0 && (
             <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl">
               <p className="text-zinc-500 text-lg">Không có bài viết nào với tag &quot;{activeTag}&quot;</p>
@@ -414,18 +260,27 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   );
 }
 
-// Helper Card Template
-function BlogCard({ post, index }: { post: DbBlog; index: number }) {
+function BlogCard({ post, index, isFeatured }: { post: DbBlog; index: number; isFeatured?: boolean }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group flex flex-col gap-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 hover:bg-zinc-800/50 transition-all duration-300"
+      className={cn(
+        "group flex bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300",
+        isFeatured 
+          ? "col-span-1 lg:col-span-2 row-span-2 flex-col lg:flex-row p-0 overflow-hidden" 
+          : "flex-col p-5 hover:bg-zinc-800/50"
+      )}
     >
-      <Link href={`/blog/${post.slug}`} className="block">
-        <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800 mb-6">
+      <Link href={`/blog/${post.slug}`} className={cn("flex w-full h-full", isFeatured ? "flex-col lg:flex-row" : "flex-col")}>
+        <div className={cn(
+          "overflow-hidden bg-zinc-800",
+          isFeatured 
+            ? "w-full lg:w-3/5 h-[300px] lg:h-auto" 
+            : "w-full aspect-video rounded-2xl mb-6"
+        )}>
           <img
             src={post.image_url}
             alt={post.title}
@@ -433,18 +288,34 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </div>
-        <div className="flex flex-col">
+        <div className={cn(
+          "flex flex-col justify-center",
+          isFeatured ? "p-8 lg:p-12 w-full lg:w-2/5" : ""
+        )}>
           <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
             <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
             <span>{post.tags?.[0] || "Blog"}</span>
           </div>
-          <h3 className="text-2xl font-bold text-zinc-100 mb-3 group-hover:text-white transition-colors leading-tight line-clamp-2">
+          <h3 className={cn(
+            "font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight",
+            isFeatured ? "text-3xl lg:text-4xl" : "text-2xl line-clamp-2"
+          )}>
             {post.title}
           </h3>
-          <p className="text-zinc-500 text-base line-clamp-2 leading-relaxed">
+          <p className={cn(
+            "text-zinc-500 leading-relaxed",
+            isFeatured ? "text-lg line-clamp-3" : "text-base line-clamp-2"
+          )}>
             {post.excerpt}
           </p>
+          
+          {isFeatured && (
+            <div className="mt-8 flex items-center gap-2 text-white font-bold text-sm uppercase tracking-wider">
+              Đọc tiếp
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          )}
         </div>
       </Link>
     </motion.article>

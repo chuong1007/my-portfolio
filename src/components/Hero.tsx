@@ -1,12 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
+const normalize = (val: any): RichTextData => {
+  if (typeof val === 'object' && val !== null && 'content' in val) return val;
+  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+};
 
 type HeroProps = {
   sectionId?: string;
@@ -25,12 +29,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [logoColor, setLogoColor] = useState('#FFFFFF');
   const { isAdmin, globalPreviewMode } = useAdmin();
 
-  const fetchContent = async () => {
-    const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
-    };
-
+  const fetchContent = useCallback(async () => {
     const supabase = createClient();
     try {
       const { data } = await supabase
@@ -38,47 +37,48 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         .select("data")
         .eq("id", sectionId)
         .single();
-
+ 
       if (data?.data) {
         const d = data.data as any;
-        // Keep raw data (could be string or responsive object)
         if (d.title !== undefined) setTitleData(normalize(d.title));
         if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
+        
+        // Preserve responsive objects if they exist
         if (d.logoType) setLogoType(d.logoType);
-        if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
-        if (d.logoColor) setLogoColor(typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : d.logoColor);
-        if (d.logoImageUrl) setLogoImageUrl(typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : d.logoImageUrl);
+        if (d.logoText) setLogoText(d.logoText);
+        if (d.logoColor) setLogoColor(d.logoColor);
+        if (d.logoImageUrl) setLogoImageUrl(d.logoImageUrl);
+        
+        if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
+        if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+        if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
       }
     } catch (error) {
       console.error("Error fetching hero content:", error);
     }
-  };
+  }, [sectionId]);
 
   useEffect(() => {
     fetchContent();
   }, []);
 
   // Listen for real-time preview updates from AdminModal
+  const applyUpdate = useCallback((d: any) => {
+    console.log("Hero receiving live update:", d);
+    if (d.isVisible !== undefined) setIsVisible(d.isVisible);
+    if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
+    if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+    if (d.title !== undefined) setTitleData(normalize(d.title));
+    if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
+    if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
+    if (d.logoText !== undefined) setLogoText(d.logoText);
+    if (d.logoImageUrl !== undefined) setLogoImageUrl(d.logoImageUrl);
+    if (d.logoColor !== undefined) setLogoColor(d.logoColor);
+    if (d.logoType !== undefined) setLogoType(d.logoType);
+  }, []);
+
   useEffect(() => {
-    const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
-    };
-
-    const applyUpdate = (d: any) => {
-      // Mark that we are receiving realtime data to prevent fetchContent from overwriting
-      (window as any)._heroRealtimeLoaded = true;
-      
-      if (d.title !== undefined) setTitleData(normalize(d.title));
-      if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
-      if (d.isVisible !== undefined) setIsVisible(d.isVisible);
-      if (d.logoType) setLogoType(d.logoType);
-      if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
-      if (d.logoColor) setLogoColor(typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : d.logoColor);
-      if (d.logoImageUrl) setLogoImageUrl(typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : d.logoImageUrl);
-    };
-
     const handlePreviewUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail.sectionId === sectionId) {
@@ -99,7 +99,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
       window.removeEventListener('previewUpdate', handlePreviewUpdate);
       window.removeEventListener('message', handleParentMessage);
     };
-  }, [sectionId]);
+  }, [sectionId, applyUpdate]);
 
   if (!isVisible && !isAdmin) return null;
 
@@ -139,19 +139,16 @@ const formatFs = (val: string, fallback: string) => {
       initialData={initialData} 
       onSave={fetchContent}
       isVisible={isVisible}
+      controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center px-6 text-center min-h-[70vh]"
+        className="relative flex flex-col items-center px-6 text-center min-h-[90vh]"
         style={{
+          paddingTop: `${180 + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
-        <div 
-          className="flex-1 flex flex-col items-center justify-start w-full"
-          style={{
-            paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
-          }}
-        >
+        <div className="flex-1 flex flex-col items-center justify-center w-full">
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -169,11 +166,11 @@ const formatFs = (val: string, fallback: string) => {
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <span className="hidden lg:inline-block w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
+            <div className="hidden lg:block w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline lg:[&_p]:block" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
             {/* Tablet variant */}
-            <span className="hidden md:inline-block lg:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
+            <div className="hidden md:block lg:hidden w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
             {/* Mobile variant */}
-            <span className="inline-block md:hidden w-full whitespace-pre-line" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
+            <div className="block md:hidden w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
           </motion.h1>
         </div>
         
@@ -189,18 +186,18 @@ const formatFs = (val: string, fallback: string) => {
           } as React.CSSProperties}
         >
           {/* Subtitle with responsive variants */}
-          <span 
-            className="uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" 
+          <div 
+            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-line [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-desk)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'desktop') }} 
           />
-          <span 
-            className="uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" 
+          <div 
+            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-line [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-tab)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'tablet') }} 
           />
-          <span 
-            className="uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" 
+          <div 
+            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-line [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-mob)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'mobile') }} 
           />

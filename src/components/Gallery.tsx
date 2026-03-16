@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { getAllProjects } from "@/lib/data";
@@ -11,25 +11,14 @@ import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
+import type { RichTextData } from "./RichTextEditor";
+
+const normalize = (val: any): RichTextData => {
+  if (typeof val === 'object' && val !== null && 'content' in val) return val;
+  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+};
 
 const CATEGORIES = ["All", "Poster", "Branding", "Logo Design", "UX/UI"];
-
-// Không cần hardcode Aspect Ratio nữa vì sẽ dùng size thật của ảnh
-// nhưng ta cứ giữ mảng này đề phòng cần dùng
-const ASPECT_RATIOS = [
-  "3/4",
-  "4/3",
-  "2/3",
-  "1/1",
-  "3/5",
-  "5/4",
-  "9/16",
-  "4/5",
-  "3/2",
-  "5/7",
-  "1/1",
-  "7/5",
-];
 
 // Use cached projects from data layer
 const MOCK_PROJECTS = getAllProjects();
@@ -48,19 +37,20 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả dự án");
   const [seeAllLink, setSeeAllLink] = useState("/projects");
   const [dbProjects, setDbProjects] = useState<any[]>([]);
+  const [titleData, setTitleData] = useState<RichTextData>({ content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 } });
+  const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
-  const fetchContent = async () => {
-    // Prevent overwrite if realtime data is already active
-    if ((window as any)._galleryRealtimeActive) return;
-
+  const fetchContent = useCallback(async () => {
     try {
       const supabase = createClient();
       
-      // Fetch Visibility & Padding Settings
       const { data: sectionData } = await supabase.from('site_content').select('data').eq('id', sectionId).single();
       if (sectionData?.data) {
         const d = sectionData.data as any;
+        if (d.title !== undefined) setTitleData(normalize(d.title));
+        if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -68,9 +58,9 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
         if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
         if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
         if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+        if (d.columns !== undefined) setColumnsData(d.columns);
       }
 
-      // Fetch Real Projects
       const { data: projectsData } = await supabase
         .from('projects')
         .select('*')
@@ -82,16 +72,17 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     } catch (e) {
       console.error("Gallery section error:", e);
     }
-  };
+  }, [sectionId]);
 
   useEffect(() => {
     fetchContent();
-  }, []);
+  }, [fetchContent]);
 
-  // Listen for real-time preview updates from AdminModal
   useEffect(() => {
     const applyUpdate = (d: any) => {
       (window as any)._galleryRealtimeActive = true;
+      if (d.title !== undefined) setTitleData(normalize(d.title));
+      if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -99,6 +90,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
       if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
       if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
       if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
+      if (d.columns !== undefined) setColumnsData(d.columns);
     };
 
     const handlePreviewUpdate = (e: Event) => {
@@ -123,14 +115,15 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     };
   }, [sectionId]);
 
-  const projectsToDisplay = dbProjects.length > 0 
-    ? dbProjects.filter(p => isAdmin || p.is_visible) // In admin mode show all, public shows visible only
-    : MOCK_PROJECTS;
+  const projectsToDisplay = useMemo(() => {
+    return dbProjects.length > 0 
+      ? dbProjects.filter(p => isAdmin || p.is_visible)
+      : MOCK_PROJECTS;
+  }, [dbProjects, isAdmin]);
 
   const filteredProjects = useMemo(() => {
     const base = projectsToDisplay.map(p => ({
       ...p,
-      // Map database field names to what the UI expects
       imageUrl: p.cover_image || p.imageUrl, 
       tags: p.tags || []
     }));
@@ -139,19 +132,6 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     return base.filter((p) => p.tags.includes(activeCategory));
   }, [activeCategory, projectsToDisplay]);
 
-  if (!isVisible && !isAdmin) return null;
-
-  const initialData = { 
-    isVisible, 
-    paddingTop: paddingTopData,
-    paddingBottom: paddingBottomData,
-    itemsToShow: itemsToShowData,
-    showSeeAll,
-    seeAllLabel,
-    seeAllLink
-  };
-
-  // Get items count based on responsive value or defaults
   const currentDevice = globalPreviewMode ?? 'desktop';
   const defaultCount = currentDevice === 'mobile' ? 4 : currentDevice === 'tablet' ? 6 : 16;
   const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
@@ -160,6 +140,31 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     if (!Array.isArray(filteredProjects)) return [];
     return filteredProjects.slice(0, itemsToShow);
   }, [filteredProjects, itemsToShow]);
+
+  if (!isVisible && !isAdmin) return null;
+
+  const initialData = { 
+    isVisible, 
+    paddingTop: paddingTopData,
+    paddingBottom: paddingBottomData,
+    title: titleData,
+    subtitle: subtitleData,
+    itemsToShow: itemsToShowData,
+    showSeeAll,
+    seeAllLabel,
+    seeAllLink,
+    columns: columnsData
+  };
+
+    const desktopCols = parseInt(getResponsiveValue(columnsData, 'desktop') || "3");
+    const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
+    const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
+
+    const gridColsClass = cn(
+      `grid-cols-${mobileCols}`,
+      `md:grid-cols-${tabletCols}`,
+      `lg:grid-cols-${desktopCols}`
+    );
 
   return (
     <SectionEditor 
@@ -184,13 +189,13 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
         id="projects" 
         className="px-6 md:px-12 bg-zinc-950 relative"
         style={{
-          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
+          paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`
         }}
       >
         <div 
           className="max-w-7xl mx-auto"
           style={{
-            paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
+            paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`
           }}
         >
           {/* Section Header */}
@@ -202,11 +207,18 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             className="mb-12 flex items-end justify-between gap-4"
           >
             <div className="flex flex-col gap-2">
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-zinc-50">Dự án</h2>
-              <p className="text-zinc-500 text-lg">Các dự án thiết kế nổi bật</p>
+              <div 
+                className="font-bold tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                style={{ fontSize: `${titleData.fontSize?.[currentDevice] || 48}px` }}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, currentDevice) }} 
+              />
+              <div 
+                className="text-zinc-500 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                style={{ fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px` }}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, currentDevice) }} 
+              />
             </div>
 
-            {/* Desktop header See All */}
             {!showSeeAll && (
               <Link 
                 href="/projects"
@@ -239,78 +251,66 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             })}
           </div>
  
-          {/* Structured Responsive Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-            {displayedProjects.map((project, index) => {
-              return (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "50px" }}
-                  transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
-                  className="group flex flex-col gap-3"
-                >
-                  <Link
-                    href={`/project/${project.id}`}
-                    className="group flex flex-col gap-3"
-                  >
-                    {/* Image Container — removes forced aspectRatio so it flows naturally */}
-                    {/* Image Container with fixed aspect-ratio for 'equal' columns */}
-                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
-                      {/* Aspect Ratio block is handled by image dimensions normally, but we use natural h-auto */}
-                      <img
-                        src={project.imageUrl}
-                        alt={project.title}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className={cn(
-                          "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
-                          isAdmin && project.is_visible === false && "opacity-40 grayscale"
-                        )}
-                      />
- 
-                      {/* Hidden Indicator for Admin */}
-                      {isAdmin && project.is_visible === false && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
-                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                          Đang ẩn
-                        </div>
+          <div className={cn(
+            "grid gap-6 md:gap-8",
+            gridColsClass
+          )}>
+            {displayedProjects.map((project, index) => (
+              <motion.div
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "50px" }}
+                transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
+                className="group flex flex-col gap-3"
+              >
+                <Link href={`/project/${project.id}`} className="group flex flex-col gap-3">
+                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                    <img
+                      src={project.imageUrl}
+                      alt={project.title}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                      className={cn(
+                        "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
+                        isAdmin && project.is_visible === false && "opacity-40 grayscale"
                       )}
- 
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
-                          {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </span>
+                    />
+                    {isAdmin && project.is_visible === false && (
+                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
+                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                        Đang ẩn
                       </div>
+                    )}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
+                        {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
- 
-                    {/* Project Meta */}
-                    <div className="px-1">
-                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-sm text-zinc-500 mt-1">
-                        {project.tags.join(", ")}
-                      </p>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
+                  </div>
+                  <div className="px-1">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
+                      {project.title}
+                    </h3>
+                    <p className="text-sm text-zinc-500 mt-1">
+                      {project.tags.join(", ")}
+                    </p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
           </div>
- 
-          {/* See All Button / Fallback mobile link */}
+
+          {/* See All */}
           {(showSeeAll || !showSeeAll) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className={cn(
-                "mt-16 flex justify-center",
-                !showSeeAll && "lg:hidden" // Hide on desktop if not explicitly enabled (as it's in the header)
+                "mt-20 flex justify-center",
+                !showSeeAll && "lg:hidden"
               )}
             >
               {showSeeAll ? (
@@ -320,8 +320,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                  {typeof seeAllLabel === 'string' ? seeAllLabel : String(seeAllLabel)}
-                </span>
+                    {seeAllLabel}
+                  </span>
                   <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg]">
                     <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
                   </div>
@@ -348,4 +348,3 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     </SectionEditor>
   );
 }
-

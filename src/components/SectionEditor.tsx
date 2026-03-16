@@ -15,9 +15,10 @@ type SectionEditorProps = {
   onSave: () => void;
   isVisible?: boolean;
   extraActions?: React.ReactNode;
+  controlsOffset?: string; // e.g. "top-20" or "mt-16"
 };
 
-export function SectionEditor({ sectionId, children, initialData, onSave, isVisible = true, extraActions }: SectionEditorProps) {
+export function SectionEditor({ sectionId, children, initialData, onSave, isVisible = true, extraActions, controlsOffset = "top-4" }: SectionEditorProps) {
   const { isAdmin, isEditMode, openEditor } = useAdmin();
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -28,8 +29,17 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
         onSave(); // Parent re-fetch
       }
     };
+    
+    const handleLocalUpdate = () => {
+      onSave(); // Parent re-fetch
+    };
+
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener('contentUpdated', handleLocalUpdate);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('contentUpdated', handleLocalUpdate);
+    };
   }, [onSave]);
 
   const handleOpenEditor = () => {
@@ -85,20 +95,28 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
   if (!isAdmin || !isEditMode) return <>{children}</>;
 
   return (
-    <div className={cn(
-      "relative group/section transition-all duration-300",
-      !isVisible && "opacity-40 grayscale-[0.5] hover:opacity-60"
-    )}>
+    <div className="relative group/section transition-all duration-300">
+      {/* Section Content */}
+      <div className={cn(
+        "transition-all duration-300",
+        !isVisible && "opacity-40 grayscale-[0.5] hover:opacity-60"
+      )}>
+        {children}
+      </div>
+
       {/* Hidden Indicator */}
       {!isVisible && (
-        <div className="absolute top-4 left-4 z-50 bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none">
+        <div className="absolute top-4 left-4 z-[70] bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none">
           <div className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />
           <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Hidden Section</span>
         </div>
       )}
 
       {/* Admin Controls Overlay */}
-      <div className="absolute top-4 right-4 z-50 flex items-center gap-2 opacity-0 group-hover/section:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/section:translate-y-0">
+      <div className={cn(
+        "absolute right-4 z-[80] flex items-center gap-2 opacity-0 group-hover/section:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/section:translate-y-0",
+        controlsOffset
+      )}>
         {/* Extra Actions Integration */}
         {extraActions && (
           <div className="flex items-center gap-2 mr-1">
@@ -111,7 +129,7 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
           onClick={handleToggleVisibility}
           disabled={isUpdating}
           className={cn(
-            "p-3 rounded-full backdrop-blur-md border transition-all duration-300 shadow-xl",
+            "p-3 rounded-full backdrop-blur-md border transition-all duration-300 shadow-xl pointer-events-auto",
             isVisible 
               ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border-emerald-500/20" 
               : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700"
@@ -124,14 +142,12 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
         {/* Edit Button */}
         <button
           onClick={handleOpenEditor}
-          className="bg-white text-black p-3 rounded-full border border-white/20 hover:bg-zinc-200 transition-all duration-300 shadow-xl"
+          className="bg-white text-black p-3 rounded-full border border-white/20 hover:bg-zinc-200 transition-all duration-300 shadow-xl pointer-events-auto"
           title="Chỉnh sửa nội dung"
         >
           <Pencil className="w-5 h-5" />
         </button>
       </div>
-
-      {children}
     </div>
   );
 }

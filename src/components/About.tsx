@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,10 @@ import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
+const normalize = (val: any): RichTextData => {
+  if (typeof val === 'object' && val !== null && 'content' in val) return val;
+  return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
+};
 
 const DEFAULTS = {
   heading: { content: "About", fontSize: { desktop: 30, tablet: 24, mobile: 18 } },
@@ -36,22 +40,9 @@ export function About({ sectionId = "about" }: AboutProps) {
   const [loaded, setLoaded] = useState(false);
   const { isAdmin, globalPreviewMode } = useAdmin();
 
-  const fetchContent = async () => {
-    // Prevent overwrite if realtime data is already active
-    if ((window as any)._aboutRealtimeActive) return;
-
-    const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
-    };
-
-    try {
-      const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
-    };
-
+  const fetchContent = useCallback(async () => {
     const supabase = createClient();
+    try {
       const { data } = await supabase
         .from("site_content")
         .select("data")
@@ -60,15 +51,15 @@ export function About({ sectionId = "about" }: AboutProps) {
 
       if (data?.data) {
         const d = data.data as { 
-          heading?: string; 
-          subheading?: string; 
-          paragraphs?: string[]; 
+          heading?: any; 
+          subheading?: any; 
+          paragraphs?: any[]; 
           isVisible?: boolean;
           paddingTop?: ResponsiveValue;
           paddingBottom?: ResponsiveValue;
         };
-        if (d.heading) setHeading(normalize(d.heading));
-        if (d.subheading) setSubheading(normalize(d.subheading));
+        if (d.heading !== undefined) setHeading(normalize(d.heading));
+        if (d.subheading !== undefined) setSubheading(normalize(d.subheading));
         if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0) {
           setParagraphs(d.paragraphs.map(p => normalize(p)));
         }
@@ -80,29 +71,22 @@ export function About({ sectionId = "about" }: AboutProps) {
       // Use defaults if table doesn't exist yet
     }
     setLoaded(true);
-  };
+  }, [sectionId]);
 
   useEffect(() => {
     fetchContent();
   }, []);
 
-  // Listen for real-time preview updates from AdminModal
+  const applyUpdate = useCallback((d: any) => {
+    if (d.heading !== undefined) setHeading(normalize(d.heading));
+    if (d.subheading !== undefined) setSubheading(normalize(d.subheading));
+    if (d.paragraphs !== undefined) setParagraphs(Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => normalize(p)) : []);
+    if (d.isVisible !== undefined) setIsVisible(d.isVisible);
+    if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
+    if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+  }, []);
+
   useEffect(() => {
-    const normalize = (val: any): RichTextData => {
-      if (typeof val === 'object' && val !== null && 'content' in val) return val;
-      return { content: val || '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } };
-    };
-
-    const applyUpdate = (d: any) => {
-      (window as any)._aboutRealtimeActive = true;
-      if (d.heading !== undefined) setHeading(normalize(d.heading));
-      if (d.subheading !== undefined) setSubheading(normalize(d.subheading));
-      if (d.paragraphs !== undefined) setParagraphs(Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => normalize(p)) : []);
-      if (d.isVisible !== undefined) setIsVisible(d.isVisible);
-      if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
-      if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-    };
-
     const handlePreviewUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail.sectionId === sectionId) {
@@ -123,7 +107,7 @@ export function About({ sectionId = "about" }: AboutProps) {
       window.removeEventListener('previewUpdate', handlePreviewUpdate);
       window.removeEventListener('message', handleParentMessage);
     };
-  }, [sectionId]);
+  }, [sectionId, applyUpdate]);
 
   if (loaded && !isVisible && !isAdmin) return null;
 
