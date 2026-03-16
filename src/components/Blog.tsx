@@ -197,12 +197,18 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             <div className="flex flex-col gap-2">
               <div 
                 className="font-bold tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-                style={{ fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` }}
+                style={{ 
+                  fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px`,
+                  lineHeight: titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.2'
+                }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, globalPreviewMode || 'desktop') }} 
               />
               <div 
                 className="text-zinc-500 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-                style={{ fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` }}
+                style={{ 
+                  fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
+                  lineHeight: subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5'
+                }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, globalPreviewMode || 'desktop') }} 
               />
             </div>

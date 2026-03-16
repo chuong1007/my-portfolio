@@ -119,6 +119,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       seeAllLink: normResp(initialData?.seeAllLink, ''),
       seeAllLabel: normResp(initialData?.seeAllLabel, ''),
       showSeeAll: normResp(initialData?.showSeeAll, false),
+      seeAllPosition: normResp(initialData?.seeAllPosition, 'bottom'),
     });
   }, [initialData, isOpen]);
 
@@ -180,34 +181,40 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
     setLoading(true);
     setError(null);
     
-    const supabase = createClient();
-    const finalData = { ...data };
-    
-    // Normalize Facebook link
-    if (finalData.facebook && !finalData.facebook.startsWith('http')) {
-      finalData.facebook = `https://${finalData.facebook}`;
-    }
-
-    console.log("Saving payload for section:", sectionId, finalData);
-
-    const { error: saveError } = await supabase
-      .from('site_content')
-      .upsert({ id: sectionId, data: finalData, updated_at: new Date().toISOString() });
-
-    if (!saveError) {
-      window.dispatchEvent(new Event('contentUpdated'));
-      onSave();
-      onClose();
-    } else {
-      const msg = saveError.message;
-      if (msg.includes("site_content") || msg.includes("cache")) {
-        setError("Lỗi: Bảng 'site_content' chưa tồn tại. Vui lòng chạy mã trong file 'supabase_setup.sql' tại Supabase SQL Editor.");
-      } else {
-        setError(`Lỗi: ${msg}`);
+    try {
+      const supabase = createClient();
+      const finalData = { ...data };
+      
+      // Normalize Facebook link
+      if (finalData.facebook && typeof finalData.facebook === 'string' && !finalData.facebook.startsWith('http')) {
+        finalData.facebook = `https://${finalData.facebook}`;
       }
-      console.error("Save Error:", saveError);
+
+      console.log("Saving payload for section:", sectionId, finalData);
+
+      const { error: saveError } = await supabase
+        .from('site_content')
+        .upsert({ id: sectionId, data: finalData, updated_at: new Date().toISOString() });
+
+      if (!saveError) {
+        window.dispatchEvent(new Event('contentUpdated'));
+        onSave();
+        onClose();
+      } else {
+        const msg = saveError.message;
+        if (msg.includes("site_content") || msg.includes("cache")) {
+          setError("Lỗi: Bảng 'site_content' chưa tồn tại. Vui lòng chạy mã trong file 'supabase_setup.sql' tại Supabase SQL Editor.");
+        } else {
+          setError(`Lỗi: ${msg}`);
+        }
+        console.error("Save Error:", saveError);
+      }
+    } catch (err) {
+      console.error("Critical Save Error:", err);
+      setError(`Lỗi hệ thống: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

@@ -229,12 +229,18 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             <div className="flex flex-col gap-2">
               <div 
                 className="font-bold tracking-tighter text-zinc-50 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-                style={{ fontSize: `${titleData.fontSize?.[currentDevice] || 48}px` }}
+                style={{ 
+                  fontSize: `${titleData.fontSize?.[currentDevice] || 48}px`,
+                  lineHeight: titleData.lineHeight?.[currentDevice] || '1.1'
+                }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, currentDevice) }} 
               />
               <div 
                 className="text-zinc-500 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-                style={{ fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px` }}
+                style={{ 
+                  fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px`,
+                  lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5'
+                }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, currentDevice) }} 
               />
             </div>
