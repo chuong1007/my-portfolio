@@ -45,6 +45,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
   const [logoImageUrl, setLogoImageUrl] = useState('');
   const [logoColor, setLogoColor] = useState('#FFFFFF');
+  const [logoHeight, setLogoHeight] = useState<ResponsiveValue>("40");
   const { isAdmin, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
@@ -67,6 +68,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         if (d.logoText) setLogoText(d.logoText);
         if (d.logoColor) setLogoColor(d.logoColor);
         if (d.logoImageUrl) setLogoImageUrl(d.logoImageUrl);
+        if (d.logoHeight) setLogoHeight(d.logoHeight);
         
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
@@ -96,6 +98,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     if (d.logoImageUrl !== undefined) setLogoImageUrl(d.logoImageUrl);
     if (d.logoColor !== undefined) setLogoColor(d.logoColor);
     if (d.logoType !== undefined) setLogoType(d.logoType);
+    if (d.logoHeight !== undefined) setLogoHeight(d.logoHeight);
   }, []);
 
   useEffect(() => {
@@ -144,7 +147,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     logoType,
     logoText,
     logoColor,
-    logoImageUrl
+    logoImageUrl,
+    logoHeight,
   };
 
 // Helper to add px if it's just a number

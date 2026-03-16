@@ -72,57 +72,77 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   const DeviceIcon = DEVICE_ICONS[globalPreviewMode];
   const [loading, setLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   useEffect(() => {
-    // Generic normalizer for responsive values
-    const normResp = (val: any, fallback: any = ''): any => {
-      if (typeof val === 'object' && val !== null && ('mobile' in val || 'tablet' in val || 'desktop' in val)) return val;
-      return { mobile: val || fallback, tablet: val || fallback, desktop: val || fallback };
-    };
+    if (isOpen && !isInitialized) {
+      if (!initialData) return;
 
-    setData({
-      ...initialData,
-      title: normalize(initialData?.title),
-      subtitle: normalize(initialData?.subtitle),
-      heading: normalize(initialData?.heading),
-      subheading: normalize(initialData?.subheading),
-      paragraphs: Array.isArray(initialData?.paragraphs) ? initialData.paragraphs.map((p: any) => normalize(p)) : [],
-      
-      // Responsive identity fields
-      phone: normResp(initialData?.phone, ''),
-      email: normResp(initialData?.email, ''),
-      facebook: normResp(initialData?.facebook, ''),
-      facebookLabel: normResp(initialData?.facebookLabel, 'Visit Profile'),
-      showFacebook: normResp(initialData?.showFacebook, true),
-      zalo: normResp(initialData?.zalo, ''),
-      zaloLabel: normResp(initialData?.zaloLabel, 'Chat on Zalo'),
-      showZalo: normResp(initialData?.showZalo, true),
-      showPhone: normResp(initialData?.showPhone, true),
-      showEmail: normResp(initialData?.showEmail, true),
-      isVisible: normResp(initialData?.isVisible, true),
+      // Generic normalizer for responsive values
+      const normResp = (val: any, fallback: any = ''): any => {
+        if (typeof val === 'object' && val !== null && ('mobile' in val || 'tablet' in val || 'desktop' in val)) return val;
+        return { mobile: val || fallback, tablet: val || fallback, desktop: val || fallback };
+      };
 
-      // Logo settings
-      logoType: normResp(initialData?.logoType, 'text'),
-      logoText: normResp(initialData?.logoText, 'CHUONG.GRAPHIC'),
-      logoColor: normResp(initialData?.logoColor, '#FFFFFF'),
-      logoImageUrl: normResp(initialData?.logoImageUrl, ''),
+      setData({
+        ...initialData,
+        title: normalize(initialData?.title),
+        subtitle: normalize(initialData?.subtitle),
+        heading: normalize(initialData?.heading),
+        subheading: normalize(initialData?.subheading),
+        paragraphs: Array.isArray(initialData?.paragraphs) ? initialData.paragraphs.map((p: any) => normalize(p)) : [],
+        
+        // Responsive identity fields
+        phone: normResp(initialData?.phone, ''),
+        email: normResp(initialData?.email, ''),
+        facebook: normResp(initialData?.facebook, ''),
+        facebookLabel: normResp(initialData?.facebookLabel, 'Visit Profile'),
+        showFacebook: normResp(initialData?.showFacebook, true),
+        zalo: normResp(initialData?.zalo, ''),
+        zaloLabel: normResp(initialData?.zaloLabel, 'Chat on Zalo'),
+        showZalo: normResp(initialData?.showZalo, true),
+        showPhone: normResp(initialData?.showPhone, true),
+        showEmail: normResp(initialData?.showEmail, true),
+        isVisible: normResp(initialData?.isVisible, true),
 
-      // For UX Builder Blocks
-      type: initialData?.type || 'text',
-      span: initialData?.span || 12,
-      data: initialData?.data || { title: normalize(''), content: normalize('') },
-      
-      // Gallery/Blog settings
-      columns: normResp(initialData?.columns, { mobile: 1, tablet: 2, desktop: 3 }),
-      itemsToShow: normResp(initialData?.itemsToShow, { mobile: 4, tablet: 6, desktop: 16 }),
-      seeAllLink: normResp(initialData?.seeAllLink, ''),
-      seeAllLabel: normResp(initialData?.seeAllLabel, ''),
-      showSeeAll: normResp(initialData?.showSeeAll, false),
-      seeAllPosition: normResp(initialData?.seeAllPosition, 'bottom'),
-    });
-  }, [initialData, isOpen]);
+        // Logo settings
+        logoType: normResp(initialData?.logoType, 'text'),
+        logoText: normResp(initialData?.logoText, 'CHUONG.GRAPHIC'),
+        logoColor: normResp(initialData?.logoColor, '#FFFFFF'),
+        logoImageUrl: normResp(initialData?.logoImageUrl, ''),
+
+        // For UX Builder Blocks
+        type: initialData?.type || 'text',
+        span: initialData?.span || 12,
+        data: initialData?.data || { title: normalize(''), content: normalize('') },
+        
+        // Gallery/Blog settings
+        columns: normResp(initialData?.columns, { mobile: 1, tablet: 2, desktop: 3 }),
+        itemsToShow: normResp(initialData?.itemsToShow, { mobile: 4, tablet: 6, desktop: 16 }),
+        seeAllLink: normResp(initialData?.seeAllLink, ''),
+        seeAllLabel: normResp(initialData?.seeAllLabel, ''),
+        showSeeAll: normResp(initialData?.showSeeAll, false),
+        seeAllPosition: normResp(initialData?.seeAllPosition, 'bottom'),
+
+        // Hero specific responsive fields
+        paddingTop: normResp(initialData?.paddingTop, '0'),
+        paddingBottom: normResp(initialData?.paddingBottom, '0'),
+        scrollOffset: normResp(initialData?.scrollOffset, '48'),
+        paddingTopTextScroll: normResp(initialData?.paddingTopTextScroll, '0'),
+        logoHeight: normResp(initialData?.logoHeight, '40'),
+      });
+      setIsInitialized(true);
+    }
+  }, [initialData, isOpen, isInitialized]);
+
+  // Reset initialization when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setIsInitialized(false);
+    }
+  }, [isOpen]);
 
   const handleBlockDataChange = (newData: Record<string, any>) => {
     setData({ ...data, data: { ...data.data, ...newData } });
