@@ -129,6 +129,13 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     logoImageUrl
   };
 
+// Helper to add px if it's just a number
+const formatFs = (val: string, fallback: string) => {
+  if (!val) return fallback;
+  if (/^\d+$/.test(val.trim())) return `${val}px`;
+  return val;
+};
+
   return (
     <SectionEditor 
       sectionId={sectionId} 
@@ -157,9 +164,9 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
               "--mw-desk": `${getResponsiveValue(titleMaxWidthData, 'desktop') ?? 100}%`,
               "--mw-tab": `${getResponsiveValue(titleMaxWidthData, 'tablet') ?? 100}%`,
               "--mw-mob": `${getResponsiveValue(titleMaxWidthData, 'mobile') ?? 100}%`,
-              "--fs-desk": getResponsiveValue(titleFontSizeData, 'desktop') || '8rem',
-              "--fs-tab": getResponsiveValue(titleFontSizeData, 'tablet') || '3.75rem',
-              "--fs-mob": getResponsiveValue(titleFontSizeData, 'mobile') || '1.875rem',
+              "--fs-desk": formatFs(getResponsiveValue(titleFontSizeData, 'desktop'), '8rem'),
+              "--fs-tab": formatFs(getResponsiveValue(titleFontSizeData, 'tablet'), '3.75rem'),
+              "--fs-mob": formatFs(getResponsiveValue(titleFontSizeData, 'mobile'), '1.875rem'),
               maxWidth: "var(--mw-mob)",
               fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)'
             } as React.CSSProperties}
@@ -178,11 +185,28 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
           className="mt-12 mb-10 flex flex-col items-center gap-2 text-zinc-500"
+          style={{
+            "--fs-sub-desk": formatFs(getResponsiveValue(subtitleFontSizeData, 'desktop'), '10px'),
+            "--fs-sub-tab": formatFs(getResponsiveValue(subtitleFontSizeData, 'tablet'), '10px'),
+            "--fs-sub-mob": formatFs(getResponsiveValue(subtitleFontSizeData, 'mobile'), '10px'),
+          } as React.CSSProperties}
         >
           {/* Subtitle with responsive variants */}
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof desktopSubtitle === 'string' ? desktopSubtitle : String(desktopSubtitle) }} />
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof tabletSubtitle === 'string' ? tabletSubtitle : String(tabletSubtitle) }} />
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" dangerouslySetInnerHTML={{ __html: typeof mobileSubtitle === 'string' ? mobileSubtitle : String(mobileSubtitle) }} />
+          <span 
+            className="uppercase tracking-[0.2em] font-medium hidden lg:inline whitespace-pre-line" 
+            style={{ fontSize: "var(--fs-sub-desk)" }}
+            dangerouslySetInnerHTML={{ __html: typeof desktopSubtitle === 'string' ? desktopSubtitle : String(desktopSubtitle) }} 
+          />
+          <span 
+            className="uppercase tracking-[0.2em] font-medium hidden md:inline lg:hidden whitespace-pre-line" 
+            style={{ fontSize: "var(--fs-sub-tab)" }}
+            dangerouslySetInnerHTML={{ __html: typeof tabletSubtitle === 'string' ? tabletSubtitle : String(tabletSubtitle) }} 
+          />
+          <span 
+            className="uppercase tracking-[0.2em] font-medium inline md:hidden whitespace-pre-line" 
+            style={{ fontSize: "var(--fs-sub-mob)" }}
+            dangerouslySetInnerHTML={{ __html: typeof mobileSubtitle === 'string' ? mobileSubtitle : String(mobileSubtitle) }} 
+          />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div
               className="absolute top-0 w-full h-full bg-zinc-400"

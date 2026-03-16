@@ -294,25 +294,35 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Kích thước Title ({DEVICE_LABELS[globalPreviewMode]})</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Kích thước Title</label>
+                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.titleFontSize, globalPreviewMode) || 80}px</span>
+                  </div>
                   <input
-                    type="text"
-                    value={getResponsiveValue(data.titleFontSize, globalPreviewMode) || ''}
-                    placeholder="VD: 8xl, 5rem, 60px"
+                    type="range"
+                    min="10"
+                    max="200"
+                    step="1"
+                    value={getResponsiveValue(data.titleFontSize, globalPreviewMode) || "80"}
                     onChange={(e) => setData({ ...data, titleFontSize: setResponsiveValue(data.titleFontSize, globalPreviewMode, e.target.value) })}
-                    className="w-full bg-zinc-900 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:border-zinc-500 outline-none text-sm"
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Kích thước Subtitle ({DEVICE_LABELS[globalPreviewMode]})</label>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-zinc-400">Kích thước Subtitle</label>
+                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || 10}px</span>
+                  </div>
                   <input
-                    type="text"
-                    value={getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || ''}
-                    placeholder="VD: 12, 14, 1rem"
+                    type="range"
+                    min="8"
+                    max="60"
+                    step="1"
+                    value={getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || "10"}
                     onChange={(e) => setData({ ...data, subtitleFontSize: setResponsiveValue(data.subtitleFontSize, globalPreviewMode, e.target.value) })}
-                    className="w-full bg-zinc-900 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:border-zinc-500 outline-none text-sm"
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
               </div>
