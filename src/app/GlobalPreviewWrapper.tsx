@@ -43,7 +43,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Header />
+      {!isPreviewActive && <Header />}
 
       {isPreviewActive ? (
         // Device Frame Container
@@ -65,7 +65,8 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Scrollable Content Area */}
-            <div className="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <div className="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-zinc-950 relative">
+              <Header />
               <main className="min-h-full">
                 {children}
               </main>

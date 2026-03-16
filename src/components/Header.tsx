@@ -66,9 +66,9 @@ export function Header() {
           const hd = heroRow.data as any;
           setLogoConfig({
             type: hd?.logoType || 'text',
-            text: typeof hd?.logoText === 'object' ? getResponsiveValue(hd.logoText, 'desktop') : (hd?.logoText || 'CHUONG.GRAPHIC'),
-            url: typeof hd?.logoImageUrl === 'object' ? getResponsiveValue(hd.logoImageUrl, 'desktop') : (hd?.logoImageUrl || ''),
-            color: typeof hd?.logoColor === 'object' ? getResponsiveValue(hd.logoColor, 'desktop') : (hd?.logoColor || '#FFFFFF')
+            text: hd?.logoText || 'CHUONG.GRAPHIC',
+            url: hd?.logoImageUrl || '',
+            color: hd?.logoColor || '#FFFFFF'
           });
         }
       }
@@ -107,9 +107,9 @@ export function Header() {
         if (d.logoType !== undefined || d.logoText !== undefined || d.logoColor !== undefined || d.logoImageUrl !== undefined) {
           setLogoConfig({
             type: d.logoType || 'text',
-            text: typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : (d.logoText || 'CHUONG.GRAPHIC'),
-            url: typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : (d.logoImageUrl || ''),
-            color: typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : (d.logoColor || '#FFFFFF')
+            text: d.logoText || 'CHUONG.GRAPHIC',
+            url: d.logoImageUrl || '',
+            color: d.logoColor || '#FFFFFF'
           });
         }
       }
@@ -120,9 +120,9 @@ export function Header() {
         const d = event.data.data;
         setLogoConfig({
           type: d.logoType || 'text',
-          text: typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : (d.logoText || 'CHUONG.GRAPHIC'),
-          url: typeof d.logoImageUrl === 'object' ? getResponsiveValue(d.logoImageUrl, 'desktop') : (d.logoImageUrl || ''),
-          color: typeof d.logoColor === 'object' ? getResponsiveValue(d.logoColor, 'desktop') : (d.logoColor || '#FFFFFF')
+          text: d.logoText || 'CHUONG.GRAPHIC',
+          url: d.logoImageUrl || '',
+          color: d.logoColor || '#FFFFFF'
         });
       }
     };
@@ -162,23 +162,23 @@ export function Header() {
     <>
       <header
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
+          "sticky md:fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
           scrolled ? "bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900" : "bg-transparent"
         )}
       >
         <Link href="/" className="flex items-center group">
           {logoConfig.type === 'text' ? (
             <span
-              className="text-xl md:text-2xl font-bold tracking-wider"
-              style={{ color: logoConfig.color || '#FFFFFF', fontFamily: 'monospace' }}
+              className="text-lg md:text-xl lg:text-2xl font-bold tracking-wider"
+              style={{ color: getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') || '#FFFFFF', fontFamily: 'monospace' }}
             >
-              {logoConfig.text}
+              {getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop')}
             </span>
           ) : (
             <img
-              src={logoConfig.url}
+              src={getResponsiveValue(logoConfig.url, globalPreviewMode ?? 'desktop')}
               alt="Logo"
-              className="h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className="h-7 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               onError={(e) => {
                 // Fallback to text if image fails
                 (e.target as HTMLImageElement).style.display = 'none';

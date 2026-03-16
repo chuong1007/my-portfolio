@@ -368,9 +368,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             </>
           )}
 
-          {/* Subpage Layout: Pinterest 3 Columns */}
+          {/* Subpage Layout: Structured 3 Columns */}
           {variant === 'subpage' && (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredBlogs.map((post, index) => (
                 <motion.article
                   key={post.id}
@@ -378,14 +378,14 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: index * 0.05 }}
-                  className="break-inside-avoid group flex flex-col gap-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 hover:bg-zinc-800/50 transition-colors"
+                  className="group flex flex-col gap-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-4 hover:bg-zinc-800/50 transition-all duration-300"
                 >
-                  <div className="w-full overflow-hidden rounded-2xl bg-zinc-800">
+                  <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800">
                     <img
                       src={post.image_url}
                       alt={post.title}
                       referrerPolicy="no-referrer"
-                      className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                   </div>
                   <div className="flex flex-col">

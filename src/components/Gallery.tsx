@@ -239,8 +239,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             })}
           </div>
  
-          {/* Masonry Grid */}
-          <div className="columns-1 sm:columns-2 md:columns-2 lg:columns-3 xl:columns-4 gap-5">
+          {/* Structured Responsive Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {displayedProjects.map((project, index) => {
               return (
                 <motion.div
@@ -249,14 +249,15 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "50px" }}
                   transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
-                  className="break-inside-avoid mb-5"
+                  className="group flex flex-col gap-3"
                 >
                   <Link
                     href={`/project/${project.id}`}
                     className="group flex flex-col gap-3"
                   >
                     {/* Image Container — removes forced aspectRatio so it flows naturally */}
-                    <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50 min-h-[200px]">
+                    {/* Image Container with fixed aspect-ratio for 'equal' columns */}
+                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
                       {/* Aspect Ratio block is handled by image dimensions normally, but we use natural h-auto */}
                       <img
                         src={project.imageUrl}
@@ -264,7 +265,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                         loading="lazy"
                         referrerPolicy="no-referrer"
                         className={cn(
-                          "w-full h-auto object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
+                          "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
                           isAdmin && project.is_visible === false && "opacity-40 grayscale"
                         )}
                       />
