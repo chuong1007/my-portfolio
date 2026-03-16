@@ -1,40 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Header } from "@/components/Header";
 import { Contact } from "@/components/Contact";
 import { AdminEditButton } from "@/components/builder/AdminEditButton";
 import { useAdmin } from "@/context/AdminContext";
 import { cn } from "@/lib/utils";
-
-const DEVICE_WIDTHS = {
-  desktop: "100%",
-  tablet: "800px",
-  mobile: "400px",
-} as const;
-
-const DEVICE_HEIGHTS = {
-  desktop: "100%",
-  tablet: "1024px",
-  mobile: "667px",
-} as const;
-
 import { AdminModal } from "@/components/AdminModal";
 
-export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }) {
-  const [isMounted, setIsMounted] = useState(false); // Added
+function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isBuilder = pathname === "/admin/builder";
   const { globalPreviewMode, isAdmin, modalState, closeEditor } = useAdmin();
 
-  useEffect(() => { // Added
+  useEffect(() => {
     setIsMounted(true);
   }, []);
 
   // Prevent hydration mismatch: render children only until client is ready
-  if (!isMounted) { // Added
+  if (!isMounted) {
     return <>{children}</>;
   }
 
@@ -115,5 +102,13 @@ export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }
         />
       )}
     </>
+  );
+}
+
+export function GlobalPreviewWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <GlobalPreviewContent>{children}</GlobalPreviewContent>
+    </Suspense>
   );
 }
