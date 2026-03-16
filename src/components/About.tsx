@@ -148,10 +148,10 @@ export function About({ sectionId = "about" }: AboutProps) {
             className="space-y-8"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter text-zinc-50" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
-            <h3 className="text-lg md:text-2xl font-bold text-zinc-300" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tighter text-zinc-50 text-balance" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
+            <h3 className="text-sm sm:text-base md:text-xl font-bold text-zinc-300 text-balance" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
             
-            <div className="space-y-6 text-lg md:text-3xl leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
+            <div className="space-y-6 text-sm sm:text-base md:text-2xl leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
               {paragraphs.map((p, i) => (
                 <p key={i} dangerouslySetInnerHTML={{ __html: typeof p === 'string' ? p : JSON.stringify(p) }} />
               ))}

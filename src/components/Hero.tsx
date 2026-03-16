@@ -144,7 +144,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-4xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line"
             style={{
               "--mw-desk": `${getResponsiveValue(titleMaxWidthData, 'desktop') ?? 100}%`,
               "--mw-tab": `${getResponsiveValue(titleMaxWidthData, 'tablet') ?? 100}%`,

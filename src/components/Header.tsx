@@ -162,14 +162,18 @@ export function Header() {
     <>
       <header
         className={cn(
-          "sticky md:fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
+          isAdmin && globalPreviewMode !== "desktop" ? "sticky" : "fixed",
+          "top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
           scrolled ? "bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900" : "bg-transparent"
         )}
       >
         <Link href="/" className="flex items-center group">
           {logoConfig.type === 'text' ? (
             <span
-              className="text-lg md:text-xl lg:text-2xl font-bold tracking-wider"
+             className={cn(
+                "font-bold tracking-wider",
+                (isAdmin && globalPreviewMode !== 'desktop') || globalPreviewMode === 'mobile' ? "text-lg" : "text-xl md:text-2xl"
+              )}
               style={{ color: getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') || '#FFFFFF', fontFamily: 'monospace' }}
             >
               {getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop')}
@@ -178,14 +182,17 @@ export function Header() {
             <img
               src={getResponsiveValue(logoConfig.url, globalPreviewMode ?? 'desktop')}
               alt="Logo"
-              className="h-7 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+              className={cn(
+                "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
+                (isAdmin && globalPreviewMode !== 'desktop') || globalPreviewMode === 'mobile' ? "h-6 md:h-7" : "h-7 md:h-10"
+              )}
               onError={(e) => {
                 // Fallback to text if image fails
                 (e.target as HTMLImageElement).style.display = 'none';
                 const parent = (e.target as HTMLElement).parentElement;
                 if (parent) {
                   const span = document.createElement('span');
-                  span.className = "text-xl md:text-2xl font-bold tracking-wider";
+                  span.className = "text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line";
                   span.style.color = logoConfig.color || '#FFFFFF';
                   span.style.fontFamily = 'monospace';
                   span.innerText = logoConfig.text;
@@ -197,7 +204,10 @@ export function Header() {
         </Link>
 
         <div className="flex items-center gap-6">
-          <nav className="hidden lg:flex items-center gap-6">
+          <nav className={cn(
+            "items-center gap-6",
+            isAdmin && globalPreviewMode !== 'desktop' ? "hidden" : "hidden lg:flex"
+          )}>
             {isAdmin && (
               <button
                 onClick={toggleEditMode}
@@ -332,7 +342,10 @@ export function Header() {
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors"
+            className={cn(
+              "flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors",
+              isAdmin && globalPreviewMode !== 'desktop' ? "flex" : "lg:hidden"
+            )}
             aria-label="Open Mobile Menu"
           >
             <Menu className="w-5 h-5" />
