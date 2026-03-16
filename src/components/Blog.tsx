@@ -237,9 +237,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             <div className="flex flex-col gap-12">
               {/* Homepage Layout: 1 Large Left, 2 Side Right on Desktop */}
               {variant === 'homepage' && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-                  {/* Left Column: Featured Post */}
-                  <div className="lg:col-span-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12">
+                  {/* Desktop Only: Large Featured Post */}
+                  <div className="hidden lg:block lg:col-span-8">
                     {featured && (
                       <motion.article
                         initial={{ opacity: 0, x: -20 }}
@@ -249,7 +249,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                         className="group"
                       >
                         <Link href={`/blog/${featured.slug}`} className="block">
-                          <div className="relative aspect-video lg:aspect-[16/10] overflow-hidden rounded-2xl md:rounded-3xl bg-zinc-900 border border-zinc-800/50">
+                          <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800/50">
                             <img
                               src={featured.image_url}
                               alt={featured.title}
@@ -278,10 +278,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                                 {new Date(featured.created_at).toLocaleDateString("vi-VN")}
                               </span>
                             </div>
-                            <h3 className="text-xl md:text-3xl lg:text-5xl font-bold text-zinc-100 group-hover:text-white transition-colors leading-tight mb-4 tracking-tighter">
+                            <h3 className="text-3xl lg:text-5xl font-bold text-zinc-100 group-hover:text-white transition-colors leading-tight mb-4 tracking-tighter">
                               {featured.title}
                             </h3>
-                            <p className="text-zinc-500 text-sm md:text-base lg:text-lg leading-relaxed line-clamp-2">
+                            <p className="text-zinc-500 text-lg leading-relaxed line-clamp-2">
                               {featured.excerpt}
                             </p>
                           </div>
@@ -290,9 +290,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                     )}
                   </div>
 
-                  {/* Right Column: Side Posts - 2 columns on Tablet, 1 on Mobile */}
-                  <div className="lg:col-span-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 md:gap-8 lg:gap-8">
+                  {/* Desktop Only: Side Posts */}
+                  <div className="hidden lg:block lg:col-span-4">
+                    <div className="grid grid-cols-1 gap-8">
                       {sidePosts.slice(0, 2).map((post, index) => (
                         <motion.article
                           key={post.id}
@@ -302,8 +302,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                           transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                           className="group"
                         >
-                          <Link href={`/blog/${post.slug}`} className="flex flex-col md:flex-row lg:flex-col gap-4 lg:gap-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-4 hover:bg-zinc-800/50 transition-all">
-                            <div className="w-full md:w-40 lg:w-full aspect-video md:aspect-square lg:aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0">
+                          <Link href={`/blog/${post.slug}`} className="flex flex-col gap-6 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6 hover:bg-zinc-800/50 transition-all">
+                            <div className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-800 shrink-0">
                               <img
                                 src={post.image_url}
                                 alt={post.title}
@@ -315,10 +315,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                               <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-2">
                                 {post.tags?.[0] || "Blog"}
                               </span>
-                              <h4 className="text-lg md:text-xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2 mb-2">
+                              <h4 className="text-xl font-bold text-zinc-200 group-hover:text-white transition-colors leading-snug line-clamp-2">
                                 {post.title}
                               </h4>
-                              <p className="text-zinc-500 text-xs line-clamp-2 hidden sm:block lg:hidden xl:block">
+                              <p className="text-zinc-500 text-sm mt-3 line-clamp-2">
                                 {post.excerpt}
                               </p>
                             </div>
@@ -326,6 +326,44 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                         </motion.article>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Tablet & Mobile: Uniform Grid Layout */}
+                  <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-8 col-span-full">
+                    {[featured, ...sidePosts].filter(Boolean).slice(0, itemsToShow).map((post, index) => (
+                      <motion.article
+                        key={post?.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: index * 0.1 }}
+                        className="group flex flex-col gap-6 bg-zinc-900 border border-zinc-800 rounded-3xl p-5 hover:bg-zinc-800/50 transition-all duration-300"
+                      >
+                        <Link href={`/blog/${post?.slug}`} className="block">
+                          <div className="w-full aspect-video overflow-hidden rounded-2xl bg-zinc-800 mb-6">
+                            <img
+                              src={post?.image_url}
+                              alt={post?.title}
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                              <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : ""}</span>
+                              <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                              <span>{post?.tags?.[0] || "Blog"}</span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-zinc-100 mb-3 group-hover:text-white transition-colors leading-tight">
+                              {post?.title}
+                            </h3>
+                            <p className="text-zinc-500 text-base line-clamp-2 leading-relaxed">
+                              {post?.excerpt}
+                            </p>
+                          </div>
+                        </Link>
+                      </motion.article>
+                    ))}
                   </div>
                 </div>
               )}

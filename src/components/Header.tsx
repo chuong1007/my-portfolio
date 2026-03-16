@@ -163,8 +163,8 @@ export function Header() {
       <header
         className={cn(
           isAdmin && globalPreviewMode !== "desktop" ? "sticky" : "fixed",
-          "top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 lg:px-12 transition-all duration-300",
-          scrolled ? "bg-zinc-950/80 backdrop-blur-md border-b border-zinc-900" : "bg-transparent"
+          "top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
+          (scrolled || globalPreviewMode !== 'desktop') ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
         )}
       >
         <Link href="/" className="flex items-center group">
@@ -172,7 +172,7 @@ export function Header() {
             <span
              className={cn(
                 "font-bold tracking-wider",
-                (isAdmin && globalPreviewMode !== 'desktop') || globalPreviewMode === 'mobile' ? "text-lg" : "text-xl md:text-2xl"
+                "text-lg md:text-xl lg:text-2xl"
               )}
               style={{ color: getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') || '#FFFFFF', fontFamily: 'monospace' }}
             >
@@ -344,7 +344,7 @@ export function Header() {
             onClick={() => setIsMobileMenuOpen(true)}
             className={cn(
               "flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors",
-              isAdmin && globalPreviewMode !== 'desktop' ? "flex" : "lg:hidden"
+              (isAdmin && globalPreviewMode !== 'desktop') ? "flex" : (isAdmin ? "hidden lg:flex" : "flex lg:hidden")
             )}
             aria-label="Open Mobile Menu"
           >

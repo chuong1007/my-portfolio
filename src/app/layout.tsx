@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Chương Graphic | Portfolio & Design",
-  description: "Visual Designer based in Ho Chi Minh City",
+  title: 'CHUONG.PORTFOLIO | Visual Designer',
+  description: 'Portfolio của Chương - Visual Designer based in Ho Chi Minh City với hơn 7 năm kinh nghiệm chuyên môn về Graphic, Branding và UX/UI Design.',
 };
 
 import { AdminProvider } from "@/context/AdminContext";

@@ -294,6 +294,29 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 />
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Kích thước Title ({DEVICE_LABELS[globalPreviewMode]})</label>
+                  <input
+                    type="text"
+                    value={getResponsiveValue(data.titleFontSize, globalPreviewMode) || ''}
+                    placeholder="VD: 8xl, 5rem, 60px"
+                    onChange={(e) => setData({ ...data, titleFontSize: setResponsiveValue(data.titleFontSize, globalPreviewMode, e.target.value) })}
+                    className="w-full bg-zinc-900 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:border-zinc-500 outline-none text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Kích thước Subtitle ({DEVICE_LABELS[globalPreviewMode]})</label>
+                  <input
+                    type="text"
+                    value={getResponsiveValue(data.subtitleFontSize, globalPreviewMode) || ''}
+                    placeholder="VD: 12, 14, 1rem"
+                    onChange={(e) => setData({ ...data, subtitleFontSize: setResponsiveValue(data.subtitleFontSize, globalPreviewMode, e.target.value) })}
+                    className="w-full bg-zinc-900 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:border-zinc-500 outline-none text-sm"
+                  />
+                </div>
+              </div>
+
               {/* Sliders for Max Width & Padding */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
                 <div className="space-y-3">

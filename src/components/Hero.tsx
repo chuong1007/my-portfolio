@@ -17,6 +17,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [titleMaxWidthData, setTitleMaxWidthData] = useState<ResponsiveValue>("100");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
+  const [titleFontSizeData, setTitleFontSizeData] = useState<ResponsiveValue>("desktop: 8xl, tablet: 6xl, mobile: 3xl");
+  const [subtitleFontSizeData, setSubtitleFontSizeData] = useState<ResponsiveValue>("10");
   const [isVisible, setIsVisible] = useState(true);
   const [logoType, setLogoType] = useState<'text' | 'image'>('text');
   const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
@@ -41,6 +43,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+        if (d.titleFontSize !== undefined) setTitleFontSizeData(d.titleFontSize);
+        if (d.subtitleFontSize !== undefined) setSubtitleFontSizeData(d.subtitleFontSize);
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         if (d.logoType) setLogoType(d.logoType);
         if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
@@ -67,6 +71,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
       if (d.titleMaxWidth !== undefined) setTitleMaxWidthData(d.titleMaxWidth);
       if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
       if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
+      if (d.titleFontSize !== undefined) setTitleFontSizeData(d.titleFontSize);
+      if (d.subtitleFontSize !== undefined) setSubtitleFontSizeData(d.subtitleFontSize);
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
       if (d.logoType) setLogoType(d.logoType);
       if (d.logoText) setLogoText(typeof d.logoText === 'object' ? getResponsiveValue(d.logoText, 'desktop') : d.logoText);
@@ -113,7 +119,9 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     paddingTop: paddingTopData,
     paddingBottom: paddingBottomData,
     title: titleData,
+    titleFontSize: titleFontSizeData,
     subtitle: subtitleData,
+    subtitleFontSize: subtitleFontSizeData,
     titleMaxWidth: titleMaxWidthData,
     logoType,
     logoText,
@@ -144,12 +152,16 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line"
+            className="font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
             style={{
               "--mw-desk": `${getResponsiveValue(titleMaxWidthData, 'desktop') ?? 100}%`,
               "--mw-tab": `${getResponsiveValue(titleMaxWidthData, 'tablet') ?? 100}%`,
               "--mw-mob": `${getResponsiveValue(titleMaxWidthData, 'mobile') ?? 100}%`,
-              maxWidth: "var(--mw-mob)" // Default fallback
+              "--fs-desk": getResponsiveValue(titleFontSizeData, 'desktop') || '8rem',
+              "--fs-tab": getResponsiveValue(titleFontSizeData, 'tablet') || '3.75rem',
+              "--fs-mob": getResponsiveValue(titleFontSizeData, 'mobile') || '1.875rem',
+              maxWidth: "var(--mw-mob)",
+              fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)'
             } as React.CSSProperties}
           >
             {/* Desktop variant */}

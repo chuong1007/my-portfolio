@@ -145,13 +145,13 @@ export function About({ sectionId = "about" }: AboutProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="space-y-8"
+            className="space-y-6"
             style={{ opacity: loaded ? undefined : 1 }}
           >
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tighter text-zinc-50 text-balance" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
-            <h3 className="text-sm sm:text-base md:text-xl font-bold text-zinc-300 text-balance" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
+            <h2 className="text-lg sm:text-xl md:text-3xl font-bold tracking-tighter text-zinc-50 text-balance" dangerouslySetInnerHTML={{ __html: typeof heading === 'string' ? getResponsiveValue(heading, globalPreviewMode ?? 'desktop') : String(heading) }} />
+            <h3 className="text-xs sm:text-sm md:text-base font-bold text-zinc-400 text-balance" dangerouslySetInnerHTML={{ __html: typeof subheading === 'string' ? getResponsiveValue(subheading, globalPreviewMode ?? 'desktop') : String(subheading) }} />
             
-            <div className="space-y-6 text-sm sm:text-base md:text-2xl leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
+            <div className="space-y-4 text-sm sm:text-base md:text-lg leading-relaxed text-zinc-400 font-light whitespace-pre-wrap">
               {paragraphs.map((p, i) => (
                 <p key={i} dangerouslySetInnerHTML={{ __html: typeof p === 'string' ? p : JSON.stringify(p) }} />
               ))}
