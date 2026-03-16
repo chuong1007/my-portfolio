@@ -27,11 +27,12 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [dynamicNavItems, setDynamicNavItems] = useState<{ label: string, href: string }[]>([]);
-  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: ResponsiveValue, url: ResponsiveValue, color?: ResponsiveValue }>({
+  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: ResponsiveValue, url: ResponsiveValue, color?: ResponsiveValue, height: ResponsiveValue }>({
     type: 'text',
     text: 'CHUONG.GRAPHIC',
     url: '',
-    color: '#FFFFFF'
+    color: '#FFFFFF',
+    height: '40'
   });
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,7 +69,8 @@ export function Header() {
             type: hd?.logoType || 'text',
             text: hd?.logoText || 'CHUONG.GRAPHIC',
             url: hd?.logoImageUrl || '',
-            color: hd?.logoColor || '#FFFFFF'
+            color: hd?.logoColor || '#FFFFFF',
+            height: hd?.logoHeight || '40'
           });
         }
       }
@@ -109,7 +111,8 @@ export function Header() {
             type: d.logoType || 'text',
             text: d.logoText || 'CHUONG.GRAPHIC',
             url: d.logoImageUrl || '',
-            color: d.logoColor || '#FFFFFF'
+            color: d.logoColor || '#FFFFFF',
+            height: d.logoHeight || '40'
           });
         }
       }
@@ -122,7 +125,8 @@ export function Header() {
           type: d.logoType || 'text',
           text: d.logoText || 'CHUONG.GRAPHIC',
           url: d.logoImageUrl || '',
-          color: d.logoColor || '#FFFFFF'
+          color: d.logoColor || '#FFFFFF',
+          height: d.logoHeight || '40'
         });
       }
     };
@@ -163,16 +167,16 @@ export function Header() {
       <header
         className={cn(
           isAdmin && globalPreviewMode !== "desktop" ? "sticky" : "fixed",
-          "top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
+          "top-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
           (scrolled || globalPreviewMode !== 'desktop') ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
         )}
       >
-        <Link href="/" className="flex items-center group">
+        <Link href="/" className="flex items-center group flex-shrink-0">
           {logoConfig.type === 'text' ? (
             <span
              className={cn(
-                "font-bold tracking-wider",
-                "text-lg md:text-xl lg:text-2xl"
+                "font-bold tracking-tight whitespace-nowrap",
+                "text-xl md:text-2xl"
               )}
               style={{ color: getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') || '#FFFFFF', fontFamily: 'monospace' }}
             >
@@ -183,8 +187,7 @@ export function Header() {
               src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
               alt="Logo"
               className={cn(
-                "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
-                (isAdmin && globalPreviewMode !== 'desktop') || globalPreviewMode === 'mobile' ? "h-6 md:h-7" : "h-7 md:h-10"
+                "h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               )}
               onError={(e) => {
                 // Fallback to text if image fails
@@ -192,7 +195,7 @@ export function Header() {
                 const parent = (e.target as HTMLElement).parentElement;
                 if (parent) {
                   const span = document.createElement('span');
-                  span.className = "text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line";
+                  span.className = "text-xl md:text-2xl font-bold tracking-tight text-white whitespace-nowrap";
                   span.style.color = (getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') as string) || '#FFFFFF';
                   span.style.fontFamily = 'monospace';
                   const textVal = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
