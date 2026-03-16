@@ -166,7 +166,7 @@ export function Contact() {
               {subtitle && (
                 <div 
                   className={cn(
-                    "text-zinc-400 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    "text-zinc-400 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
                   style={{ fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px` }}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle, globalPreviewMode || 'desktop') }}
@@ -178,14 +178,14 @@ export function Contact() {
               {showPhone && (
                 <a
                   href={`tel:${phone.replace(/\s/g, '')}`}
-                  className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors">
-                    <Phone className="w-6 h-6 text-zinc-300 group-hover:text-red-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors shrink-0">
+                    <Phone className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-red-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-sm text-zinc-500 mb-1">Phone Number</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{phone}</span>
+                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Phone Number</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{phone}</span>
                   </div>
                 </a>
               )}
@@ -193,14 +193,14 @@ export function Contact() {
               {showEmail && (
                 <a
                   href={`mailto:${email}`}
-                  className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors">
-                    <Mail className="w-6 h-6 text-zinc-300 group-hover:text-orange-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors shrink-0">
+                    <Mail className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-orange-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-sm text-zinc-500 mb-1">Email Address</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{email}</span>
+                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{email}</span>
                   </div>
                 </a>
               )}
@@ -211,14 +211,14 @@ export function Contact() {
                   href={facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
-                    <Facebook className="w-6 h-6 text-zinc-300 group-hover:text-blue-500 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors shrink-0">
+                    <Facebook className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-blue-500 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-sm text-zinc-500 mb-1">Facebook</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{facebookLabel}</span>
+                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Facebook</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{facebookLabel}</span>
                   </div>
                 </a>
               )}
@@ -229,14 +229,14 @@ export function Contact() {
                   href={zalo.startsWith('http') ? zalo : `https://zalo.me/${zalo.replace(/\s/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 group p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
-                  <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors">
-                    <MessageSquare className="w-6 h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors shrink-0">
+                    <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-sm text-zinc-500 mb-1">Zalo</span>
-                    <span className="text-lg md:text-xl font-medium text-zinc-200 break-all">{zaloLabel}</span>
+                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Zalo</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{zaloLabel}</span>
                   </div>
                 </a>
               )}

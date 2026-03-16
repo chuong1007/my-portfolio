@@ -160,11 +160,11 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
     const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
 
-    const gridColsClass = cn(
-      `grid-cols-${mobileCols}`,
-      `md:grid-cols-${tabletCols}`,
-      `lg:grid-cols-${desktopCols}`
-    );
+    const gridStyle = {
+      display: 'grid',
+      gap: currentDevice === 'mobile' ? '1.5rem' : '2rem',
+      gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
+    };
 
   return (
     <SectionEditor 
@@ -189,7 +189,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
         id="projects" 
         className="px-6 md:px-12 bg-zinc-950 relative"
         style={{
-          paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`
+          paddingTop: `${(globalPreviewMode === 'mobile' ? 80 : globalPreviewMode === 'tablet' ? 100 : 120) + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
+          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
         <div 
@@ -251,10 +252,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             })}
           </div>
  
-          <div className={cn(
-            "grid gap-6 md:gap-8",
-            gridColsClass
-          )}>
+          <div style={gridStyle}>
             {displayedProjects.map((project, index) => (
               <motion.div
                 key={project.id}

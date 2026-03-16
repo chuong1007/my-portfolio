@@ -144,7 +144,7 @@ const formatFs = (val: string, fallback: string) => {
       <section 
         className="relative flex flex-col items-center px-6 text-center min-h-[90vh]"
         style={{
-          paddingTop: `${220 + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
+          paddingTop: `${(globalPreviewMode === 'mobile' ? 100 : globalPreviewMode === 'tablet' ? 120 : 140) + parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
@@ -166,11 +166,11 @@ const formatFs = (val: string, fallback: string) => {
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
-            <div className="hidden lg:block w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline lg:[&_p]:block" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
+            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-desk)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'desktop') }} />
             {/* Tablet variant */}
-            <div className="hidden md:block lg:hidden w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
+            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-tab)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'tablet') }} />
             {/* Mobile variant */}
-            <div className="block md:hidden w-full whitespace-pre-line [&_p]:m-0 [&_p]:inline" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
+            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0" style={{ maxWidth: 'var(--mw-mob)' }} dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData, 'mobile') }} />
           </motion.h1>
         </div>
         
@@ -187,17 +187,17 @@ const formatFs = (val: string, fallback: string) => {
         >
           {/* Subtitle with responsive variants */}
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-line [&_p]:m-0" 
+            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-wrap [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-desk)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'desktop') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-line [&_p]:m-0" 
+            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-tab)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'tablet') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-line [&_p]:m-0" 
+            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-wrap [&_p]:m-0" 
             style={{ fontSize: "var(--fs-sub-mob)" }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData, 'mobile') }} 
           />
