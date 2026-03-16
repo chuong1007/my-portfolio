@@ -3,10 +3,10 @@
 
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
-export type ResponsiveValue = string | {
-  desktop?: string | null;
-  tablet?: string | null;
-  mobile?: string | null;
+export type ResponsiveValue = string | boolean | number | {
+  desktop?: any;
+  tablet?: any;
+  mobile?: any;
 } | null;
 
 /**

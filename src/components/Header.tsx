@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase";
 
 
 import { useAdmin } from "@/context/AdminContext";
-import { getResponsiveValue } from "@/lib/responsive-helpers";
+import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout, Monitor, Tablet, Smartphone, Menu, X } from "lucide-react";
 
 const STATIC_NAV_ITEMS = [
@@ -27,7 +27,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [dynamicNavItems, setDynamicNavItems] = useState<{ label: string, href: string }[]>([]);
-  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: string, url: string, color?: string }>({
+  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: ResponsiveValue, url: ResponsiveValue, color?: ResponsiveValue }>({
     type: 'text',
     text: 'CHUONG.GRAPHIC',
     url: '',
@@ -193,9 +193,10 @@ export function Header() {
                 if (parent) {
                   const span = document.createElement('span');
                   span.className = "text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter text-zinc-50 leading-[1.1] text-balance mx-auto whitespace-pre-line";
-                  span.style.color = logoConfig.color || '#FFFFFF';
+                  span.style.color = (getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') as string) || '#FFFFFF';
                   span.style.fontFamily = 'monospace';
-                  span.innerText = logoConfig.text;
+                  const textVal = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
+                  span.innerText = typeof textVal === 'string' ? textVal : '';
                   parent.appendChild(span);
                 }
               }}

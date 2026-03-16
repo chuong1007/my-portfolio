@@ -29,16 +29,16 @@ export function Contact() {
   const isContactPage = pathname === "/contact";
   const [heading, setHeading] = useState<RichTextData>(DEFAULTS.heading);
   const [subtitle, setSubtitle] = useState<RichTextData>(DEFAULTS.subtitle);
-  const [phone, setPhone] = useState("038 429 7019");
-  const [email, setEmail] = useState("chuong.thanh1007@gmail.com");
-  const [facebook, setFacebook] = useState("");
-  const [facebookLabel, setFacebookLabel] = useState("Visit Profile");
-  const [showFacebook, setShowFacebook] = useState(true);
-  const [zalo, setZalo] = useState("");
-  const [zaloLabel, setZaloLabel] = useState("Chat on Zalo");
-  const [showZalo, setShowZalo] = useState(true);
-  const [showPhone, setShowPhone] = useState(true);
-  const [showEmail, setShowEmail] = useState(true);
+  const [phone, setPhone] = useState<ResponsiveValue>("038 429 7019");
+  const [email, setEmail] = useState<ResponsiveValue>("chuong.thanh1007@gmail.com");
+  const [facebook, setFacebook] = useState<ResponsiveValue>("");
+  const [facebookLabel, setFacebookLabel] = useState<ResponsiveValue>("Visit Profile");
+  const [showFacebook, setShowFacebook] = useState<ResponsiveValue>(true);
+  const [zalo, setZalo] = useState<ResponsiveValue>("");
+  const [zaloLabel, setZaloLabel] = useState<ResponsiveValue>("Chat on Zalo");
+  const [showZalo, setShowZalo] = useState<ResponsiveValue>(true);
+  const [showPhone, setShowPhone] = useState<ResponsiveValue>(true);
+  const [showEmail, setShowEmail] = useState<ResponsiveValue>(true);
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("128");
   const [isVisible, setIsVisible] = useState(true);
@@ -193,9 +193,9 @@ export function Contact() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
-              {showPhone && (
+              {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
-                  href={`tel:${phone.replace(/\s/g, '')}`}
+                  href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}
                   className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors shrink-0">
@@ -203,14 +203,14 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Phone Number</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{phone}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(phone, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
 
-              {showEmail && (
+              {getResponsiveValue(showEmail, globalPreviewMode) !== false && (
                 <a
-                  href={`mailto:${email}`}
+                  href={`mailto:${getResponsiveValue(email, globalPreviewMode)}`}
                   className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
                 >
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors shrink-0">
@@ -218,15 +218,15 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{email}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(email, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
 
               {/* Conditional Facebook */}
-              {facebook && showFacebook && (
+              {getResponsiveValue(facebook, globalPreviewMode) && getResponsiveValue(showFacebook, globalPreviewMode) !== false && (
                 <a
-                  href={facebook}
+                  href={getResponsiveValue(facebook, globalPreviewMode)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
@@ -236,15 +236,15 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Facebook</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{facebookLabel}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(facebookLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
 
               {/* Conditional Zalo */}
-              {zalo && showZalo && (
+              {getResponsiveValue(zalo, globalPreviewMode) && getResponsiveValue(showZalo, globalPreviewMode) !== false && (
                 <a
-                  href={typeof zalo === 'string' && zalo.startsWith('http') ? zalo : `https://zalo.me/${(zalo || '').toString().replace(/[^0-9]/g, '')}`}
+                  href={typeof getResponsiveValue(zalo, globalPreviewMode) === 'string' && getResponsiveValue(zalo, globalPreviewMode).startsWith('http') ? getResponsiveValue(zalo, globalPreviewMode) : `https://zalo.me/${(getResponsiveValue(zalo, globalPreviewMode) || '').toString().replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
@@ -254,7 +254,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Zalo</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{zaloLabel}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(zaloLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
