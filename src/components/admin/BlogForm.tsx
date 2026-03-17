@@ -99,10 +99,6 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
     try {
       const supabase = createClient();
       
-      if (isFeatured) {
-        await supabase.from("blogs").update({ is_featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000");
-      }
-
       const finalSlug = slug || generateSlug(title);
       const blogData = {
         title,

@@ -299,7 +299,7 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
       <Link href={`/blog/${post.slug}`} className="flex flex-col w-full h-full">
         <div className="overflow-hidden bg-zinc-800 w-full aspect-video rounded-2xl mb-6 relative">
           {post.is_featured && (
-            <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg">
+            <div className="bg-orange-500 text-white text-xs font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg">
               NỔI BẬT
             </div>
           )}
