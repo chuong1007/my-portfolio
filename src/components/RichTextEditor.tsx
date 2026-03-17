@@ -259,32 +259,39 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   if (!editor) return null;
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">{label}</label>
-        
+    <div className="space-y-4">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{label}</label>
+          <span className="text-[9px] bg-zinc-800/50 text-zinc-500 px-1.5 py-0.5 rounded uppercase font-bold border border-zinc-700/50">{globalPreviewMode}</span>
+        </div>
+      </div>
+      
+      <div className="flex flex-col gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden shadow-inner">
         {/* Toolbar */}
-        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-lg">
-          <button
-            onClick={() => editor.chain().focus().toggleBold().run()}
-            className={cn(
-              "p-1.5 rounded transition-colors",
-              editor.isActive('bold') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
-            )}
-            title="Bold"
-          >
-            <Bold className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={cn(
-              "p-1.5 rounded transition-colors",
-              editor.isActive('italic') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
-            )}
-            title="Italic"
-          >
-            <Italic className="w-3.5 h-3.5" />
-          </button>
+        <div className="flex flex-wrap items-center gap-1 p-1">
+          <div className="flex items-center gap-0.5 bg-zinc-950 p-1 rounded-lg border border-zinc-800/50">
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={cn(
+                "p-1.5 rounded transition-colors",
+                editor.isActive('bold') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
+              )}
+              title="Bold"
+            >
+              <Bold className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={cn(
+                "p-1.5 rounded transition-colors",
+                editor.isActive('italic') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
+              )}
+              title="Italic"
+            >
+              <Italic className="w-3.5 h-3.5" />
+            </button>
+          </div>
           
           <div className="w-px h-4 bg-zinc-800 mx-1" />
           
@@ -311,49 +318,47 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
               className="w-20 md:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
             />
             
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 pr-1">
                 <button onClick={() => updateFontSize(currentSize + 1)} className="text-zinc-500 hover:text-blue-400 transition-colors"><Plus className="w-2.5 h-2.5" /></button>
                 <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="text-zinc-500 hover:text-blue-400 transition-colors"><Minus className="w-2.5 h-2.5" /></button>
             </div>
           </div>
-
-          {!hideLineHeight && (
-            <>
-              <div className="w-px h-4 bg-zinc-800 mx-1" />
-
-              {/* Line Height Slider */}
-              <div className="flex items-center gap-3 px-3 py-1 bg-zinc-950 rounded-lg border border-zinc-800 ml-1 group/slider">
-                <div className="flex items-center gap-1.5 min-w-[50px]">
-                  <FoldVertical className="w-3.5 h-3.5 text-zinc-500" />
-                  <div className="flex items-baseline gap-0.5">
-                    <input 
-                      type="number"
-                      step="0.1"
-                      value={currentLineHeight}
-                      onChange={(e) => updateLineHeight(e.target.value)}
-                      className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <span className="text-[9px] text-zinc-600 font-black uppercase">lh</span>
-                  </div>
-                </div>
-                
-                <input
-                  type="range"
-                  min="0.8"
-                  max="3"
-                  step="0.1"
-                  value={currentLineHeight}
-                  onChange={(e) => updateLineHeight(e.target.value)}
-                  className="w-20 md:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
-                />
-              </div>
-            </>
-          )}
-          <span className="ml-2 text-[9px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded uppercase font-bold">{globalPreviewMode}</span>
         </div>
+
+        {!hideLineHeight && (
+          <div className="px-1 pb-1">
+            <div className="flex items-center gap-3 px-3 py-1.5 bg-zinc-950 rounded-lg border border-zinc-800 group/slider">
+              <div className="flex items-center gap-1.5 min-w-[50px]">
+                <FoldVertical className="w-3.5 h-3.5 text-zinc-500" />
+                <div className="flex items-baseline gap-0.5">
+                  <input 
+                    type="number"
+                    step="0.1"
+                    value={currentLineHeight}
+                    onChange={(e) => updateLineHeight(e.target.value)}
+                    className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-[9px] text-zinc-600 font-black uppercase">lh</span>
+                </div>
+              </div>
+              
+              <input
+                type="range"
+                min="0.8"
+                max="3"
+                step="0.1"
+                value={currentLineHeight}
+                onChange={(e) => updateLineHeight(e.target.value)}
+                className="flex-1 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      <EditorContent editor={editor} />
+      <div className="min-h-[100px] p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50 shadow-inner">
+        <EditorContent editor={editor} className="prose prose-invert max-w-none text-zinc-300 [&_.ProseMirror]:outline-none" />
+      </div>
     </div>
   );
 }
