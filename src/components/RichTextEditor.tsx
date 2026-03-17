@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Paragraph from '@tiptap/extension-paragraph';
 import { Extension } from '@tiptap/core';
-import { Bold, Italic, Type, Plus, Minus, CornerDownLeft } from 'lucide-react';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
@@ -321,22 +321,31 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             <>
               <div className="w-px h-4 bg-zinc-800 mx-1" />
 
-              {/* Line Height Selector */}
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-950 rounded border border-zinc-800">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase">LH</span>
-                <select 
+              {/* Line Height Slider */}
+              <div className="flex items-center gap-3 px-3 py-1 bg-zinc-950 rounded-lg border border-zinc-800 ml-1 group/slider">
+                <div className="flex items-center gap-1.5 min-w-[50px]">
+                  <FoldVertical className="w-3.5 h-3.5 text-zinc-500" />
+                  <div className="flex items-baseline gap-0.5">
+                    <input 
+                      type="number"
+                      step="0.1"
+                      value={currentLineHeight}
+                      onChange={(e) => updateLineHeight(e.target.value)}
+                      className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[9px] text-zinc-600 font-black uppercase">lh</span>
+                  </div>
+                </div>
+                
+                <input
+                  type="range"
+                  min="0.8"
+                  max="3"
+                  step="0.1"
                   value={currentLineHeight}
                   onChange={(e) => updateLineHeight(e.target.value)}
-                  className="bg-transparent text-[10px] font-bold text-blue-400 focus:outline-none cursor-pointer"
-                >
-                  <option value="1">1.0</option>
-                  <option value="1.2">1.2</option>
-                  <option value="1.4">1.4</option>
-                  <option value="1.5">1.5</option>
-                  <option value="1.6">1.6</option>
-                  <option value="1.8">1.8</option>
-                  <option value="2">2.0</option>
-                </select>
+                  className="w-20 md:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+                />
               </div>
             </>
           )}
