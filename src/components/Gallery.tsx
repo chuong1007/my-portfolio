@@ -260,7 +260,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-12 flex items-end justify-between gap-4"
+            className="mb-16 flex items-end justify-between gap-4 border-b border-zinc-900 pb-8"
           >
             <div className="flex flex-col gap-2">
               <div 
