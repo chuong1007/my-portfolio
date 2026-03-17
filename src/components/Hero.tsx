@@ -169,15 +169,15 @@ const formatFs = (val: string, fallback: string) => {
       controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        className="relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] pt-[var(--pad-mob)] md:pt-[var(--pad-tab)] lg:pt-[var(--pad-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         style={{
-          "--pt-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
-          "--pt-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
-          "--pt-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
+          "--pad-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
+          "--pad-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
+          "--pad-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
           "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
-        } as any}
+        } as React.CSSProperties}
       >
         <div className="flex flex-col items-center w-full">
             <motion.h1
@@ -188,7 +188,7 @@ const formatFs = (val: string, fallback: string) => {
             style={{
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
-              "--fs-mob": `${titleData.fontSize?.mobile || 32}px`,
+              "--fs-mob": `${titleData.fontSize?.mobile || 40}px`,
               "--lh-desk": titleData.lineHeight?.desktop || '1.1',
               "--lh-tab": titleData.lineHeight?.tablet || '1.1',
               "--lh-mob": titleData.lineHeight?.mobile || '1.1',
@@ -198,56 +198,53 @@ const formatFs = (val: string, fallback: string) => {
               "--fw-desk": titleData.fontWeight?.desktop || '700',
               "--fw-tab": titleData.fontWeight?.tablet || '700',
               "--fw-mob": titleData.fontWeight?.mobile || '700',
-              lineHeight: "var(--lh-mob)",
-              fontFamily: "var(--ff-mob)",
-              fontWeight: "var(--fw-mob)",
             } as any}
           >
             {/* Using arbitrary values with CSS variables for responsive styling */}
             <div 
-              className="w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] md:[font-weight:var(--fw-tab)] lg:[font-weight:var(--fw-desk)]" 
+              className="w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] leading-[var(--lh-mob)] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] [font-family:var(--ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] font-[var(--fw-mob)] md:font-[var(--fw-tab)] lg:font-[var(--fw-desk)]" 
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
             />
           </motion.h1>
         </div>
         
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="flex flex-col items-center gap-2 text-zinc-500 mt-[var(--sp-mob)] md:mt-[var(--sp-tab)] lg:mt-[var(--sp-desk)]"
-          style={{
-            "--sp-desk": `${getResponsiveValue(scrollPadding, 'desktop') || 0}px`,
-            "--sp-tab": `${getResponsiveValue(scrollPadding, 'tablet') || 0}px`,
-            "--sp-mob": `${getResponsiveValue(scrollPadding, 'mobile') || 0}px`,
-            "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
-            "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
-            "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
-            "--lh-sub-desk": subtitleData.lineHeight?.desktop || '1.5',
-            "--lh-sub-tab": subtitleData.lineHeight?.tablet || '1.5',
-            "--lh-sub-mob": subtitleData.lineHeight?.mobile || '1.5',
-            "--ff-sub-desk": subtitleData.fontFamily?.desktop || 'inherit',
-            "--ff-sub-tab": subtitleData.fontFamily?.tablet || 'inherit',
-            "--ff-sub-mob": subtitleData.fontFamily?.mobile || 'inherit',
-            "--fw-sub-desk": subtitleData.fontWeight?.desktop || '500',
-            "--fw-sub-tab": subtitleData.fontWeight?.tablet || '500',
-            "--fw-sub-mob": subtitleData.fontWeight?.mobile || '500',
-          } as React.CSSProperties}
-        >
-          {/* Subtitle with responsive variants */}
-          <div 
-            className="uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)] transition-all duration-300" 
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
-          />
-          <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
-            <motion.div
-              className="absolute top-0 w-full h-full bg-zinc-400"
-              initial={{ y: "-100%" }}
-              animate={{ y: "100%" }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            />
-          </div>
-        </motion.div>
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  transition={{ delay: 0.5, duration: 1 }}
+  className="flex flex-col items-center gap-2 text-zinc-500 mt-[var(--scroll-mob)] md:mt-[var(--scroll-tab)] lg:mt-[var(--scroll-desk)]"
+  style={{
+    "--scroll-desk": `${getResponsiveValue(scrollPadding, 'desktop') ?? getResponsiveValue(scrollOffset, 'desktop') ?? 0}px`,
+    "--scroll-tab": `${getResponsiveValue(scrollPadding, 'tablet') ?? getResponsiveValue(scrollOffset, 'tablet') ?? 0}px`,
+    "--scroll-mob": `${getResponsiveValue(scrollPadding, 'mobile') ?? getResponsiveValue(scrollOffset, 'mobile') ?? 0}px`,
+    "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
+    "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
+    "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
+    "--lh-sub-desk": subtitleData.lineHeight?.desktop || '1.5',
+    "--lh-sub-tab": subtitleData.lineHeight?.tablet || '1.5',
+    "--lh-sub-mob": subtitleData.lineHeight?.mobile || '1.5',
+    "--ff-sub-desk": subtitleData.fontFamily?.desktop || 'inherit',
+    "--ff-sub-tab": subtitleData.fontFamily?.tablet || 'inherit',
+    "--ff-sub-mob": subtitleData.fontFamily?.mobile || 'inherit',
+    "--fw-sub-desk": subtitleData.fontWeight?.desktop || '500',
+    "--fw-sub-tab": subtitleData.fontWeight?.tablet || '500',
+    "--fw-sub-mob": subtitleData.fontWeight?.mobile || '500',
+  } as React.CSSProperties}
+>
+  {/* Subtitle with responsive variants */}
+  <div 
+    className="uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)] transition-all duration-300" 
+    dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
+  />
+  <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
+    <motion.div
+      className="absolute top-0 w-full h-full bg-zinc-400"
+      initial={{ y: "-100%" }}
+      animate={{ y: "100%" }}
+      transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+    />
+  </div>
+</motion.div>
       </section>
     </SectionEditor>
   );

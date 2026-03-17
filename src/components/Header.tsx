@@ -174,11 +174,15 @@ export function Header() {
         <Link href="/" className="flex items-center group flex-shrink-0">
           {logoConfig.type === 'text' ? (
             <span
-             className={cn(
-                "font-bold tracking-tight whitespace-nowrap",
-                "text-xl md:text-2xl"
+               className={cn(
+                "font-bold tracking-tight whitespace-nowrap text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
               )}
-              style={{ color: getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') || '#FFFFFF', fontFamily: 'monospace' }}
+              style={{ 
+                "--logo-clr-desk": getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF',
+                "--logo-clr-tab": getResponsiveValue(logoConfig.color, 'tablet') || '#FFFFFF',
+                "--logo-clr-mob": getResponsiveValue(logoConfig.color, 'mobile') || '#FFFFFF',
+                fontFamily: 'monospace' 
+              } as React.CSSProperties}
             >
               {getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop')}
             </span>
@@ -187,12 +191,14 @@ export function Header() {
               src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
               alt="Logo"
               className={cn(
-                "w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                "w-auto object-contain transition-transform duration-300 group-hover:scale-105 h-[var(--logo-h-mob)] md:h-[var(--logo-h-tab)] lg:h-[var(--logo-h-desk)]"
               )}
               style={{
-                height: `${getResponsiveValue(logoConfig.height, globalPreviewMode ?? 'desktop') || 40}px`,
+                "--logo-h-desk": `${getResponsiveValue(logoConfig.height, 'desktop') || 40}px`,
+                "--logo-h-tab": `${getResponsiveValue(logoConfig.height, 'tablet') || 40}px`,
+                "--logo-h-mob": `${getResponsiveValue(logoConfig.height, 'mobile') || 40}px`,
                 maxHeight: '120px'
-              }}
+              } as React.CSSProperties}
               onError={(e) => {
                 // Fallback to text if image fails
                 (e.target as HTMLImageElement).style.display = 'none';
