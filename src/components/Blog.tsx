@@ -222,8 +222,15 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--b-fs-mob)] md:text-[length:var(--b-fs-tab)] lg:text-[length:var(--b-fs-desk)] leading-[var(--b-lh-mob)] md:leading-[var(--b-lh-tab)] lg:leading-[var(--b-lh-desk)] [font-family:var(--b-ff-mob)] md:[font-family:var(--b-ff-tab)] lg:[font-family:var(--b-ff-desk)] font-[var(--b-fw-mob)] md:font-[var(--b-fw-tab)] lg:font-[var(--b-fw-desk)]" 
+                className={cn(
+                  "tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  !isEditor && "text-[length:var(--b-fs-mob)] md:text-[length:var(--b-fs-tab)] lg:text-[length:var(--b-fs-desk)] leading-[var(--b-lh-mob)] md:leading-[var(--b-lh-tab)] lg:leading-[var(--b-lh-desk)] [font-family:var(--b-ff-mob)] md:[font-family:var(--b-ff-tab)] lg:[font-family:var(--b-ff-desk)] font-[var(--b-fw-mob)] md:font-[var(--b-fw-tab)] lg:font-[var(--b-fw-desk)]"
+                )}
                 style={{ 
+                  fontSize: isEditor ? `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` : undefined,
+                  lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
+                  fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
+                  fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
                   "--b-fs-desk": `${titleData.fontSize?.desktop || 48}px`,
                   "--b-fs-tab": `${titleData.fontSize?.tablet || 40}px`,
                   "--b-fs-mob": `${titleData.fontSize?.mobile || 32}px`,
@@ -240,8 +247,13 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
               <div 
-                className="text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--bs-fs-mob)] md:text-[length:var(--bs-fs-tab)] lg:text-[length:var(--bs-fs-desk)] leading-[var(--bs-lh-mob)] md:leading-[var(--bs-lh-tab)] lg:leading-[var(--bs-lh-desk)]" 
+                className={cn(
+                  "text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  !isEditor && "text-[length:var(--bs-fs-mob)] md:text-[length:var(--bs-fs-tab)] lg:text-[length:var(--bs-fs-desk)] leading-[var(--bs-lh-mob)] md:leading-[var(--bs-lh-tab)] lg:leading-[var(--bs-lh-desk)]"
+                )}
                 style={{ 
+                  fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` : undefined,
+                  lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
                   "--bs-fs-desk": `${subtitleData.fontSize?.desktop || 18}px`,
                   "--bs-fs-tab": `${subtitleData.fontSize?.tablet || 16}px`,
                   "--bs-fs-mob": `${subtitleData.fontSize?.mobile || 14}px`,
@@ -285,10 +297,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           {!loading && filteredBlogs.length > 0 && (
             <div 
               className={cn(
-                "grid gap-6 md:gap-8",
+                "grid",
+                !isEditor && "gap-6 md:gap-8",
                 gridClass
               )}
               style={{
+                gap: isEditor ? (currentDevice === 'mobile' ? '1.5rem' : '2rem') : undefined,
                 '--cols-mob': mobileCols,
                 '--cols-tab': tabletCols,
                 '--cols-desk': desktopCols

@@ -162,38 +162,47 @@ export function Header() {
   // Remove special hiding for home-2 to allow guest mode
   // if (pathname === '/admin/builder') return null;
 
+  const isEditor = isAdmin && isEditMode;
+  const currentLogoColor = getResponsiveValue(logoConfig.color, globalPreviewMode || 'desktop') || '#FFFFFF';
+  const currentLogoHeight = getResponsiveValue(logoConfig.height, globalPreviewMode || 'desktop') || 40;
+  const currentLogoText = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
+
   return (
     <>
       <header
         className={cn(
-          isAdmin && globalPreviewMode !== "desktop" ? "sticky" : "fixed",
+          (isAdmin && globalPreviewMode !== "desktop") || isEditor ? "sticky" : "fixed",
           "top-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
-          (scrolled || globalPreviewMode !== 'desktop') ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
+          (scrolled || globalPreviewMode !== 'desktop' || isEditor) ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
         )}
       >
         <Link href="/" className="flex items-center group flex-shrink-0">
           {logoConfig.type === 'text' ? (
             <span
                className={cn(
-                "font-bold tracking-tight whitespace-nowrap text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
+                "font-bold tracking-tight whitespace-nowrap",
+                !isEditor && "text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
               )}
               style={{ 
+                color: isEditor ? (currentLogoColor as string) : undefined,
                 "--logo-clr-desk": getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF',
                 "--logo-clr-tab": getResponsiveValue(logoConfig.color, 'tablet') || '#FFFFFF',
                 "--logo-clr-mob": getResponsiveValue(logoConfig.color, 'mobile') || '#FFFFFF',
                 fontFamily: 'monospace' 
               } as React.CSSProperties}
             >
-              {getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop')}
+              {currentLogoText}
             </span>
           ) : (
             <img
               src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
               alt="Logo"
               className={cn(
-                "w-auto object-contain transition-transform duration-300 group-hover:scale-105 h-[var(--logo-h-mob)] md:h-[var(--logo-h-tab)] lg:h-[var(--logo-h-desk)]"
+                "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
+                !isEditor && "h-[var(--logo-h-mob)] md:h-[var(--logo-h-tab)] lg:h-[var(--logo-h-desk)]"
               )}
               style={{
+                height: isEditor ? `${currentLogoHeight}px` : undefined,
                 "--logo-h-desk": `${getResponsiveValue(logoConfig.height, 'desktop') || 40}px`,
                 "--logo-h-tab": `${getResponsiveValue(logoConfig.height, 'tablet') || 40}px`,
                 "--logo-h-mob": `${getResponsiveValue(logoConfig.height, 'mobile') || 40}px`,

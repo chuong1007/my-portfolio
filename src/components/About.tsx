@@ -58,7 +58,7 @@ export function About({ sectionId = "about" }: AboutProps) {
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(isContactPage ? "80" : "128");
   const [isVisible, setIsVisible] = useState(true);
   const [loaded, setLoaded] = useState(false);
-  const { isAdmin, globalPreviewMode } = useAdmin();
+  const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
     const supabase = createClient();
@@ -139,6 +139,9 @@ export function About({ sectionId = "about" }: AboutProps) {
     paddingBottom: paddingBottomData 
   };
 
+        const isEditor = isAdmin && isEditMode;
+        const currentPx = globalPreviewMode === 'mobile' ? '1rem' : '3rem';
+
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
       <section 
@@ -149,9 +152,14 @@ export function About({ sectionId = "about" }: AboutProps) {
         }}
       >
         <div 
-          className="max-w-4xl mx-auto px-4 md:px-12"
+          className={cn(
+            "max-w-4xl mx-auto",
+            !isEditor && "px-4 md:px-12"
+          )}
           style={{
-            paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
+            paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
+            paddingLeft: isEditor ? currentPx : undefined,
+            paddingRight: isEditor ? currentPx : undefined
           }}
         >
           <motion.div

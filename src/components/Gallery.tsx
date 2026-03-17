@@ -253,8 +253,15 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--g-fs-mob)] md:text-[length:var(--g-fs-tab)] lg:text-[length:var(--g-fs-desk)] leading-[var(--g-lh-mob)] md:leading-[var(--g-lh-tab)] lg:leading-[var(--g-lh-desk)] [font-family:var(--g-ff-mob)] md:[font-family:var(--g-ff-tab)] lg:[font-family:var(--g-ff-desk)] font-[var(--g-fw-mob)] md:font-[var(--g-fw-tab)] lg:font-[var(--g-fw-desk)]" 
+                className={cn(
+                  "tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  !isEditor && "text-[length:var(--g-fs-mob)] md:text-[length:var(--g-fs-tab)] lg:text-[length:var(--g-fs-desk)] leading-[var(--g-lh-mob)] md:leading-[var(--g-lh-tab)] lg:leading-[var(--g-lh-desk)] [font-family:var(--g-ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--g-ff-desk)] font-[var(--g-fw-mob)] md:font-[var(--g-fw-tab)] lg:font-[var(--g-fw-desk)]"
+                )}
                 style={{ 
+                  fontSize: isEditor ? `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` : undefined,
+                  lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
+                  fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
+                  fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
                   "--g-fs-desk": `${titleData.fontSize?.desktop || 48}px`,
                   "--g-fs-tab": `${titleData.fontSize?.tablet || 40}px`,
                   "--g-fs-mob": `${titleData.fontSize?.mobile || 32}px`,
@@ -271,8 +278,13 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
               <div 
-                className="text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--gs-fs-mob)] md:text-[length:var(--gs-fs-tab)] lg:text-[length:var(--gs-fs-desk)] leading-[var(--gs-lh-mob)] md:leading-[var(--gs-lh-tab)] lg:leading-[var(--gs-lh-desk)]" 
+                className={cn(
+                  "text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  !isEditor && "text-[length:var(--gs-fs-mob)] md:text-[length:var(--gs-fs-tab)] lg:text-[length:var(--gs-fs-desk)] leading-[var(--gs-lh-mob)] md:leading-[var(--gs-lh-tab)] lg:leading-[var(--gs-lh-desk)]"
+                )}
                 style={{ 
+                  fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` : undefined,
+                  lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
                   "--gs-fs-desk": `${subtitleData.fontSize?.desktop || 18}px`,
                   "--gs-fs-tab": `${subtitleData.fontSize?.tablet || 16}px`,
                   "--gs-fs-mob": `${subtitleData.fontSize?.mobile || 14}px`,
@@ -318,10 +330,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
  
           <div 
             className={cn(
-              "grid gap-6 md:gap-8",
+              "grid",
+              !isEditor && "gap-6 md:gap-8",
               gridClass
             )}
             style={{
+              gap: isEditor ? (currentDevice === 'mobile' ? '1.5rem' : '2rem') : undefined,
               '--cols-mob': mobileCols,
               '--cols-tab': tabletCols,
               '--cols-desk': desktopCols

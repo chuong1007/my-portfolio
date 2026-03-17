@@ -164,7 +164,8 @@ const formatFs = (val: string, fallback: string) => {
   const isEditor = isAdmin && isEditMode;
 
   // Parity 1:1 current values for Editor mode
-  const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop');
+  const ptOffset = 80;
+  const currentPt = (parseInt(String(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || '0'))) + ptOffset;
   const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop');
   const currentFs = titleData.fontSize?.[globalPreviewMode || 'desktop'] || 40;
   const currentScroll = getResponsiveValue(scrollPadding, globalPreviewMode || 'desktop') ?? getResponsiveValue(scrollOffset, globalPreviewMode || 'desktop') ?? 0;
@@ -186,9 +187,9 @@ const formatFs = (val: string, fallback: string) => {
         style={{
           paddingTop: isEditor ? `${currentPt}px` : undefined,
           paddingBottom: isEditor ? `${currentPb}px` : undefined,
-          "--pad-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
-          "--pad-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
-          "--pad-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
+          "--pad-desk": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'desktop') || 0}px)`,
+          "--pad-tab": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'tablet') || 0}px)`,
+          "--pad-mob": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'mobile') || 0}px)`,
           "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
@@ -221,7 +222,15 @@ const formatFs = (val: string, fallback: string) => {
           >
             {/* Using arbitrary values with CSS variables for responsive styling */}
             <div 
-              className="w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] leading-[var(--lh-mob)] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] [font-family:var(--ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] font-[var(--fw-mob)] md:font-[var(--fw-tab)] lg:font-[var(--fw-desk)]" 
+              className={cn(
+                "w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]",
+                !isEditor && "leading-[var(--lh-mob)] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] [font-family:var(--ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] font-[var(--fw-mob)] md:font-[var(--fw-tab)] lg:font-[var(--fw-desk)]"
+              )}
+              style={{
+                lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
+                fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'Syne, sans-serif') : undefined,
+                fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
+              }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
             />
           </motion.h1>
@@ -256,7 +265,16 @@ const formatFs = (val: string, fallback: string) => {
 >
   {/* Subtitle with responsive variants */}
   <div 
-    className="uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)] transition-all duration-300" 
+    className={cn(
+      "uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] transition-all duration-300",
+      !isEditor && "text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)]"
+    )}
+    style={{
+      fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 10}px` : undefined,
+      lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
+      fontFamily: isEditor ? (subtitleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
+      fontWeight: isEditor ? (subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '500') : undefined,
+    }}
     dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
   />
   <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
