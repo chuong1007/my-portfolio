@@ -120,7 +120,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
       }
     } catch (err) {
       console.error("Critical error saving blog:", err);
-      alert(`Lỗi khi lưu blog: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`Lỗi khi lưu blog: ${err instanceof Error ? err.message : JSON.stringify(err, null, 2)}`);
     } finally {
       setSaving(false);
     }

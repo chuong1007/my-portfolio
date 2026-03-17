@@ -18,7 +18,7 @@ import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout, Moni
 const STATIC_NAV_ITEMS = [
   { label: "Projects", href: "/projects" },
   { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 export function Header() {

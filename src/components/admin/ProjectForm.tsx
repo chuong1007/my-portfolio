@@ -143,7 +143,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       onClose();
     } catch (err) {
       console.error("Critical error saving project:", err);
-      alert(`Lỗi khi lưu dự án: ${err instanceof Error ? err.message : String(err)}`);
+      alert(`Lỗi khi lưu dự án: ${err instanceof Error ? err.message : JSON.stringify(err, null, 2)}`);
     } finally {
       setSaving(false);
     }
