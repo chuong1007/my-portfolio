@@ -288,18 +288,32 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
           
           <div className="w-px h-4 bg-zinc-800 mx-1" />
           
-          <div className="flex items-center gap-2 px-2 py-1 bg-zinc-950 rounded border border-zinc-800 ml-1">
-            <Type className="w-3 h-3 text-zinc-500" />
-            <input 
-              type="number"
+          <div className="flex items-center gap-3 px-3 py-1 bg-zinc-950 rounded-lg border border-zinc-800 ml-1 group/slider">
+            <div className="flex items-center gap-1.5 min-w-[50px]">
+              <Type className="w-3.5 h-3.5 text-zinc-500" />
+              <div className="flex items-baseline gap-0.5">
+                <input 
+                  type="number"
+                  value={currentSize}
+                  onChange={(e) => updateFontSize(parseInt(e.target.value) || 16)}
+                  className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-[9px] text-zinc-600 font-black uppercase">px</span>
+              </div>
+            </div>
+            
+            <input
+              type="range"
+              min="8"
+              max="200"
               value={currentSize}
-              onChange={(e) => updateFontSize(parseInt(e.target.value) || 16)}
-              className="w-8 bg-transparent text-[10px] font-bold text-center focus:outline-none text-blue-400"
+              onChange={(e) => updateFontSize(parseInt(e.target.value))}
+              className="w-20 md:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
             />
-            <span className="text-[10px] text-zinc-600 font-bold uppercase">px</span>
-            <div className="flex flex-col gap-0.5 ml-1">
-                <button onClick={() => updateFontSize(currentSize + 1)} className="hover:text-zinc-300"><Plus className="w-2.5 h-2.5" /></button>
-                <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="hover:text-zinc-300"><Minus className="w-2.5 h-2.5" /></button>
+            
+            <div className="flex flex-col gap-0.5">
+                <button onClick={() => updateFontSize(currentSize + 1)} className="text-zinc-500 hover:text-blue-400 transition-colors"><Plus className="w-2.5 h-2.5" /></button>
+                <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="text-zinc-500 hover:text-blue-400 transition-colors"><Minus className="w-2.5 h-2.5" /></button>
             </div>
           </div>
 
