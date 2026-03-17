@@ -134,7 +134,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-20 pt-8">
         <div className="border-t border-zinc-800 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-zinc-500 text-sm">
-            © CHUONG.GRAPHIC — Thiết kế bởi sự đam mê.
+            © CHUONG.GRAPHIC
           </p>
           <Link
             href="/#dự-án"
