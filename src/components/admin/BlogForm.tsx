@@ -5,6 +5,7 @@ import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink,
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
+import { ImageUpload } from "./ImageUpload";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
@@ -75,23 +76,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
     );
   };
 
-  const handleCoverUpload = async (file: File) => {
-    setUploading(true);
-    const supabase = createClient();
-    const fileName = `blogs/${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("project-images") // Reusing the same bucket for simplicity
-      .upload(fileName, file);
-
-    if (!error) {
-      const { data } = supabase.storage
-        .from("project-images")
-        .getPublicUrl(fileName);
-      setCoverImage(data.publicUrl);
-    }
-    setUploading(false);
-  };
+  // Removed manual handleCoverUpload as it's handled by ImageUpload component
 
   const handleSave = async () => {
     if (!title.trim() || !coverImage) return;
@@ -342,45 +327,14 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
         {/* Right Column - Side Config */}
         <div className="space-y-6">
           {/* Cover Image */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Ảnh bìa *
-            </label>
-            {coverImage ? (
-              <div className="relative w-full aspect-video">
-                <img
-                  src={coverImage}
-                  alt="Cover"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover rounded-xl border border-zinc-800 bg-zinc-900"
-                />
-                <button
-                  onClick={() => setCoverImage("")}
-                  className="absolute top-2 right-2 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80"
-                >
-                  <X className="w-4 h-4 text-white" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex items-center justify-center w-full aspect-video border-2 border-dashed border-zinc-800 rounded-xl cursor-pointer hover:border-zinc-600 transition-colors">
-                <div className="text-center">
-                  <Upload className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-sm text-zinc-500">
-                    {uploading ? "Đang tải lên..." : "Click để upload ảnh bìa"}
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleCoverUpload(file);
-                  }}
-                />
-              </label>
-            )}
-          </div>
+          <ImageUpload
+            value={coverImage}
+            onChange={setCoverImage}
+            label="Ảnh bìa bài viết *"
+            path="blogs"
+            onUploadStart={() => setUploading(true)}
+            onUploadEnd={() => setUploading(false)}
+          />
 
           {/* Tags */}
           <div>

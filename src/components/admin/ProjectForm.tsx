@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Plus } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon } from "lucide-react";
+import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
+import { cn } from "@/lib/utils";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
@@ -34,23 +36,9 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     );
   };
 
-  const handleCoverUpload = async (file: File) => {
-    setUploading(true);
-    const supabase = createClient();
-    const fileName = `covers/${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("project-images")
-      .upload(fileName, file);
-
-    if (!error) {
-      const { data } = supabase.storage
-        .from("project-images")
-        .getPublicUrl(fileName);
-      setCoverImage(data.publicUrl);
-    }
-    setUploading(false);
-  };
+  // Removed manual handleCoverUpload as it's handled by ImageUpload component
+  
+  const [galleryDragging, setGalleryDragging] = useState(false);
 
   const handleGalleryUpload = (files: FileList) => {
     const fileArray = Array.from(files);
@@ -262,45 +250,14 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           </div>
 
           {/* Cover Image */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Ảnh bìa
-            </label>
-            {coverImage ? (
-              <div className="relative w-full max-w-md">
-                <img
-                  src={coverImage}
-                  alt="Cover"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-48 object-cover rounded-xl border border-zinc-800 bg-zinc-900"
-                />
-                <button
-                  onClick={() => setCoverImage("")}
-                  className="absolute top-2 right-2 w-8 h-8 bg-black/60 rounded-full flex items-center justify-center hover:bg-black/80"
-                >
-                  <X className="w-4 h-4 text-white" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex items-center justify-center w-full max-w-md h-36 border-2 border-dashed border-zinc-800 rounded-xl cursor-pointer hover:border-zinc-600 transition-colors">
-                <div className="text-center">
-                  <Upload className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-sm text-zinc-500">
-                    {uploading ? "Đang tải lên..." : "Click để upload ảnh bìa"}
-                  </p>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleCoverUpload(file);
-                  }}
-                />
-              </label>
-            )}
-          </div>
+          <ImageUpload
+            value={coverImage}
+            onChange={setCoverImage}
+            label="Ảnh bìa dự án *"
+            path="projects/covers"
+            onUploadStart={() => setUploading(true)}
+            onUploadEnd={() => setUploading(false)}
+          />
         </div>
 
         {/* Right Column - Gallery Images */}
@@ -309,22 +266,41 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
           </label>
 
-          {/* Upload Button */}
-          <label className="flex items-center justify-center w-full h-24 border-2 border-dashed border-zinc-800 rounded-xl cursor-pointer hover:border-zinc-600 transition-colors mb-4">
-            <div className="flex items-center gap-2 text-zinc-500">
-              <Plus className="w-5 h-5" />
-              <span className="text-sm">Thêm ảnh</span>
+          {/* Upload Drop Zone */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setGalleryDragging(true); }}
+            onDragLeave={() => setGalleryDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setGalleryDragging(false);
+              if (e.dataTransfer.files) handleGalleryUpload(e.dataTransfer.files);
+            }}
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.multiple = true;
+              input.accept = 'image/*';
+              input.onchange = (e) => {
+                const files = (e.target as HTMLInputElement).files;
+                if (files) handleGalleryUpload(files);
+              };
+              input.click();
+            }}
+            className={cn(
+               "flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 mb-4",
+               galleryDragging 
+                ? "border-emerald-500 bg-emerald-500/5 scale-[0.98]" 
+                : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-600 hover:bg-zinc-900"
+            )}
+          >
+            <div className="text-center">
+              <Upload className={cn("w-8 h-8 mx-auto mb-2 transition-colors", galleryDragging ? "text-emerald-500" : "text-zinc-600")} />
+              <p className="text-xs font-medium text-zinc-300">
+                {galleryDragging ? "Thả để thêm ảnh" : "Thêm ảnh dự án"}
+              </p>
+              <p className="text-[10px] text-zinc-500 mt-1">Kéo thả hoặc click để chọn nhiều ảnh</p>
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                if (e.target.files) handleGalleryUpload(e.target.files);
-              }}
-            />
-          </label>
+          </div>
 
           {/* Image Grid */}
           <div className="grid grid-cols-3 gap-2 max-h-[500px] overflow-y-auto">

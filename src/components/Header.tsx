@@ -165,7 +165,10 @@ export function Header() {
   const isEditor = isAdmin && isEditMode;
   const currentLogoColor = getResponsiveValue(logoConfig.color, globalPreviewMode || 'desktop') || '#FFFFFF';
   const currentLogoHeight = getResponsiveValue(logoConfig.height, globalPreviewMode || 'desktop') || 40;
-  const currentLogoText = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
+  const logoRaw = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
+  const currentLogoText = typeof logoRaw === 'object' && logoRaw !== null 
+    ? (logoRaw.content || logoRaw.text || JSON.stringify(logoRaw)) 
+    : logoRaw;
 
   return (
     <>

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { getResponsiveValue } from "@/lib/responsive-helpers";
 
 export default function AdminLayout({
   children,
@@ -14,7 +15,7 @@ export default function AdminLayout({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: string, url: string, color?: string }>({
+  const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: any, url: any, color?: any }>({
     type: 'text',
     text: 'CHUONG.GRAPHIC',
     url: '',
@@ -61,6 +62,14 @@ export default function AdminLayout({
 
   if (!user) return null;
 
+  const logoRaw = getResponsiveValue(logoConfig.text, 'desktop');
+  const currentLogoText = typeof logoRaw === 'object' && logoRaw !== null
+    ? (logoRaw.content || logoRaw.text || JSON.stringify(logoRaw))
+    : logoRaw;
+
+  const currentLogoColor = getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF';
+  const currentLogoUrl = getResponsiveValue(logoConfig.url, 'desktop');
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50">
       {/* Admin Top Bar */}
@@ -69,16 +78,16 @@ export default function AdminLayout({
           <div className="flex items-center gap-4">
             <a href="/" className="flex items-center group">
               {logoConfig.type === 'text' ? (
-                <span 
+                <span
                   className="text-lg font-bold tracking-wider"
-                  style={{ color: logoConfig.color || '#FFFFFF' }}
+                  style={{ color: currentLogoColor }}
                 >
-                  {logoConfig.text}
+                  {currentLogoText}
                 </span>
               ) : (
-                <img 
-                  src={logoConfig.url} 
-                  alt="Logo" 
+                <img
+                  src={currentLogoUrl}
+                  alt="Logo"
                   className="h-6 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
@@ -86,8 +95,8 @@ export default function AdminLayout({
                     if (parent) {
                       const span = document.createElement('span');
                       span.className = "text-lg font-bold tracking-wider";
-                      span.style.color = logoConfig.color || '#FFFFFF';
-                      span.innerText = logoConfig.text;
+                      span.style.color = currentLogoColor;
+                      span.innerText = currentLogoText;
                       parent.appendChild(span);
                     }
                   }}
