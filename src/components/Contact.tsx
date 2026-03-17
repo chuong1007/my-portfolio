@@ -144,7 +144,7 @@ export function Contact() {
       <section 
         id="contact" 
         className={cn(
-          "px-6 md:px-12 bg-zinc-950",
+          "px-4 md:px-12 bg-zinc-950",
           isContactPage ? "flex flex-col" : "border-t border-zinc-900"
         )}
         style={{

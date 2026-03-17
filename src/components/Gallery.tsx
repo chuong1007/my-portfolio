@@ -206,7 +206,7 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     >
       <section 
         id="projects" 
-        className="px-6 md:px-12 bg-zinc-950 relative"
+        className="px-4 md:px-12 bg-zinc-950 relative"
         style={{
           paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`

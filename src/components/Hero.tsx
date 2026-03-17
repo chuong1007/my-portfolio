@@ -169,7 +169,7 @@ const formatFs = (val: string, fallback: string) => {
       controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center justify-center px-6 text-center min-h-[90vh]"
+        className="relative flex flex-col items-center justify-center px-4 text-center min-h-[90vh]"
         style={{
           paddingTop: `${parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`

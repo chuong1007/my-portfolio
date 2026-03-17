@@ -176,7 +176,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
       <section 
         id={sectionId} 
-        className="px-6 md:px-12 bg-zinc-950 relative"
+        className="px-4 md:px-12 bg-zinc-950 relative"
         style={{
           paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`

@@ -149,7 +149,7 @@ export function About({ sectionId = "about" }: AboutProps) {
         }}
       >
         <div 
-          className="max-w-4xl mx-auto px-6 md:px-12"
+          className="max-w-4xl mx-auto px-4 md:px-12"
           style={{
             paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`
           }}
