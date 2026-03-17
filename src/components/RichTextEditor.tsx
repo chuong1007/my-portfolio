@@ -335,38 +335,55 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   };
 
   const updateFontFamily = (newFF: string) => {
-    const updatedFF = { ...localFontFamily, [globalPreviewMode]: newFF };
-    setLocalFontFamily(updatedFF);
-    if (editor?.isFocused) {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    const isSelection = from !== to;
+
+    if (isSelection) {
       editor.chain().focus().setFontFamily(newFF).run();
+    } else {
+      const updatedFF = { ...localFontFamily, [globalPreviewMode]: newFF };
+      setLocalFontFamily(updatedFF);
+      editor.chain().focus().setFontFamily(newFF).run();
+      onChange({
+        content: localContent,
+        fontSize: localFontSize,
+        lineHeight: localLineHeight,
+        fontFamily: updatedFF,
+        fontWeight: localFontWeight
+      });
     }
-    onChange({
-      content: localContent,
-      fontSize: localFontSize,
-      lineHeight: localLineHeight,
-      fontFamily: updatedFF,
-      fontWeight: localFontWeight
-    });
   };
 
   const updateFontWeight = (newFW: string) => {
-    const updatedFW = { ...localFontWeight, [globalPreviewMode]: newFW };
-    setLocalFontWeight(updatedFW);
-    if (editor?.isFocused) {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    const isSelection = from !== to;
+
+    if (isSelection) {
       editor.chain().focus().setFontWeight(newFW).run();
+    } else {
+      const updatedFW = { ...localFontWeight, [globalPreviewMode]: newFW };
+      setLocalFontWeight(updatedFW);
+      editor.chain().focus().setFontWeight(newFW).run();
+      onChange({
+        content: localContent,
+        fontSize: localFontSize,
+        lineHeight: localLineHeight,
+        fontFamily: localFontFamily,
+        fontWeight: updatedFW
+      });
     }
-    onChange({
-      content: localContent,
-      fontSize: localFontSize,
-      lineHeight: localLineHeight,
-      fontFamily: localFontFamily,
-      fontWeight: updatedFW
-    });
   };
 
   const currentLineHeight = localLineHeight[globalPreviewMode] || '1.5';
-  const currentFontFamily = localFontFamily[globalPreviewMode] || 'inherit';
-  const currentFontWeight = localFontWeight[globalPreviewMode] || '400';
+  const baseFontFamily = localFontFamily[globalPreviewMode] || 'inherit';
+  const baseFontWeight = localFontWeight[globalPreviewMode] || '400';
+
+  // Determine current weight/family at selection/cursor for dropdown display
+  const selectionAttributes = editor?.getAttributes('textStyle') || {};
+  const currentFontFamily = selectionAttributes.fontFamily || baseFontFamily;
+  const currentFontWeight = selectionAttributes.fontWeight || baseFontWeight;
 
   const FONT_FAMILIES = [
     { label: 'Default', value: 'inherit' },
