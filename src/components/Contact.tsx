@@ -144,13 +144,17 @@ export function Contact() {
       <section 
         id="contact" 
         className={cn(
-          "px-4 md:px-12 bg-zinc-950",
+          "px-4 md:px-12 bg-zinc-950 pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]",
           isContactPage ? "flex flex-col" : "border-t border-zinc-900"
         )}
         style={{
-          paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
-          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
-        }}
+          "--pt-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
+          "--pt-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
+          "--pt-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
+          "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
+          "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
+          "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
+        } as any}
       >
         <div className="max-w-4xl mx-auto relative w-full">
           {/* Separator Line only for Contact Page */}
@@ -168,36 +172,41 @@ export function Contact() {
             <div className="flex flex-col gap-2 md:gap-3">
               {heading && (
                 <div 
-                  className={cn(
-                    "tracking-tighter text-zinc-50 whitespace-pre-wrap break-words overflow-visible w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                  )}
+                  className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--h-fs-mob)] md:text-[length:var(--h-fs-tab)] lg:text-[length:var(--h-fs-desk)] leading-[var(--h-lh-mob)] md:leading-[var(--h-lh-tab)] lg:leading-[var(--h-lh-desk)] [font-family:var(--h-ff-mob)] md:[font-family:var(--h-ff-tab)] lg:[font-family:var(--h-ff-desk)] font-[var(--h-fw-mob)] md:font-[var(--h-fw-tab)] lg:font-[var(--h-fw-desk)]"
                   style={{ 
-                    fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px`,
-                    lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
-                    fontFamily: heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                    fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
-                  }}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }}
+                    "--h-fs-desk": `${heading.fontSize?.desktop || 80}px`,
+                    "--h-fs-tab": `${heading.fontSize?.tablet || 48}px`,
+                    "--h-fs-mob": `${heading.fontSize?.mobile || 32}px`,
+                    "--h-lh-desk": heading.lineHeight?.desktop || '1.1',
+                    "--h-lh-tab": heading.lineHeight?.tablet || '1.1',
+                    "--h-lh-mob": heading.lineHeight?.mobile || '1.1',
+                    "--h-ff-desk": heading.fontFamily?.desktop || 'inherit',
+                    "--h-ff-tab": heading.fontFamily?.tablet || 'inherit',
+                    "--h-ff-mob": heading.fontFamily?.mobile || 'inherit',
+                    "--h-fw-desk": heading.fontWeight?.desktop || '700',
+                    "--h-fw-tab": heading.fontWeight?.tablet || '700',
+                    "--h-fw-mob": heading.fontWeight?.mobile || '700',
+                  } as any}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') || "" }}
                 />
               )}
               {subtitle && (
                 <div 
-                  className={cn(
-                    "text-zinc-400 whitespace-pre-wrap break-words w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                  )}
+                  className="text-zinc-400 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--s-fs-mob)] md:text-[length:var(--s-fs-tab)] lg:text-[length:var(--s-fs-desk)] leading-[var(--s-lh-mob)] md:leading-[var(--s-lh-tab)] lg:leading-[var(--s-lh-desk)]"
                   style={{ 
-                    fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px`,
-                    lineHeight: subtitle.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4'
-                  }}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') }}
+                    "--s-fs-desk": `${subtitle.fontSize?.desktop || 24}px`,
+                    "--s-fs-tab": `${subtitle.fontSize?.tablet || 20}px`,
+                    "--s-fs-mob": `${subtitle.fontSize?.mobile || 18}px`,
+                    "--s-lh-desk": subtitle.lineHeight?.desktop || '1.4',
+                    "--s-lh-tab": subtitle.lineHeight?.tablet || '1.4',
+                    "--s-lh-mob": subtitle.lineHeight?.mobile || '1.4',
+                  } as any}
+                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') || "" }}
                 />
               )}
             </div>
 
-            <div className={cn(
-              "grid gap-4 md:gap-8 w-full mt-4",
-              globalPreviewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
-            )}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full mt-4">
               {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
                   href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}
@@ -223,7 +232,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(email, globalPreviewMode)}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 block break-all leading-tight">{getResponsiveValue(email, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}

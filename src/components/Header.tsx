@@ -187,8 +187,12 @@ export function Header() {
               src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
               alt="Logo"
               className={cn(
-                "h-8 md:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                "w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               )}
+              style={{
+                height: `${getResponsiveValue(logoConfig.height, globalPreviewMode ?? 'desktop') || 40}px`,
+                maxHeight: '120px'
+              }}
               onError={(e) => {
                 // Fallback to text if image fails
                 (e.target as HTMLImageElement).style.display = 'none';

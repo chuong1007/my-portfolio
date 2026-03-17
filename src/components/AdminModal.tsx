@@ -213,13 +213,15 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       const finalData = { ...data };
       
       // Normalize Facebook link
-      if (finalData.facebook && typeof finalData.facebook === 'string' && !finalData.facebook.startsWith('http')) {
-        finalData.facebook = `https://${finalData.facebook}`;
+      const fb = getResponsiveValue(finalData.facebook, globalPreviewMode);
+      if (fb && typeof fb === 'string' && !(fb || '').startsWith('http') && (fb || '').trim() !== '') {
+        finalData.facebook = setResponsiveValue(finalData.facebook, globalPreviewMode, `https://${fb}`);
       }
 
       // Safe check for Zalo if it's a string
-      if (finalData.zalo && typeof finalData.zalo === 'string' && !finalData.zalo.startsWith('http') && /^\d+$/.test(finalData.zalo.replace(/\s/g, ''))) {
-        finalData.zalo = `https://zalo.me/${finalData.zalo.replace(/\s/g, '')}`;
+      const zl = getResponsiveValue(finalData.zalo, globalPreviewMode);
+      if (zl && typeof zl === 'string' && !(zl || '').startsWith('http') && (zl || '').trim() !== '' && /^\d+$/.test(zl.replace(/\s/g, ''))) {
+        finalData.zalo = setResponsiveValue(finalData.zalo, globalPreviewMode, `https://zalo.me/${zl.replace(/\s/g, '')}`);
       }
 
       console.log("Saving payload for section:", sectionId, finalData);
@@ -412,6 +414,26 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     </div>
                   </div>
                 )}
+                
+                {/* Logo Height Slider */}
+                <div className="mt-4 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Chiều cao Logo (px)</label>
+                    <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                      {getResponsiveValue(data.logoHeight, globalPreviewMode) || "40"}px
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="200"
+                    step="1"
+                    value={getResponsiveValue(data.logoHeight, globalPreviewMode) || "40"}
+                    onChange={(e) => setData({ ...data, logoHeight: setResponsiveValue(data.logoHeight, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[9px] text-zinc-500 italic">Điều chỉnh kích thước logo trên từng thiết bị.</p>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -481,7 +503,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 <input
                   type="range"
                   min="-200"
-                  max="400"
+                  max="200"
                   step="1"
                   value={getResponsiveValue(data.scrollPadding, globalPreviewMode) || "0"}
                   onChange={(e) => setData({ ...data, scrollPadding: setResponsiveValue(data.scrollPadding, globalPreviewMode, e.target.value) })}

@@ -160,27 +160,33 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     columns: columnsData
   };
 
-  const desktopCols = parseInt(getResponsiveValue(columnsData, 'desktop') || "3");
-  const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
-  const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
+  const desktopCols = getResponsiveValue(columnsData, 'desktop') || "3";
+  const tabletCols = getResponsiveValue(columnsData, 'tablet') || "2";
+  const mobileCols = getResponsiveValue(columnsData, 'mobile') || "1";
+
+  const ptDesk = getResponsiveValue(paddingTopData, 'desktop') || 0;
+  const ptTab = getResponsiveValue(paddingTopData, 'tablet') || 0;
+  const ptMob = getResponsiveValue(paddingTopData, 'mobile') || 0;
+
+  const pbDesk = getResponsiveValue(paddingBottomData, 'desktop') || 0;
+  const pbTab = getResponsiveValue(paddingBottomData, 'tablet') || 0;
+  const pbMob = getResponsiveValue(paddingBottomData, 'mobile') || 0;
 
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
-
-  const gridStyle = {
-    display: 'grid',
-    gap: currentDevice === 'mobile' ? '1.5rem' : '2rem',
-    gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
-  };
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
       <section 
         id={sectionId} 
-        className="px-4 md:px-12 bg-zinc-950 relative"
+        className="px-4 md:px-12 bg-zinc-950 relative pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         style={{
-          paddingTop: `${getResponsiveValue(paddingTopData, currentDevice) || 0}px`,
-          paddingBottom: `${getResponsiveValue(paddingBottomData, currentDevice) || 0}px`
-        }}
+          "--pt-desk": `${ptDesk}px`,
+          "--pt-tab": `${ptTab}px`,
+          "--pt-mob": `${ptMob}px`,
+          "--pb-desk": `${pbDesk}px`,
+          "--pb-tab": `${pbTab}px`,
+          "--pb-mob": `${pbMob}px`,
+        } as any}
       >
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -192,23 +198,33 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--b-fs-mob)] md:text-[length:var(--b-fs-tab)] lg:text-[length:var(--b-fs-desk)] leading-[var(--b-lh-mob)] md:leading-[var(--b-lh-tab)] lg:leading-[var(--b-lh-desk)] [font-family:var(--b-ff-mob)] md:[font-family:var(--b-ff-tab)] lg:[font-family:var(--b-ff-desk)] font-[var(--b-fw-mob)] md:font-[var(--b-fw-tab)] lg:font-[var(--b-fw-desk)]" 
                 style={{ 
-                  fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px`,
-                  lineHeight: titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.2',
-                  fontFamily: titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                  fontWeight: titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
-                }}
+                  "--b-fs-desk": `${titleData.fontSize?.desktop || 48}px`,
+                  "--b-fs-tab": `${titleData.fontSize?.tablet || 40}px`,
+                  "--b-fs-mob": `${titleData.fontSize?.mobile || 32}px`,
+                  "--b-lh-desk": titleData.lineHeight?.desktop || '1.1',
+                  "--b-lh-tab": titleData.lineHeight?.tablet || '1.1',
+                  "--b-lh-mob": titleData.lineHeight?.mobile || '1.1',
+                  "--b-ff-desk": titleData.fontFamily?.desktop || 'inherit',
+                  "--b-ff-tab": titleData.fontFamily?.tablet || 'inherit',
+                  "--b-ff-mob": titleData.fontFamily?.mobile || 'inherit',
+                  "--b-fw-desk": titleData.fontWeight?.desktop || '700',
+                  "--b-fw-tab": titleData.fontWeight?.tablet || '700',
+                  "--b-fw-mob": titleData.fontWeight?.mobile || '700',
+                } as any}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
               <div 
-                className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--bs-fs-mob)] md:text-[length:var(--bs-fs-tab)] lg:text-[length:var(--bs-fs-desk)] leading-[var(--bs-lh-mob)] md:leading-[var(--bs-lh-tab)] lg:leading-[var(--bs-lh-desk)]" 
                 style={{ 
-                  fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
-                  lineHeight: subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5',
-                  fontFamily: subtitleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                  fontWeight: subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '400'
-                }}
+                  "--bs-fs-desk": `${subtitleData.fontSize?.desktop || 18}px`,
+                  "--bs-fs-tab": `${subtitleData.fontSize?.tablet || 16}px`,
+                  "--bs-fs-mob": `${subtitleData.fontSize?.mobile || 14}px`,
+                  "--bs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
+                  "--bs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
+                  "--bs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
+                } as any}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
             </div>
@@ -243,7 +259,14 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           )}
 
           {!loading && filteredBlogs.length > 0 && (
-            <div style={gridStyle}>
+            <div 
+              className="grid grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))] gap-6 md:gap-8"
+              style={{
+                '--cols-mob': mobileCols,
+                '--cols-tab': tabletCols,
+                '--cols-desk': desktopCols
+              } as any}
+            >
               {filteredBlogs.map((post, index) => (
                 <BlogCard 
                   key={post.id} 
@@ -298,12 +321,12 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group flex flex-col bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300 p-5 hover:bg-zinc-800/50"
+      className="group flex flex-col bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300 p-5 hover:bg-zinc-800/50 h-full"
     >
       <Link href={`/blog/${post.slug}`} className="flex flex-col w-full h-full">
         <div className="overflow-hidden bg-zinc-800 w-full aspect-video rounded-2xl mb-6 relative">
           {post.is_featured && (
-            <div className="bg-orange-500 text-white text-xs font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg">
+            <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg tracking-wider">
               NỔI BẬT
             </div>
           )}
@@ -314,16 +337,16 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </div>
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col flex-1">
           <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
             <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
             <span>{post.tags?.[0] || "Blog"}</span>
           </div>
-          <h3 className="font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight text-2xl line-clamp-2">
+          <h3 className="font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight text-xl line-clamp-2">
             {post.title}
           </h3>
-          <p className="text-zinc-500 leading-relaxed text-base line-clamp-2">
+          <p className="text-zinc-500 leading-relaxed text-sm line-clamp-2 mt-auto">
             {post.excerpt}
           </p>
         </div>

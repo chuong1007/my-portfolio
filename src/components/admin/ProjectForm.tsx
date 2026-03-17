@@ -24,6 +24,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [existingImages, setExistingImages] = useState<DbProjectImage[]>(project?.images || []);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [isVisible, setIsVisible] = useState<boolean>(project?.is_visible !== false);
+  const [isFeatured, setIsFeatured] = useState<boolean>(project?.is_featured || false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -81,6 +82,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             tags,
             cover_image: coverImage,
             is_visible: isVisible,
+            is_featured: isFeatured,
             updated_at: new Date().toISOString(),
           })
           .eq("id", projectId);
@@ -106,6 +108,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             tags,
             cover_image: coverImage,
             is_visible: isVisible,
+            is_featured: isFeatured,
             created_at: new Date().toISOString(),
           })
           .select()
@@ -204,18 +207,32 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             />
           </div>
 
-          {/* Visibility Toggle */}
-          <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-            <input
-              type="checkbox"
-              id="project-visible-toggle"
-              checked={isVisible}
-              onChange={(e) => setIsVisible(e.target.checked)}
-              className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
-            />
-            <label htmlFor="project-visible-toggle" className="text-zinc-200 cursor-pointer select-none">
-              Hiển thị dự án này (Bật con mắt)
-            </label>
+          {/* Visibility & Featured Toggle */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+              <input
+                type="checkbox"
+                id="project-visible-toggle"
+                checked={isVisible}
+                onChange={(e) => setIsVisible(e.target.checked)}
+                className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
+              />
+              <label htmlFor="project-visible-toggle" className="text-zinc-200 cursor-pointer select-none">
+                Hiển thị dự án (Bật mắt)
+              </label>
+            </div>
+            <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+              <input
+                type="checkbox"
+                id="project-featured-toggle"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
+              />
+              <label htmlFor="project-featured-toggle" className="text-zinc-200 cursor-pointer select-none">
+                Dự án Nổi bật (Hàng đầu)
+              </label>
+            </div>
           </div>
 
           {/* Tags */}

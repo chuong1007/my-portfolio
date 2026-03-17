@@ -35,8 +35,8 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'CHUONG.PORTFOLIO | Visual Designer',
-  description: 'Visual Designer based in Ho Chi Minh City.',
+  title: 'CHUONG.PORTFOLIO | Visual Designer & Brand Identity Specialist',
+  description: 'Portfolio của Chuong Thanh - Visual Designer chuyên nghiệp tại TP.HCM. Chuyên về nhận diện thương hiệu, thiết kế đồ họa và trải nghiệm thị giác.',
   metadataBase: new URL('https://chuong-graphic.vercel.app'),
   alternates: {
     canonical: '/',

@@ -5,6 +5,7 @@ export type DbProject = {
   tags: string[];
   cover_image: string;
   is_visible: boolean;
+  is_featured?: boolean;
   created_at: string;
 };
 

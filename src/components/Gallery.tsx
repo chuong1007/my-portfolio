@@ -173,15 +173,17 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     columns: columnsData
   };
 
-    const desktopCols = parseInt(getResponsiveValue(columnsData, 'desktop') || "3");
-    const tabletCols = parseInt(getResponsiveValue(columnsData, 'tablet') || "2");
-    const mobileCols = parseInt(getResponsiveValue(columnsData, 'mobile') || "1");
+    const desktopCols = getResponsiveValue(columnsData, 'desktop') || "3";
+    const tabletCols = getResponsiveValue(columnsData, 'tablet') || "2";
+    const mobileCols = getResponsiveValue(columnsData, 'mobile') || "1";
 
-    const gridStyle = {
-      display: 'grid',
-      gap: currentDevice === 'mobile' ? '1.5rem' : '2rem',
-      gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
-    };
+    const ptDesk = getResponsiveValue(paddingTopData, 'desktop') || 0;
+    const ptTab = getResponsiveValue(paddingTopData, 'tablet') || 0;
+    const ptMob = getResponsiveValue(paddingTopData, 'mobile') || 0;
+
+    const pbDesk = getResponsiveValue(paddingBottomData, 'desktop') || 0;
+    const pbTab = getResponsiveValue(paddingBottomData, 'tablet') || 0;
+    const pbMob = getResponsiveValue(paddingBottomData, 'mobile') || 0;
 
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
@@ -206,11 +208,15 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     >
       <section 
         id="projects" 
-        className="px-4 md:px-12 bg-zinc-950 relative"
+        className="px-4 md:px-12 bg-zinc-950 relative pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         style={{
-          paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
-          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
-        }}
+          "--pt-desk": `${ptDesk}px`,
+          "--pt-tab": `${ptTab}px`,
+          "--pt-mob": `${ptMob}px`,
+          "--pb-desk": `${pbDesk}px`,
+          "--pb-tab": `${pbTab}px`,
+          "--pb-mob": `${pbMob}px`,
+        } as any}
       >
         <div className="max-w-7xl mx-auto">
           {/* Section Header */}
@@ -223,24 +229,34 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--g-fs-mob)] md:text-[length:var(--g-fs-tab)] lg:text-[length:var(--g-fs-desk)] leading-[var(--g-lh-mob)] md:leading-[var(--g-lh-tab)] lg:leading-[var(--g-lh-desk)] [font-family:var(--g-ff-mob)] md:[font-family:var(--g-ff-tab)] lg:[font-family:var(--g-ff-desk)] font-[var(--g-fw-mob)] md:font-[var(--g-fw-tab)] lg:font-[var(--g-fw-desk)]" 
                 style={{ 
-                  fontSize: `${titleData.fontSize?.[currentDevice] || 48}px`,
-                  lineHeight: titleData.lineHeight?.[currentDevice] || '1.1',
-                  fontFamily: titleData.fontFamily?.[currentDevice] || 'inherit',
-                  fontWeight: titleData.fontWeight?.[currentDevice] || '700'
-                }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, currentDevice) || "" }} 
+                  "--g-fs-desk": `${titleData.fontSize?.desktop || 48}px`,
+                  "--g-fs-tab": `${titleData.fontSize?.tablet || 40}px`,
+                  "--g-fs-mob": `${titleData.fontSize?.mobile || 32}px`,
+                  "--g-lh-desk": titleData.lineHeight?.desktop || '1.1',
+                  "--g-lh-tab": titleData.lineHeight?.tablet || '1.1',
+                  "--g-lh-mob": titleData.lineHeight?.mobile || '1.1',
+                  "--g-ff-desk": titleData.fontFamily?.desktop || 'inherit',
+                  "--g-ff-tab": titleData.fontFamily?.tablet || 'inherit',
+                  "--g-ff-mob": titleData.fontFamily?.mobile || 'inherit',
+                  "--g-fw-desk": titleData.fontWeight?.desktop || '700',
+                  "--g-fw-tab": titleData.fontWeight?.tablet || '700',
+                  "--g-fw-mob": titleData.fontWeight?.mobile || '700',
+                } as any}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
               <div 
-                className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--gs-fs-mob)] md:text-[length:var(--gs-fs-tab)] lg:text-[length:var(--gs-fs-desk)] leading-[var(--gs-lh-mob)] md:leading-[var(--gs-lh-tab)] lg:leading-[var(--gs-lh-desk)]" 
                 style={{ 
-                  fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px`,
-                  lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5',
-                  fontFamily: subtitleData.fontFamily?.[currentDevice] || 'inherit',
-                  fontWeight: subtitleData.fontWeight?.[currentDevice] || '400'
-                }}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, currentDevice) || "" }} 
+                  "--gs-fs-desk": `${subtitleData.fontSize?.desktop || 18}px`,
+                  "--gs-fs-tab": `${subtitleData.fontSize?.tablet || 16}px`,
+                  "--gs-fs-mob": `${subtitleData.fontSize?.mobile || 14}px`,
+                  "--gs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
+                  "--gs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
+                  "--gs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
+                } as any}
+                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
             </div>
 
@@ -276,7 +292,14 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             })}
           </div>
  
-          <div style={gridStyle}>
+          <div 
+            className="grid grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))] gap-6 md:gap-8"
+            style={{
+              '--cols-mob': mobileCols,
+              '--cols-tab': tabletCols,
+              '--cols-desk': desktopCols
+            } as any}
+          >
             {displayedProjects.map((project, index) => (
               <motion.div
                 key={project.id}
@@ -298,6 +321,11 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                         isAdmin && project.is_visible === false && "opacity-40 grayscale"
                       )}
                     />
+                    {project.is_featured && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 bg-orange-500 rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-xl">
+                        Nổi bật
+                      </div>
+                    )}
                     {isAdmin && project.is_visible === false && (
                       <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
                         <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
@@ -311,11 +339,11 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                       </span>
                     </div>
                   </div>
-                  <div className="px-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
+                  <div className="px-1 flex flex-col flex-1">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-zinc-500 mt-1">
+                    <p className="text-sm text-zinc-500 mt-1 line-clamp-1">
                       {project.tags.join(", ")}
                     </p>
                   </div>

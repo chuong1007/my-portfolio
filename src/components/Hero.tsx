@@ -169,18 +169,22 @@ const formatFs = (val: string, fallback: string) => {
       controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center justify-center px-4 text-center min-h-[90vh]"
+        className="relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         style={{
-          paddingTop: `${parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
-          paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
-        }}
+          "--pt-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
+          "--pt-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
+          "--pt-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
+          "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
+          "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
+          "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
+        } as any}
       >
         <div className="flex flex-col items-center w-full">
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            className="tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap text-[length:var(--fs-mob)] md:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)] transition-all duration-300"
             style={{
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
@@ -188,24 +192,22 @@ const formatFs = (val: string, fallback: string) => {
               "--lh-desk": titleData.lineHeight?.desktop || '1.1',
               "--lh-tab": titleData.lineHeight?.tablet || '1.1',
               "--lh-mob": titleData.lineHeight?.mobile || '1.1',
-              "--ff-desk": titleData.fontFamily?.desktop || 'inherit',
-              "--ff-tab": titleData.fontFamily?.tablet || 'inherit',
-              "--ff-mob": titleData.fontFamily?.mobile || 'inherit',
+              "--ff-desk": titleData.fontFamily?.desktop || 'Syne, sans-serif',
+              "--ff-tab": titleData.fontFamily?.tablet || 'Syne, sans-serif',
+              "--ff-mob": titleData.fontFamily?.mobile || 'Syne, sans-serif',
               "--fw-desk": titleData.fontWeight?.desktop || '700',
               "--fw-tab": titleData.fontWeight?.tablet || '700',
               "--fw-mob": titleData.fontWeight?.mobile || '700',
-              fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)',
-              lineHeight: globalPreviewMode === 'mobile' ? 'var(--lh-mob)' : globalPreviewMode === 'tablet' ? 'var(--lh-tab)' : 'var(--lh-desk)',
-              fontFamily: globalPreviewMode === 'mobile' ? 'var(--ff-mob)' : globalPreviewMode === 'tablet' ? 'var(--ff-tab)' : 'var(--ff-desk)',
-              fontWeight: globalPreviewMode === 'mobile' ? 'var(--fw-mob)' : globalPreviewMode === 'tablet' ? 'var(--fw-tab)' : 'var(--fw-desk)'
-            } as React.CSSProperties}
+              lineHeight: "var(--lh-mob)",
+              fontFamily: "var(--ff-mob)",
+              fontWeight: "var(--fw-mob)",
+            } as any}
           >
-            {/* Desktop variant */}
-            <div className="hidden lg:block w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'desktop') }} />
-            {/* Tablet variant */}
-            <div className="hidden md:block lg:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'tablet') }} />
-            {/* Mobile variant */}
-            <div className="block md:hidden w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, 'mobile') }} />
+            {/* Using arbitrary values with CSS variables for responsive styling */}
+            <div 
+              className="w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] md:[font-weight:var(--fw-tab)] lg:[font-weight:var(--fw-desk)]" 
+              dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
+            />
           </motion.h1>
         </div>
         
@@ -213,9 +215,11 @@ const formatFs = (val: string, fallback: string) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
-          className="flex flex-col items-center gap-2 text-zinc-500"
+          className="flex flex-col items-center gap-2 text-zinc-500 mt-[var(--sp-mob)] md:mt-[var(--sp-tab)] lg:mt-[var(--sp-desk)]"
           style={{
-            marginTop: `${getResponsiveValue(scrollPadding, globalPreviewMode) || 0}px`,
+            "--sp-desk": `${getResponsiveValue(scrollPadding, 'desktop') || 0}px`,
+            "--sp-tab": `${getResponsiveValue(scrollPadding, 'tablet') || 0}px`,
+            "--sp-mob": `${getResponsiveValue(scrollPadding, 'mobile') || 0}px`,
             "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
             "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
             "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
@@ -232,34 +236,8 @@ const formatFs = (val: string, fallback: string) => {
         >
           {/* Subtitle with responsive variants */}
           <div 
-            className="uppercase tracking-[0.2em] hidden lg:block whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ 
-              fontSize: "var(--fs-sub-desk)", 
-              lineHeight: "var(--lh-sub-desk)",
-              fontFamily: "var(--ff-sub-desk)",
-              fontWeight: "var(--fw-sub-desk)"
-            }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'desktop') }} 
-          />
-          <div 
-            className="uppercase tracking-[0.2em] hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ 
-              fontSize: "var(--fs-sub-tab)", 
-              lineHeight: "var(--lh-sub-tab)",
-              fontFamily: "var(--ff-sub-tab)",
-              fontWeight: "var(--fw-sub-tab)"
-            }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'tablet') }} 
-          />
-          <div 
-            className="uppercase tracking-[0.2em] block md:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ 
-              fontSize: "var(--fs-sub-mob)", 
-              lineHeight: "var(--lh-sub-mob)",
-              fontFamily: "var(--ff-sub-mob)",
-              fontWeight: "var(--fw-sub-mob)"
-            }}
-            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'mobile') }} 
+            className="uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)] transition-all duration-300" 
+            dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
             <motion.div
