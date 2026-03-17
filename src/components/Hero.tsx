@@ -171,9 +171,9 @@ const formatFs = (val: string, fallback: string) => {
       <section 
         className="relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] pt-[var(--pad-mob)] md:pt-[var(--pad-tab)] lg:pt-[var(--pad-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         style={{
-          "--pad-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
-          "--pad-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
-          "--pad-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
+          "--pad-desk": `calc(80px + ${getResponsiveValue(paddingTopData, 'desktop') || 0}px)`,
+          "--pad-tab": `calc(70px + ${getResponsiveValue(paddingTopData, 'tablet') || 0}px)`,
+          "--pad-mob": `calc(60px + ${getResponsiveValue(paddingTopData, 'mobile') || 0}px)`,
           "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
