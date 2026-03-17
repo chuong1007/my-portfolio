@@ -69,7 +69,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
   const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>("bottom");
-  const { isAdmin, globalPreviewMode } = useAdmin();
+  const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
     try {
@@ -172,14 +172,25 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const pbTab = getResponsiveValue(paddingBottomData, 'tablet') || 0;
   const pbMob = getResponsiveValue(paddingBottomData, 'mobile') || 0;
 
+  const isEditor = isAdmin && isEditMode;
+  const currentCols = getResponsiveValue(columnsData, globalPreviewMode || 'desktop') || "1";
+  const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0;
+  const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0;
+
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
       <section 
         id={sectionId} 
-        className="px-4 md:px-12 bg-zinc-950 relative pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        className={cn(
+          "px-4 md:px-12 bg-zinc-950 relative",
+          !isEditor && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
+          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        )}
         style={{
+          paddingTop: isEditor ? `${currentPt}px` : undefined,
+          paddingBottom: isEditor ? `${currentPb}px` : undefined,
           "--pt-desk": `${ptDesk}px`,
           "--pt-tab": `${ptTab}px`,
           "--pt-mob": `${ptMob}px`,
@@ -260,8 +271,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
 
           {!loading && filteredBlogs.length > 0 && (
             <div 
-              className="grid grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))] gap-6 md:gap-8"
+              className={cn(
+                "grid gap-6 md:gap-8",
+                !isEditor && "grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))]"
+              )}
               style={{
+                gridTemplateColumns: isEditor ? `repeat(${currentCols}, minmax(0, 1fr))` : undefined,
                 '--cols-mob': mobileCols,
                 '--cols-tab': tabletCols,
                 '--cols-desk': desktopCols

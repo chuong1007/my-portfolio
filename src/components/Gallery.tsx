@@ -185,6 +185,11 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     const pbTab = getResponsiveValue(paddingBottomData, 'tablet') || 0;
     const pbMob = getResponsiveValue(paddingBottomData, 'mobile') || 0;
 
+  const isEditor = isAdmin && isEditMode;
+  const currentCols = getResponsiveValue(columnsData, globalPreviewMode || 'desktop') || "1";
+  const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0;
+  const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0;
+
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
   return (
@@ -208,8 +213,14 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
     >
       <section 
         id="projects" 
-        className="px-4 md:px-12 bg-zinc-950 relative pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        className={cn(
+          "px-4 md:px-12 bg-zinc-950 relative",
+          !isEditor && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
+          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        )}
         style={{
+          paddingTop: isEditor ? `${currentPt}px` : undefined,
+          paddingBottom: isEditor ? `${currentPb}px` : undefined,
           "--pt-desk": `${ptDesk}px`,
           "--pt-tab": `${ptTab}px`,
           "--pt-mob": `${ptMob}px`,
@@ -293,8 +304,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
           </div>
  
           <div 
-            className="grid grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))] gap-6 md:gap-8"
+            className={cn(
+              "grid gap-6 md:gap-8",
+              !isEditor && "grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))]"
+            )}
             style={{
+              gridTemplateColumns: isEditor ? `repeat(${currentCols}, minmax(0, 1fr))` : undefined,
               '--cols-mob': mobileCols,
               '--cols-tab': tabletCols,
               '--cols-desk': desktopCols
