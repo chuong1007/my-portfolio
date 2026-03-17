@@ -169,7 +169,7 @@ export function Contact() {
               {heading && (
                 <div 
                   className={cn(
-                    "tracking-tighter text-zinc-50 whitespace-pre-wrap break-words hyphens-auto w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    "tracking-tighter text-zinc-50 whitespace-pre-wrap break-words w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
                   style={{ 
                     fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px`,
@@ -181,7 +181,7 @@ export function Contact() {
               {subtitle && (
                 <div 
                   className={cn(
-                    "text-zinc-400 whitespace-pre-wrap break-words hyphens-auto w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                    "text-zinc-400 whitespace-pre-wrap break-words w-full [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   )}
                   style={{ 
                     fontSize: `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 20}px`,
@@ -192,7 +192,7 @@ export function Contact() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full">
               {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
                   href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}
@@ -203,7 +203,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Phone Number</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(phone, globalPreviewMode)}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(phone, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -218,7 +218,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(email, globalPreviewMode)}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(email, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -236,7 +236,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Facebook</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(facebookLabel, globalPreviewMode)}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(facebookLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -254,7 +254,7 @@ export function Contact() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Zalo</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 break-all">{getResponsiveValue(zaloLabel, globalPreviewMode)}</span>
+                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(zaloLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
