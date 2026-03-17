@@ -180,7 +180,7 @@ const formatFs = (val: string, fallback: string) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="font-bold tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            className="tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap sm:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
             style={{
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
@@ -188,8 +188,16 @@ const formatFs = (val: string, fallback: string) => {
               "--lh-desk": titleData.lineHeight?.desktop || '1.1',
               "--lh-tab": titleData.lineHeight?.tablet || '1.1',
               "--lh-mob": titleData.lineHeight?.mobile || '1.1',
+              "--ff-desk": titleData.fontFamily?.desktop || 'inherit',
+              "--ff-tab": titleData.fontFamily?.tablet || 'inherit',
+              "--ff-mob": titleData.fontFamily?.mobile || 'inherit',
+              "--fw-desk": titleData.fontWeight?.desktop || '700',
+              "--fw-tab": titleData.fontWeight?.tablet || '700',
+              "--fw-mob": titleData.fontWeight?.mobile || '700',
               fontSize: globalPreviewMode === 'mobile' ? 'var(--fs-mob)' : globalPreviewMode === 'tablet' ? 'var(--fs-tab)' : 'var(--fs-desk)',
-              lineHeight: globalPreviewMode === 'mobile' ? 'var(--lh-mob)' : globalPreviewMode === 'tablet' ? 'var(--lh-tab)' : 'var(--lh-desk)'
+              lineHeight: globalPreviewMode === 'mobile' ? 'var(--lh-mob)' : globalPreviewMode === 'tablet' ? 'var(--lh-tab)' : 'var(--lh-desk)',
+              fontFamily: globalPreviewMode === 'mobile' ? 'var(--ff-mob)' : globalPreviewMode === 'tablet' ? 'var(--ff-tab)' : 'var(--ff-desk)',
+              fontWeight: globalPreviewMode === 'mobile' ? 'var(--fw-mob)' : globalPreviewMode === 'tablet' ? 'var(--fw-tab)' : 'var(--fw-desk)'
             } as React.CSSProperties}
           >
             {/* Desktop variant */}
@@ -214,22 +222,43 @@ const formatFs = (val: string, fallback: string) => {
             "--lh-sub-desk": subtitleData.lineHeight?.desktop || '1.5',
             "--lh-sub-tab": subtitleData.lineHeight?.tablet || '1.5',
             "--lh-sub-mob": subtitleData.lineHeight?.mobile || '1.5',
+            "--ff-sub-desk": subtitleData.fontFamily?.desktop || 'inherit',
+            "--ff-sub-tab": subtitleData.fontFamily?.tablet || 'inherit',
+            "--ff-sub-mob": subtitleData.fontFamily?.mobile || 'inherit',
+            "--fw-sub-desk": subtitleData.fontWeight?.desktop || '500',
+            "--fw-sub-tab": subtitleData.fontWeight?.tablet || '500',
+            "--fw-sub-mob": subtitleData.fontWeight?.mobile || '500',
           } as React.CSSProperties}
         >
           {/* Subtitle with responsive variants */}
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden lg:block whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ fontSize: "var(--fs-sub-desk)", lineHeight: "var(--lh-sub-desk)" }}
+            className="uppercase tracking-[0.2em] hidden lg:block whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ 
+              fontSize: "var(--fs-sub-desk)", 
+              lineHeight: "var(--lh-sub-desk)",
+              fontFamily: "var(--ff-sub-desk)",
+              fontWeight: "var(--fw-sub-desk)"
+            }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'desktop') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ fontSize: "var(--fs-sub-tab)", lineHeight: "var(--lh-sub-tab)" }}
+            className="uppercase tracking-[0.2em] hidden md:block lg:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ 
+              fontSize: "var(--fs-sub-tab)", 
+              lineHeight: "var(--lh-sub-tab)",
+              fontFamily: "var(--ff-sub-tab)",
+              fontWeight: "var(--fw-sub-tab)"
+            }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'tablet') }} 
           />
           <div 
-            className="uppercase tracking-[0.2em] font-medium block md:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
-            style={{ fontSize: "var(--fs-sub-mob)", lineHeight: "var(--lh-sub-mob)" }}
+            className="uppercase tracking-[0.2em] block md:hidden whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]" 
+            style={{ 
+              fontSize: "var(--fs-sub-mob)", 
+              lineHeight: "var(--lh-sub-mob)",
+              fontFamily: "var(--ff-sub-mob)",
+              fontWeight: "var(--fw-sub-mob)"
+            }}
             dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, 'mobile') }} 
           />
           <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">

@@ -163,10 +163,12 @@ export function About({ sectionId = "about" }: AboutProps) {
             style={{ opacity: loaded ? undefined : 1 }}
           >
             <div 
-              className="font-bold tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+              className="tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
               style={{ 
                 fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
-                lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
+                lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
+                fontFamily: heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
               }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }} 
             />
@@ -174,7 +176,9 @@ export function About({ sectionId = "about" }: AboutProps) {
               className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
               style={{ 
                 fontSize: `${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px`,
-                lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5'
+                lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5',
+                fontFamily: subheading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                fontWeight: subheading.fontWeight?.[globalPreviewMode || 'desktop'] || '400'
               }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }} 
             />

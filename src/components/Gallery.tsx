@@ -223,10 +223,12 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="font-bold tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${titleData.fontSize?.[currentDevice] || 48}px`,
-                  lineHeight: titleData.lineHeight?.[currentDevice] || '1.1'
+                  lineHeight: titleData.lineHeight?.[currentDevice] || '1.1',
+                  fontFamily: titleData.fontFamily?.[currentDevice] || 'inherit',
+                  fontWeight: titleData.fontWeight?.[currentDevice] || '700'
                 }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, currentDevice) || "" }} 
               />
@@ -234,7 +236,9 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
                 className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${subtitleData.fontSize?.[currentDevice] || 18}px`,
-                  lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5'
+                  lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5',
+                  fontFamily: subtitleData.fontFamily?.[currentDevice] || 'inherit',
+                  fontWeight: subtitleData.fontWeight?.[currentDevice] || '400'
                 }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, currentDevice) || "" }} 
               />

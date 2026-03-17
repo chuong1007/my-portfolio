@@ -173,7 +173,9 @@ export function Contact() {
                   )}
                   style={{ 
                     fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || (isContactPage ? 32: 80)}px`,
-                    lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1'
+                    lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
+                    fontFamily: heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                    fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
                   }}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }}
                 />

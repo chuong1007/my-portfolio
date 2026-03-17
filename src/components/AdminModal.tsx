@@ -51,18 +51,24 @@ const DEVICE_LABELS: Record<DeviceMode, string> = {
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+  const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
   
   if (typeof val === 'object' && val !== null && 'content' in val) {
     return {
       ...val,
       fontSize: val.fontSize || defaultFS,
-      lineHeight: val.lineHeight || defaultLH
+      lineHeight: val.lineHeight || defaultLH,
+      fontFamily: val.fontFamily || defaultFF,
+      fontWeight: val.fontWeight || defaultFW
     };
   }
   return { 
     content: val || '', 
     fontSize: defaultFS,
-    lineHeight: defaultLH
+    lineHeight: defaultLH,
+    fontFamily: defaultFF,
+    fontWeight: defaultFW
   };
 };
 

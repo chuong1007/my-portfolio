@@ -22,8 +22,44 @@ declare module '@tiptap/core' {
       setLineHeight: (lineHeight: string) => ReturnType;
       unsetLineHeight: () => ReturnType;
     };
+    fontWeight: {
+      setFontWeight: (weight: string) => ReturnType;
+      unsetFontWeight: () => ReturnType;
+    };
+    fontFamily: {
+      setFontFamily: (fontFamily: string) => ReturnType;
+      unsetFontFamily: () => ReturnType;
+    };
   }
 }
+
+import FontFamily from '@tiptap/extension-font-family';
+
+const FontWeight = Extension.create({
+  name: 'fontWeight',
+  addOptions() { return { types: ['textStyle'] }; },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        fontWeight: {
+          default: null,
+          parseHTML: element => element.style.fontWeight,
+          renderHTML: attributes => {
+            if (!attributes.fontWeight) return {};
+            return { style: `font-weight: ${attributes.fontWeight}` };
+          },
+        },
+      },
+    }];
+  },
+  addCommands() {
+    return {
+      setFontWeight: fontWeight => ({ chain }) => chain().setMark('textStyle', { fontWeight }).run(),
+      unsetFontWeight: () => ({ chain }) => chain().setMark('textStyle', { fontWeight: null }).removeEmptyTextStyle().run(),
+    };
+  },
+});
 
 const FontSize = Extension.create({
   name: 'fontSize',
@@ -99,10 +135,24 @@ export type ResponsiveLineHeight = {
   desktop: string;
 };
 
+export type ResponsiveFontFamily = {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+};
+
+export type ResponsiveFontWeight = {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+};
+
 export type RichTextData = {
   content: string | ResponsiveContent;
   fontSize: ResponsiveFontSize;
   lineHeight: ResponsiveLineHeight;
+  fontFamily?: ResponsiveFontFamily;
+  fontWeight?: ResponsiveFontWeight;
 };
 
 type RichTextEditorProps = {
@@ -126,6 +176,16 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     tablet: '1.5',
     desktop: '1.5'
   });
+  const [localFontFamily, setLocalFontFamily] = useState<ResponsiveFontFamily>({
+    mobile: 'inherit',
+    tablet: 'inherit',
+    desktop: 'inherit'
+  });
+  const [localFontWeight, setLocalFontWeight] = useState<ResponsiveFontWeight>({
+    mobile: '400',
+    tablet: '400',
+    desktop: '400'
+  });
   const [localContent, setLocalContent] = useState<ResponsiveContent>({
     mobile: '',
     tablet: '',
@@ -137,17 +197,27 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   const normalize = (v: any): RichTextData => {
     const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
     const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+    const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+    const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
     const defaultContent = { mobile: '', tablet: '', desktop: '' };
 
     if (v === null || v === undefined) {
-      return { content: defaultContent, fontSize: defaultFS, lineHeight: defaultLH };
+      return { 
+        content: defaultContent, 
+        fontSize: defaultFS, 
+        lineHeight: defaultLH, 
+        fontFamily: defaultFF, 
+        fontWeight: defaultFW 
+      };
     }
     
     if (typeof v === 'string') {
       return { 
         content: { mobile: v, tablet: v, desktop: v }, 
         fontSize: defaultFS,
-        lineHeight: defaultLH
+        lineHeight: defaultLH,
+        fontFamily: defaultFF,
+        fontWeight: defaultFW
       };
     }
 
@@ -157,8 +227,10 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     
     const fontSize = v.fontSize || defaultFS;
     const lineHeight = v.lineHeight || defaultLH;
+    const fontFamily = v.fontFamily || defaultFF;
+    const fontWeight = v.fontWeight || defaultFW;
 
-    return { content, fontSize, lineHeight };
+    return { content, fontSize, lineHeight, fontFamily, fontWeight };
   };
 
   const normalizedValue = normalize(value);
@@ -166,6 +238,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   useEffect(() => {
     setLocalFontSize(normalizedValue.fontSize);
     setLocalLineHeight(normalizedValue.lineHeight);
+    setLocalFontFamily(normalizedValue.fontFamily || { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' });
+    setLocalFontWeight(normalizedValue.fontWeight || { mobile: '400', tablet: '400', desktop: '400' });
     setLocalContent(normalizedValue.content as ResponsiveContent);
   }, [value]);
 
@@ -179,6 +253,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       TextStyle,
       FontSize,
       LineHeight,
+      FontFamily,
+      FontWeight,
       ...(enterAsBreak ? [
         Extension.create({
           name: 'enterHandler',
@@ -201,7 +277,9 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       onChange({
         content: updatedContent,
         fontSize: localFontSize,
-        lineHeight: localLineHeight
+        lineHeight: localLineHeight,
+        fontFamily: localFontFamily,
+        fontWeight: localFontWeight
       });
     },
     editorProps: {
@@ -250,11 +328,69 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     onChange({
       content: localContent,
       fontSize: localFontSize,
-      lineHeight: updatedLH
+      lineHeight: updatedLH,
+      fontFamily: localFontFamily,
+      fontWeight: localFontWeight
+    });
+  };
+
+  const updateFontFamily = (newFF: string) => {
+    const updatedFF = { ...localFontFamily, [globalPreviewMode]: newFF };
+    setLocalFontFamily(updatedFF);
+    if (editor?.isFocused) {
+      editor.chain().focus().setFontFamily(newFF).run();
+    }
+    onChange({
+      content: localContent,
+      fontSize: localFontSize,
+      lineHeight: localLineHeight,
+      fontFamily: updatedFF,
+      fontWeight: localFontWeight
+    });
+  };
+
+  const updateFontWeight = (newFW: string) => {
+    const updatedFW = { ...localFontWeight, [globalPreviewMode]: newFW };
+    setLocalFontWeight(updatedFW);
+    if (editor?.isFocused) {
+      editor.chain().focus().setFontWeight(newFW).run();
+    }
+    onChange({
+      content: localContent,
+      fontSize: localFontSize,
+      lineHeight: localLineHeight,
+      fontFamily: localFontFamily,
+      fontWeight: updatedFW
     });
   };
 
   const currentLineHeight = localLineHeight[globalPreviewMode] || '1.5';
+  const currentFontFamily = localFontFamily[globalPreviewMode] || 'inherit';
+  const currentFontWeight = localFontWeight[globalPreviewMode] || '400';
+
+  const FONT_FAMILIES = [
+    { label: 'Default', value: 'inherit' },
+    { label: 'Sans', value: 'ui-sans-serif, system-ui, sans-serif' },
+    { label: 'Serif', value: 'ui-serif, Georgia, serif' },
+    { label: 'Mono', value: 'ui-monospace, SFMono-Regular, monospace' },
+    { label: 'Geist', value: 'var(--font-geist-sans)' },
+    { label: 'Inter', value: 'var(--font-inter)' },
+    { label: 'Outfit', value: 'var(--font-outfit)' },
+    { label: 'Syne', value: 'var(--font-syne)' },
+    { label: 'Montserrat', value: 'var(--font-montserrat)' },
+  ];
+
+  const FONT_WEIGHTS = [
+    { label: 'Thin', value: '100' },
+    { label: 'Extra Light', value: '200' },
+    { label: 'Light', value: '300' },
+    { label: 'Regular', value: '400' },
+    { label: 'Medium', value: '500' },
+    { label: 'Semi Bold', value: '600' },
+    { label: 'Bold', value: '700' },
+    { label: 'Extra Bold', value: '800' },
+    { label: 'Black', value: '900' },
+  ];
 
   if (!editor) return null;
 
@@ -291,6 +427,30 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             >
               <Italic className="w-3.5 h-3.5" />
             </button>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800 ml-1">
+             <select 
+               value={currentFontFamily}
+               onChange={(e) => updateFontFamily(e.target.value)}
+               className="bg-transparent text-[11px] font-bold text-zinc-400 focus:outline-none cursor-pointer hover:text-zinc-200"
+             >
+               {FONT_FAMILIES.map(ff => (
+                 <option key={ff.value} value={ff.value} className="bg-zinc-900 text-zinc-300">{ff.label}</option>
+               ))}
+             </select>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800 ml-1">
+             <select 
+               value={currentFontWeight}
+               onChange={(e) => updateFontWeight(e.target.value)}
+               className="bg-transparent text-[11px] font-bold text-zinc-400 focus:outline-none cursor-pointer hover:text-zinc-200"
+             >
+               {FONT_WEIGHTS.map(fw => (
+                 <option key={fw.value} value={fw.value} className="bg-zinc-900 text-zinc-300">{fw.label}</option>
+               ))}
+             </select>
           </div>
           
           <div className="w-px h-4 bg-zinc-800 mx-1" />

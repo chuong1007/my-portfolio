@@ -192,10 +192,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
           >
             <div className="flex flex-col gap-2">
               <div 
-                className="font-bold tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
+                className="tracking-tighter text-zinc-50 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px`,
-                  lineHeight: titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.2'
+                  lineHeight: titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.2',
+                  fontFamily: titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                  fontWeight: titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
                 }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
@@ -203,7 +205,9 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                 className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
                 style={{ 
                   fontSize: `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
-                  lineHeight: subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5'
+                  lineHeight: subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5',
+                  fontFamily: subtitleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                  fontWeight: subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '400'
                 }}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
               />

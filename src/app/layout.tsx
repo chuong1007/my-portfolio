@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Outfit, Syne, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Contact } from "@/components/Contact";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -10,6 +11,26 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+});
+
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+});
+
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
 });
 
@@ -59,7 +80,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-zinc-950">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-zinc-50 selection:text-zinc-950 bg-zinc-950 text-zinc-50 min-h-screen font-sans flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${outfit.variable} ${syne.variable} ${montserrat.variable} antialiased selection:bg-zinc-50 selection:text-zinc-950 bg-zinc-950 text-zinc-50 min-h-screen font-sans flex flex-col`}
       >
         <AdminProvider>
           <GlobalPreviewWrapper>
