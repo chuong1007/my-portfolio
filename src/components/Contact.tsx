@@ -192,7 +192,10 @@ export function Contact() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-8 w-full mt-4">
+            <div className={cn(
+              "grid gap-4 md:gap-8 w-full mt-4",
+              globalPreviewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
+            )}>
               {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
                   href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}
