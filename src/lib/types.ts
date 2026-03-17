@@ -23,7 +23,7 @@ export type DbBlog = {
   content: string;
   tags: string[];
   image_url: string;
-  featured: boolean;
+  is_featured: boolean;
   is_published?: boolean;
   custom_css?: string;
   custom_html?: string;

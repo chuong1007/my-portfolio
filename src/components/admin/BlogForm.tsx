@@ -37,7 +37,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [content, setContent] = useState(blog?.content || "");
   const [tags, setTags] = useState<string[]>(blog?.tags || []);
   const [coverImage, setCoverImage] = useState<string>(blog?.image_url || "");
-  const [featured, setFeatured] = useState<boolean>(blog?.featured || false);
+  const [isFeatured, setIsFeatured] = useState<boolean>(blog?.is_featured || false);
   const [isPublished, setIsPublished] = useState<boolean>(blog?.is_published ?? true);
   const [customCss, setCustomCss] = useState(blog?.custom_css || "");
   const [customHtml, setCustomHtml] = useState(blog?.custom_html || "");
@@ -99,8 +99,8 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
     try {
       const supabase = createClient();
       
-      if (featured) {
-        await supabase.from("blogs").update({ featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000");
+      if (isFeatured) {
+        await supabase.from("blogs").update({ is_featured: false }).neq("id", blog?.id || "00000000-0000-0000-0000-000000000000");
       }
 
       const finalSlug = slug || generateSlug(title);
@@ -111,7 +111,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
         content,
         tags,
         image_url: coverImage,
-        featured,
+        is_featured: isFeatured,
         is_published: isPublished,
         custom_css: customCss,
         custom_html: customHtml,
@@ -293,12 +293,12 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             <input
               type="checkbox"
               id="featured-toggle"
-              checked={featured}
-              onChange={(e) => setFeatured(e.target.checked)}
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
               className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
             />
             <label htmlFor="featured-toggle" className="text-zinc-200 cursor-pointer select-none">
-              Đặt làm bài viết Nổi bật (Hiển thị đầu trang chủ)
+              Đánh dấu bài viết Nổi bật
             </label>
           </div>
 

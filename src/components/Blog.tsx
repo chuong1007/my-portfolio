@@ -168,7 +168,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
 
   const gridStyle = {
     display: 'grid',
-    gap: currentDevice === 'mobile' ? '2rem' : '3rem',
+    gap: currentDevice === 'mobile' ? '1.5rem' : '2rem',
     gridTemplateColumns: `repeat(${currentDevice === 'mobile' ? mobileCols : currentDevice === 'tablet' ? tabletCols : desktopCols}, minmax(0, 1fr))`
   };
 
@@ -245,7 +245,6 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                   key={post.id} 
                   post={post} 
                   index={index} 
-                  isFeatured={variant === 'homepage' && index === 0 && currentDevice === 'desktop' && desktopCols === 3}
                 />
               ))}
             </div>
@@ -288,27 +287,22 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   );
 }
 
-function BlogCard({ post, index, isFeatured }: { post: DbBlog; index: number; isFeatured?: boolean }) {
+function BlogCard({ post, index }: { post: DbBlog; index: number }) {
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className={cn(
-        "group flex bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300",
-        isFeatured 
-          ? "col-span-1 lg:col-span-2 row-span-2 flex-col lg:flex-row p-0 overflow-hidden" 
-          : "flex-col p-5 hover:bg-zinc-800/50"
-      )}
+      className="group flex flex-col bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300 p-5 hover:bg-zinc-800/50"
     >
-      <Link href={`/blog/${post.slug}`} className={cn("flex w-full h-full", isFeatured ? "flex-col lg:flex-row" : "flex-col")}>
-        <div className={cn(
-          "overflow-hidden bg-zinc-800",
-          isFeatured 
-            ? "w-full lg:w-3/5 h-[300px] lg:h-auto" 
-            : "w-full aspect-video rounded-2xl mb-6"
-        )}>
+      <Link href={`/blog/${post.slug}`} className="flex flex-col w-full h-full">
+        <div className="overflow-hidden bg-zinc-800 w-full aspect-video rounded-2xl mb-6 relative">
+          {post.is_featured && (
+            <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg">
+              NỔI BẬT
+            </div>
+          )}
           <img
             src={post.image_url}
             alt={post.title}
@@ -316,34 +310,18 @@ function BlogCard({ post, index, isFeatured }: { post: DbBlog; index: number; is
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </div>
-        <div className={cn(
-          "flex flex-col justify-center",
-          isFeatured ? "p-8 lg:p-12 w-full lg:w-2/5" : ""
-        )}>
+        <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
             <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
             <span>{post.tags?.[0] || "Blog"}</span>
           </div>
-          <h3 className={cn(
-            "font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight",
-            isFeatured ? "text-3xl lg:text-4xl" : "text-2xl line-clamp-2"
-          )}>
+          <h3 className="font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight text-2xl line-clamp-2">
             {post.title}
           </h3>
-          <p className={cn(
-            "text-zinc-500 leading-relaxed",
-            isFeatured ? "text-lg line-clamp-3" : "text-base line-clamp-2"
-          )}>
+          <p className="text-zinc-500 leading-relaxed text-base line-clamp-2">
             {post.excerpt}
           </p>
-          
-          {isFeatured && (
-            <div className="mt-8 flex items-center gap-2 text-white font-bold text-sm uppercase tracking-wider">
-              Đọc tiếp
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          )}
         </div>
       </Link>
     </motion.article>

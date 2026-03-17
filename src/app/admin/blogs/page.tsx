@@ -166,11 +166,11 @@ export default function AdminBlogsPage() {
                       <ImageIcon className="w-10 h-10 text-zinc-700" />
                     </div>
                   )}
-                  {blog.featured && (
-                    <div className="absolute top-4 left-4 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
-                      Nổi bật
-                    </div>
-                  )}
+                    {blog.is_featured && (
+                      <div className="absolute top-4 left-4 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                        Nổi bật
+                      </div>
+                    )}
                 </div>
 
                 {/* Info */}
