@@ -179,18 +179,29 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
 
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
-  const getGridColsClass = (cols: any) => {
-    const c = parseInt(cols.toString()) || 1;
-    if (c <= 1) return "grid-cols-1";
-    if (c === 2) return "grid-cols-2";
-    if (c === 3) return "grid-cols-3";
-    if (c >= 4) return "grid-cols-4";
-    return "grid-cols-1";
+  const getGridColsClass = (cols: any, device: 'mobile' | 'tablet' | 'desktop') => {
+    const c = parseInt(cols?.toString() || "1") || 1;
+    if (device === 'mobile') {
+      if (c <= 1) return "grid-cols-1";
+      if (c === 2) return "grid-cols-2";
+      if (c === 3) return "grid-cols-3";
+      return "grid-cols-4";
+    }
+    if (device === 'tablet') {
+      if (c <= 1) return "md:grid-cols-1";
+      if (c === 2) return "md:grid-cols-2";
+      if (c === 3) return "md:grid-cols-3";
+      return "md:grid-cols-4";
+    }
+    if (c <= 1) return "lg:grid-cols-1";
+    if (c === 2) return "lg:grid-cols-2";
+    if (c === 3) return "lg:grid-cols-3";
+    return "lg:grid-cols-4";
   };
 
   const gridClass = isEditor 
-    ? getGridColsClass(currentCols)
-    : `${getGridColsClass(mobileCols)} md:${getGridColsClass(tabletCols)} lg:${getGridColsClass(desktopCols)}`;
+    ? getGridColsClass(currentCols, 'mobile').replace('lg:', '').replace('md:', '')
+    : `${getGridColsClass(mobileCols, 'mobile')} ${getGridColsClass(tabletCols, 'tablet')} ${getGridColsClass(desktopCols, 'desktop')}`;
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
