@@ -466,22 +466,22 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 />
               </div>
 
-              {/* Slider for Padding Top Text Scroll */}
+              {/* Slider for Scroll Down Distance */}
               <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top Text Scroll (px)</label>
-                  <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.paddingTopTextScroll, globalPreviewMode) || 0}px</span>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">KHOẢNG CÁCH SCROLL DOWN (MARGIN TOP)</label>
+                  <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.scrollPadding, globalPreviewMode) || 0}px</span>
                 </div>
                 <input
                   type="range"
-                  min="0"
-                  max="200"
+                  min="-200"
+                  max="400"
                   step="1"
-                  value={getResponsiveValue(data.paddingTopTextScroll, globalPreviewMode) || "0"}
-                  onChange={(e) => setData({ ...data, paddingTopTextScroll: setResponsiveValue(data.paddingTopTextScroll, globalPreviewMode, e.target.value) })}
+                  value={getResponsiveValue(data.scrollPadding, globalPreviewMode) || "0"}
+                  onChange={(e) => setData({ ...data, scrollPadding: setResponsiveValue(data.scrollPadding, globalPreviewMode, e.target.value) })}
                   className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                 />
-                <p className="text-[10px] text-zinc-500 italic">Điều chỉnh khoảng cách phía trên cụm chữ Scroll Down.</p>
+                <p className="text-[10px] text-zinc-500 italic">Điều chỉnh khoảng cách (Margin Top) cho cụm chữ Scroll Down. Hỗ trợ số âm để kéo lên cao.</p>
               </div>
             </div>
           )}

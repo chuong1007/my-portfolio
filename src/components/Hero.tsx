@@ -39,7 +39,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>("48");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
-  const [paddingTopTextScroll, setPaddingTopTextScroll] = useState<ResponsiveValue>("0");
+  const [scrollPadding, setScrollPadding] = useState<ResponsiveValue>("0");
   const [isVisible, setIsVisible] = useState(true);
   const [logoType, setLogoType] = useState<'text' | 'image'>('text');
   const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
@@ -72,7 +72,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
         
         if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
         if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-        if (d.paddingTopTextScroll !== undefined) setPaddingTopTextScroll(d.paddingTopTextScroll);
+        if (d.scrollPadding !== undefined) setScrollPadding(d.scrollPadding);
+        else if (d.paddingTopTextScroll !== undefined) setScrollPadding(d.paddingTopTextScroll); // Migration
         if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
       }
     } catch (error) {
@@ -90,7 +91,8 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     if (d.isVisible !== undefined) setIsVisible(d.isVisible);
     if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
     if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-    if (d.paddingTopTextScroll !== undefined) setPaddingTopTextScroll(d.paddingTopTextScroll);
+    if (d.scrollPadding !== undefined) setScrollPadding(d.scrollPadding);
+    else if (d.paddingTopTextScroll !== undefined) setScrollPadding(d.paddingTopTextScroll);
     if (d.title !== undefined) setTitleData(normalize(d.title));
     if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
     if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
@@ -143,7 +145,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
     title: titleData,
     subtitle: subtitleData,
     scrollOffset: scrollOffset,
-    paddingTopTextScroll: paddingTopTextScroll,
+    scrollPadding: scrollPadding,
     logoType,
     logoText,
     logoColor,
@@ -167,13 +169,13 @@ const formatFs = (val: string, fallback: string) => {
       controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center px-6 text-center min-h-[90vh]"
+        className="relative flex flex-col items-center justify-center px-6 text-center min-h-[90vh]"
         style={{
           paddingTop: `${parseInt(getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || '0')}px`,
           paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 0}px`
         }}
       >
-        <div className="flex-1 flex flex-col items-center w-full">
+        <div className="flex flex-col items-center w-full">
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -205,8 +207,7 @@ const formatFs = (val: string, fallback: string) => {
           transition={{ delay: 0.5, duration: 1 }}
           className="flex flex-col items-center gap-2 text-zinc-500"
           style={{
-            marginTop: `${getResponsiveValue(scrollOffset, globalPreviewMode) || 48}px`,
-            paddingTop: `${getResponsiveValue(paddingTopTextScroll, globalPreviewMode) || 0}px`,
+            marginTop: `${getResponsiveValue(scrollPadding, globalPreviewMode) || 0}px`,
             "--fs-sub-desk": `${subtitleData.fontSize?.desktop || 10}px`,
             "--fs-sub-tab": `${subtitleData.fontSize?.tablet || 10}px`,
             "--fs-sub-mob": `${subtitleData.fontSize?.mobile || 10}px`,
