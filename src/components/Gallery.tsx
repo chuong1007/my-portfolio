@@ -192,6 +192,19 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
 
   const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
 
+  const getGridColsClass = (cols: any) => {
+    const c = parseInt(cols.toString()) || 1;
+    if (c <= 1) return "grid-cols-1";
+    if (c === 2) return "grid-cols-2";
+    if (c === 3) return "grid-cols-3";
+    if (c >= 4) return "grid-cols-4";
+    return "grid-cols-1";
+  };
+
+  const gridClass = isEditor 
+    ? getGridColsClass(currentCols)
+    : `${getGridColsClass(mobileCols)} md:${getGridColsClass(tabletCols)} lg:${getGridColsClass(desktopCols)}`;
+
   return (
     <SectionEditor 
       sectionId={sectionId} 
@@ -306,10 +319,9 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
           <div 
             className={cn(
               "grid gap-6 md:gap-8",
-              !isEditor && "grid-cols-[repeat(var(--cols-mob),minmax(0,1fr))] md:grid-cols-[repeat(var(--cols-tab),minmax(0,1fr))] lg:grid-cols-[repeat(var(--cols-desk),minmax(0,1fr))]"
+              gridClass
             )}
             style={{
-              gridTemplateColumns: isEditor ? `repeat(${currentCols}, minmax(0, 1fr))` : undefined,
               '--cols-mob': mobileCols,
               '--cols-tab': tabletCols,
               '--cols-desk': desktopCols
