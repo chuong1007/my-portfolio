@@ -7,6 +7,7 @@ import { SectionEditor } from "./SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
+import { cn } from "@/lib/utils";
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
@@ -46,7 +47,7 @@ export function Hero({ sectionId = "hero" }: HeroProps) {
   const [logoImageUrl, setLogoImageUrl] = useState('');
   const [logoColor, setLogoColor] = useState('#FFFFFF');
   const [logoHeight, setLogoHeight] = useState<ResponsiveValue>("40");
-  const { isAdmin, globalPreviewMode } = useAdmin();
+  const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {
     const supabase = createClient();
@@ -160,6 +161,14 @@ const formatFs = (val: string, fallback: string) => {
   return val;
 };
 
+  const isEditor = isAdmin && isEditMode;
+
+  // Parity 1:1 current values for Editor mode
+  const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop');
+  const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop');
+  const currentFs = titleData.fontSize?.[globalPreviewMode || 'desktop'] || 40;
+  const currentScroll = getResponsiveValue(scrollPadding, globalPreviewMode || 'desktop') ?? getResponsiveValue(scrollOffset, globalPreviewMode || 'desktop') ?? 0;
+
   return (
     <SectionEditor 
       sectionId={sectionId} 
@@ -169,11 +178,17 @@ const formatFs = (val: string, fallback: string) => {
       controlsOffset="top-32"
     >
       <section 
-        className="relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] pt-[var(--pad-mob)] md:pt-[var(--pad-tab)] lg:pt-[var(--pad-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        className={cn(
+          "relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh]",
+          !isEditor && "pt-[var(--pad-mob)] md:pt-[var(--pad-tab)] lg:pt-[var(--pad-desk)]",
+          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+        )}
         style={{
-          "--pad-desk": `calc(80px + ${getResponsiveValue(paddingTopData, 'desktop') || 0}px)`,
-          "--pad-tab": `calc(70px + ${getResponsiveValue(paddingTopData, 'tablet') || 0}px)`,
-          "--pad-mob": `calc(60px + ${getResponsiveValue(paddingTopData, 'mobile') || 0}px)`,
+          paddingTop: isEditor ? `${currentPt}px` : undefined,
+          paddingBottom: isEditor ? `${currentPb}px` : undefined,
+          "--pad-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
+          "--pad-tab": `${getResponsiveValue(paddingTopData, 'tablet') || 0}px`,
+          "--pad-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
           "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
@@ -184,8 +199,12 @@ const formatFs = (val: string, fallback: string) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap text-[length:var(--fs-mob)] md:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)] transition-all duration-300"
+            className={cn(
+              "tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap transition-all duration-300",
+              !isEditor && "text-[length:var(--fs-mob)] md:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            )}
             style={{
+              fontSize: isEditor ? `${currentFs}px` : undefined,
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
               "--fs-mob": `${titleData.fontSize?.mobile || 40}px`,
@@ -212,8 +231,12 @@ const formatFs = (val: string, fallback: string) => {
   initial={{ opacity: 0 }}
   animate={{ opacity: 1 }}
   transition={{ delay: 0.5, duration: 1 }}
-  className="flex flex-col items-center gap-2 text-zinc-500 mt-[var(--scroll-mob)] md:mt-[var(--scroll-tab)] lg:mt-[var(--scroll-desk)]"
+  className={cn(
+    "flex flex-col items-center gap-2 text-zinc-500",
+    !isEditor && "mt-[var(--scroll-mob)] md:mt-[var(--scroll-tab)] lg:mt-[var(--scroll-desk)]"
+  )}
   style={{
+    marginTop: isEditor ? `${currentScroll}px` : undefined,
     "--scroll-desk": `${getResponsiveValue(scrollPadding, 'desktop') ?? getResponsiveValue(scrollOffset, 'desktop') ?? 0}px`,
     "--scroll-tab": `${getResponsiveValue(scrollPadding, 'tablet') ?? getResponsiveValue(scrollOffset, 'tablet') ?? 0}px`,
     "--scroll-mob": `${getResponsiveValue(scrollPadding, 'mobile') ?? getResponsiveValue(scrollOffset, 'mobile') ?? 0}px`,

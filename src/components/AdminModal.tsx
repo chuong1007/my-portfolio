@@ -473,8 +473,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
-                    max="1200"
+                    min="-100"
+                    max="500"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
