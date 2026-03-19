@@ -104,7 +104,7 @@ export function BlogDetail({ slug }: { slug: string }) {
                 {blog?.tags?.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs px-3 py-1 bg-zinc-800/50 text-emerald-400 rounded-full border border-zinc-800"
+                    className="text-xs px-3 py-1 bg-zinc-800/50 text-blue-500 rounded-full border border-zinc-800"
                   >
                     {tag}
                   </span>
