@@ -396,7 +396,7 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
           <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
             <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
             <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-            <span>{post.tags?.[0] || "Blog"}</span>
+            <span className="text-blue-500">{post.tags?.[0] || "Blog"}</span>
           </div>
           <h3 className="font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight text-xl line-clamp-2">
             {post.title}
