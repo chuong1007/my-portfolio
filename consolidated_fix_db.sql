@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS public.blogs (
 );
 
 -- Add any missing columns to blogs if they were created with old scripts
-ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS slug TEXT UNIQUE;
+ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS slug TEXT;
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS excerpt TEXT;
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS content TEXT;
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
@@ -28,6 +28,7 @@ ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT fa
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS custom_css TEXT DEFAULT '';
 ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS custom_html TEXT DEFAULT '';
+ALTER TABLE public.blogs ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- 2. Ensure projects table has all required columns
 CREATE TABLE IF NOT EXISTS public.projects (
@@ -47,6 +48,7 @@ ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
 ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS cover_image TEXT;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- 3. Ensure project_images table exists
 CREATE TABLE IF NOT EXISTS public.project_images (

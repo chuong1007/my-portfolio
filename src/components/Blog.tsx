@@ -97,7 +97,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   useEffect(() => {
     async function fetchBlogs() {
       const supabase = createClient();
-      let query = supabase.from("blogs").select("*").order("created_at", { ascending: false });
+      let query = supabase.from("blogs")
+        .select("*")
+        .order("is_featured", { ascending: false })
+        .order("created_at", { ascending: false });
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) query = query.eq("is_published", true);
       const { data } = await query;
