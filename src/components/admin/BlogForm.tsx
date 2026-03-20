@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink, Save as SaveIcon, Copy, Check } from "lucide-react";
+import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink, Save as SaveIcon, Copy, Check, Plus, Tag as TagIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
@@ -46,6 +46,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [newTagInput, setNewTagInput] = useState("");
 
   const handleCopyUrl = () => {
     if (!slug) return;
@@ -74,6 +75,23 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
     setTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
+  };
+
+  const handleAddCustomTag = (e: React.KeyboardEvent | React.MouseEvent) => {
+    const tagName = newTagInput.trim();
+    if (!tagName) return;
+
+    if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return;
+    if (e.type === 'keydown') (e as React.KeyboardEvent).preventDefault();
+
+    if (!tags.includes(tagName)) {
+      setTags([...tags, tagName]);
+    }
+    setNewTagInput("");
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
   };
 
   // Removed manual handleCoverUpload as it's handled by ImageUpload component
@@ -337,28 +355,69 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           />
 
           {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Tags
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {AVAILABLE_TAGS.map((tag) => {
-                const isActive = tags.includes(tag);
-                return (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+              <TagIcon className="w-4 h-4 text-emerald-500" />
+              Quản lý Tags
+            </h3>
+            
+            {/* Tag Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={handleAddCustomTag}
+                placeholder="Thêm tag mới..."
+                className="flex-1 bg-black/40 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomTag}
+                className="p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl hover:bg-emerald-500/20 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current Tags */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {tags.length === 0 ? (
+                <p className="text-[10px] text-zinc-600 italic">Chưa có tag nào...</p>
+              ) : (
+                tags.map((tag) => (
+                  <div
+                    key={tag}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-semibold group"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="text-emerald-500/40 hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Suggested Tags */}
+            <div className="pt-4 border-t border-zinc-800/50">
+              <p className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-3">Gợi ý</p>
+              <div className="flex flex-wrap gap-1.5">
+                {AVAILABLE_TAGS.filter(t => !tags.includes(t)).map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                      isActive
-                        ? "bg-zinc-50 text-zinc-950 border-zinc-50"
-                        : "bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500"
-                    }`}
+                    className="px-2.5 py-1 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 border border-zinc-800 rounded-md text-[10px] transition-all"
                   >
-                    {tag}
+                    + {tag}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         </div>
