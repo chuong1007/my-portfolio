@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { 
-  ArrowRight, 
+  ArrowRight,
+  ArrowDown
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -353,8 +354,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                 <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.2em] transition-colors relative z-10">
                   Xem thêm
                 </span>
-                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
-                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
+                  <ArrowDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
                 </div>
               </button>
             </div>
