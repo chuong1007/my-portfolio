@@ -136,32 +136,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
     return () => window.removeEventListener('previewUpdate', handlePreviewUpdate);
   }, [sectionId]);
 
-  const currentDevice = globalPreviewMode ?? 'desktop';
-  const defaultCount = variant === 'homepage' 
-    ? (currentDevice === 'mobile' ? 5 : currentDevice === 'tablet' ? 6 : 3)
-    : 50;
-  const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
-
-  const filteredBlogs = useMemo(() => {
-    const base = activeTag === "All" ? blogs : blogs.filter((b) => b.tags?.includes(activeTag));
-    return base.slice(0, itemsToShow);
-  }, [blogs, activeTag, itemsToShow]);
-
-  if (!isVisible && !isAdmin) return null;
-
-  const initialData = { 
-    isVisible, 
-    paddingTop: paddingTopData,
-    paddingBottom: paddingBottomData,
-    title: titleData,
-    subtitle: subtitleData,
-    itemsToShow: itemsToShowData,
-    showSeeAll,
-    seeAllLabel,
-    seeAllLink,
-    seeAllPosition: seeAllPositionData,
-    columns: columnsData
-  };
+  const [visibleCount, setVisibleCount] = useState(variant === 'subpage' ? 15 : 50);
 
   const desktopCols = getResponsiveValue(columnsData, 'desktop') || "3";
   const tabletCols = getResponsiveValue(columnsData, 'tablet') || "2";
@@ -180,7 +155,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0;
   const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0;
 
-  const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
+  const currentDevice = globalPreviewMode ?? 'desktop';
 
   const getGridColsClass = (cols: any, device: 'mobile' | 'tablet' | 'desktop') => {
     const c = parseInt(cols?.toString() || "1") || 1;
@@ -205,6 +180,42 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
   const gridClass = isEditor 
     ? getGridColsClass(currentCols, 'mobile').replace('lg:', '').replace('md:', '')
     : `${getGridColsClass(mobileCols, 'mobile')} ${getGridColsClass(tabletCols, 'tablet')} ${getGridColsClass(desktopCols, 'desktop')}`;
+
+  const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
+
+  const itemsToShow = variant === 'homepage' 
+    ? Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, "3")) || 3)
+    : visibleCount;
+
+  const filteredBlogs = useMemo(() => {
+    const base = activeTag === "All" ? blogs : blogs.filter((b) => b.tags?.includes(activeTag));
+    return base.slice(0, itemsToShow);
+  }, [blogs, activeTag, itemsToShow]);
+
+  const hasMore = useMemo(() => {
+    const total = activeTag === "All" ? blogs.length : blogs.filter((b) => b.tags?.includes(activeTag)).length;
+    return itemsToShow < total;
+  }, [blogs, activeTag, itemsToShow]);
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 6);
+  };
+
+  if (!isVisible && !isAdmin) return null;
+
+  const initialData = { 
+    isVisible, 
+    paddingTop: paddingTopData,
+    paddingBottom: paddingBottomData,
+    title: titleData,
+    subtitle: subtitleData,
+    itemsToShow: itemsToShowData,
+    showSeeAll,
+    seeAllLabel,
+    seeAllLink,
+    seeAllPosition: seeAllPositionData,
+    columns: columnsData
+  };
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
@@ -280,10 +291,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             </div>
             {((showSeeAll && currentSeeAllPos === 'top') || (variant === 'homepage' && !showSeeAll)) && (
               <Link 
-                href={showSeeAll ? (getResponsiveValue(seeAllLink, currentDevice) || "/blog") : "/blog"}
+                href={showSeeAll ? (getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || "/blog") : "/blog"}
                 className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
               >
-                {showSeeAll ? (getResponsiveValue(seeAllLabel, currentDevice) || "Xem tất cả") : "Xem tất cả"}
+                {showSeeAll ? (getResponsiveValue(seeAllLabel, globalPreviewMode || 'desktop') || "Xem tất cả") : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             )}
@@ -316,7 +327,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
                 gridClass
               )}
               style={{
-                gap: isEditor ? (currentDevice === 'mobile' ? '1.5rem' : '2rem') : undefined,
+                gap: isEditor ? (globalPreviewMode === 'mobile' ? '1.5rem' : '2rem') : undefined,
                 '--cols-mob': mobileCols,
                 '--cols-tab': tabletCols,
                 '--cols-desk': desktopCols
@@ -332,7 +343,24 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
             </div>
           )}
 
-          {((showSeeAll && currentSeeAllPos === 'bottom') || (variant === 'homepage' && !showSeeAll)) && (
+          {variant === 'subpage' && hasMore && (
+            <div className="mt-16 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                className="group relative flex items-center gap-3 px-10 py-5 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.2em] transition-colors relative z-10">
+                  Xem thêm
+                </span>
+                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
+                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                </div>
+              </button>
+            </div>
+          )}
+
+          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -340,10 +368,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
               className={cn("mt-20 flex justify-center", !showSeeAll && "lg:hidden")}
             >
               {showSeeAll ? (
-                <Link href={getResponsiveValue(seeAllLink, currentDevice) || seeAllLink || "/blog"} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
+                <Link href={getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || seeAllLink || "/blog"} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
-                    {getResponsiveValue(seeAllLabel, currentDevice) || seeAllLabel}
+                    {getResponsiveValue(seeAllLabel, globalPreviewMode || 'desktop') || seeAllLabel}
                   </span>
                   <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
                     <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />

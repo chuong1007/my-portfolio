@@ -38,9 +38,10 @@ const MOCK_PROJECTS = getAllProjects();
 
 type GalleryProps = {
   sectionId?: string;
+  variant?: 'homepage' | 'subpage';
 };
 
-export function Gallery({ sectionId = "gallery" }: GalleryProps) {
+export function Gallery({ sectionId = "gallery", variant = 'homepage' }: GalleryProps) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [isVisible, setIsVisible] = useState(true);
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
@@ -55,6 +56,8 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
+
+  const [visibleCount, setVisibleCount] = useState(variant === 'subpage' ? 12 : 16);
 
   const fetchContent = useCallback(async () => {
     try {
@@ -149,13 +152,22 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
   }, [activeCategory, projectsToDisplay]);
 
   const currentDevice = globalPreviewMode ?? 'desktop';
-  const defaultCount = currentDevice === 'mobile' ? 4 : currentDevice === 'tablet' ? 6 : 16;
-  const itemsToShow = Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, defaultCount.toString())) || defaultCount);
+  const itemsToShow = variant === 'homepage' 
+    ? Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, "16")) || 16)
+    : visibleCount;
 
   const displayedProjects = useMemo(() => {
     if (!Array.isArray(filteredProjects)) return [];
     return filteredProjects.slice(0, itemsToShow);
   }, [filteredProjects, itemsToShow]);
+
+  const hasMore = useMemo(() => {
+    return itemsToShow < filteredProjects.length;
+  }, [itemsToShow, filteredProjects.length]);
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 4);
+  };
 
   if (!isVisible && !isAdmin) return null;
 
@@ -404,7 +416,24 @@ export function Gallery({ sectionId = "gallery" }: GalleryProps) {
             ))}
           </div>
 
-          {((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
+          {variant === 'subpage' && hasMore && (
+            <div className="mt-16 flex justify-center">
+              <button
+                onClick={handleLoadMore}
+                className="group relative flex items-center gap-3 px-10 py-5 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.2em] transition-colors relative z-10">
+                  Xem thêm
+                </span>
+                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
+                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                </div>
+              </button>
+            </div>
+          )}
+
+          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

@@ -8,7 +8,7 @@ export const metadata = {
 export default function ProjectsPage() {
   return (
     <div className="pt-24 min-h-screen">
-      <Gallery />
+      <Gallery variant="subpage" />
     </div>
   );
 }
