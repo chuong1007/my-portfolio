@@ -1,0 +1,146 @@
+[
+  {
+    "id": "8c05693a-f8cc-4b7c-8d4e-3684695c7598",
+    "slug": "new-page",
+    "title": "NEW PAGE",
+    "page_content": [
+      {
+        "id": "row_1773557911714",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773557911714",
+            "span": 12,
+            "blocks": [
+              {
+                "id": "block_1773558553117",
+                "type": "text",
+                "styles": {},
+                "content": "<h1 style=\"text-align: center; font-size: 128px !important;\"><span style=\"font-family: monospace; font-size: 128px !important; color: rgb(239, 68, 68) !important;\"><strong>PORTFOLIO</strong></span></h1><p></p>",
+                "visibility": {}
+              }
+            ],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      }
+    ],
+    "created_at": "2026-03-15T06:58:32.234008+00:00",
+    "updated_at": "2026-03-15T07:09:35.689+00:00",
+    "is_published": true,
+    "show_in_header": false
+  },
+  {
+    "id": "822c87ca-9af9-42a3-8596-035ed0c4ed1b",
+    "slug": "portfolio",
+    "title": "PORTFOLIO",
+    "page_content": [
+      {
+        "id": "row_1",
+        "columns": [
+          {
+            "id": "col_row_1_0_1773470878664",
+            "span": 12,
+            "blocks": [
+              {
+                "id": "block_1773470881401",
+                "type": "text",
+                "styles": {
+                  "padding": "p-4",
+                  "backgroundColor": "transparent"
+                },
+                "content": "<h1 style=\"text-align: center; font-size: 128px !important;\"><span style=\"font-family: monospace; color: rgb(239, 68, 68); font-size: 128px !important;\"><strong>PORTFOLIO</strong></span></h1><h1 style=\"text-align: center; font-size: 128px !important;\"></h1><p style=\"text-align: center; font-size: 128px !important;\"></p>",
+                "visibility": {
+                  "hideOnMobile": false,
+                  "hideOnDesktop": false
+                }
+              }
+            ],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {
+          "hideOnMobile": false,
+          "hideOnDesktop": false
+        }
+      },
+      {
+        "id": "row_1773479721362",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773479721362",
+            "span": 12,
+            "blocks": [],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      },
+      {
+        "id": "row_1773479908293",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773479908293",
+            "span": 12,
+            "blocks": [],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      },
+      {
+        "id": "row_1773479909097",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773479909097",
+            "span": 12,
+            "blocks": [],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      },
+      {
+        "id": "row_1773479910075",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773479910075",
+            "span": 12,
+            "blocks": [],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      },
+      {
+        "id": "row_1773479912179",
+        "styles": {},
+        "columns": [
+          {
+            "id": "col_1773479912179",
+            "span": 12,
+            "blocks": [],
+            "styles": {},
+            "visibility": {}
+          }
+        ],
+        "visibility": {}
+      }
+    ],
+    "created_at": "2026-03-14T05:36:12.026539+00:00",
+    "updated_at": "2026-03-15T13:15:58.887+00:00",
+    "is_published": true,
+    "show_in_header": false
+  }
+]

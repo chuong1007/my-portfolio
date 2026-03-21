@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette } from "lucide-react";
+import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { getAllProjects } from "@/lib/data";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import { ProjectForm } from "@/components/admin/ProjectForm";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 
 // Convert mock projects to DbProject format for admin display
 function getMockProjectsAsDb(): (DbProject & { images: DbProjectImage[]; isMock?: boolean })[] {
@@ -38,10 +39,11 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'homepage'>(tabParam === 'homepage' ? 'homepage' : 'projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics'>(tabParam === 'homepage' ? 'homepage' : tabParam === 'analytics' ? 'analytics' : 'projects');
   
   useEffect(() => {
     if (tabParam === 'homepage') setActiveTab('homepage');
+    if (tabParam === 'analytics') setActiveTab('analytics');
   }, [tabParam]);
 
   // Site content state
@@ -306,9 +308,20 @@ export default function AdminPage() {
               <LayoutDashboard className="w-4 h-4" />
               Trang chủ
             </button>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                activeTab === 'analytics'
+                  ? 'bg-emerald-600 text-white'
+                  : 'text-zinc-500 hover:text-emerald-400 hover:bg-emerald-500/10'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </button>
           </div>
         </div>
-        {activeTab !== 'homepage' && (
+        {activeTab === 'projects' && (
         <button
           onClick={() => setShowProjectForm(true)}
           className="flex items-center gap-2 bg-zinc-50 text-zinc-950 px-5 py-3 rounded-xl font-semibold hover:bg-zinc-200 transition-colors w-fit"
@@ -684,6 +697,11 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Analytics Dashboard */}
+      {activeTab === 'analytics' && !loading && (
+        <AnalyticsDashboard />
       )}
     </div>
   );

@@ -1,0 +1,1633 @@
+[
+  {
+    "id": "ux-builder-home-2",
+    "data": {
+      "rows": [
+        {
+          "id": "row-initial",
+          "columns": [
+            {
+              "id": "col-1",
+              "data": {
+                "title": "Chào mừng tới HOME 2",
+                "content": "Đây là trang web được xây dựng bằng UX Builder."
+              },
+              "span": 12,
+              "type": "text"
+            }
+          ]
+        },
+        {
+          "id": "row-1773464901218",
+          "columns": [
+            {
+              "id": "col-1773464901218",
+              "data": {
+                "title": "New Row"
+              },
+              "span": 12,
+              "type": "text"
+            },
+            {
+              "id": "col-1773464902870",
+              "data": {
+                "title": "New Column"
+              },
+              "span": 6,
+              "type": "text"
+            },
+            {
+              "id": "col-1773465001337",
+              "data": {
+                "title": "New Column"
+              },
+              "span": 6,
+              "type": "text"
+            }
+          ]
+        }
+      ]
+    },
+    "updated_at": "2026-03-14T05:10:01.338+00:00"
+  },
+  {
+    "id": "ux-builder-home-2-row-1773464901218-col-1773464901218",
+    "data": {
+      "id": "col-1773464901218",
+      "data": {
+        "title": "New Row"
+      },
+      "span": 12,
+      "type": "text",
+      "isVisible": false
+    },
+    "updated_at": "2026-03-14T05:10:08.317+00:00"
+  },
+  {
+    "id": "hero",
+    "data": {
+      "data": {
+        "title": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        "content": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      },
+      "span": 12,
+      "type": "text",
+      "zalo": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "email": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "phone": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "title": {
+        "content": {
+          "mobile": "<p><span style=\"font-weight: 700;\"><strong>Visual<br>Designer<br></strong></span><span style=\"font-weight: 400;\">based in<br>Ho Chi Minh City</span></p>",
+          "tablet": "<p><span style=\"font-weight: 700;\">Visual<br>Designer</span><br>based in<br>Ho Chi Minh City</p>",
+          "desktop": "<p><span style=\"font-weight: 700;\">Visual Designer </span>based in<br>Ho Chi Minh City</p>"
+        },
+        "fontSize": {
+          "mobile": 48,
+          "tablet": 92,
+          "desktop": 88
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.3",
+          "tablet": "1",
+          "desktop": "1.2"
+        }
+      },
+      "columns": {
+        "mobile": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "tablet": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "desktop": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        }
+      },
+      "heading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "facebook": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoText": {
+        "mobile": "CHUONG.GRAPHIC",
+        "tablet": "CHUONG.GRAPHIC",
+        "desktop": "CHUONG.GRAPHIC"
+      },
+      "logoType": {
+        "mobile": "text",
+        "tablet": "text",
+        "desktop": "text"
+      },
+      "showZalo": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subtitle": {
+        "content": {
+          "mobile": "Scroll to explore",
+          "tablet": "Scroll to explore",
+          "desktop": "Scroll to explore"
+        },
+        "fontSize": {
+          "mobile": 14,
+          "tablet": 10,
+          "desktop": 13
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "isVisible": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "logoColor": {
+        "mobile": "#FFFFFF",
+        "tablet": "#FFFFFF",
+        "desktop": "#FFFFFF"
+      },
+      "showEmail": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "showPhone": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "zaloLabel": {
+        "mobile": "Chat on Zalo",
+        "tablet": "Chat on Zalo",
+        "desktop": "Chat on Zalo"
+      },
+      "logoHeight": {
+        "mobile": "40",
+        "tablet": "40",
+        "desktop": "40"
+      },
+      "paddingTop": {
+        "mobile": "80",
+        "tablet": "170",
+        "desktop": "229"
+      },
+      "paragraphs": [],
+      "seeAllLink": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "showSeeAll": {
+        "mobile": false,
+        "tablet": false,
+        "desktop": false
+      },
+      "subheading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "itemsToShow": {
+        "mobile": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "tablet": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "desktop": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        }
+      },
+      "seeAllLabel": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoImageUrl": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "scrollOffset": {
+        "mobile": "500",
+        "tablet": "500",
+        "desktop": "48"
+      },
+      "showFacebook": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "facebookLabel": {
+        "mobile": "Visit Profile",
+        "tablet": "Visit Profile",
+        "desktop": "Visit Profile"
+      },
+      "paddingBottom": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      },
+      "scrollPadding": {
+        "mobile": "39",
+        "tablet": "31",
+        "desktop": "33"
+      },
+      "seeAllPosition": {
+        "mobile": "bottom",
+        "tablet": "bottom",
+        "desktop": "bottom"
+      },
+      "paddingTopTextScroll": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      }
+    },
+    "updated_at": "2026-03-17T16:24:20.978+00:00"
+  },
+  {
+    "id": "gallery",
+    "data": {
+      "data": {
+        "title": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        "content": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      },
+      "span": 12,
+      "type": "text",
+      "zalo": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "email": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "phone": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "title": {
+        "content": {
+          "mobile": "<p>Dự án</p>",
+          "tablet": "<p>Dự án</p>",
+          "desktop": "<p><span style=\"font-weight: 700;\"><strong>Dự án</strong></span></p>"
+        },
+        "fontSize": {
+          "mobile": 35,
+          "tablet": 45,
+          "desktop": 55
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "columns": {
+        "mobile": "1",
+        "tablet": 3,
+        "desktop": "4"
+      },
+      "heading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "facebook": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoText": {
+        "mobile": "CHUONG.GRAPHIC",
+        "tablet": "CHUONG.GRAPHIC",
+        "desktop": "CHUONG.GRAPHIC"
+      },
+      "logoType": {
+        "mobile": "text",
+        "tablet": "text",
+        "desktop": "text"
+      },
+      "showZalo": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subtitle": {
+        "content": {
+          "mobile": "<p>Dự án nổi bật</p>",
+          "tablet": "<p>Dự án nổi bật</p>",
+          "desktop": "<p>Dự án nổi bật</p>"
+        },
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "isVisible": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "logoColor": {
+        "mobile": "#FFFFFF",
+        "tablet": "#FFFFFF",
+        "desktop": "#FFFFFF"
+      },
+      "showEmail": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "showPhone": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "zaloLabel": {
+        "mobile": "Chat on Zalo",
+        "tablet": "Chat on Zalo",
+        "desktop": "Chat on Zalo"
+      },
+      "logoHeight": {
+        "mobile": "40",
+        "tablet": "40",
+        "desktop": "40"
+      },
+      "paddingTop": {
+        "mobile": "99",
+        "tablet": "0",
+        "desktop": "0"
+      },
+      "paragraphs": [],
+      "seeAllLink": {
+        "mobile": "/projects",
+        "tablet": "/projects",
+        "desktop": "/projects"
+      },
+      "showSeeAll": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subheading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "itemsToShow": {
+        "mobile": "6",
+        "tablet": "6",
+        "desktop": "8"
+      },
+      "seeAllLabel": {
+        "mobile": "Xem tất cả",
+        "tablet": "Xem tất cả dự án",
+        "desktop": "Xem tất cả dự án"
+      },
+      "logoImageUrl": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "scrollOffset": {
+        "mobile": "48",
+        "tablet": "48",
+        "desktop": "48"
+      },
+      "showFacebook": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "facebookLabel": {
+        "mobile": "Visit Profile",
+        "tablet": "Visit Profile",
+        "desktop": "Visit Profile"
+      },
+      "paddingBottom": {
+        "mobile": "170",
+        "tablet": "128",
+        "desktop": "128"
+      },
+      "seeAllPosition": {
+        "mobile": "bottom",
+        "tablet": "bottom",
+        "desktop": "top"
+      },
+      "paddingTopTextScroll": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      }
+    },
+    "updated_at": "2026-03-17T06:34:59.578+00:00"
+  },
+  {
+    "id": "contact",
+    "data": {
+      "data": {
+        "title": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        "content": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      },
+      "span": 12,
+      "type": "text",
+      "zalo": {
+        "mobile": "0384297019",
+        "tablet": "0384297019",
+        "desktop": "https://zalo.me/0384297019"
+      },
+      "email": {
+        "mobile": "chuong.thanh1007@gmail.com",
+        "tablet": "chuong.thanh1007@gmail.com",
+        "desktop": "chuong.thanh1007@gmail.com"
+      },
+      "phone": {
+        "mobile": "038 429 7019",
+        "tablet": "038 429 7019",
+        "desktop": "038 429 7019"
+      },
+      "title": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "columns": {
+        "mobile": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "tablet": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "desktop": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        }
+      },
+      "heading": {
+        "content": {
+          "mobile": "<h2><span style=\"font-size: 72px;\"><strong>Let's Connect</strong></span></h2><p></p>",
+          "tablet": "<h2 style=\"font-size: 72px !important;\"><span style=\"color: rgb(255, 255, 255); font-size: 72px !important;\"><strong>Let's Conne</strong></span><span style=\"color: rgb(249, 244, 244); font-size: 72px !important;\"><strong>ct</strong></span></h2><p></p>",
+          "desktop": "<h2 style=\"font-size: 72px !important;\"><span style=\"color: rgb(255, 255, 255); font-size: 72px !important;\"><strong>Let's Conne</strong></span><span style=\"color: rgb(249, 244, 244); font-size: 72px !important;\"><strong>ct</strong></span></h2><p></p>"
+        },
+        "fontSize": {
+          "mobile": 87,
+          "tablet": 62,
+          "desktop": 64
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "0.9",
+          "tablet": "1.4",
+          "desktop": "1.4"
+        }
+      },
+      "facebook": {
+        "mobile": "https://www.facebook.com/thory.4869",
+        "tablet": "https://www.facebook.com/thory.4869",
+        "desktop": "https://www.facebook.com/thory.4869"
+      },
+      "logoText": {
+        "mobile": "CHUONG.GRAPHIC",
+        "tablet": "CHUONG.GRAPHIC",
+        "desktop": "CHUONG.GRAPHIC"
+      },
+      "logoType": {
+        "mobile": "text",
+        "tablet": "text",
+        "desktop": "text"
+      },
+      "showZalo": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subtitle": {
+        "content": {
+          "mobile": "<p><span style=\"font-size: 16px;\">Anh/ Chị có dự án cần thực hiện, hãy liên hệ qua thông tin bên dưới:</span></p><p></p><h2></h2><p></p>",
+          "tablet": "<p style=\"text-align: left; font-size: 40px !important;\"><span style=\"color: rgb(178, 178, 178); font-size: 16px !important;\">Anh/ Chị có dự án cần thực hiện, hãy liên hệ qua thông tin bên dưới:</span></p><p></p><h2 style=\"font-size: 40px !important;\"></h2><p></p>",
+          "desktop": "<p style=\"text-align: left; font-size: 40px !important;\"><span style=\"color: rgb(178, 178, 178); font-size: 16px !important;\">Anh/ Chị có dự án cần thực hiện, hãy liên hệ qua thông tin bên dưới:</span></p><p></p><h2 style=\"font-size: 40px !important;\"></h2><p></p>"
+        },
+        "fontSize": {
+          "mobile": 24,
+          "tablet": 26,
+          "desktop": 28
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.2",
+          "tablet": "1.4",
+          "desktop": "1"
+        }
+      },
+      "isVisible": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "logoColor": {
+        "mobile": "#FFFFFF",
+        "tablet": "#FFFFFF",
+        "desktop": "#FFFFFF"
+      },
+      "showEmail": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "showPhone": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "zaloLabel": {
+        "mobile": "Kết nối Zalo",
+        "tablet": "Kết nối Zalo",
+        "desktop": "Kết nối Zalo"
+      },
+      "logoHeight": {
+        "mobile": "40",
+        "tablet": "40",
+        "desktop": "40"
+      },
+      "paddingTop": {
+        "mobile": "0",
+        "tablet": "59",
+        "desktop": "80"
+      },
+      "paragraphs": [],
+      "seeAllLink": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "showSeeAll": {
+        "mobile": false,
+        "tablet": false,
+        "desktop": false
+      },
+      "subheading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "itemsToShow": {
+        "mobile": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "tablet": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "desktop": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        }
+      },
+      "seeAllLabel": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoImageUrl": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "scrollOffset": {
+        "mobile": "48",
+        "tablet": "48",
+        "desktop": "48"
+      },
+      "showFacebook": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "facebookLabel": {
+        "mobile": "Kết nối Facebook",
+        "tablet": "Kết nối Facebook",
+        "desktop": "Kết nối Facebook"
+      },
+      "paddingBottom": {
+        "mobile": "128",
+        "tablet": "65",
+        "desktop": "209"
+      },
+      "seeAllPosition": {
+        "mobile": "bottom",
+        "tablet": "bottom",
+        "desktop": "bottom"
+      },
+      "paddingTopTextScroll": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      }
+    },
+    "updated_at": "2026-03-17T13:59:02.403+00:00"
+  },
+  {
+    "id": "blog",
+    "data": {
+      "data": {
+        "title": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        "content": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      },
+      "span": 12,
+      "type": "text",
+      "zalo": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "email": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "phone": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "title": {
+        "content": {
+          "mobile": "<p>Bài viết</p>",
+          "tablet": "<p>Bài viết</p>",
+          "desktop": "<p><strong>Blog</strong></p>"
+        },
+        "fontSize": {
+          "mobile": 35,
+          "tablet": 45,
+          "desktop": 55
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "700"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "columns": {
+        "mobile": "1",
+        "tablet": "3",
+        "desktop": "3"
+      },
+      "heading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "facebook": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoText": {
+        "mobile": "CHUONG.GRAPHIC",
+        "tablet": "CHUONG.GRAPHIC",
+        "desktop": "CHUONG.GRAPHIC"
+      },
+      "logoType": {
+        "mobile": "text",
+        "tablet": "text",
+        "desktop": "text"
+      },
+      "showZalo": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subtitle": {
+        "content": {
+          "mobile": "<p>Bài viết nổi bật</p>",
+          "tablet": "<p>Bài viết nổi bật</p>",
+          "desktop": "<p>Bài viết nổi bật</p>"
+        },
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "isVisible": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "logoColor": {
+        "mobile": "#FFFFFF",
+        "tablet": "#FFFFFF",
+        "desktop": "#FFFFFF"
+      },
+      "showEmail": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "showPhone": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "zaloLabel": {
+        "mobile": "Chat on Zalo",
+        "tablet": "Chat on Zalo",
+        "desktop": "Chat on Zalo"
+      },
+      "logoHeight": {
+        "mobile": "40",
+        "tablet": "40",
+        "desktop": "40"
+      },
+      "paddingTop": {
+        "mobile": "0",
+        "tablet": "35",
+        "desktop": "90"
+      },
+      "paragraphs": [],
+      "seeAllLink": {
+        "mobile": "/blog",
+        "tablet": "/blog",
+        "desktop": "/blog"
+      },
+      "showSeeAll": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subheading": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "itemsToShow": {
+        "mobile": "4",
+        "tablet": "6",
+        "desktop": "6"
+      },
+      "seeAllLabel": {
+        "mobile": "Xem tất cả",
+        "tablet": "Xem tất cả bài viết",
+        "desktop": "Xem tất cả bài viết"
+      },
+      "logoImageUrl": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "scrollOffset": {
+        "mobile": "48",
+        "tablet": "48",
+        "desktop": "48"
+      },
+      "showFacebook": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "facebookLabel": {
+        "mobile": "Visit Profile",
+        "tablet": "Visit Profile",
+        "desktop": "Visit Profile"
+      },
+      "paddingBottom": {
+        "mobile": "64",
+        "tablet": "128",
+        "desktop": "128"
+      },
+      "seeAllPosition": {
+        "mobile": "bottom",
+        "tablet": "bottom",
+        "desktop": "top"
+      },
+      "paddingTopTextScroll": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      }
+    },
+    "updated_at": "2026-03-20T06:50:58.424+00:00"
+  },
+  {
+    "id": "about",
+    "data": {
+      "data": {
+        "title": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        "content": {
+          "content": "",
+          "fontSize": {
+            "mobile": 16,
+            "tablet": 18,
+            "desktop": 20
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      },
+      "span": 12,
+      "type": "text",
+      "zalo": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "email": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "phone": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "title": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "columns": {
+        "mobile": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "tablet": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        },
+        "desktop": {
+          "mobile": 1,
+          "tablet": 2,
+          "desktop": 3
+        }
+      },
+      "heading": {
+        "content": {
+          "mobile": "<p>About</p>",
+          "tablet": "<p><strong>About</strong></p>",
+          "desktop": "<p><span style=\"font-weight: 700;\"><strong>About</strong></span></p>"
+        },
+        "fontSize": {
+          "mobile": 30,
+          "tablet": 40,
+          "desktop": 55
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "facebook": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoText": {
+        "mobile": "CHUONG.GRAPHIC",
+        "tablet": "CHUONG.GRAPHIC",
+        "desktop": "CHUONG.GRAPHIC"
+      },
+      "logoType": {
+        "mobile": "text",
+        "tablet": "text",
+        "desktop": "text"
+      },
+      "showZalo": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "subtitle": {
+        "content": "",
+        "fontSize": {
+          "mobile": 16,
+          "tablet": 18,
+          "desktop": 20
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "isVisible": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "logoColor": {
+        "mobile": "#FFFFFF",
+        "tablet": "#FFFFFF",
+        "desktop": "#FFFFFF"
+      },
+      "showEmail": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "showPhone": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "zaloLabel": {
+        "mobile": "Chat on Zalo",
+        "tablet": "Chat on Zalo",
+        "desktop": "Chat on Zalo"
+      },
+      "logoHeight": {
+        "mobile": "40",
+        "tablet": "40",
+        "desktop": "40"
+      },
+      "paddingTop": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "84"
+      },
+      "paragraphs": [
+        {
+          "content": {
+            "mobile": "<p>Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu và doanh nghiệp.</p><p>Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.</p>",
+            "tablet": "<p>Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu và doanh nghiệp.</p><p>Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.</p>",
+            "desktop": "<p>Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu và doanh nghiệp.</p><p>Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.</p>"
+          },
+          "fontSize": {
+            "mobile": 15,
+            "tablet": 19,
+            "desktop": 18
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        },
+        {
+          "content": {
+            "mobile": "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.",
+            "tablet": "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.",
+            "desktop": "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án."
+          },
+          "fontSize": {
+            "mobile": 14,
+            "tablet": 19,
+            "desktop": 18
+          },
+          "fontFamily": {
+            "mobile": "inherit",
+            "tablet": "inherit",
+            "desktop": "inherit"
+          },
+          "fontWeight": {
+            "mobile": "400",
+            "tablet": "400",
+            "desktop": "400"
+          },
+          "lineHeight": {
+            "mobile": "1.5",
+            "tablet": "1.5",
+            "desktop": "1.5"
+          }
+        }
+      ],
+      "seeAllLink": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "showSeeAll": {
+        "mobile": false,
+        "tablet": false,
+        "desktop": false
+      },
+      "subheading": {
+        "content": {
+          "mobile": "<p><strong>Senior Graphic Designer<br>7 Years of Experience</strong></p>",
+          "tablet": "<p><strong>Senior Graphic Designer | 7 Years of Experience</strong></p>",
+          "desktop": "<p><strong>Senior Graphic Designer  |  7 Years of Experience</strong></p>"
+        },
+        "fontSize": {
+          "mobile": 20,
+          "tablet": 27,
+          "desktop": 30
+        },
+        "fontFamily": {
+          "mobile": "inherit",
+          "tablet": "inherit",
+          "desktop": "inherit"
+        },
+        "fontWeight": {
+          "mobile": "400",
+          "tablet": "400",
+          "desktop": "400"
+        },
+        "lineHeight": {
+          "mobile": "1.5",
+          "tablet": "1.5",
+          "desktop": "1.5"
+        }
+      },
+      "itemsToShow": {
+        "mobile": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "tablet": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        },
+        "desktop": {
+          "mobile": 4,
+          "tablet": 6,
+          "desktop": 16
+        }
+      },
+      "seeAllLabel": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "logoImageUrl": {
+        "mobile": "",
+        "tablet": "",
+        "desktop": ""
+      },
+      "scrollOffset": {
+        "mobile": "48",
+        "tablet": "48",
+        "desktop": "48"
+      },
+      "showFacebook": {
+        "mobile": true,
+        "tablet": true,
+        "desktop": true
+      },
+      "facebookLabel": {
+        "mobile": "Visit Profile",
+        "tablet": "Visit Profile",
+        "desktop": "Visit Profile"
+      },
+      "paddingBottom": {
+        "mobile": "104",
+        "tablet": "128",
+        "desktop": "128"
+      },
+      "seeAllPosition": {
+        "mobile": "bottom",
+        "tablet": "bottom",
+        "desktop": "bottom"
+      },
+      "paddingTopTextScroll": {
+        "mobile": "0",
+        "tablet": "0",
+        "desktop": "0"
+      }
+    },
+    "updated_at": "2026-03-17T06:34:47.38+00:00"
+  }
+]

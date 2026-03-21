@@ -71,6 +71,8 @@ export const metadata: Metadata = {
 import { AdminProvider } from "@/context/AdminContext";
 import { AdminEditButton } from "@/components/builder/AdminEditButton";
 import { GlobalPreviewWrapper } from "./GlobalPreviewWrapper";
+import { Analytics } from "@vercel/analytics/next";
+import { PageViewTracker } from "@/components/PageViewTracker";
 
 export default function RootLayout({
   children,
@@ -87,6 +89,8 @@ export default function RootLayout({
             {children}
           </GlobalPreviewWrapper>
         </AdminProvider>
+        <Analytics />
+        <PageViewTracker />
       </body>
     </html>
   );
