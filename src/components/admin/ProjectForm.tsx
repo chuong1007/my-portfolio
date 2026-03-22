@@ -237,39 +237,56 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       // Upload new gallery images
       if (projectId && newImageFiles.length > 0) {
         const startOrder = existingImages.length;
+        const imageInserts: any[] = [];
+        
+        // Process uploads in chunks of 5 to prevent browser memory crashes (Canvas)
+        // and network rate limits/timeouts (Supabase) when uploading 50+ files.
+        const CHUNK_SIZE = 5;
+        for (let i = 0; i < newImageFiles.length; i += CHUNK_SIZE) {
+          const chunk = newImageFiles.slice(i, i + CHUNK_SIZE);
+          
+          const chunkResults = await Promise.all(
+            chunk.map(async (file, chunkIdx) => {
+              const index = i + chunkIdx;
+              try {
+                // Compress before upload
+                const compressed = await compressImage(file, {
+                  maxWidth: 1920,
+                  maxHeight: 1920,
+                  quality: 0.82,
+                  maxSizeMB: 1,
+                });
+                
+                const fileName = `gallery/${projectId}/${Date.now()}-${index}-${compressed.name}`;
+                const { error } = await supabase.storage
+                  .from("project-images")
+                  .upload(fileName, compressed, {
+                    cacheControl: '3600',
+                    contentType: compressed.type,
+                  });
 
-        const imageInserts = await Promise.all(
-          newImageFiles.map(async (file, i) => {
-            // Compress before upload
-            const compressed = await compressImage(file, {
-              maxWidth: 1920,
-              maxHeight: 1920,
-              quality: 0.82,
-              maxSizeMB: 1,
-            });
-            const fileName = `gallery/${projectId}/${Date.now()}-${i}-${compressed.name}`;
-            const { error } = await supabase.storage
-              .from("project-images")
-              .upload(fileName, compressed, {
-                cacheControl: '3600',
-                contentType: compressed.type,
-              });
+                if (!error) {
+                  const { data } = supabase.storage
+                    .from("project-images")
+                    .getPublicUrl(fileName);
 
-            if (!error) {
-              const { data } = supabase.storage
-                .from("project-images")
-                .getPublicUrl(fileName);
-
-              return {
-                project_id: projectId!,
-                image_url: data.publicUrl,
-                display_order: startOrder + i,
-              };
-            }
-            console.error("Gallery upload error:", error);
-            return null;
-          })
-        );
+                  return {
+                    project_id: projectId!,
+                    image_url: data.publicUrl,
+                    display_order: startOrder + index,
+                  };
+                }
+                console.error("Gallery upload error on file:", file.name, error);
+                return null;
+              } catch (err) {
+                console.error("Error processing file:", file.name, err);
+                return null;
+              }
+            })
+          );
+          
+          imageInserts.push(...chunkResults);
+        }
 
         const validInserts = imageInserts.filter((item): item is any => item !== null);
         if (validInserts.length > 0) {
