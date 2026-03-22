@@ -22,9 +22,15 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     });
   }, []);
 
-  // Only gallery images (no cover image duplication)
+  // Only gallery images (no cover image duplication) + deduplicate by URL
   const allImages = useMemo(() => {
-    return project.galleryImages || [];
+    const images = project.galleryImages || [];
+    const seen = new Set<string>();
+    return images.filter((img) => {
+      if (seen.has(img.url)) return false;
+      seen.add(img.url);
+      return true;
+    });
   }, [project]);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
@@ -141,8 +147,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           Hình ảnh dự án
         </motion.h2>
 
-        {/* Masonry Grid — cover image + all gallery images */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+        {/* 4-column Grid matching admin layout */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {allImages.map((image, index) => (
             <motion.div
               key={image.id}
@@ -150,11 +156,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}
               transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
-              className="break-inside-avoid mb-4 group cursor-pointer"
+              className="group cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               <div
-                className="relative w-full overflow-hidden rounded-xl bg-zinc-900"
+                className="relative w-full aspect-square overflow-hidden rounded-xl bg-zinc-900"
                 onContextMenu={handleContextMenu}
               >
                 <img
@@ -163,7 +169,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   loading={index < 4 ? "eager" : "lazy"}
                   referrerPolicy="no-referrer"
                   draggable={isAdmin}
-                  className="w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                  className="w-full h-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
                   style={!isAdmin ? { pointerEvents: "none" } : undefined}
                 />
                 {/* Hover overlay */}
