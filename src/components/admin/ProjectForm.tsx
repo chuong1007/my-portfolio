@@ -95,11 +95,36 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   }, [existingImages, newImageFiles]);
 
   const handleGalleryUpload = (files: FileList) => {
-    const fileArray = Array.from(files);
+    // Chỉ lấy file ảnh
+    const fileArray = Array.from(files).filter(f => f.type.startsWith("image/"));
+    
     setNewImageFiles((prev) => {
       const existingNames = new Set(prev.map(f => f.name));
-      const newUnique = fileArray.filter(f => !existingNames.has(f.name));
-      return [...prev, ...newUnique];
+      const newFiles: File[] = [];
+      
+      for (const f of fileArray) {
+        let finalFile = f;
+        let fileName = f.name;
+        let counter = 1;
+        
+        // Nếu trùng tên trong danh sách chờ, tự động thêm số -1, -2... để không bị loại bỏ
+        while (existingNames.has(fileName)) {
+          const nameParts = f.name.split('.');
+          const ext = nameParts.length > 1 ? nameParts.pop() : '';
+          const baseName = nameParts.join('.');
+          fileName = ext ? `${baseName}-${counter}.${ext}` : `${f.name}-${counter}`;
+          counter++;
+        }
+        
+        if (fileName !== f.name) {
+          // Tạo File mới với tên đã xử lý
+          finalFile = new File([f], fileName, { type: f.type });
+        }
+        
+        existingNames.add(fileName);
+        newFiles.push(finalFile);
+      }
+      return [...prev, ...newFiles];
     });
   };
 
