@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Pencil, ImageIcon } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, ArrowRight, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { createClient } from "@/lib/supabase";
+
 type ProjectDetailProps = {
   project: Project;
 };
 
 export function ProjectDetail({ project }: ProjectDetailProps) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -29,6 +31,43 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     };
     return [coverImage, ...project.galleryImages];
   }, [project]);
+
+  const openLightbox = (index: number) => setLightboxIndex(index);
+  const closeLightbox = () => setLightboxIndex(null);
+
+  const goNext = useCallback(() => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((lightboxIndex + 1) % allImages.length);
+  }, [lightboxIndex, allImages.length]);
+
+  const goPrev = useCallback(() => {
+    if (lightboxIndex === null) return;
+    setLightboxIndex((lightboxIndex - 1 + allImages.length) % allImages.length);
+  }, [lightboxIndex, allImages.length]);
+
+  // Keyboard navigation for lightbox
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "ArrowLeft") goPrev();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    // Prevent body scroll when lightbox is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [lightboxIndex, goNext, goPrev]);
+
+  // Prevent right-click for non-admin users
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (!isAdmin) {
+      e.preventDefault();
+    }
+  };
 
   return (
     <div className="w-full">
@@ -116,21 +155,109 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}
               transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
-              className="break-inside-avoid mb-4 group"
+              className="break-inside-avoid mb-4 group cursor-pointer"
+              onClick={() => openLightbox(index)}
             >
-              <div className="relative w-full overflow-hidden rounded-xl bg-zinc-900 min-h-[200px]">
+              <div
+                className="relative w-full overflow-hidden rounded-xl bg-zinc-900"
+                onContextMenu={handleContextMenu}
+              >
                 <img
                   src={image.url}
                   alt={project.title}
                   loading={index < 4 ? "eager" : "lazy"}
                   referrerPolicy="no-referrer"
-                  className="w-full h-auto object-cover transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                  draggable={isAdmin}
+                  className="w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                  style={!isAdmin ? { pointerEvents: "none" } : undefined}
                 />
+                {/* Hover overlay */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
       </section>
+
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center"
+            onClick={closeLightbox}
+          >
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-sm" />
+
+            {/* Close button */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-6 right-6 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-all duration-300 text-white"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute top-6 left-6 z-10 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-white text-sm font-medium">
+              {lightboxIndex + 1} / {allImages.length}
+            </div>
+
+            {/* Navigation: Previous */}
+            {allImages.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                className="absolute left-4 md:left-8 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-all duration-300 text-white"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Navigation: Next */}
+            {allImages.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); goNext(); }}
+                className="absolute right-4 md:right-8 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-all duration-300 text-white"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            )}
+
+            {/* Image */}
+            <motion.div
+              key={lightboxIndex}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="relative z-[1] max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+              onContextMenu={handleContextMenu}
+            >
+              <img
+                src={allImages[lightboxIndex].url}
+                alt={`${project.title} - ${lightboxIndex + 1}`}
+                referrerPolicy="no-referrer"
+                draggable={isAdmin}
+                className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
+                style={!isAdmin ? { pointerEvents: "none" } : undefined}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Footer CTA */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-20 pt-8">
         <div className="border-t border-zinc-800 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -148,4 +275,3 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     </div>
   );
 }
-
