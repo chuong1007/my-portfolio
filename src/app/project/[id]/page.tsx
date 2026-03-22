@@ -1,23 +1,10 @@
-import { getProjectById, getAllProjects } from "@/lib/data";
+import { getProjectById } from "@/lib/data";
 import { ProjectDetail } from "@/components/ProjectDetail";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 
-// Generate static params for all projects to enable static generation
-export async function generateStaticParams() {
-  const supabase = createClient();
-  const { data } = await supabase.from('projects').select('id, slug');
-  
-  const dbParams = (data || []).map((project) => ({
-    id: project.slug || project.id,
-  }));
-
-  const mockParams = getAllProjects().map((project) => ({
-    id: project.id,
-  }));
-
-  return [...dbParams, ...mockParams];
-}
+// Always fetch fresh data from Supabase (no stale static cache)
+export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -28,8 +15,12 @@ export default async function ProjectPage({ params }: PageProps) {
   
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
 
-  // Try to fetch from database first
-  const supabase = createClient();
+  // Use server-side Supabase client (not browser client)
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  );
+
   const { data: dbProject } = await supabase
     .from("projects")
     .select("*")
@@ -57,7 +48,7 @@ export default async function ProjectPage({ params }: PageProps) {
       }))
     };
   } else {
-    // Fallback to mock data (handling both numeric project-X and UUIDs)
+    // Fallback to mock data
     projectData = getProjectById(id);
   }
 

@@ -22,14 +22,9 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     });
   }, []);
 
-  // Combine cover image + gallery images so cover is first
+  // Only gallery images (no cover image duplication)
   const allImages = useMemo(() => {
-    const coverImage = {
-      id: `cover-${project.id}`,
-      url: project.imageUrl,
-      aspectRatio: project.aspectRatio,
-    };
-    return [coverImage, ...project.galleryImages];
+    return project.galleryImages || [];
   }, [project]);
 
   const openLightbox = (index: number) => setLightboxIndex(index);
