@@ -175,7 +175,7 @@ export function Header() {
       <header
         className={cn(
           (isAdmin && globalPreviewMode !== "desktop") || isEditor ? "sticky" : "fixed",
-          "top-0 left-0 right-0 z-50 flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
+          "top-0 left-0 right-0 z-[999] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
           (scrolled || globalPreviewMode !== 'desktop' || isEditor) ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
         )}
       >
@@ -291,7 +291,7 @@ export function Header() {
                 </button>
 
                 {adminMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[100] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[1000] animate-in fade-in zoom-in-95 duration-200">
                     <Link
                       href="/admin"
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-500/10 transition-colors"
