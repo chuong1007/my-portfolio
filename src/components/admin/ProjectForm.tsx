@@ -115,6 +115,16 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [lockedImageIds, setLockedImageIds] = useState<string[]>([]);
+  const [wideImages, setWideImages] = useState<Set<string>>(new Set());
+
+  const handleImageLoad = (url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    if (naturalWidth && naturalHeight) {
+      if (naturalWidth / naturalHeight > 1.4) {
+        setWideImages(prev => new Set(prev).add(url));
+      }
+    }
+  };
 
   // Unified image list for ordering: { type, id/index, url }
   type GalleryItem = { type: 'existing'; data: DbProjectImage } | { type: 'new'; data: File; index: number };
@@ -255,13 +265,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     if (!indicesToMove.includes(dragIndex)) indicesToMove.push(dragIndex);
     indicesToMove.sort((a,b) => a - b);
 
-    // Kiểm tra xem có đang cố kéo ảnh bị khoá không
+    // Kiểm tra khoá
     const movingLocked = indicesToMove.some(idx => {
       const item = items[idx];
       const id = item.type === 'existing' ? (item.data as DbProjectImage).id : `new-${item.index}`;
       return lockedImageIds.includes(id);
     });
-    
     if (movingLocked) {
       alert("Bạn không thể kéo một bức ảnh đang bị khoá vị trí!");
       setDragIndex(null);
@@ -269,47 +278,37 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       return;
     }
 
-    // Tách riêng các ảnh bị khoá và ảnh tự do (unlocked)
-    const fixedSlots = new Map<number, any>();
-    const unlockedItems: { item: any; originalIndex: number }[] = [];
-
+    const lockedSlots = new Set<number>();
     items.forEach((item, index) => {
       const id = item.type === 'existing' ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
       if (lockedImageIds.includes(id)) {
-        fixedSlots.set(index, item);
-      } else {
-        unlockedItems.push({ item, originalIndex: index });
+        lockedSlots.add(index);
       }
     });
 
-    // Lấy các elements chuẩn bị được di chuyển
-    const itemsToMoveObjects = indicesToMove.map(i => items[i]);
-    const remainingUnlocked = unlockedItems.filter(u => !indicesToMove.includes(u.originalIndex));
-    
-    // Tính toán lại index trong mảng những element còn lại tự do
-    const numUnlockedBeforeDrop = unlockedItems.filter(u => u.originalIndex < dropIndex).length;
-    const numMovingBeforeDrop = indicesToMove.filter(i => i < dropIndex).length;
-    let targetIndexInRemaining = numUnlockedBeforeDrop - numMovingBeforeDrop;
-
-    const isMovingDown = dragIndex < dropIndex;
-    if (isMovingDown) {
-      targetIndexInRemaining++;
+    const targetSlots = indicesToMove.map((_, i) => dropIndex + i);
+    const dropOnLocked = targetSlots.some(slot => lockedSlots.has(slot));
+    if (dropOnLocked) {
+      alert("Bạn đang chèn lên vị trí bị khoá. Hệ thống đã huỷ thao tác để tránh lỗi lộn xộn.");
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
     }
 
-    // Chèn vào vị trí đích của mảng tự do
-    remainingUnlocked.splice(targetIndexInRemaining, 0, ...itemsToMoveObjects.map(item => ({ item, originalIndex: -1 })));
+    // LOGIC SWAP (HOÁN ĐỔI) ĐỂ KHÔNG BAO GIỜ NHẢY ẢNH:
+    // Copy toàn bộ mảng thay vì splice để tránh hiệu ứng domino
+    const finalItems = [...items];
+    const sourceItems = indicesToMove.map(idx => items[idx]);
+    const targetItems = targetSlots.map(idx => items[idx]);
 
-    // Xây dựng lại mảng final bằng cách đặt lại đúng vị trí của các slot đã bị ghim
-    const finalItems: any[] = [];
-    let unlockedPointer = 0;
-    
-    for (let i = 0; i < items.length; i++) {
-        if (fixedSlots.has(i)) {
-            finalItems.push(fixedSlots.get(i));
-        } else {
-            finalItems.push(remainingUnlocked[unlockedPointer++].item);
-        }
-    }
+    // Swap
+    indicesToMove.forEach((sourceIdx, idx) => {
+      const targetIdx = targetSlots[idx];
+      if (targetIdx < finalItems.length) {
+        finalItems[targetIdx] = sourceItems[idx];
+        finalItems[sourceIdx] = targetItems[idx];
+      }
+    });
 
     // Rebuild existing and new arrays from reordered items
     const newExisting: DbProjectImage[] = [];
@@ -836,6 +835,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               const isDragOver = dragOverIndex === index;
               const isSelected = selectedIndices.includes(index);
               const isLocked = lockedImageIds.includes(imgId);
+              const isWide = wideImages.has(imgUrl);
 
               return (
                 <div
@@ -846,8 +846,10 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
+                  style={isWide ? { columnSpan: "all" } as any : {}}
                   className={cn(
-                    "relative break-inside-avoid group rounded-lg transition-all duration-200 ring-offset-zinc-950",
+                    "relative group rounded-lg transition-all duration-200 ring-offset-zinc-950",
+                    isWide ? "w-full md:w-1/2 md:mx-auto mb-4" : "break-inside-avoid w-full mb-4",
                     isLocked ? "cursor-default" : "cursor-grab active:cursor-grabbing",
                     isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
                     isDragging && "opacity-50 scale-95",
@@ -857,10 +859,11 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 >
                   <img
                     src={imgUrl}
+                    onLoad={(e) => handleImageLoad(imgUrl, e)}
                     alt=""
                     referrerPolicy="no-referrer"
                     className={cn(
-                      "w-full h-auto object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none",
+                      "w-full h-auto object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none transition-all duration-300",
                       isLocked && "opacity-90 grayscale-[0.2]"
                     )}
                   />
