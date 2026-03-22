@@ -5,9 +5,18 @@ import { createClient } from "@/lib/supabase";
 
 // Generate static params for all projects to enable static generation
 export async function generateStaticParams() {
-  return getAllProjects().map((project) => ({
+  const supabase = createClient();
+  const { data } = await supabase.from('projects').select('id, slug');
+  
+  const dbParams = (data || []).map((project) => ({
+    id: project.slug || project.id,
+  }));
+
+  const mockParams = getAllProjects().map((project) => ({
     id: project.id,
   }));
+
+  return [...dbParams, ...mockParams];
 }
 
 type PageProps = {
@@ -17,12 +26,14 @@ type PageProps = {
 export default async function ProjectPage({ params }: PageProps) {
   const { id } = await params;
   
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
   // Try to fetch from database first
   const supabase = createClient();
   const { data: dbProject } = await supabase
     .from("projects")
     .select("*, images:project_images(*)")
-    .eq("id", id)
+    .eq(isUuid ? "id" : "slug", id)
     .single();
 
   let projectData: any = null;

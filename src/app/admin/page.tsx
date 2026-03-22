@@ -417,7 +417,7 @@ export default function AdminPage() {
                 </button>
                 
                 <Link
-                  href={`/project/${project.id}`}
+                  href={`/project/${project.slug || project.id}`}
                   className="flex items-center gap-1 bg-amber-400 text-black px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-amber-300 transition-colors shrink-0"
                 >
                   <Palette className="w-3 h-3" />

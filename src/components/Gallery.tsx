@@ -375,7 +375,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                 transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
                 className="group flex flex-col gap-3"
               >
-                <Link href={`/project/${project.id}`} className="group flex flex-col gap-3">
+                <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3">
                   <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
                     <img
                       src={project.imageUrl}
