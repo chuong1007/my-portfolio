@@ -147,39 +147,41 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           Hình ảnh dự án
         </motion.h2>
 
-        {/* Masonry Grid — full aspect ratio preserved */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
+        {/* Pro-style Grid — matching Admin view for design parity */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {allImages.map((image, index) => (
             <motion.div
               key={image.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}
-              transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
-              className="break-inside-avoid mb-4 group cursor-pointer"
+              transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
+              className="group cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               <div
-                className="relative w-full overflow-hidden rounded-xl bg-zinc-900"
+                className="relative aspect-square overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5"
                 onContextMenu={handleContextMenu}
               >
                 <img
                   src={image.url}
-                  alt={project.title}
-                  loading={index < 4 ? "eager" : "lazy"}
+                  alt={`${project.title} - ${index + 1}`}
+                  loading={index < 8 ? "eager" : "lazy"}
                   referrerPolicy="no-referrer"
                   draggable={isAdmin}
-                  className="w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                  className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
                   style={!isAdmin ? { pointerEvents: "none" } : undefined}
                 />
-                {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                      </svg>
-                    </div>
+                
+                {/* Visual Glass Overlay on Hover */}
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
+                
+                {/* Zoom Icon */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0">
+                  <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
                   </div>
                 </div>
               </div>

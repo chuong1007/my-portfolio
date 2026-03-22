@@ -74,7 +74,8 @@ export default function AdminPage() {
             .from("project_images")
             .select("*")
             .eq("project_id", project.id)
-            .order("display_order", { ascending: true });
+            .order("display_order", { ascending: true })
+            .limit(500); // Prevent default 30-item limit cutoff
           return { ...project, images: images || [] };
         })
       );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star, GripVertical, Tag as TagIcon } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
@@ -34,7 +34,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<string>("");
   const [newTagInput, setNewTagInput] = useState("");
 
   const handleCopyUrl = () => {
@@ -93,6 +93,28 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     newImageFiles.forEach((file, i) => items.push({ type: 'new' as const, data: file, index: i }));
     return items;
   }, [existingImages, newImageFiles]);
+
+  // Cảnh báo nếu người dùng vô tình đóng tab khi đang lưu ảnh
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (saving) {
+        // Trình duyệt sẽ tự động hiện thông báo mặc định khi thấy e.returnValue có độ dài > 0
+        e.preventDefault();
+        e.returnValue = 'Dữ liệu đang được tải lên. Bạn có chắc muốn rời đi không? Hệ thống sẽ bị huỷ lưu trữ!';
+        return e.returnValue;
+      }
+      if (newImageFiles.length > 0) {
+        e.preventDefault();
+        e.returnValue = 'Bạn có ảnh chờ lưu nhưng chưa bấm Cập Nhật. Bạn có chắc muốn thoắt ra không?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [saving, newImageFiles.length]);
 
   const handleGalleryUpload = (files: FileList) => {
     // Chỉ lấy file ảnh
@@ -265,6 +287,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
       // Upload new gallery images
       if (projectId && newImageFiles.length > 0) {
+        setSaveSuccess(`Đang tải lên 0/${newImageFiles.length} ảnh mới...`);
         const startOrder = existingImages.length;
         const imageInserts: any[] = [];
         
@@ -303,6 +326,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             const maxAttempts = 3;
 
             while (attempt < maxAttempts && !uploadSuccess) {
+              setSaveSuccess(`Đang tải ảnh ${i + 1}/${newImageFiles.length}... (Lần thử ${attempt + 1})`);
               const { error } = await supabase.storage
                 .from("project-images")
                 .upload(fileName, compressed, {
@@ -323,6 +347,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             }
 
             if (uploadSuccess) {
+              setSaveSuccess(`Tải thành công ${i + 1}/${newImageFiles.length} ảnh...`);
               const { data } = supabase.storage
                 .from("project-images")
                 .getPublicUrl(fileName);
@@ -357,8 +382,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
         }
       }
 
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setSaveSuccess("Đã cập nhật dự án thành công!");
+      setTimeout(() => setSaveSuccess(""), 3000);
 
       if (!isEditing) {
         onClose();
@@ -451,7 +476,9 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             ) : (
               <SaveIcon className="w-4 h-4" />
             )}
-            <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Tạo dự án"}</span>
+            <span className="max-w-[120px] truncate">
+              {saving ? (saveSuccess || "Đang lưu...") : saveSuccess || (isEditing ? "Cập nhật" : "Tạo dự án")}
+            </span>
           </button>
         </div>
       </div>

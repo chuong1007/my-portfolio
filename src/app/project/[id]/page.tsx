@@ -34,7 +34,8 @@ export default async function ProjectPage({ params }: PageProps) {
       .from("project_images")
       .select("*")
       .eq("project_id", dbProject.id)
-      .order("display_order", { ascending: true });
+      .order("display_order", { ascending: true })
+      .limit(500); // Explicitly high limit to avoid default 30 cutoff in some environments
 
     // Deduplicate images by URL (in case of duplicate DB records)
     const uniqueImages: any[] = [];
