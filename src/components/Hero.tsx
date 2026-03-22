@@ -28,25 +28,26 @@ const normalize = (val: any): RichTextData => {
 
 type HeroProps = {
   sectionId?: string;
+  initialContent?: any;
 };
 
-export function Hero({ sectionId = "hero" }: HeroProps) {
-  const [titleData, setTitleData] = useState<RichTextData>({ 
+export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
+  const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { 
     content: "Visual Designer based in Ho Chi Minh City", 
     fontSize: { desktop: 80, tablet: 60, mobile: 32 },
     lineHeight: { desktop: '1.1', tablet: '1.1', mobile: '1.1' }
   });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 }, lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' } });
-  const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>("48");
-  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
-  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("0");
-  const [scrollPadding, setScrollPadding] = useState<ResponsiveValue>("0");
-  const [isVisible, setIsVisible] = useState(true);
-  const [logoType, setLogoType] = useState<'text' | 'image'>('text');
-  const [logoText, setLogoText] = useState('CHUONG.GRAPHIC');
-  const [logoImageUrl, setLogoImageUrl] = useState('');
-  const [logoColor, setLogoColor] = useState('#FFFFFF');
-  const [logoHeight, setLogoHeight] = useState<ResponsiveValue>("40");
+  const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 }, lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' } });
+  const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>(() => initialContent?.scrollOffset ?? "48");
+  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
+  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "0");
+  const [scrollPadding, setScrollPadding] = useState<ResponsiveValue>(() => initialContent?.scrollPadding ?? initialContent?.paddingTopTextScroll ?? "0");
+  const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
+  const [logoType, setLogoType] = useState<'text' | 'image'>(() => initialContent?.logoType ?? 'text');
+  const [logoText, setLogoText] = useState(() => initialContent?.logoText ?? 'CHUONG.GRAPHIC');
+  const [logoImageUrl, setLogoImageUrl] = useState(() => initialContent?.logoImageUrl ?? '');
+  const [logoColor, setLogoColor] = useState(() => initialContent?.logoColor ?? '#FFFFFF');
+  const [logoHeight, setLogoHeight] = useState<ResponsiveValue>(() => initialContent?.logoHeight ?? "40");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {

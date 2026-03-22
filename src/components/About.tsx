@@ -46,18 +46,24 @@ const DEFAULTS = {
 
 type AboutProps = {
   sectionId?: string;
+  initialContent?: any;
 };
 
-export function About({ sectionId = "about" }: AboutProps) {
+export function About({ sectionId = "about", initialContent }: AboutProps) {
   const pathname = usePathname();
   const isContactPage = pathname === "/contact";
-  const [heading, setHeading] = useState<RichTextData>(DEFAULTS.heading);
-  const [subheading, setSubheading] = useState<RichTextData>(DEFAULTS.subheading);
-  const [paragraphs, setParagraphs] = useState<RichTextData[]>(DEFAULTS.paragraphs);
-  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
-  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(isContactPage ? "0" : "128");
-  const [isVisible, setIsVisible] = useState(true);
-  const [loaded, setLoaded] = useState(false);
+  const [heading, setHeading] = useState<RichTextData>(() => initialContent?.heading ? normalize(initialContent.heading) : DEFAULTS.heading);
+  const [subheading, setSubheading] = useState<RichTextData>(() => initialContent?.subheading ? normalize(initialContent.subheading) : DEFAULTS.subheading);
+  const [paragraphs, setParagraphs] = useState<RichTextData[]>(() => {
+    if (Array.isArray(initialContent?.paragraphs) && initialContent.paragraphs.length > 0) {
+      return initialContent.paragraphs.map(normalize);
+    }
+    return DEFAULTS.paragraphs;
+  });
+  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
+  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? (isContactPage ? "0" : "128"));
+  const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
+  const [loaded, setLoaded] = useState(true);
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {

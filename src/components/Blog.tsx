@@ -53,23 +53,25 @@ const BLOG_TAGS = [
 type BlogProps = {
   variant?: 'homepage' | 'subpage';
   sectionId?: string;
+  initialContent?: any;
+  initialBlogs?: any[];
 };
 
-export function Blog({ variant = 'homepage', sectionId = 'blog' }: BlogProps) {
-  const [blogs, setBlogs] = useState<DbBlog[]>([]);
-  const [loading, setLoading] = useState(true);
+export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent, initialBlogs }: BlogProps) {
+  const [blogs, setBlogs] = useState<DbBlog[]>(() => initialBlogs || []);
+  const [loading, setLoading] = useState(initialBlogs ? false : true);
   const [activeTag, setActiveTag] = useState("All");
-  const [isVisible, setIsVisible] = useState(true);
-  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
-  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("128");
-  const [itemsToShowData, setItemsToShowData] = useState<ResponsiveValue>(null);
-  const [showSeeAll, setShowSeeAll] = useState(false);
-  const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả bài viết");
-  const [seeAllLink, setSeeAllLink] = useState("/blog");
-  const [titleData, setTitleData] = useState<RichTextData>({ content: "Blog", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
-  const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
-  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>("bottom");
+  const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
+  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
+  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "128");
+  const [itemsToShowData, setItemsToShowData] = useState<ResponsiveValue>(() => initialContent?.itemsToShow ?? null);
+  const [showSeeAll, setShowSeeAll] = useState(() => initialContent?.showSeeAll ?? false);
+  const [seeAllLabel, setSeeAllLabel] = useState(() => initialContent?.seeAllLabel ?? "Xem tất cả bài viết");
+  const [seeAllLink, setSeeAllLink] = useState(() => initialContent?.seeAllLink ?? "/blog");
+  const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { content: "Blog", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Chia sẻ kiến thức & trải nghiệm", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
+  const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
+  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>(() => initialContent?.seeAllPosition ?? "bottom");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const fetchContent = useCallback(async () => {

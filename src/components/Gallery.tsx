@@ -39,22 +39,24 @@ const MOCK_PROJECTS = getAllProjects();
 type GalleryProps = {
   sectionId?: string;
   variant?: 'homepage' | 'subpage';
+  initialContent?: any;
+  initialProjects?: any[];
 };
 
-export function Gallery({ sectionId = "gallery", variant = 'homepage' }: GalleryProps) {
+export function Gallery({ sectionId = "gallery", variant = 'homepage', initialContent, initialProjects }: GalleryProps) {
   const [activeCategory, setActiveCategory] = useState("All");
-  const [isVisible, setIsVisible] = useState(true);
-  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>("0");
-  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("128");
-  const [itemsToShowData, setItemsToShowData] = useState<ResponsiveValue>(null);
-  const [showSeeAll, setShowSeeAll] = useState(false);
-  const [seeAllLabel, setSeeAllLabel] = useState("Xem tất cả dự án");
-  const [seeAllLink, setSeeAllLink] = useState("/projects");
-  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>("bottom");
-  const [dbProjects, setDbProjects] = useState<any[]>([]);
-  const [titleData, setTitleData] = useState<RichTextData>({ content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
-  const [subtitleData, setSubtitleData] = useState<RichTextData>({ content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
-  const [columnsData, setColumnsData] = useState<ResponsiveValue>("3");
+  const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
+  const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
+  const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "128");
+  const [itemsToShowData, setItemsToShowData] = useState<ResponsiveValue>(() => initialContent?.itemsToShow ?? null);
+  const [showSeeAll, setShowSeeAll] = useState(() => initialContent?.showSeeAll ?? false);
+  const [seeAllLabel, setSeeAllLabel] = useState(() => initialContent?.seeAllLabel ?? "Xem tất cả dự án");
+  const [seeAllLink, setSeeAllLink] = useState(() => initialContent?.seeAllLink ?? "/projects");
+  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>(() => initialContent?.seeAllPosition ?? "bottom");
+  const [dbProjects, setDbProjects] = useState<any[]>(() => initialProjects || []);
+  const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
+  const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
+  const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
 
   const [visibleCount, setVisibleCount] = useState(variant === 'subpage' ? 12 : 16);
