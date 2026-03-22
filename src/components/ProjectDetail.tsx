@@ -79,14 +79,15 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           </div>
 
           {/* Description */}
-          <motion.p
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl"
-          >
-            {typeof project.description === 'string' ? project.description : String(project.description)}
-          </motion.p>
+            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0"
+            dangerouslySetInnerHTML={{ 
+              __html: typeof project.description === 'string' ? project.description : String(project.description) 
+            }}
+          />
         </div>
       </motion.section>
 
