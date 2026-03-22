@@ -693,8 +693,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </div>
           </div>
 
-          {/* Image Grid - 4 columns with drag & drop */}
-          <div className="grid grid-cols-4 gap-2 max-h-[600px] overflow-y-auto">
+          {/* Image Grid - Masonry style to matching Live view */}
+          <div className="columns-3 sm:columns-4 gap-2 max-h-[800px] overflow-y-auto space-y-2">
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
               const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : URL.createObjectURL(item.data as File);
@@ -711,7 +711,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   className={cn(
-                    "relative aspect-square group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200",
+                    "relative break-inside-avoid group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200",
                     isDragging && "opacity-30 scale-95",
                     isDragOver && "ring-2 ring-emerald-500 ring-offset-2 ring-offset-zinc-950 scale-[1.02]"
                   )}
@@ -720,7 +720,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                     src={imgUrl}
                     alt=""
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none"
+                    className="w-full h-auto object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none"
                   />
                   {/* Drag handle */}
                   <div className="absolute top-1 left-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

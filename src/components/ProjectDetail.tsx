@@ -63,12 +63,29 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
     };
   }, [lightboxIndex, goNext, goPrev]);
 
-  // Prevent right-click for non-admin users
-  const handleContextMenu = (e: React.MouseEvent) => {
+  // Prevent right-click and keyboard inspector keys for guest users
+  useEffect(() => {
     if (!isAdmin) {
-      e.preventDefault();
+      const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U (View Source), Ctrl+S
+        if (
+          e.key === "F12" || 
+          ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "J" || e.key === "C")) ||
+          ((e.ctrlKey || e.metaKey) && (e.key === "u" || e.key === "s"))
+        ) {
+          e.preventDefault();
+        }
+      };
+
+      window.addEventListener("contextmenu", handleContextMenu);
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("contextmenu", handleContextMenu);
+        window.removeEventListener("keydown", handleKeyDown);
+      };
     }
-  };
+  }, [isAdmin]);
 
   return (
     <div className="w-full">
@@ -147,21 +164,20 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           Hình ảnh dự án
         </motion.h2>
 
-        {/* Pro-style Grid — matching Admin view for design parity */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        {/* Masonry — Preserving original aspect ratios (Pinterest style) */}
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
           {allImages.map((image, index) => (
             <motion.div
               key={image.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true, margin: "50px" }}
               transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
-              className="group cursor-pointer"
+              className="break-inside-avoid group cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               <div
-                className="relative aspect-square overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5"
-                onContextMenu={handleContextMenu}
+                className="relative overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5"
               >
                 <img
                   src={image.url}
@@ -169,12 +185,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   loading={index < 8 ? "eager" : "lazy"}
                   referrerPolicy="no-referrer"
                   draggable={isAdmin}
-                  className="w-full h-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
-                  style={!isAdmin ? { pointerEvents: "none" } : undefined}
+                  className="w-full h-auto object-contain transition-all duration-700 ease-out group-hover:scale-105 group-hover:brightness-110 select-none pointer-events-none sm:pointer-events-auto"
+                  style={{ userSelect: 'none', WebkitUserSelect: "none" } as any}
+                  onDragStart={(e) => e.preventDefault()}
                 />
                 
                 {/* Visual Glass Overlay on Hover */}
-                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300" />
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300 pointer-events-none" />
                 
                 {/* Zoom Icon */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0">
@@ -246,15 +263,15 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               transition={{ duration: 0.3 }}
               className="relative z-[1] max-w-[90vw] max-h-[85vh] flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
-              onContextMenu={handleContextMenu}
             >
               <img
                 src={allImages[lightboxIndex].url}
                 alt={`${project.title} - ${lightboxIndex + 1}`}
                 referrerPolicy="no-referrer"
-                draggable={isAdmin}
-                className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl"
-                style={!isAdmin ? { pointerEvents: "none" } : undefined}
+                draggable={false}
+                onDragStart={(e) => e.preventDefault()}
+                className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl select-none"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' } as any}
               />
             </motion.div>
           </motion.div>
