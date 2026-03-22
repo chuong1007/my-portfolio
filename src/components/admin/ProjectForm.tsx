@@ -723,8 +723,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </div>
           </div>
 
-          {/* Image Grid - Masonry style to matching Live view */}
-          <div className="columns-3 sm:columns-4 gap-2 max-h-[800px] overflow-y-auto space-y-2">
+          {/* Image Grid - 4-column vertical flow per request */}
+          <div className="columns-2 sm:columns-3 md:columns-4 gap-4 space-y-4">
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
               const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : getPreviewUrl(item.data as File);

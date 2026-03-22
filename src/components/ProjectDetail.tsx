@@ -159,13 +159,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-2xl md:text-3xl font-bold mb-10 text-zinc-200"
+          className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-zinc-50"
         >
           Hình ảnh dự án
         </motion.h2>
 
-        {/* Masonry — Preserving original aspect ratios (Pinterest style) */}
-        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
+        {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
+        <div className="columns-2 sm:columns-3 md:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
           {allImages.map((image, index) => (
             <motion.div
               key={image.id}

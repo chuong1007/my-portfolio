@@ -166,8 +166,9 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
 
   const displayedProjects = useMemo(() => {
     if (!Array.isArray(filteredProjects)) return [];
-    return filteredProjects.slice(0, itemsToShow);
-  }, [filteredProjects, itemsToShow]);
+    // Show all projects per request (100% like admin, no limit/scroll)
+    return filteredProjects;
+  }, [filteredProjects]);
 
   const hasMore = useMemo(() => {
     return itemsToShow < filteredProjects.length;
