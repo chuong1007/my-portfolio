@@ -176,12 +176,35 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
         
         if (error) throw error;
 
-        // Delete removed images from DB
+        // Delete removed images from DB & Storage
         const existingIds = existingImages.map((img) => img.id);
-        const originalIds = project?.images?.map((img) => img.id) || [];
-        const deletedIds = originalIds.filter((id) => !existingIds.includes(id));
+        const originalImages = project?.images || [];
+        const deletedImages = originalImages.filter((img) => !existingIds.includes(img.id));
 
-        if (deletedIds.length > 0) {
+        if (deletedImages.length > 0) {
+          // Remove from Supabase Storage first
+          const storagePaths = deletedImages
+            .map((img) => {
+              try {
+                // Extract relative path from full public URL
+                // Example URL: https://.../storage/v1/object/public/project-images/gallery/123/...
+                const urlParts = img.image_url.split('/public/project-images/');
+                return urlParts.length > 1 ? decodeURIComponent(urlParts[1]) : null;
+              } catch {
+                return null;
+              }
+            })
+            .filter((path): path is string => path !== null);
+
+          if (storagePaths.length > 0) {
+            const { error: storageError } = await supabase.storage
+              .from("project-images")
+              .remove(storagePaths);
+            if (storageError) console.error("Lỗi khi xóa ảnh trên Supabase Storage:", storageError);
+          }
+
+          // Remove database records
+          const deletedIds = deletedImages.map((img) => img.id);
           const { error: delError } = await supabase.from("project_images").delete().in("id", deletedIds);
           if (delError) throw delError;
         }
