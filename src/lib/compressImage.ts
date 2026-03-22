@@ -38,9 +38,14 @@ export async function compressImage(
 
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-  // Only skip if file is already very small (under 200KB)
-  if (file.size <= 200 * 1024) {
-    console.log(`[compress] ${file.name}: ${(file.size / 1024).toFixed(0)}KB — đã nhỏ, bỏ qua`);
+  // Hard limit for Supabase Storage free tier is 5MB. 
+  // We aim for 4MB to be safe and leave room for metadata.
+  const SUPABASE_FREE_LIMIT_BYTES = 4.5 * 1024 * 1024; 
+  const targetBytes = Math.min(maxSizeBytes, SUPABASE_FREE_LIMIT_BYTES);
+
+  // Skip if file is already small AND under the Supabase limit
+  if (file.size <= 200 * 1024 && file.size < SUPABASE_FREE_LIMIT_BYTES) {
+    console.log(`[compress] ${file.name}: ${(file.size / 1024).toFixed(0)}KB — small enough, skipping`);
     return file;
   }
 
@@ -77,59 +82,81 @@ export async function compressImage(
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Determine output format: WebP preferred, JPEG fallback
+      const cleanup = () => {
+        canvas.width = 0;
+        canvas.height = 0;
+        URL.revokeObjectURL(url);
+      };
+
+      // Determiner function to try different quality settings and dimensions to hit size target
+      const tryCompress = (currentQuality: number, currentScale: number) => {
+        const scaledWidth = Math.round(width * currentScale);
+        const scaledHeight = Math.round(height * currentScale);
+        
+        canvas.width = scaledWidth;
+        canvas.height = scaledHeight;
+        
+        const currentCtx = canvas.getContext("2d");
+        if (!currentCtx) {
+          cleanup();
+          resolve(file);
+          return;
+        }
+
+        currentCtx.imageSmoothingEnabled = true;
+        currentCtx.imageSmoothingQuality = "high";
+        currentCtx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            cleanup();
+            resolve(file);
+            return;
+          }
+
+          // SUCCESS: Under all limits
+          if (blob.size <= targetBytes) {
+            const baseName = file.name.replace(/\.[^.]+$/, "");
+            const newFile = new File([blob], `${baseName}.${ext}`, {
+              type: outputType,
+              lastModified: Date.now(),
+            });
+
+            console.log(`[compress] ${file.name}: ${(originalSize / 1024).toFixed(0)}KB → ${(newFile.size / 1024).toFixed(0)}KB (Quality: ${currentQuality.toFixed(2)}, Scale: ${currentScale.toFixed(2)}, ${ext})`);
+            cleanup();
+            resolve(newFile);
+          } 
+          // FAIL: Still too large, try reducing quality
+          else if (currentQuality > 0.4) {
+            tryCompress(currentQuality - 0.15, currentScale);
+          } 
+          // FAIL: Quality low, try reducing resolution
+          else if (currentScale > 0.4) {
+            tryCompress(0.7, currentScale - 0.2); // Reset quality, drop resolution
+          } 
+          // FINAL FAIL: Give up and return original if it's less than free limit, 
+          // otherwise return a tiny blank/fallback to avoid total error?
+          // For now, return original and let storage handle the 413 error.
+          else {
+            console.warn(`[compress] Failed to hit target size for ${file.name}, using original`);
+            cleanup();
+            resolve(file);
+          }
+        }, outputType, currentQuality);
+      };
+
+      // Determine output format
       const useWebP = supportsWebP();
       const outputType = useWebP ? "image/webp" : "image/jpeg";
       const ext = useWebP ? "webp" : "jpg";
 
-      const processBlob = (blob: Blob | null) => {
-        if (!blob) {
-          console.warn("[compress] Blob creation failed, using original");
-          resolve(file);
-          return;
-        }
-
-        const baseName = file.name.replace(/\.[^.]+$/, "");
-        const newFile = new File([blob], `${baseName}.${ext}`, {
-          type: outputType,
-          lastModified: Date.now(),
-        });
-
-        const savedPercent = Math.round((1 - newFile.size / originalSize) * 100);
-        console.log(
-          `[compress] ${file.name}: ${(originalSize / 1024).toFixed(0)}KB → ${(newFile.size / 1024).toFixed(0)}KB (giảm ${savedPercent}%, ${width}x${height}, ${ext})`
-        );
-
-        // If somehow the compressed version is larger, use original
-        if (newFile.size >= originalSize) {
-          console.log("[compress] Compressed larger than original, using original");
-          resolve(file);
-          return;
-        }
-
-        resolve(newFile);
-      };
-
-      // First attempt with target quality
-      canvas.toBlob(
-        (blob) => {
-          if (blob && blob.size > maxSizeBytes) {
-            // If still too large, try lower quality
-            const lowerQuality = Math.max(0.5, quality - 0.2);
-            console.log(`[compress] Still ${(blob.size / 1024).toFixed(0)}KB, retrying at quality ${lowerQuality}`);
-            canvas.toBlob(processBlob, outputType, lowerQuality);
-          } else {
-            processBlob(blob);
-          }
-        },
-        outputType,
-        quality
-      );
+      // Start recursive compression attempt
+      tryCompress(quality, 1.0);
     };
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      console.warn("[compress] Failed to load image, using original");
+      console.warn("[compress] Image load error, using original");
       resolve(file);
     };
 

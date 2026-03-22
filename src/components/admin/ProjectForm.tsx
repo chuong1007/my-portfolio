@@ -304,26 +304,30 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               maxSizeMB: 1,
             });
             
-            // Safe filename with encodeURIComponent to prevent URL parsing errors
-            const safeName = encodeURIComponent(compressed.name.replace(/\s+/g, '-'));
+            // Strictly safe filename: alphanumeric, dots, and dashes only
+            const safeName = compressed.name
+              .replace(/[^a-zA-Z0-9.-]/g, '-')
+              .replace(/-+/g, '-');
+            
             const fileName = `gallery/${projectId}/${Date.now()}-${i}-${safeName}`;
             
             // Artificial delay to prevent Supabase 429 rate limit errors 
-            // especially on free tier when uploading 30+ items continuously
+            // especially on free tier. Large images take time to process.
             if (i > 0) {
-              if (i % 10 === 0) {
-                // Take a longer breath every 10 images
-                await new Promise(resolve => setTimeout(resolve, 2000));
+              if (i % 5 === 0) {
+                // Break more often (every 5) for a longer period
+                setSaveSuccess(`Đang nghỉ để hệ thống thở (${i}/${newImageFiles.length})...`);
+                await new Promise(resolve => setTimeout(resolve, 5000));
               } else {
-                // Short wait between normal images
-                await new Promise(resolve => setTimeout(resolve, 400));
+                // Regular delay between normal images
+                await new Promise(resolve => setTimeout(resolve, 1500));
               }
             }
 
             let uploadError = null;
             let uploadSuccess = false;
             let attempt = 0;
-            const maxAttempts = 3;
+            const maxAttempts = 5; // Increased to 5 for large batches
 
             while (attempt < maxAttempts && !uploadSuccess) {
               setSaveSuccess(`Đang tải ảnh ${i + 1}/${newImageFiles.length}... (Lần thử ${attempt + 1})`);
@@ -331,6 +335,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 .from("project-images")
                 .upload(fileName, compressed, {
                   cacheControl: '3600',
+                  upsert: true,
                   contentType: compressed.type,
                 });
 
@@ -339,7 +344,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 console.warn(`[Image ${i+1}] Supabase upload failed. Attempt ${attempt + 1}/${maxAttempts} for [${file.name}]:`, error);
                 attempt++;
                 // Exponential backoff
-                await new Promise(r => setTimeout(r, 1500 * attempt)); 
+                await new Promise(r => setTimeout(r, 2000 * attempt)); 
               } else {
                 uploadError = null;
                 uploadSuccess = true;
