@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
@@ -18,6 +18,7 @@ type ProjectFormProps = {
 
 export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const isEditing = !!project;
+  const isMockProject = (project as any)?.isMock === true;
 
   const [title, setTitle] = useState(project?.title || "");
   const [slug, setSlug] = useState(project?.slug || "");
@@ -32,6 +33,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handleCopyUrl = () => {
     if (!slug) return;
@@ -84,7 +86,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       const supabase = createClient();
       let projectId = project?.id;
 
-      if (isEditing && projectId) {
+      if (isEditing && projectId && !isMockProject) {
         // Update existing project
         const { error } = await supabase
           .from("projects")
@@ -166,7 +168,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
         }
       }
 
-      onClose();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+
+      if (!isEditing) {
+        onClose();
+      }
     } catch (err) {
       console.error("Critical error saving project:", err);
       alert(`Lỗi khi lưu dự án: ${err instanceof Error ? err.message : JSON.stringify(err, null, 2)}`);
@@ -176,18 +183,66 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   };
 
   return (
-    <div>
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-10">
-        <button
-          onClick={onClose}
-          className="flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="text-2xl font-bold">
-          {isEditing ? "Chỉnh sửa dự án" : "Thêm dự án mới"}
-        </h1>
+    <div className="relative">
+      {/* Sticky Quick Actions Bar */}
+      <div className="sticky top-0 z-[60] -mx-4 px-4 py-4 mb-8 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 flex items-center justify-between gap-4 rounded-b-2xl shadow-xl shadow-black/50">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors p-2 hover:bg-zinc-900 rounded-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-bold truncate max-w-[200px] md:max-w-md">
+              {isEditing ? `Sửa: ${title}` : "Thêm dự án mới"}
+            </h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Visibility Toggle */}
+          <button
+            onClick={() => setIsVisible(!isVisible)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${
+              isVisible 
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20" 
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800"
+            }`}
+          >
+            {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            <span className="hidden xs:inline">{isVisible ? "Công khai" : "Đang ẩn"}</span>
+          </button>
+
+          {/* Preview Button */}
+          {isEditing && (
+            <a
+              href={`/project/${slug || project?.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 rounded-xl transition-all text-xs font-bold uppercase tracking-wider"
+            >
+              <ExternalLink className="w-4 h-4" />
+              <span className="hidden xs:inline">Xem trước</span>
+            </a>
+          )}
+
+          {/* Quick Save */}
+          <button
+            onClick={handleSave}
+            disabled={saving || !title.trim()}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-950 font-bold rounded-xl hover:bg-zinc-200 transition-all text-xs uppercase tracking-wider disabled:opacity-50"
+          >
+            {saving ? (
+              <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+            ) : saveSuccess ? (
+              <Check className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <SaveIcon className="w-4 h-4" />
+            )}
+            <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Tạo dự án"}</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -256,32 +311,18 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             />
           </div>
 
-          {/* Visibility & Featured Toggle */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-              <input
-                type="checkbox"
-                id="project-visible-toggle"
-                checked={isVisible}
-                onChange={(e) => setIsVisible(e.target.checked)}
-                className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
-              />
-              <label htmlFor="project-visible-toggle" className="text-zinc-200 cursor-pointer select-none">
-                Hiển thị dự án (Bật mắt)
-              </label>
-            </div>
-            <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-              <input
-                type="checkbox"
-                id="project-featured-toggle"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
-              />
-              <label htmlFor="project-featured-toggle" className="text-zinc-200 cursor-pointer select-none">
-                Dự án Nổi bật (Hàng đầu)
-              </label>
-            </div>
+          {/* Featured Toggle */}
+          <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
+            <input
+              type="checkbox"
+              id="project-featured-toggle"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
+            />
+            <label htmlFor="project-featured-toggle" className="text-zinc-200 cursor-pointer select-none">
+              Dự án Nổi bật (Hàng đầu)
+            </label>
           </div>
 
           {/* Tags */}
@@ -412,14 +453,21 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           onClick={onClose}
           className="px-6 py-3 text-zinc-400 hover:text-zinc-200 transition-colors font-medium"
         >
-          Hủy bỏ
+          {isEditing ? "Đóng" : "Hủy bỏ"}
         </button>
         <button
           onClick={handleSave}
           disabled={saving || !title.trim()}
-          className="px-8 py-3 bg-zinc-50 text-zinc-950 font-semibold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-8 py-3 bg-zinc-50 text-zinc-950 font-semibold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center gap-2"
         >
-          {saving ? "Đang lưu..." : isEditing ? "Cập nhật" : "Tạo dự án"}
+          {saving ? (
+            <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+          ) : saveSuccess ? (
+            <Check className="w-4 h-4 text-emerald-600" />
+          ) : (
+            <SaveIcon className="w-4 h-4" />
+          )}
+          <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Tạo dự án"}</span>
         </button>
       </div>
     </div>
