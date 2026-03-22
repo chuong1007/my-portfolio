@@ -476,7 +476,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             ) : (
               <SaveIcon className="w-4 h-4" />
             )}
-            <span className="max-w-[120px] truncate">
+            <span className="whitespace-nowrap">
               {saving ? (saveSuccess || "Đang lưu...") : saveSuccess || (isEditing ? "Cập nhật" : "Tạo dự án")}
             </span>
           </button>
