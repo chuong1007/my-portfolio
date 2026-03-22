@@ -344,7 +344,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   return (
     <div className="relative">
       {/* Sticky Quick Actions Bar */}
-      <div className="sticky top-0 z-[60] -mx-4 px-4 py-4 mb-8 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800 flex items-center justify-between gap-4 rounded-b-2xl shadow-xl shadow-black/50">
+      <div className="sticky top-[48px] md:top-[57px] z-[40] -mx-4 px-4 py-4 mb-8 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800 flex items-center justify-between gap-4 rounded-b-2xl shadow-xl shadow-black/50">
         <div className="flex items-center gap-4">
           <button
             onClick={onClose}
