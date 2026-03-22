@@ -147,8 +147,8 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           Hình ảnh dự án
         </motion.h2>
 
-        {/* 4-column Grid matching admin layout */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {/* Masonry Grid — full aspect ratio preserved */}
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-4">
           {allImages.map((image, index) => (
             <motion.div
               key={image.id}
@@ -156,11 +156,11 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "50px" }}
               transition={{ duration: 0.4, delay: (index % 8) * 0.05 }}
-              className="group cursor-pointer"
+              className="break-inside-avoid mb-4 group cursor-pointer"
               onClick={() => openLightbox(index)}
             >
               <div
-                className="relative w-full aspect-square overflow-hidden rounded-xl bg-zinc-900"
+                className="relative w-full overflow-hidden rounded-xl bg-zinc-900"
                 onContextMenu={handleContextMenu}
               >
                 <img
@@ -169,7 +169,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
                   loading={index < 4 ? "eager" : "lazy"}
                   referrerPolicy="no-referrer"
                   draggable={isAdmin}
-                  className="w-full h-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
+                  className="w-full h-auto object-contain transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-110"
                   style={!isAdmin ? { pointerEvents: "none" } : undefined}
                 />
                 {/* Hover overlay */}
