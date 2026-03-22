@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "backup": "node backup_db.js",
+    "backup:inc": "node scripts/incremental_backup.js",
+    "backup:reconstruct": "node scripts/reconstruct_backup.js",
     "restore": "node restore_db.js"
   },
   "dependencies": {
