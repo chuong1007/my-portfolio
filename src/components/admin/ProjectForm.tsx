@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star, GripVertical, Tag as TagIcon } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
@@ -34,6 +34,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [newTagInput, setNewTagInput] = useState("");
 
   const handleCopyUrl = () => {
     if (!slug) return;
@@ -62,9 +63,35 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     );
   };
 
+  const handleAddCustomTag = (e: React.KeyboardEvent | React.MouseEvent) => {
+    const tagName = newTagInput.trim();
+    if (!tagName) return;
+    if (e.type === 'keydown' && (e as React.KeyboardEvent).key !== 'Enter') return;
+    if (e.type === 'keydown') (e as React.KeyboardEvent).preventDefault();
+    if (!tags.includes(tagName)) {
+      setTags([...tags, tagName]);
+    }
+    setNewTagInput("");
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(t => t !== tagToRemove));
+  };
+
   // Removed manual handleCoverUpload as it's handled by ImageUpload component
   
   const [galleryDragging, setGalleryDragging] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Unified image list for ordering: { type, id/index, url }
+  type GalleryItem = { type: 'existing'; data: DbProjectImage } | { type: 'new'; data: File; index: number };
+
+  const getGalleryItems = useCallback((): GalleryItem[] => {
+    const items: GalleryItem[] = existingImages.map(img => ({ type: 'existing' as const, data: img }));
+    newImageFiles.forEach((file, i) => items.push({ type: 'new' as const, data: file, index: i }));
+    return items;
+  }, [existingImages, newImageFiles]);
 
   const handleGalleryUpload = (files: FileList) => {
     const fileArray = Array.from(files);
@@ -75,8 +102,52 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
   };
 
-  const removeNewImage = (index: number) => {
-    setNewImageFiles((prev) => prev.filter((_, i) => i !== index));
+  const removeNewImage = (idx: number) => {
+    setNewImageFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleDragStart = (index: number) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIndex) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const items = getGalleryItems();
+    const [movedItem] = items.splice(dragIndex, 1);
+    items.splice(dropIndex, 0, movedItem);
+
+    // Rebuild existing and new arrays from reordered items
+    const newExisting: DbProjectImage[] = [];
+    const newFiles: File[] = [];
+    items.forEach((item, i) => {
+      if (item.type === 'existing') {
+        newExisting.push({ ...item.data, display_order: i });
+      } else {
+        newFiles.push(item.data);
+      }
+    });
+
+    setExistingImages(newExisting);
+    setNewImageFiles(newFiles);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
   };
 
   const handleSave = async () => {
@@ -112,6 +183,11 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
         if (deletedIds.length > 0) {
           const { error: delError } = await supabase.from("project_images").delete().in("id", deletedIds);
           if (delError) throw delError;
+        }
+
+        // Update display_order for reordered existing images
+        for (const img of existingImages) {
+          await supabase.from("project_images").update({ display_order: img.display_order }).eq("id", img.id);
         }
       } else {
         // Insert new project
@@ -336,28 +412,69 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
 
           {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Tags
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {AVAILABLE_TAGS.map((tag) => {
-                const isActive = tags.includes(tag);
-                return (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-zinc-200 flex items-center gap-2">
+              <TagIcon className="w-4 h-4 text-emerald-500" />
+              Quản lý Tags
+            </h3>
+
+            {/* Tag Input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newTagInput}
+                onChange={(e) => setNewTagInput(e.target.value)}
+                onKeyDown={handleAddCustomTag}
+                placeholder="Thêm tag mới..."
+                className="flex-1 bg-black/40 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomTag}
+                className="p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-xl hover:bg-emerald-500/20 transition-all"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Current Tags */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {tags.length === 0 ? (
+                <p className="text-[10px] text-zinc-600 italic">Chưa có tag nào...</p>
+              ) : (
+                tags.map((tag) => (
+                  <div
+                    key={tag}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-lg text-xs font-semibold group"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="text-emerald-500/40 hover:text-red-400 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Suggested Tags */}
+            <div className="pt-4 border-t border-zinc-800/50">
+              <p className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-3">Gợi ý</p>
+              <div className="flex flex-wrap gap-1.5">
+                {AVAILABLE_TAGS.filter(t => !tags.includes(t)).map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => toggleTag(tag)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      isActive
-                        ? "bg-zinc-50 text-zinc-950 border-zinc-50"
-                        : "bg-transparent text-zinc-400 border-zinc-700 hover:border-zinc-500"
-                    }`}
+                    className="px-2.5 py-1 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 border border-zinc-800 rounded-md text-[10px] transition-all"
                   >
-                    {tag}
+                    + {tag}
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -415,45 +532,63 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </div>
           </div>
 
-          {/* Image Grid */}
-          <div className="grid grid-cols-3 gap-2 max-h-[500px] overflow-y-auto">
-            {/* Existing Images */}
-            {existingImages.map((img) => (
-              <div key={img.id} className="relative aspect-square group">
-                <img
-                  src={img.image_url}
-                  alt=""
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover rounded-lg bg-zinc-900 min-h-[50px]"
-                />
-                <button
-                  onClick={() => removeExistingImage(img.id)}
-                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              </div>
-            ))}
+          {/* Image Grid - 4 columns with drag & drop */}
+          <div className="grid grid-cols-4 gap-2 max-h-[600px] overflow-y-auto">
+            {getGalleryItems().map((item, index) => {
+              const isExisting = item.type === 'existing';
+              const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : URL.createObjectURL(item.data as File);
+              const imgId = isExisting ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
+              const isDragging = dragIndex === index;
+              const isDragOver = dragOverIndex === index;
 
-            {/* New Image Previews */}
-            {newImageFiles.map((file, i) => (
-              <div key={i} className="relative aspect-square group">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt=""
-                  className="w-full h-full object-cover rounded-lg border border-zinc-700"
-                />
-                <button
-                  onClick={() => removeNewImage(i)}
-                  className="absolute top-1 right-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              return (
+                <div
+                  key={imgId}
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDrop={(e) => handleDrop(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={cn(
+                    "relative aspect-square group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200",
+                    isDragging && "opacity-30 scale-95",
+                    isDragOver && "ring-2 ring-emerald-500 ring-offset-2 ring-offset-zinc-950 scale-[1.02]"
+                  )}
                 >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-                <div className="absolute bottom-1 left-1 text-[10px] bg-emerald-500/80 text-white px-1.5 py-0.5 rounded">
-                  Mới
+                  <img
+                    src={imgUrl}
+                    alt=""
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none"
+                  />
+                  {/* Drag handle */}
+                  <div className="absolute top-1 left-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <GripVertical className="w-3 h-3 text-white" />
+                  </div>
+                  {/* Order number */}
+                  <div className="absolute bottom-1 right-1 text-[10px] bg-black/70 text-zinc-300 px-1.5 py-0.5 rounded font-mono">
+                    {index + 1}
+                  </div>
+                  {/* New badge */}
+                  {!isExisting && (
+                    <div className="absolute bottom-1 left-1 text-[10px] bg-emerald-500/80 text-white px-1.5 py-0.5 rounded">
+                      Mới
+                    </div>
+                  )}
+                  {/* Remove button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (isExisting) removeExistingImage((item.data as DbProjectImage).id);
+                      else removeNewImage((item as any).index);
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-600/80 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           </div>
         </div>
