@@ -37,23 +37,13 @@ export default async function ProjectPage({ params }: PageProps) {
       .order("display_order", { ascending: true })
       .limit(500); // Explicitly high limit to avoid default 30 cutoff in some environments
 
-    // Deduplicate images by URL (in case of duplicate DB records)
-    const uniqueImages: any[] = [];
-    const seenUrls = new Set<string>();
-    for (const img of (images || [])) {
-      if (!seenUrls.has(img.image_url)) {
-        seenUrls.add(img.image_url);
-        uniqueImages.push(img);
-      }
-    }
-
     projectData = {
       id: dbProject.id,
       title: dbProject.title,
       description: dbProject.description,
       tags: dbProject.tags,
       imageUrl: dbProject.cover_image,
-      galleryImages: uniqueImages.map((img: any) => ({
+      galleryImages: (images || []).map((img: any) => ({
         id: img.id,
         url: img.image_url,
       }))
