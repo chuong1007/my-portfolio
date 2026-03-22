@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star, GripVertical, Tag as TagIcon, Lock, Unlock } from "lucide-react";
+import { Download, Check, Pen, CalendarDays, ExternalLink, ImageIcon, Grid, Tag as TagIcon, LayoutTemplate, Save, Search, Lock, Unlock, GripVertical, AlertCircle, Trash2, X, Trash, PlaySquare, Settings, Eye, EyeOff, LayoutPanelLeft, Link, Loader2, UploadCloud, Copy, FileIcon, User, Video, FileText, CheckCircle2, ChevronDown, Sparkles, FolderOpen, PanelTop, PanelBottom, ChevronRight, ArrowLeft, Upload, Plus, ImageIcon as ImageIconIcon, Link2, Save as SaveIcon, Star } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
+import { MasonryContainer, MasonryItem } from "@/components/MasonryLayout";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
 import { compressImage } from "@/lib/compressImage";
@@ -826,7 +827,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           </div>
 
           {/* Image Grid - 4-column vertical flow per request */}
-          <div className="columns-2 sm:columns-3 md:columns-4 gap-4 space-y-4">
+          <MasonryContainer className="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4">
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
               const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : getPreviewUrl(item.data as File);
@@ -838,18 +839,18 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               const isWide = wideImages.has(imgUrl);
 
               return (
-                <div
+                <MasonryItem
                   key={imgId}
+                  isWide={isWide}
+                  gap={16}
                   draggable={!isLocked}
                   onClick={(e) => handleImageClick(e, index)}
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  style={isWide ? { columnSpan: "all" } as any : {}}
                   className={cn(
                     "relative group rounded-lg transition-all duration-200 ring-offset-zinc-950",
-                    isWide ? "w-full md:w-1/2 md:mx-auto mb-4" : "break-inside-avoid w-full mb-4",
                     isLocked ? "cursor-default" : "cursor-grab active:cursor-grabbing",
                     isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
                     isDragging && "opacity-50 scale-95",
@@ -869,6 +870,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                   />
                   {/* Lock button */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLockedImageIds(prev => 
@@ -892,7 +894,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
                   {/* Drag handle */}
                   {!isLocked && (
-                    <div className="absolute top-1 left-9 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <div className="absolute top-1 left-9 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
                       <GripVertical className="w-3.5 h-3.5 text-white" />
                     </div>
                   )}
@@ -903,30 +905,31 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                     </div>
                   )}
                   {/* Order number */}
-                  <div className="absolute bottom-1 right-1 text-[10px] bg-black/70 text-zinc-300 px-1.5 py-0.5 rounded font-mono">
+                  <div className="absolute bottom-1 right-1 text-[10px] bg-black/70 text-zinc-300 px-1.5 py-0.5 rounded font-mono pointer-events-none">
                     {index + 1}
                   </div>
                   {/* New badge */}
                   {!isExisting && (
-                    <div className="absolute bottom-1 left-1 text-[10px] bg-emerald-500/80 text-white px-1.5 py-0.5 rounded">
+                    <div className="absolute bottom-1 left-1 text-[10px] bg-emerald-500/80 text-white px-1.5 py-0.5 rounded pointer-events-none">
                       Mới
                     </div>
                   )}
                   {/* Remove button */}
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (isExisting) removeExistingImage((item.data as DbProjectImage).id);
                       else removeNewImage((item as any).index);
                     }}
-                    className="absolute top-1 right-1 w-6 h-6 bg-red-600/80 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 w-6 h-6 bg-red-600/80 hover:bg-red-500 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20"
                   >
                     <X className="w-3 h-3 text-white" />
                   </button>
-                </div>
+                </MasonryItem>
               );
             })}
-          </div>
+          </MasonryContainer>
           </div>
         </div>
       </div>
