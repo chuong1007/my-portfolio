@@ -285,14 +285,44 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             const safeName = encodeURIComponent(compressed.name.replace(/\s+/g, '-'));
             const fileName = `gallery/${projectId}/${Date.now()}-${i}-${safeName}`;
             
-            const { error } = await supabase.storage
-              .from("project-images")
-              .upload(fileName, compressed, {
-                cacheControl: '3600',
-                contentType: compressed.type,
-              });
+            // Artificial delay to prevent Supabase 429 rate limit errors 
+            // especially on free tier when uploading 30+ items continuously
+            if (i > 0) {
+              if (i % 10 === 0) {
+                // Take a longer breath every 10 images
+                await new Promise(resolve => setTimeout(resolve, 2000));
+              } else {
+                // Short wait between normal images
+                await new Promise(resolve => setTimeout(resolve, 400));
+              }
+            }
 
-            if (!error) {
+            let uploadError = null;
+            let uploadSuccess = false;
+            let attempt = 0;
+            const maxAttempts = 3;
+
+            while (attempt < maxAttempts && !uploadSuccess) {
+              const { error } = await supabase.storage
+                .from("project-images")
+                .upload(fileName, compressed, {
+                  cacheControl: '3600',
+                  contentType: compressed.type,
+                });
+
+              if (error) {
+                uploadError = error;
+                console.warn(`[Image ${i+1}] Supabase upload failed. Attempt ${attempt + 1}/${maxAttempts} for [${file.name}]:`, error);
+                attempt++;
+                // Exponential backoff
+                await new Promise(r => setTimeout(r, 1500 * attempt)); 
+              } else {
+                uploadError = null;
+                uploadSuccess = true;
+              }
+            }
+
+            if (uploadSuccess) {
               const { data } = supabase.storage
                 .from("project-images")
                 .getPublicUrl(fileName);
@@ -303,7 +333,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 display_order: startOrder + i,
               });
             } else {
-              console.error(`Supabase upload error on file [${file.name}]:`, error);
+              console.error(`[Image ${i+1}] Supabase upload FAILED completely after retries for [${file.name}]:`, uploadError);
             }
           } catch (err) {
             console.error(`Exception during processing of [${file.name}]:`, err);
