@@ -5,6 +5,8 @@ export const metadata = {
   description: "Các dự án thiết kế nổi bật",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function ProjectsPage() {
   return (
     <div className="pt-24 min-h-screen">

@@ -325,7 +325,31 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             </div>
           )}
 
-          {!loading && filteredBlogs.length > 0 && (
+          {loading && blogs.length === 0 ? (
+            <div 
+              className={cn(
+                "grid",
+                !isEditor && "gap-6 md:gap-8",
+                gridClass
+              )}
+              style={{
+                gap: isEditor ? (globalPreviewMode === 'mobile' ? '1.5rem' : '2rem') : undefined,
+                '--cols-mob': mobileCols,
+                '--cols-tab': tabletCols,
+                '--cols-desk': desktopCols
+              } as any}
+            >
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex flex-col gap-3 animate-pulse">
+                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-zinc-900 rounded-md w-2/3" />
+                    <div className="h-3 bg-zinc-900 rounded-md w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : !loading && filteredBlogs.length > 0 && (
             <div 
               className={cn(
                 "grid",

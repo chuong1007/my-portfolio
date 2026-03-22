@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { revalidateCache } from "@/app/actions";
 import { getAllProjects } from "@/lib/data";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import { ProjectForm } from "@/components/admin/ProjectForm";
@@ -153,6 +154,7 @@ export default function AdminPage() {
       .eq("id", id);
 
     if (!error) {
+      await revalidateCache('/');
       fetchData();
     }
   };
@@ -167,6 +169,7 @@ export default function AdminPage() {
     // Then delete the project
     await supabase.from("projects").delete().eq("id", id);
 
+    await revalidateCache('/');
     fetchData();
   };
 
@@ -247,6 +250,7 @@ export default function AdminPage() {
         .upsert({ id: section, data: payload, updated_at: new Date().toISOString() });
 
       if (error) throw error;
+      await revalidateCache('/');
       setSaveSuccess(section);
       setTimeout(() => setSaveSuccess(''), 2000);
     } catch (err) {

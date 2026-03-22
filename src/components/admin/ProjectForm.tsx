@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
 import { compressImage } from "@/lib/compressImage";
 import type { DbProject, DbProjectImage } from "@/lib/types";
+import { revalidateCache } from "@/app/actions";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
@@ -411,6 +412,10 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           }
         }
       }
+
+      // Force revalidate both home and projects pages
+      await revalidateCache('/');
+      await revalidateCache('/projects');
 
       setSaveSuccess("Đã cập nhật dự án thành công!");
       setTimeout(() => setSaveSuccess(""), 3000);

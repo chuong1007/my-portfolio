@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink, Save as SaveIcon, Copy, Check, Plus, Tag as TagIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase";
+import { revalidateCache } from "@/app/actions";
 import type { DbBlog } from "@/lib/types";
 import { generateSlug } from "@/lib/utils";
 import { ImageUpload } from "./ImageUpload";
@@ -129,6 +130,10 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
           .insert({ ...blogData, created_at: new Date().toISOString() });
         if (error) throw error;
       }
+
+      // Force revalidate both home and blog pages
+      await revalidateCache('/');
+      await revalidateCache('/blog');
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);

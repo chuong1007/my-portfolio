@@ -55,6 +55,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
   const [seeAllLink, setSeeAllLink] = useState(() => initialContent?.seeAllLink ?? "/projects");
   const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>(() => initialContent?.seeAllPosition ?? "bottom");
   const [dbProjects, setDbProjects] = useState<any[]>(() => initialProjects || []);
+  const [loading, setLoading] = useState(initialProjects ? false : true);
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
   const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
@@ -94,6 +95,8 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       }
     } catch (e) {
       console.error("Gallery section error:", e);
+    } finally {
+      setLoading(false);
     }
   }, [sectionId]);
 
@@ -369,56 +372,68 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
               '--cols-desk': desktopCols
             } as any}
           >
-            {displayedProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "50px" }}
-                transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
-                className="group flex flex-col gap-3"
-              >
-                <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3">
-                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
-                    <img
-                      src={project.imageUrl}
-                      alt={project.title}
-                      loading="lazy"
-                      referrerPolicy="no-referrer"
-                      className={cn(
-                        "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
-                        isAdmin && project.is_visible === false && "opacity-40 grayscale"
+            {loading && dbProjects.length === 0 ? (
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex flex-col gap-3 animate-pulse">
+                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50" />
+                  <div className="space-y-2">
+                    <div className="h-4 bg-zinc-900 rounded-md w-2/3" />
+                    <div className="h-3 bg-zinc-900 rounded-md w-full" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              displayedProjects.map((project, index) => (
+                <motion.div
+                  key={project.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "50px" }}
+                  transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
+                  className="group flex flex-col gap-3"
+                >
+                  <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3">
+                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                      <img
+                        src={project.imageUrl}
+                        alt={project.title}
+                        loading="lazy"
+                        referrerPolicy="no-referrer"
+                        className={cn(
+                          "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
+                          isAdmin && project.is_visible === false && "opacity-40 grayscale"
+                        )}
+                      />
+                      {project.is_featured && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 bg-orange-500 rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-xl">
+                          Nổi bật
+                        </div>
                       )}
-                    />
-                    {project.is_featured && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 bg-orange-500 rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-xl">
-                        Nổi bật
+                      {isAdmin && project.is_visible === false && (
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
+                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
+                          Đang ẩn
+                        </div>
+                      )}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
+                          {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
                       </div>
-                    )}
-                    {isAdmin && project.is_visible === false && (
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
-                        <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                        Đang ẩn
-                      </div>
-                    )}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
-                        {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
                     </div>
-                  </div>
-                  <div className="px-1 flex flex-col flex-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm text-zinc-500 mt-1">
-                      {project.tags.join(", ")}
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                    <div className="px-1 flex flex-col flex-1">
+                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
+                        {project.title}
+                      </h3>
+                      <p className="text-sm text-zinc-500 mt-1">
+                        {project.tags.join(", ")}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))
+            )}
           </div>
 
           {variant === 'subpage' && hasMore && (
