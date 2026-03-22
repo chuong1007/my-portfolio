@@ -29,72 +29,68 @@ function parseUserAgent(ua: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { page_path, page_title, referrer } = body;
+    const { visitor_id, page_path, page_title, referrer } = body;
 
     if (!page_path) {
       return NextResponse.json({ error: 'page_path is required' }, { status: 400 });
     }
 
+    const userAgent = request.headers.get('user-agent') || 'unknown';
+
+    // 1. Chống Bot/Crawler cơ bản o Server Side
+    const lowerUA = userAgent.toLowerCase();
+    const isBot = /bot|crawler|spider|lighthouse|hyperdx|vercel|headless/i.test(lowerUA);
+    if (isBot) {
+      return NextResponse.json({ ok: true, skipped: "bot_detected" });
+    }
+
     // Skip tracking for admin pages
     if (page_path.startsWith('/admin')) {
-      return NextResponse.json({ ok: true, skipped: true });
+      return NextResponse.json({ ok: true, skipped: "admin_page" });
     }
 
     const supabase = getSupabaseAdmin();
 
-    // Create anonymous visitor hash from IP + User-Agent (privacy-friendly)
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-      || request.headers.get('x-real-ip')
-      || 'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-
-    // Daily-rotating hash for privacy (similar to Vercel Analytics)
-    const today = new Date().toISOString().split('T')[0];
-    const rawHash = `${ip}::${userAgent}::${today}`;
-    const visitorHash = crypto.createHash('sha256').update(rawHash).digest('hex').substring(0, 16);
+    // 2. Persistence Tracking Logic: Use visitor_id from body
+    // If client didn't send ID (old client), fallback to IP-based hash
+    let effectiveId = visitor_id;
+    
+    if (!effectiveId) {
+      const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || request.headers.get('x-real-ip')
+        || 'unknown';
+      const today = new Date().toISOString().split('T')[0];
+      const rawHash = `${ip}::${userAgent}::${today}`;
+      effectiveId = crypto.createHash('sha256').update(rawHash).digest('hex').substring(0, 16);
+    }
 
     const { device, browser } = parseUserAgent(userAgent);
 
-    // Upsert visitor
-    const { data: existingVisitor } = await supabase
+    // Upsert visitor directly by its ID
+    const { data: visitorRecord, error: upsertError } = await supabase
       .from('visitors')
+      .upsert({
+        id: effectiveId,
+        visitor_hash: effectiveId, // Re-use ID as hash if needed for compatibility
+        device,
+        browser,
+        last_seen: new Date().toISOString()
+      }, { onConflict: 'id' })
       .select('id')
-      .eq('visitor_hash', visitorHash)
       .single();
 
-    let visitorId: string;
-
-    if (existingVisitor) {
-      visitorId = existingVisitor.id;
-      // Update last_seen
-      await supabase
-        .from('visitors')
-        .update({ last_seen: new Date().toISOString() })
-        .eq('id', visitorId);
-    } else {
-      // Insert new visitor
-      const { data: newVisitor, error: insertError } = await supabase
-        .from('visitors')
-        .insert({
-          visitor_hash: visitorHash,
-          device,
-          browser,
-        })
-        .select('id')
-        .single();
-
-      if (insertError || !newVisitor) {
-        console.error('Error inserting visitor:', insertError);
-        return NextResponse.json({ error: 'Failed to track visitor' }, { status: 500 });
-      }
-      visitorId = newVisitor.id;
+    if (upsertError || !visitorRecord) {
+      console.error('Error upserting visitor:', upsertError);
+      return NextResponse.json({ error: 'Failed to track visitor' }, { status: 500 });
     }
+
+    const finalVisitorId = visitorRecord.id;
 
     // Insert page view
     const { error: pvError } = await supabase
       .from('page_views')
       .insert({
-        visitor_id: visitorId,
+        visitor_id: finalVisitorId,
         page_path,
         page_title: page_title || '',
         referrer: referrer || '',
@@ -105,7 +101,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to track pageview' }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, visitorId: finalVisitorId });
   } catch (err) {
     console.error('Track API error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
