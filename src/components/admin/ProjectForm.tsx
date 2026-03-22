@@ -841,7 +841,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               return (
                 <MasonryItem
                   key={imgId}
-                  isWide={isWide}
+                  isWide={false}
                   gap={16}
                   draggable={!isLocked}
                   onClick={(e) => handleImageClick(e, index)}

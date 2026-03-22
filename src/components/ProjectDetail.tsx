@@ -19,8 +19,9 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
 
   const checkRatio = useCallback(() => {
     if (imgRef.current?.naturalWidth && imgRef.current?.naturalHeight) {
-      const ratio = imgRef.current.naturalWidth / imgRef.current.naturalHeight;
-      if (ratio > 1.4) setIsWide(true);
+      // Do không dùng hiển thị ảnh ngang dạng 2 cột nữa nên comment dòng này
+      // const ratio = imgRef.current.naturalWidth / imgRef.current.naturalHeight;
+      // if (ratio > 1.4) setIsWide(true);
     }
   }, []);
 
