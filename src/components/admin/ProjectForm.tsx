@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star, GripVertical, Tag as TagIcon } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star, GripVertical, Tag as TagIcon, Lock, Unlock } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
@@ -114,6 +114,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
+  const [lockedImageIds, setLockedImageIds] = useState<string[]>([]);
 
   // Unified image list for ordering: { type, id/index, url }
   type GalleryItem = { type: 'existing'; data: DbProjectImage } | { type: 'new'; data: File; index: number };
@@ -212,14 +213,16 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   };
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
+    const item = getGalleryItems()[index];
+    const id = item.type === 'existing' ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
+    if (lockedImageIds.includes(id)) {
+      e.preventDefault(); // Chặn hành vi drag ngay lập tức đối với item bị khoá
+      return;
+    }
+
     setDragIndex(index);
     if (!selectedIndices.includes(index)) {
       setSelectedIndices([index]);
-    }
-    
-    // Create a drag overlay that indicates multiple items if needed (optional)
-    if (selectedIndices.includes(index) && selectedIndices.length > 1) {
-      // It will just natively drag the single element but act as multi-drop
     }
   };
 
@@ -252,22 +255,66 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     if (!indicesToMove.includes(dragIndex)) indicesToMove.push(dragIndex);
     indicesToMove.sort((a,b) => a - b);
 
-    const itemsToMove = indicesToMove.map(i => items[i]);
-    const remainingItems = items.filter((_, i) => !indicesToMove.includes(i));
+    // Kiểm tra xem có đang cố kéo ảnh bị khoá không
+    const movingLocked = indicesToMove.some(idx => {
+      const item = items[idx];
+      const id = item.type === 'existing' ? (item.data as DbProjectImage).id : `new-${item.index}`;
+      return lockedImageIds.includes(id);
+    });
     
-    const numItemsBeforeDropIndex = indicesToMove.filter(i => i < dropIndex).length;
+    if (movingLocked) {
+      alert("Bạn không thể kéo một bức ảnh đang bị khoá vị trí!");
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Tách riêng các ảnh bị khoá và ảnh tự do (unlocked)
+    const fixedSlots = new Map<number, any>();
+    const unlockedItems: { item: any; originalIndex: number }[] = [];
+
+    items.forEach((item, index) => {
+      const id = item.type === 'existing' ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
+      if (lockedImageIds.includes(id)) {
+        fixedSlots.set(index, item);
+      } else {
+        unlockedItems.push({ item, originalIndex: index });
+      }
+    });
+
+    // Lấy các elements chuẩn bị được di chuyển
+    const itemsToMoveObjects = indicesToMove.map(i => items[i]);
+    const remainingUnlocked = unlockedItems.filter(u => !indicesToMove.includes(u.originalIndex));
+    
+    // Tính toán lại index trong mảng những element còn lại tự do
+    const numUnlockedBeforeDrop = unlockedItems.filter(u => u.originalIndex < dropIndex).length;
+    const numMovingBeforeDrop = indicesToMove.filter(i => i < dropIndex).length;
+    let targetIndexInRemaining = numUnlockedBeforeDrop - numMovingBeforeDrop;
+
     const isMovingDown = dragIndex < dropIndex;
-    let targetIndexInRemaining = dropIndex - numItemsBeforeDropIndex;
     if (isMovingDown) {
       targetIndexInRemaining++;
     }
 
-    remainingItems.splice(targetIndexInRemaining, 0, ...itemsToMove);
+    // Chèn vào vị trí đích của mảng tự do
+    remainingUnlocked.splice(targetIndexInRemaining, 0, ...itemsToMoveObjects.map(item => ({ item, originalIndex: -1 })));
+
+    // Xây dựng lại mảng final bằng cách đặt lại đúng vị trí của các slot đã bị ghim
+    const finalItems: any[] = [];
+    let unlockedPointer = 0;
+    
+    for (let i = 0; i < items.length; i++) {
+        if (fixedSlots.has(i)) {
+            finalItems.push(fixedSlots.get(i));
+        } else {
+            finalItems.push(remainingUnlocked[unlockedPointer++].item);
+        }
+    }
 
     // Rebuild existing and new arrays from reordered items
     const newExisting: DbProjectImage[] = [];
     const newFiles: File[] = [];
-    remainingItems.forEach((item, i) => {
+    finalItems.forEach((item, i) => {
       if (item.type === 'existing') {
         newExisting.push({ ...item.data, display_order: i });
       } else {
@@ -788,33 +835,64 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               const isDragging = dragIndex === index;
               const isDragOver = dragOverIndex === index;
               const isSelected = selectedIndices.includes(index);
+              const isLocked = lockedImageIds.includes(imgId);
 
               return (
                 <div
                   key={imgId}
-                  draggable
+                  draggable={!isLocked}
                   onClick={(e) => handleImageClick(e, index)}
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   className={cn(
-                    "relative break-inside-avoid group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200 ring-offset-zinc-950",
+                    "relative break-inside-avoid group rounded-lg transition-all duration-200 ring-offset-zinc-950",
+                    isLocked ? "cursor-default" : "cursor-grab active:cursor-grabbing",
                     isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
                     isDragging && "opacity-50 scale-95",
-                    isDragOver && !isSelected && "ring-2 ring-indigo-500 ring-offset-2 scale-[1.02]"
+                    isDragOver && !isSelected && "ring-2 ring-indigo-500 ring-offset-2 scale-[1.02]",
+                    isLocked && "ring-2 ring-amber-500/50" // Viền nhẹ để báo hiệu đang khoá
                   )}
                 >
                   <img
                     src={imgUrl}
                     alt=""
                     referrerPolicy="no-referrer"
-                    className="w-full h-auto object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none"
+                    className={cn(
+                      "w-full h-auto object-cover rounded-lg bg-zinc-900 min-h-[50px] pointer-events-none",
+                      isLocked && "opacity-90 grayscale-[0.2]"
+                    )}
                   />
+                  {/* Lock button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLockedImageIds(prev => 
+                        prev.includes(imgId) ? prev.filter(id => id !== imgId) : [...prev, imgId]
+                      );
+                      // Nếu đang bị chọn mà bấm khoá thì tự động bỏ chọn luôn
+                      if (!isLocked && isSelected) {
+                        setSelectedIndices(prev => prev.filter(i => i !== index));
+                      }
+                    }}
+                    className={cn(
+                      "absolute top-1 left-1 w-7 h-7 rounded-lg flex items-center justify-center transition-all z-20 backdrop-blur-sm shadow-md",
+                      isLocked 
+                        ? "bg-amber-500 text-white opacity-100 ring-1 ring-amber-400" 
+                        : "bg-black/60 text-zinc-400 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/80"
+                    )}
+                    title={isLocked ? "Mở khoá vị trí" : "Khoá cố định vị trí này"}
+                  >
+                    {isLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                  </button>
+
                   {/* Drag handle */}
-                  <div className="absolute top-1 left-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <GripVertical className="w-3 h-3 text-white" />
-                  </div>
+                  {!isLocked && (
+                    <div className="absolute top-1 left-9 w-7 h-7 bg-black/60 backdrop-blur-sm rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <GripVertical className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  )}
                   {/* Multi-selection indicator count */}
                   {isDragging && selectedIndices.length > 1 && isSelected && index === dragIndex && (
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white font-bold px-3 py-1 rounded-full shadow-lg pointer-events-none z-10 text-sm">
