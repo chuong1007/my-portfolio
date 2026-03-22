@@ -1,15 +1,29 @@
 /**
  * Client-side image compression using Canvas API
- * Resizes large images and converts to WebP for smaller file sizes
- * while maintaining visual quality.
+ * Resizes large images and converts to WebP (or JPEG fallback)
+ * for smaller file sizes while maintaining visual quality.
  */
 
 type CompressOptions = {
   maxWidth?: number;   // Max pixel width (default: 1920)
   maxHeight?: number;  // Max pixel height (default: 1920)
-  quality?: number;    // 0-1, WebP quality (default: 0.82)
-  maxSizeMB?: number;  // Max file size in MB (default: 1)
+  quality?: number;    // 0-1, output quality (default: 0.82)
+  maxSizeMB?: number;  // Target max file size in MB (default: 1)
 };
+
+/**
+ * Check if browser supports WebP encoding
+ */
+function supportsWebP(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    return canvas.toDataURL("image/webp").startsWith("data:image/webp");
+  } catch {
+    return false;
+  }
+}
 
 export async function compressImage(
   file: File,
@@ -24,12 +38,13 @@ export async function compressImage(
 
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-  // Skip if already small enough and is WebP
-  if (file.size <= maxSizeBytes && file.type === "image/webp") {
+  // Only skip if file is already very small (under 200KB)
+  if (file.size <= 200 * 1024) {
+    console.log(`[compress] ${file.name}: ${(file.size / 1024).toFixed(0)}KB — đã nhỏ, bỏ qua`);
     return file;
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
 
@@ -37,6 +52,7 @@ export async function compressImage(
       URL.revokeObjectURL(url);
 
       let { width, height } = img;
+      const originalSize = file.size;
 
       // Calculate new dimensions while maintaining aspect ratio
       if (width > maxWidth || height > maxHeight) {
@@ -51,7 +67,8 @@ export async function compressImage(
 
       const ctx = canvas.getContext("2d");
       if (!ctx) {
-        reject(new Error("Canvas context not available"));
+        console.warn("[compress] Canvas context not available, using original");
+        resolve(file);
         return;
       }
 
@@ -60,29 +77,50 @@ export async function compressImage(
       ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, width, height);
 
-      // Try WebP first, fallback to JPEG
-      const outputType = "image/webp";
-      
+      // Determine output format: WebP preferred, JPEG fallback
+      const useWebP = supportsWebP();
+      const outputType = useWebP ? "image/webp" : "image/jpeg";
+      const ext = useWebP ? "webp" : "jpg";
+
+      const processBlob = (blob: Blob | null) => {
+        if (!blob) {
+          console.warn("[compress] Blob creation failed, using original");
+          resolve(file);
+          return;
+        }
+
+        const baseName = file.name.replace(/\.[^.]+$/, "");
+        const newFile = new File([blob], `${baseName}.${ext}`, {
+          type: outputType,
+          lastModified: Date.now(),
+        });
+
+        const savedPercent = Math.round((1 - newFile.size / originalSize) * 100);
+        console.log(
+          `[compress] ${file.name}: ${(originalSize / 1024).toFixed(0)}KB → ${(newFile.size / 1024).toFixed(0)}KB (giảm ${savedPercent}%, ${width}x${height}, ${ext})`
+        );
+
+        // If somehow the compressed version is larger, use original
+        if (newFile.size >= originalSize) {
+          console.log("[compress] Compressed larger than original, using original");
+          resolve(file);
+          return;
+        }
+
+        resolve(newFile);
+      };
+
+      // First attempt with target quality
       canvas.toBlob(
         (blob) => {
-          if (!blob) {
-            reject(new Error("Compression failed"));
-            return;
+          if (blob && blob.size > maxSizeBytes) {
+            // If still too large, try lower quality
+            const lowerQuality = Math.max(0.5, quality - 0.2);
+            console.log(`[compress] Still ${(blob.size / 1024).toFixed(0)}KB, retrying at quality ${lowerQuality}`);
+            canvas.toBlob(processBlob, outputType, lowerQuality);
+          } else {
+            processBlob(blob);
           }
-
-          // Generate new filename with .webp extension
-          const baseName = file.name.replace(/\.[^.]+$/, "");
-          const newFile = new File([blob], `${baseName}.webp`, {
-            type: outputType,
-            lastModified: Date.now(),
-          });
-
-          const savedPercent = Math.round((1 - newFile.size / file.size) * 100);
-          console.log(
-            `[compress] ${file.name}: ${(file.size / 1024).toFixed(0)}KB → ${(newFile.size / 1024).toFixed(0)}KB (giảm ${savedPercent}%, ${width}x${height})`
-          );
-
-          resolve(newFile);
         },
         outputType,
         quality
@@ -91,7 +129,6 @@ export async function compressImage(
 
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      // If compression fails, return original file
       console.warn("[compress] Failed to load image, using original");
       resolve(file);
     };

@@ -58,7 +58,8 @@ export function ImageUpload({
         .from(bucket)
         .upload(fileName, compressed, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: compressed.type,
         });
 
       if (uploadError) {

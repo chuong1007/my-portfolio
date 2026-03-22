@@ -227,7 +227,10 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             const fileName = `gallery/${projectId}/${Date.now()}-${i}-${compressed.name}`;
             const { error } = await supabase.storage
               .from("project-images")
-              .upload(fileName, compressed);
+              .upload(fileName, compressed, {
+                cacheControl: '3600',
+                contentType: compressed.type,
+              });
 
             if (!error) {
               const { data } = supabase.storage
