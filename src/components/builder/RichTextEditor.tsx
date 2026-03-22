@@ -361,11 +361,11 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
   return (
     <div className={cn(
       "relative transition-all duration-300",
-      !isPreviewingLocal ? "overflow-hidden border border-zinc-800/50 rounded-2xl bg-zinc-900/30 backdrop-blur-xl shadow-2xl ring-1 ring-white/5" : "",
+      !isPreviewingLocal ? "border border-zinc-800/50 rounded-2xl bg-zinc-900/30 backdrop-blur-xl shadow-2xl ring-1 ring-white/5" : "",
       className
     )}>
       {editable && (
-        <div className="flex items-center gap-y-2 gap-x-1 p-2 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md rounded-t-2xl z-20 sticky top-0 overflow-x-auto custom-scrollbar flex-nowrap hide-scrollbar">
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-1 p-2 border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md rounded-t-2xl z-[60] sticky top-0">
           
           {/* History */}
           <div className="flex items-center gap-0.5 bg-zinc-900/50 p-1 rounded-lg">
