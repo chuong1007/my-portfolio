@@ -113,6 +113,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [galleryDragging, setGalleryDragging] = useState(false);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 
   // Unified image list for ordering: { type, id/index, url }
   type GalleryItem = { type: 'existing'; data: DbProjectImage } | { type: 'new'; data: File; index: number };
@@ -187,32 +188,86 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     setNewImageFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleDragStart = (index: number) => {
+  const handleImageClick = (e: React.MouseEvent, index: number) => {
+    // Avoid interfering with basic click elements if this was a button inside
+    if (e.metaKey || e.ctrlKey) {
+      e.preventDefault();
+      setSelectedIndices(prev => 
+        prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+      );
+    } else if (e.shiftKey && selectedIndices.length > 0) {
+      e.preventDefault();
+      const lastSelected = selectedIndices[selectedIndices.length - 1];
+      const start = Math.min(lastSelected, index);
+      const end = Math.max(lastSelected, index);
+      const range = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      setSelectedIndices(Array.from(new Set([...selectedIndices, ...range])));
+    } else {
+      if (selectedIndices.length === 1 && selectedIndices[0] === index) {
+        setSelectedIndices([]);
+      } else {
+        setSelectedIndices([index]);
+      }
+    }
+  };
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
     setDragIndex(index);
+    if (!selectedIndices.includes(index)) {
+      setSelectedIndices([index]);
+    }
+    
+    // Create a drag overlay that indicates multiple items if needed (optional)
+    if (selectedIndices.includes(index) && selectedIndices.length > 1) {
+      // It will just natively drag the single element but act as multi-drop
+    }
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
-    if (dragIndex === null || dragIndex === index) return;
+    if (dragIndex === null) return;
+    if (selectedIndices.includes(index)) {
+      setDragOverIndex(null);
+      return; 
+    }
     setDragOverIndex(index);
   };
 
   const handleDrop = (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault();
-    if (dragIndex === null || dragIndex === dropIndex) {
+    if (dragIndex === null) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    if (selectedIndices.includes(dropIndex)) {
       setDragIndex(null);
       setDragOverIndex(null);
       return;
     }
 
     const items = getGalleryItems();
-    const [movedItem] = items.splice(dragIndex, 1);
-    items.splice(dropIndex, 0, movedItem);
+    const indicesToMove = selectedIndices.length > 0 ? [...selectedIndices] : [dragIndex];
+    if (!indicesToMove.includes(dragIndex)) indicesToMove.push(dragIndex);
+    indicesToMove.sort((a,b) => a - b);
+
+    const itemsToMove = indicesToMove.map(i => items[i]);
+    const remainingItems = items.filter((_, i) => !indicesToMove.includes(i));
+    
+    const numItemsBeforeDropIndex = indicesToMove.filter(i => i < dropIndex).length;
+    const isMovingDown = dragIndex < dropIndex;
+    let targetIndexInRemaining = dropIndex - numItemsBeforeDropIndex;
+    if (isMovingDown) {
+      targetIndexInRemaining++;
+    }
+
+    remainingItems.splice(targetIndexInRemaining, 0, ...itemsToMove);
 
     // Rebuild existing and new arrays from reordered items
     const newExisting: DbProjectImage[] = [];
     const newFiles: File[] = [];
-    items.forEach((item, i) => {
+    remainingItems.forEach((item, i) => {
       if (item.type === 'existing') {
         newExisting.push({ ...item.data, display_order: i });
       } else {
@@ -224,6 +279,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
     setNewImageFiles(newFiles);
     setDragIndex(null);
     setDragOverIndex(null);
+    setSelectedIndices([]);
   };
 
   const handleDragEnd = () => {
@@ -728,22 +784,25 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
               const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : getPreviewUrl(item.data as File);
-              const imgId = isExisting ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
+              const imgId = isExisting ? (item.data as DbProjectImage).id : `new-${item.index}`;
               const isDragging = dragIndex === index;
               const isDragOver = dragOverIndex === index;
+              const isSelected = selectedIndices.includes(index);
 
               return (
                 <div
                   key={imgId}
                   draggable
-                  onDragStart={() => handleDragStart(index)}
+                  onClick={(e) => handleImageClick(e, index)}
+                  onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   className={cn(
-                    "relative break-inside-avoid group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200",
-                    isDragging && "opacity-30 scale-95",
-                    isDragOver && "ring-2 ring-emerald-500 ring-offset-2 ring-offset-zinc-950 scale-[1.02]"
+                    "relative break-inside-avoid group cursor-grab active:cursor-grabbing rounded-lg transition-all duration-200 ring-offset-zinc-950",
+                    isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
+                    isDragging && "opacity-50 scale-95",
+                    isDragOver && !isSelected && "ring-2 ring-indigo-500 ring-offset-2 scale-[1.02]"
                   )}
                 >
                   <img
@@ -756,6 +815,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                   <div className="absolute top-1 left-1 w-6 h-6 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <GripVertical className="w-3 h-3 text-white" />
                   </div>
+                  {/* Multi-selection indicator count */}
+                  {isDragging && selectedIndices.length > 1 && isSelected && index === dragIndex && (
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white font-bold px-3 py-1 rounded-full shadow-lg pointer-events-none z-10 text-sm">
+                      {selectedIndices.length} items
+                    </div>
+                  )}
                   {/* Order number */}
                   <div className="absolute bottom-1 right-1 text-[10px] bg-black/70 text-zinc-300 px-1.5 py-0.5 rounded font-mono">
                     {index + 1}
