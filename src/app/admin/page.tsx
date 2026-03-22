@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { getAllProjects } from "@/lib/data";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import { ProjectForm } from "@/components/admin/ProjectForm";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 
@@ -16,6 +16,7 @@ function getMockProjectsAsDb(): (DbProject & { images: DbProjectImage[]; isMock?
   return getAllProjects().map((p) => ({
     id: p.id,
     title: p.title,
+    slug: generateSlug(p.title),
     description: p.description,
     tags: p.tags,
     cover_image: p.imageUrl,
