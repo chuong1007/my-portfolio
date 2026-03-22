@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy, Eye, EyeOff, Save as SaveIcon, ExternalLink, Star } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
@@ -214,6 +214,20 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             <span className="hidden xs:inline">{isVisible ? "Công khai" : "Đang ẩn"}</span>
           </button>
 
+          {/* Featured Toggle */}
+          <button
+            onClick={() => setIsFeatured(!isFeatured)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${
+              isFeatured 
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" 
+                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800"
+            }`}
+            title="Đánh dấu Nổi bật"
+          >
+            <Star className={cn("w-4 h-4", isFeatured && "fill-current")} />
+            <span className="hidden xs:inline">Nổi bật</span>
+          </button>
+
           {/* Preview Button */}
           {isEditing && (
             <a
@@ -311,19 +325,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             />
           </div>
 
-          {/* Featured Toggle */}
-          <div className="flex items-center gap-3 bg-zinc-900 p-4 rounded-xl border border-zinc-800">
-            <input
-              type="checkbox"
-              id="project-featured-toggle"
-              checked={isFeatured}
-              onChange={(e) => setIsFeatured(e.target.checked)}
-              className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-zinc-50 focus:ring-0 focus:ring-offset-0"
-            />
-            <label htmlFor="project-featured-toggle" className="text-zinc-200 cursor-pointer select-none">
-              Dự án Nổi bật (Hàng đầu)
-            </label>
-          </div>
+
 
           {/* Tags */}
           <div>
@@ -350,7 +352,10 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               })}
             </div>
           </div>
+        </div>
 
+        {/* Right Column - Media */}
+        <div className="space-y-8">
           {/* Cover Image */}
           <ImageUpload
             value={coverImage}
@@ -360,13 +365,11 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             onUploadStart={() => setUploading(true)}
             onUploadEnd={() => setUploading(false)}
           />
-        </div>
 
-        {/* Right Column - Gallery Images */}
-        <div>
-          <label className="block text-sm font-medium text-zinc-400 mb-2">
-            Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
-          </label>
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-2">
+              Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
+            </label>
 
           {/* Upload Drop Zone */}
           <div
@@ -443,6 +446,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 </div>
               </div>
             ))}
+          </div>
           </div>
         </div>
       </div>
