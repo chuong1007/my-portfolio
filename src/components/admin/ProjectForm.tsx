@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2, Check, Copy } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
@@ -20,6 +20,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const isEditing = !!project;
 
   const [title, setTitle] = useState(project?.title || "");
+  const [slug, setSlug] = useState(project?.slug || "");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(!!project?.slug);
   const [description, setDescription] = useState(project?.description || "");
   const [tags, setTags] = useState<string[]>(project?.tags || []);
   const [coverImage, setCoverImage] = useState<string>(project?.cover_image || "");
@@ -29,6 +31,28 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [isFeatured, setIsFeatured] = useState<boolean>(project?.is_featured || false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyUrl = () => {
+    if (!slug) return;
+    const fullUrl = `https://chuong-graphic.vercel.app/project/${slug}`;
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!slugManuallyEdited) {
+      setSlug(generateSlug(newTitle));
+    }
+  };
+
+  const handleSlugChange = (newSlug: string) => {
+    const sanitized = newSlug.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    setSlug(sanitized);
+    setSlugManuallyEdited(true);
+  };
 
   const toggleTag = (tag: string) => {
     setTags((prev) =>
@@ -66,6 +90,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           .from("projects")
           .update({
             title,
+            slug: slug || generateSlug(title),
             description,
             tags,
             cover_image: coverImage,
@@ -92,6 +117,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           .from("projects")
           .insert({
             title,
+            slug: slug || generateSlug(title),
             description,
             tags,
             cover_image: coverImage,
@@ -175,10 +201,45 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => handleTitleChange(e.target.value)}
               placeholder="Nhập tên dự án..."
               className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-50 placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-600 transition-all"
             />
+          </div>
+
+          {/* Slug */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-400 mb-2">
+              <Link2 className="w-4 h-4 inline mr-1.5" />
+              Đường dẫn (Slug)
+            </label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-zinc-600 transition-all overflow-hidden line-clamp-1">
+                <span className="text-sm text-zinc-500 shrink-0 whitespace-nowrap hidden sm:inline-block">https://chuong-graphic.vercel.app/project/</span>
+                <span className="text-sm text-zinc-500 shrink-0 whitespace-nowrap sm:hidden">.../project/</span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => handleSlugChange(e.target.value)}
+                  placeholder="tu-dong-tao-tu-tieu-de"
+                  className="flex-1 bg-transparent text-zinc-50 font-mono text-sm placeholder:text-zinc-600 focus:outline-none min-w-0 ml-1"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                disabled={!slug}
+                className="shrink-0 p-3 bg-zinc-900 border border-zinc-800 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Copy link"
+              >
+                {copied ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5" />}
+              </button>
+            </div>
+            {slug && (
+              <p className="text-xs text-zinc-500 mt-2 flex items-center gap-1.5">
+                URL: <a href={`https://chuong-graphic.vercel.app/project/${slug}`} target="_blank" rel="noopener noreferrer" className="text-zinc-400 font-mono hover:text-white transition-colors break-all">https://chuong-graphic.vercel.app/project/{slug}</a>
+              </p>
+            )}
           </div>
 
           {/* Description */}

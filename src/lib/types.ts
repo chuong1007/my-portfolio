@@ -1,6 +1,7 @@
 export type DbProject = {
   id: string;
   title: string;
+  slug: string;
   description: string;
   tags: string[];
   cover_image: string;
