@@ -96,7 +96,11 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
   const handleGalleryUpload = (files: FileList) => {
     const fileArray = Array.from(files);
-    setNewImageFiles((prev) => [...prev, ...fileArray]);
+    setNewImageFiles((prev) => {
+      const existingNames = new Set(prev.map(f => f.name));
+      const newUnique = fileArray.filter(f => !existingNames.has(f.name));
+      return [...prev, ...newUnique];
+    });
   };
 
   const removeExistingImage = (imageId: string) => {
@@ -290,8 +294,18 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
         const validInserts = imageInserts.filter((item): item is any => item !== null);
         if (validInserts.length > 0) {
-          const { error: insError } = await supabase.from("project_images").insert(validInserts);
+          const { data: insertedData, error: insError } = await supabase
+            .from("project_images")
+            .insert(validInserts)
+            .select();
+            
           if (insError) throw insError;
+          
+          if (isEditing && insertedData) {
+            // Update UI state so multiple clicks on Save won't re-upload
+            setNewImageFiles([]);
+            setExistingImages(prev => [...prev, ...insertedData]);
+          }
         }
       }
 
