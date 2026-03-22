@@ -5,6 +5,7 @@ import { ArrowLeft, Upload, X, Plus, Loader2, ImageIcon as ImageIconIcon, Link2,
 import { ImageUpload } from "./ImageUpload";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
+import { compressImage } from "@/lib/compressImage";
 import type { DbProject, DbProjectImage } from "@/lib/types";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
@@ -216,10 +217,17 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
         const imageInserts = await Promise.all(
           newImageFiles.map(async (file, i) => {
-            const fileName = `gallery/${projectId}/${Date.now()}-${i}-${file.name}`;
+            // Compress before upload
+            const compressed = await compressImage(file, {
+              maxWidth: 1920,
+              maxHeight: 1920,
+              quality: 0.82,
+              maxSizeMB: 1,
+            });
+            const fileName = `gallery/${projectId}/${Date.now()}-${i}-${compressed.name}`;
             const { error } = await supabase.storage
               .from("project-images")
-              .upload(fileName, file);
+              .upload(fileName, compressed);
 
             if (!error) {
               const { data } = supabase.storage
@@ -492,9 +500,25 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           />
 
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-2">
-              Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-zinc-400">
+                Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
+              </label>
+              {(existingImages.length + newImageFiles.length) > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm("Bạn có chắc muốn xóa TẤT CẢ hình ảnh?")) {
+                      setExistingImages([]);
+                      setNewImageFiles([]);
+                    }
+                  }}
+                  className="text-[11px] text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/40 px-2.5 py-1 rounded-lg transition-all"
+                >
+                  Xóa tất cả
+                </button>
+              )}
+            </div>
 
           {/* Upload Drop Zone */}
           <div

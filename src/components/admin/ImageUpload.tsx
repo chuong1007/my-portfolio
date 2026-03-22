@@ -3,6 +3,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { compressImage } from "@/lib/compressImage";
 
 type ImageUploadProps = {
   value?: string;
@@ -38,16 +39,24 @@ export function ImageUpload({
     onUploadStart?.();
     
     try {
+      // Compress image before upload
+      const compressed = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.82,
+        maxSizeMB: 1,
+      });
+
       // Lazy load supabase to avoid issues
       const { createClient } = await import("@/lib/supabase");
       const supabase = createClient();
       
-      const fileExt = file.name.split('.').pop();
+      const fileExt = compressed.name.split('.').pop();
       const fileName = `${path}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file, {
+        .upload(fileName, compressed, {
           cacheControl: '3600',
           upsert: false
         });
