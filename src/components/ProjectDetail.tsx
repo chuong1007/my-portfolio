@@ -155,55 +155,34 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         transition={{ duration: 0.6 }}
         className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-12"
       >
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-12 lg:gap-24 items-start">
-          {/* Main Content */}
-          <div className="lg:col-span-5 space-y-8 order-2 lg:order-1">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[0.9]">
-              {typeof project.title === 'string' ? project.title : String(project.title)}
-            </h1>
+        {/* Project Info */}
+        <div className="flex flex-col gap-6">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
+            {typeof project.title === 'string' ? project.title : String(project.title)}
+          </h1>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2.5">
-              {project.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-4 py-1.5 rounded-full text-xs font-bold border border-white/10 bg-white/5 text-zinc-300 uppercase tracking-[0.1em]"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Description */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.8 }}
-              className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-2xl prose prose-invert [&_p]:mb-6 last:[&_p]:mb-0"
-              dangerouslySetInnerHTML={{ 
-                __html: typeof project.description === 'string' ? project.description : String(project.description) 
-              }}
-            />
-          </div>
-
-          {/* Project Cover / Large Preview Image */}
-          <div className="lg:col-span-7 w-full order-1 lg:order-2">
-            {project.imageUrl && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="w-full rounded-[2rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 bg-zinc-900 group"
+          {/* Tags */}
+          <div className="flex flex-wrap gap-3">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300"
               >
-                <img
-                  src={project.imageUrl}
-                  alt="Ảnh bìa dự án"
-                  className="w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
-                  referrerPolicy="no-referrer"
-                />
-              </motion.div>
-            )}
+                {tag}
+              </span>
+            ))}
           </div>
+
+          {/* Description */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-700 [&_hr]:my-8"
+            dangerouslySetInnerHTML={{ 
+              __html: typeof project.description === 'string' ? project.description : String(project.description) 
+            }}
+          />
         </div>
       </motion.section>
 
