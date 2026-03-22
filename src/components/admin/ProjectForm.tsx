@@ -37,6 +37,34 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [saveSuccess, setSaveSuccess] = useState<string>("");
   const [newTagInput, setNewTagInput] = useState("");
 
+  // RAM Optimization: Manage preview URLs to prevent memory leaks
+  const previewUrlsRef = useRef<Map<File, string>>(new Map());
+
+  const getPreviewUrl = useCallback((file: File) => {
+    if (!previewUrlsRef.current.has(file)) {
+      previewUrlsRef.current.set(file, URL.createObjectURL(file));
+    }
+    return previewUrlsRef.current.get(file)!;
+  }, []);
+
+  useEffect(() => {
+    // Revoke URLs for files that are no longer in newImageFiles
+    const currentFiles = new Set(newImageFiles);
+    previewUrlsRef.current.forEach((url, file) => {
+      if (!currentFiles.has(file)) {
+        URL.revokeObjectURL(url);
+        previewUrlsRef.current.delete(file);
+      }
+    });
+  }, [newImageFiles]);
+
+  useEffect(() => {
+    return () => {
+      // Final cleanup on unmount
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
   const handleCopyUrl = () => {
     if (!slug) return;
     const fullUrl = `https://chuong-graphic.vercel.app/project/${slug}`;
@@ -287,100 +315,97 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
       // Upload new gallery images
       if (projectId && newImageFiles.length > 0) {
-        setSaveSuccess(`Đang tải lên 0/${newImageFiles.length} ảnh mới...`);
+        setSaveSuccess(`Đang chuẩn bị tải lên ${newImageFiles.length} ảnh...`);
         const startOrder = existingImages.length;
         const imageInserts: any[] = [];
         
-        // Process strictly sequentially (1 by 1) to guarantee NO Supabase Rate Limiting (HTTP 429) 
-        // and no browser Canvas memory crashes when uploading 50+ images at once.
-        for (let i = 0; i < newImageFiles.length; i++) {
-          const file = newImageFiles[i];
-          try {
-            // Compress before upload
-            const compressed = await compressImage(file, {
-              maxWidth: 1920,
-              maxHeight: 1920,
-              quality: 0.82,
-              maxSizeMB: 1,
-            });
-            
-            // Strictly safe filename: alphanumeric, dots, and dashes only
-            const safeName = compressed.name
-              .replace(/[^a-zA-Z0-9.-]/g, '-')
-              .replace(/-+/g, '-');
-            
-            const fileName = `gallery/${projectId}/${Date.now()}-${i}-${safeName}`;
-            
-            // Artificial delay to prevent Supabase 429 rate limit errors 
-            // especially on free tier. Large images take time to process.
-            if (i > 0) {
-              if (i % 5 === 0) {
-                // Break more often (every 5) for a longer period
-                setSaveSuccess(`Đang nghỉ để hệ thống thở (${i}/${newImageFiles.length})...`);
-                await new Promise(resolve => setTimeout(resolve, 5000));
-              } else {
-                // Regular delay between normal images
-                await new Promise(resolve => setTimeout(resolve, 1500));
-              }
-            }
+        // Step 1: Chunking files into groups of 5
+        const chunkSize = 5;
+        const totalFiles = newImageFiles.length;
+        
+        for (let i = 0; i < totalFiles; i += chunkSize) {
+          const chunk = newImageFiles.slice(i, i + chunkSize);
+          const chunkIndex = Math.floor(i / chunkSize) + 1;
+          const totalChunks = Math.ceil(totalFiles / chunkSize);
+          
+          setSaveSuccess(`Đang tải đợt ${chunkIndex}/${totalChunks}...`);
 
-            let uploadError = null;
-            let uploadSuccess = false;
+          // Process each chunk in parallel using Promise.all
+          const chunkResults = await Promise.all(chunk.map(async (file, indexInChunk) => {
+            const globalIndex = i + indexInChunk;
             let attempt = 0;
-            const maxAttempts = 5; // Increased to 5 for large batches
+            const maxAttempts = 3; // Step 2: Retry up to 3 times
+            let lastError = null;
 
-            while (attempt < maxAttempts && !uploadSuccess) {
-              setSaveSuccess(`Đang tải ảnh ${i + 1}/${newImageFiles.length}... (Lần thử ${attempt + 1})`);
-              const { error } = await supabase.storage
-                .from("project-images")
-                .upload(fileName, compressed, {
-                  cacheControl: '3600',
-                  upsert: true,
-                  contentType: compressed.type,
+            while (attempt < maxAttempts) {
+              try {
+                // Compress image
+                const compressed = await compressImage(file, {
+                  maxWidth: 1920,
+                  maxHeight: 1920,
+                  quality: 0.82,
+                  maxSizeMB: 1,
                 });
 
-              if (error) {
-                uploadError = error;
-                console.warn(`[Image ${i+1}] Supabase upload failed. Attempt ${attempt + 1}/${maxAttempts} for [${file.name}]:`, error);
+                const safeName = compressed.name
+                  .replace(/[^a-zA-Z0-9.-]/g, '-')
+                  .replace(/-+/g, '-');
+                
+                const fileName = `gallery/${projectId}/${Date.now()}-${globalIndex}-${safeName}`;
+
+                const { error: uploadError } = await supabase.storage
+                  .from("project-images")
+                  .upload(fileName, compressed, {
+                    cacheControl: '3600',
+                    upsert: true,
+                    contentType: compressed.type,
+                  });
+
+                if (uploadError) throw uploadError;
+
+                const { data } = supabase.storage
+                  .from("project-images")
+                  .getPublicUrl(fileName);
+
+                return {
+                  project_id: projectId!,
+                  image_url: data.publicUrl,
+                  display_order: startOrder + globalIndex,
+                };
+              } catch (err) {
                 attempt++;
-                // Exponential backoff
-                await new Promise(r => setTimeout(r, 2000 * attempt)); 
-              } else {
-                uploadError = null;
-                uploadSuccess = true;
+                lastError = err;
+                console.warn(`[Image ${globalIndex + 1}] Lỗi tải (Lần ${attempt}):`, err);
+                if (attempt < maxAttempts) {
+                  // Wait before retry (exponential backoff)
+                  await new Promise(r => setTimeout(r, 1000 * attempt));
+                }
               }
             }
+            // Step 2: Mandatory failure report
+            console.error(`[Image ${globalIndex + 1}] Thất bại hoàn toàn sau 3 lần thử:`, lastError);
+            return null;
+          }));
 
-            if (uploadSuccess) {
-              setSaveSuccess(`Tải thành công ${i + 1}/${newImageFiles.length} ảnh...`);
-              const { data } = supabase.storage
-                .from("project-images")
-                .getPublicUrl(fileName);
-
-              imageInserts.push({
-                project_id: projectId!,
-                image_url: data.publicUrl,
-                display_order: startOrder + i,
-              });
-            } else {
-              console.error(`[Image ${i+1}] Supabase upload FAILED completely after retries for [${file.name}]:`, uploadError);
-            }
-          } catch (err) {
-            console.error(`Exception during processing of [${file.name}]:`, err);
-          }
+          // Add successful uploads from this chunk
+          imageInserts.push(...chunkResults.filter(r => r !== null));
         }
 
-        const validInserts = imageInserts.filter((item): item is any => item !== null);
-        if (validInserts.length > 0) {
+        // Step 3: Count Verification Guard
+        if (imageInserts.length !== newImageFiles.length) {
+          alert(`⚠️ CẢNH BÁO RỚT FILE: Chỉ có ${imageInserts.length}/${newImageFiles.length} ảnh được tải lên thành công. Vui lòng kiểm tra lại kết nối.`);
+        }
+
+        // Final Insert to DB
+        if (imageInserts.length > 0) {
           const { data: insertedData, error: insError } = await supabase
             .from("project_images")
-            .insert(validInserts)
+            .insert(imageInserts)
             .select();
             
           if (insError) throw insError;
           
           if (isEditing && insertedData) {
-            // Update UI state so multiple clicks on Save won't re-upload
             setNewImageFiles([]);
             setExistingImages(prev => [...prev, ...insertedData]);
           }
@@ -697,7 +722,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           <div className="columns-3 sm:columns-4 gap-2 max-h-[800px] overflow-y-auto space-y-2">
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
-              const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : URL.createObjectURL(item.data as File);
+              const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : getPreviewUrl(item.data as File);
               const imgId = isExisting ? (item.data as DbProjectImage).id : `new-${(item as any).index}`;
               const isDragging = dragIndex === index;
               const isDragOver = dragOverIndex === index;
