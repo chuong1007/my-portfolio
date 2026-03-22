@@ -241,6 +241,14 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </a>
           )}
 
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className="hidden sm:block px-3 py-2 text-zinc-400 hover:text-zinc-200 transition-colors font-bold text-xs uppercase tracking-wider"
+          >
+            {isEditing ? "Đóng" : "Hủy bỏ"}
+          </button>
+
           {/* Quick Save */}
           <button
             onClick={handleSave}
@@ -449,30 +457,6 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
           </div>
           </div>
         </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="mt-10 pt-6 border-t border-zinc-800 flex items-center justify-end gap-4">
-        <button
-          onClick={onClose}
-          className="px-6 py-3 text-zinc-400 hover:text-zinc-200 transition-colors font-medium"
-        >
-          {isEditing ? "Đóng" : "Hủy bỏ"}
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={saving || !title.trim()}
-          className="px-8 py-3 bg-zinc-50 text-zinc-950 font-semibold rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] flex items-center justify-center gap-2"
-        >
-          {saving ? (
-            <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
-          ) : saveSuccess ? (
-            <Check className="w-4 h-4 text-emerald-600" />
-          ) : (
-            <SaveIcon className="w-4 h-4" />
-          )}
-          <span>{saving ? "Đang lưu..." : saveSuccess ? "Đã lưu" : isEditing ? "Cập nhật" : "Tạo dự án"}</span>
-        </button>
       </div>
     </div>
   );

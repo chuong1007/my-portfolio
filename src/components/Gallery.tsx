@@ -404,10 +404,10 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage' }: Gallery
                     </div>
                   </div>
                   <div className="px-1 flex flex-col flex-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
                       {project.title}
                     </h3>
-                    <p className="text-sm text-zinc-500 mt-1 line-clamp-1">
+                    <p className="text-sm text-zinc-500 mt-1">
                       {project.tags.join(", ")}
                     </p>
                   </div>
