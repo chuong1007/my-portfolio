@@ -117,7 +117,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0"
+            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-none [&_hr]:border-t [&_hr]:border-zinc-700 [&_hr]:my-6"
             dangerouslySetInnerHTML={{ 
               __html: typeof project.description === 'string' ? project.description : String(project.description) 
             }}

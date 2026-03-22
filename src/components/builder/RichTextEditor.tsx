@@ -938,6 +938,12 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
           margin-top: 1rem;
           margin-bottom: 0.5rem;
         }
+        /* Horizontal rule styling */
+        .custom-tiptap-content .ProseMirror hr {
+          border: none;
+          border-top: 1px solid #3f3f46;
+          margin: 1.5rem 0;
+        }
       `}</style>
     </div>
   );
