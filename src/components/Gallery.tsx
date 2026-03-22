@@ -12,6 +12,7 @@ import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
+import { usePathname } from "next/navigation";
 
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
@@ -58,6 +59,8 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
   const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
+  const pathname = usePathname();
+  const isProjectsPage = pathname === '/projects';
 
   const [visibleCount, setVisibleCount] = useState(variant === 'subpage' ? 12 : 16);
 
@@ -321,7 +324,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
               />
             </div>
 
-            {((showSeeAll && currentSeeAllPos === 'top') || (!showSeeAll)) && (
+            {((showSeeAll && currentSeeAllPos === 'top' && !isProjectsPage) || (!showSeeAll && !isProjectsPage)) && (
               <Link 
                 href={showSeeAll ? (getResponsiveValue(seeAllLink, currentDevice) || "/projects") : "/projects"}
                 className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
@@ -435,7 +438,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
             </div>
           )}
 
-          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
+          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom' && !isProjectsPage) || (!showSeeAll && !isProjectsPage)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

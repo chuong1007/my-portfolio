@@ -16,6 +16,7 @@ import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "./RichTextEditor";
+import { usePathname } from "next/navigation";
 
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
@@ -73,6 +74,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
   const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
   const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>(() => initialContent?.seeAllPosition ?? "bottom");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
+  const pathname = usePathname();
+  const isBlogPage = pathname === '/blog';
 
   const fetchContent = useCallback(async () => {
     try {
@@ -292,7 +295,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
             </div>
-            {((showSeeAll && currentSeeAllPos === 'top') || (variant === 'homepage' && !showSeeAll)) && (
+            {((showSeeAll && currentSeeAllPos === 'top' && !isBlogPage) || (variant === 'homepage' && !showSeeAll && !isBlogPage)) && (
               <Link 
                 href={showSeeAll ? (getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || "/blog") : "/blog"}
                 className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
@@ -363,7 +366,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             </div>
           )}
 
-          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom') || (!showSeeAll)) && (
+          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom' && !isBlogPage) || (!showSeeAll && !isBlogPage)) && (
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
