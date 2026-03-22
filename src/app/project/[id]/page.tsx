@@ -32,20 +32,26 @@ export default async function ProjectPage({ params }: PageProps) {
   const supabase = createClient();
   const { data: dbProject } = await supabase
     .from("projects")
-    .select("*, images:project_images(*)")
+    .select("*")
     .eq(isUuid ? "id" : "slug", id)
     .single();
 
   let projectData: any = null;
 
   if (dbProject) {
+    const { data: images } = await supabase
+      .from("project_images")
+      .select("*")
+      .eq("project_id", dbProject.id)
+      .order("display_order", { ascending: true });
+
     projectData = {
       id: dbProject.id,
       title: dbProject.title,
       description: dbProject.description,
       tags: dbProject.tags,
       imageUrl: dbProject.cover_image,
-      galleryImages: dbProject.images.map((img: any) => ({
+      galleryImages: (images || []).map((img: any) => ({
         id: img.id,
         url: img.image_url,
       }))
