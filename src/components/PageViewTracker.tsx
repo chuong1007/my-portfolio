@@ -9,6 +9,8 @@ export function PageViewTracker() {
 
   useEffect(() => {
     // 1. Chống Bot/Crawler cơ bản
+    if (typeof window === "undefined") return;
+    
     const ua = navigator.userAgent.toLowerCase();
     const isBot = /bot|crawler|spider|lighthouse|hyperdx|vercel|headless/i.test(ua);
     if (isBot) return;
@@ -16,17 +18,21 @@ export function PageViewTracker() {
     // Skip admin pages
     if (pathname.startsWith("/admin")) return;
 
+    // 2. Kiểm tra và duy trì visitor_id (Persistence)
+    let visitorId = localStorage.getItem('visitor_id');
+    
+    if (!visitorId) {
+      // Tạo ID mới nếu chưa có
+      visitorId = 'v-' + Math.random().toString(36).substring(2, 15) + '-' + Date.now();
+      localStorage.setItem('visitor_id', visitorId);
+      console.log("Generated and saved new visitor_id:", visitorId);
+    } else {
+      console.log("Using existing visitor_id from localStorage:", visitorId);
+    }
+
     // Skip if same path already tracked (prevents double-track)
     if (lastTracked.current === pathname) return;
     lastTracked.current = pathname;
-
-    // 2. Lưu trữ vĩnh viễn (Persistence) bằng localStorage
-    let visitorId = localStorage.getItem('visitor_id');
-    if (!visitorId) {
-      // Tạo ID mới nếu chưa có (UUID v4 style simple)
-      visitorId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('visitor_id', visitorId);
-    }
 
     // Small delay to ensure page title is updated
     const timer = setTimeout(() => {
@@ -40,10 +46,9 @@ export function PageViewTracker() {
           referrer: document.referrer || "",
         }),
       }).catch((err) => {
-        // Silently fail — tracking should never break the UX
         console.warn("PageView tracking failed:", err);
       });
-    }, 500); // 500ms delay for better title sync
+    }, 800);
 
     return () => clearTimeout(timer);
   }, [pathname]);

@@ -162,6 +162,13 @@ export function Header() {
   // Remove special hiding for home-2 to allow guest mode
   // if (pathname === '/admin/builder') return null;
 
+  const [logoImageError, setLogoImageError] = useState(false);
+
+  useEffect(() => {
+    // Reset logo error when config changes
+    setLogoImageError(false);
+  }, [logoConfig.url]);
+
   const isEditor = isAdmin && isEditMode;
   const currentLogoColor = getResponsiveValue(logoConfig.color, globalPreviewMode || 'desktop') || '#FFFFFF';
   const currentLogoHeight = getResponsiveValue(logoConfig.height, globalPreviewMode || 'desktop') || 40;
@@ -169,6 +176,50 @@ export function Header() {
   const currentLogoText = typeof logoRaw === 'object' && logoRaw !== null 
     ? (logoRaw.content || logoRaw.text || JSON.stringify(logoRaw)) 
     : logoRaw;
+
+  // Render the logo content (either Image or Text)
+  const renderLogo = () => {
+    if (logoConfig.type === 'image' && logoConfig.url && !logoImageError) {
+      return (
+        <img
+          src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
+          alt="Logo"
+          className={cn(
+            "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
+            !isEditor && "h-[var(--logo-h-mob)] md:h-[var(--logo-h-tab)] lg:h-[var(--logo-h-desk)]"
+          )}
+          style={{
+            height: isEditor ? `${currentLogoHeight}px` : undefined,
+            "--logo-h-desk": `${getResponsiveValue(logoConfig.height, 'desktop') || 40}px`,
+            "--logo-h-tab": `${getResponsiveValue(logoConfig.height, 'tablet') || 40}px`,
+            "--logo-h-mob": `${getResponsiveValue(logoConfig.height, 'mobile') || 40}px`,
+            maxHeight: '120px'
+          } as React.CSSProperties}
+          onError={() => setLogoImageError(true)}
+        />
+      );
+    }
+
+    // Default or Fallback to Text
+    return (
+      <span
+        className={cn(
+          "font-bold tracking-tight whitespace-nowrap",
+          !isEditor && "text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
+        )}
+        style={{ 
+          color: isEditor ? (currentLogoColor as string) : undefined,
+          "--logo-clr-desk": getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF',
+          "--logo-clr-tab": getResponsiveValue(logoConfig.color, 'tablet') || '#FFFFFF',
+          "--logo-clr-mob": getResponsiveValue(logoConfig.color, 'mobile') || '#FFFFFF',
+          fontFamily: 'monospace',
+          fontSize: '1.5rem'
+        } as React.CSSProperties}
+      >
+        {currentLogoText || 'CHUONG.GRAPHIC'}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -180,53 +231,7 @@ export function Header() {
         )}
       >
         <Link href="/" className="flex items-center group flex-shrink-0">
-          {logoConfig.type === 'text' ? (
-            <span
-               className={cn(
-                "font-bold tracking-tight whitespace-nowrap",
-                !isEditor && "text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
-              )}
-              style={{ 
-                color: isEditor ? (currentLogoColor as string) : undefined,
-                "--logo-clr-desk": getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF',
-                "--logo-clr-tab": getResponsiveValue(logoConfig.color, 'tablet') || '#FFFFFF',
-                "--logo-clr-mob": getResponsiveValue(logoConfig.color, 'mobile') || '#FFFFFF',
-                fontFamily: 'monospace' 
-              } as React.CSSProperties}
-            >
-              {currentLogoText}
-            </span>
-          ) : (
-            <img
-              src={getResponsiveValue<string>(logoConfig.url, globalPreviewMode ?? 'desktop') || "/logo.png"}
-              alt="Logo"
-              className={cn(
-                "w-auto object-contain transition-transform duration-300 group-hover:scale-105",
-                !isEditor && "h-[var(--logo-h-mob)] md:h-[var(--logo-h-tab)] lg:h-[var(--logo-h-desk)]"
-              )}
-              style={{
-                height: isEditor ? `${currentLogoHeight}px` : undefined,
-                "--logo-h-desk": `${getResponsiveValue(logoConfig.height, 'desktop') || 40}px`,
-                "--logo-h-tab": `${getResponsiveValue(logoConfig.height, 'tablet') || 40}px`,
-                "--logo-h-mob": `${getResponsiveValue(logoConfig.height, 'mobile') || 40}px`,
-                maxHeight: '120px'
-              } as React.CSSProperties}
-              onError={(e) => {
-                // Fallback to text if image fails
-                (e.target as HTMLImageElement).style.display = 'none';
-                const parent = (e.target as HTMLElement).parentElement;
-                if (parent) {
-                  const span = document.createElement('span');
-                  span.className = "text-xl md:text-2xl font-bold tracking-tight text-white whitespace-nowrap";
-                  span.style.color = (getResponsiveValue(logoConfig.color, globalPreviewMode ?? 'desktop') as string) || '#FFFFFF';
-                  span.style.fontFamily = 'monospace';
-                  const textVal = getResponsiveValue(logoConfig.text, globalPreviewMode ?? 'desktop');
-                  span.innerText = typeof textVal === 'string' ? textVal : '';
-                  parent.appendChild(span);
-                }
-              }}
-            />
-          )}
+          {renderLogo()}
         </Link>
 
         <div className="flex items-center gap-6">
