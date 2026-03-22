@@ -6,42 +6,30 @@ import { ArrowLeft, ArrowRight, Pencil, X, ChevronLeft, ChevronRight } from "luc
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { createClient } from "@/lib/supabase";
+import { MasonryContainer, MasonryItem } from "./MasonryLayout";
 import { cn } from "@/lib/utils";
 
 type ProjectDetailProps = {
   project: Project;
 };
 
-// Component con để tính toán chiều ngang của ảnh. Nếu ngang > 1.4 => style columnSpan: "all" và rộng 50% (2 cột).
+// Component con sử dụng MasonryItem mới.
 function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, index: number, isAdmin: boolean, onClick: () => void }) {
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [isWide, setIsWide] = useState(false);
-
-  const checkRatio = useCallback(() => {
-    if (imgRef.current?.naturalWidth && imgRef.current?.naturalHeight) {
-      // Do không dùng hiển thị ảnh ngang dạng 2 cột nữa nên comment dòng này
-      // const ratio = imgRef.current.naturalWidth / imgRef.current.naturalHeight;
-      // if (ratio > 1.4) setIsWide(true);
-    }
-  }, []);
-
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true, margin: "50px" }}
-      transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
-      style={isWide ? { columnSpan: "all" } as any : {}}
-      className={cn(
-        "group cursor-pointer",
-        isWide ? "w-full md:w-1/2 md:mx-auto mb-4 md:mb-6" : "break-inside-avoid w-full mb-4 md:mb-6"
-      )}
+    <MasonryItem
+      isWide={false}
+      gap={16} // md:gap-x-6 (24px) but generally matching 16-24px depending on gap. MasonryContainer will use gap-x-4 md:gap-x-6. Let's use 16 standard for calculation sync or 24.
+      className="group cursor-pointer mb-4 md:mb-6"
       onClick={onClick}
     >
-      <div className="relative overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, margin: "50px" }}
+        transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
+        className="w-full relative overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5"
+      >
         <img
-          ref={imgRef}
-          onLoad={checkRatio}
           src={image.url}
           alt={`Dự án ${index + 1}`}
           loading={index < 8 ? "eager" : "lazy"}
@@ -56,15 +44,15 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
         <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300 pointer-events-none" />
         
         {/* Zoom Icon */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 text-white">
           <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </MasonryItem>
   );
 }
 
@@ -222,7 +210,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         </motion.h2>
 
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
-        <div className="columns-2 sm:columns-3 md:columns-4 gap-4 md:gap-6 space-y-4 md:space-y-6">
+        <MasonryContainer className="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 md:gap-x-6">
           {allImages.map((image, index) => (
             <MasonryDetailImage
               key={image.id}
@@ -232,7 +220,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
               onClick={() => openLightbox(index)}
             />
           ))}
-        </div>
+        </MasonryContainer>
       </section>
 
       {/* Lightbox Modal */}
