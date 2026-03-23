@@ -33,6 +33,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [isVisible, setIsVisible] = useState<boolean>(project?.is_visible !== false);
   const [isFeatured, setIsFeatured] = useState<boolean>(project?.is_featured || false);
+  const [featuredOrder, setFeaturedOrder] = useState<number>(project?.featured_order || 0);
   const [galleryColumns, setGalleryColumns] = useState<number>(project?.gallery_columns || 4);
   const [galleryTitle, setGalleryTitle] = useState<string>(project?.gallery_title || "Hình ảnh dự án");
   const [galleryBottomContent, setGalleryBottomContent] = useState<string>(project?.gallery_bottom_content || "");
@@ -356,6 +357,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             cover_image: coverImage,
             is_visible: isVisible,
             is_featured: isFeatured,
+            featured_order: featuredOrder,
             gallery_columns: galleryColumns,
             gallery_title: galleryTitle,
             gallery_bottom_content: galleryBottomContent,
@@ -414,6 +416,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             cover_image: coverImage,
             is_visible: isVisible,
             is_featured: isFeatured,
+            featured_order: featuredOrder,
             gallery_columns: galleryColumns,
             gallery_title: galleryTitle,
             gallery_bottom_content: galleryBottomContent,
@@ -575,19 +578,32 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             <span className="hidden xs:inline">{isVisible ? "Công khai" : "Đang ẩn"}</span>
           </button>
 
-          {/* Featured Toggle */}
-          <button
-            onClick={() => setIsFeatured(!isFeatured)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl border transition-all text-xs font-bold uppercase tracking-wider ${
-              isFeatured 
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20" 
-                : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800"
-            }`}
-            title="Đánh dấu Nổi bật"
-          >
-            <Star className={cn("w-4 h-4", isFeatured && "fill-current")} />
-            <span className="hidden xs:inline">Nổi bật</span>
-          </button>
+          {/* Featured Toggle & Order */}
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsFeatured(!isFeatured)}
+              className={`flex items-center gap-2 px-3 py-2 border transition-all text-xs font-bold uppercase tracking-wider ${
+                isFeatured 
+                  ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-l-xl" 
+                  : "bg-zinc-900 border-zinc-800 text-zinc-500 hover:bg-zinc-800 rounded-xl"
+              }`}
+              title="Đánh dấu Nổi bật"
+            >
+              <Star className={cn("w-4 h-4", isFeatured && "fill-current")} />
+              <span className="hidden xs:inline">Nổi bật</span>
+            </button>
+            {isFeatured && (
+              <input
+                type="number"
+                value={featuredOrder}
+                onChange={(e) => setFeaturedOrder(parseInt(e.target.value) || 0)}
+                className="w-14 h-[34px] px-2 bg-amber-500/5 border-y border-r border-amber-500/30 text-amber-400 text-xs font-bold rounded-r-xl focus:outline-none focus:ring-1 focus:ring-amber-500/50"
+                min="0"
+                placeholder="Số..."
+                title="Thứ tự ghim (số nhỏ hơn được ghim lên trước)"
+              />
+            )}
+          </div>
 
           {/* Preview Button */}
           {isEditing && (

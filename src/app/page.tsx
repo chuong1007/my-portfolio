@@ -19,7 +19,13 @@ export default async function Home() {
     { data: dbBlogs }
   ] = await Promise.all([
     supabase.from('site_content').select('*'),
-    supabase.from('projects').select('*').order('is_featured', { ascending: false }).order('created_at', { ascending: false }),
+    supabase.from('projects')
+      .select('*')
+      .eq('is_visible', true)
+      .order('is_featured', { ascending: false })
+      .order('featured_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(12),
     supabase.from('blogs').select('*').order('created_at', { ascending: false })
   ]);
 

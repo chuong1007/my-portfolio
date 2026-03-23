@@ -67,6 +67,7 @@ export default function AdminPage() {
       .from("projects")
       .select("*")
       .order("is_featured", { ascending: false })
+      .order("featured_order", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (projectsData && projectsData.length > 0) {
