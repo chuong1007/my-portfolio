@@ -437,7 +437,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                       </div>
                     </div>
                     <div className="px-1 flex flex-col">
-                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
+                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3]">
                         {project.title}
                       </h3>
                     </div>
