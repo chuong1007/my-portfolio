@@ -695,6 +695,37 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               editable={true}
             />
           </div>
+          
+          {/* Gallery Title (Rich Text) */}
+          <div className="space-y-4 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6">
+            <div className="flex items-center gap-2 text-zinc-300">
+              <FileIcon className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-bold uppercase tracking-wider">Tiêu đề phần Gallery</span>
+            </div>
+            <RichTextEditor
+              content={galleryTitle}
+              onChange={setGalleryTitle}
+              placeholder="Vd: Hình ảnh thực tế, Gallery..."
+              className="bg-black/40 border-zinc-800 transition-all focus-within:ring-2 focus-within:ring-blue-500/20"
+              editable={true}
+            />
+          </div>
+
+          {/* Gallery Bottom Content (Rich Text) */}
+          <div className="space-y-4 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6">
+            <div className="flex items-center gap-2 text-zinc-300">
+              <FileText className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-bold uppercase tracking-wider">Nội dung kết thúc Gallery</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 italic -mt-2">Bro có thể viết lời nhắn hoặc chi tiết bổ sung ở cuối phần hình ảnh.</p>
+            <RichTextEditor
+              content={galleryBottomContent}
+              onChange={setGalleryBottomContent}
+              placeholder="Viết nội dung kết thúc gallery ở đây..."
+              className="bg-black/40 border-zinc-800 min-h-[150px] transition-all focus-within:ring-2 focus-within:ring-blue-500/20"
+              editable={true}
+            />
+          </div>
 
 
 
@@ -800,24 +831,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </div>
 
             {/* Gallery Settings Section */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 space-y-4">
+            <div className="bg-zinc-900 border border-zinc-900/50 rounded-xl p-4 mb-6">
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                    <FileText className="w-3.5 h-3.5 text-blue-400" />
-                    Tiêu đề phần Gallery
-                  </span>
-                </div>
-                <RichTextEditor
-                  content={galleryTitle}
-                  onChange={setGalleryTitle}
-                  placeholder="Vd: Hình ảnh thực tế, Gallery..."
-                  className="bg-black/40 border-zinc-800"
-                  editable={true}
-                />
-              </div>
-
-              <div className="space-y-3 pt-2 border-t border-zinc-800/50">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
                     <Grid className="w-3.5 h-3.5 text-blue-400" />
@@ -844,7 +859,6 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-zinc-500 italic">Bro chọn số cột phù hợp với tính chất của từng project nhé!</p>
               </div>
             </div>
 
@@ -995,22 +1009,6 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               );
             })}
           </MasonryContainer>
-
-          {/* Gallery Bottom Content (Rich Text) */}
-          <div className="mt-12 space-y-4 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6">
-            <div className="flex items-center gap-2 text-zinc-300 mb-2">
-              <FileIcon className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-bold uppercase tracking-wider">Nội dung bổ sung phía cuối Gallery</span>
-            </div>
-            <p className="text-xs text-zinc-500 mb-4 italic">Bro có thể viết gì đó ở đây để kết thúc phần gallery này (ví dụ: lời nhắn, chi tiết thêm...)</p>
-            <RichTextEditor
-              content={galleryBottomContent}
-              onChange={setGalleryBottomContent}
-              placeholder="Viết nội dung kết thúc gallery ở đây..."
-              className="bg-black/40 border-zinc-800 min-h-[150px]"
-              editable={true}
-            />
-          </div>
           </div>
         </div>
       </div>
