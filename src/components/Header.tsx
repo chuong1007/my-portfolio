@@ -372,28 +372,21 @@ export function Header() {
 
           {/* Mobile Menu Toggle Button */}
           <button
-            onClick={() => setIsMobileMenuOpen(true)}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className={cn(
-              "flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors",
+              "flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors relative z-[1001]",
               (isAdmin && globalPreviewMode !== 'desktop') ? "flex" : (isAdmin ? "hidden lg:flex" : "flex lg:hidden")
             )}
-            aria-label="Open Mobile Menu"
+            aria-label={isMobileMenuOpen ? "Close Mobile Menu" : "Open Mobile Menu"}
           >
-            <Menu className="w-5 h-5" />
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </header>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] bg-zinc-950/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
-          <button
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="absolute top-6 right-6 flex items-center justify-center w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-colors"
-            aria-label="Close Mobile Menu"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        <div className="fixed inset-0 z-[1000] bg-zinc-950/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
 
           <nav className="flex flex-col items-center gap-8 w-full mt-12 overflow-y-auto">
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]

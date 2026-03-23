@@ -163,7 +163,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       >
         {/* Project Info */}
         <div className="flex flex-col gap-6">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tighter">
+          <h1 className="text-[31px] md:text-[55px] font-bold tracking-normal leading-[1.2]">
             {typeof project.title === 'string' ? project.title : String(project.title)}
           </h1>
 
@@ -352,7 +352,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                     )}
                   </div>
                   <div className="px-1">
-                    <h3 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-[1.6] tracking-wider line-clamp-2">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
                       {p.title}
                     </h3>
                     <p className="text-xs text-zinc-500 mt-1 font-medium">

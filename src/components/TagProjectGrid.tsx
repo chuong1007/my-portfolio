@@ -50,7 +50,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
             </div>
             
             <div className="px-1">
-              <h3 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-[1.6] tracking-wider line-clamp-2">
+              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
                 {project.title}
               </h3>
             </div>
