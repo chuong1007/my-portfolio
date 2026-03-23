@@ -310,14 +310,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       {relatedProjects.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 md:px-12 py-24 border-t border-zinc-900">
           <div className="flex items-end justify-between mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">Dự án khác</h2>
-            <Link 
-              href="/#dự-án"
-              className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-semibold uppercase tracking-widest"
-            >
-              Xem tất cả
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <h2 className="text-3xl font-bold tracking-tight">Khám phá các dự án khác</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
