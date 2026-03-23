@@ -808,12 +808,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                     Tiêu đề phần Gallery
                   </span>
                 </div>
-                <input
-                  type="text"
-                  value={galleryTitle}
-                  onChange={(e) => setGalleryTitle(e.target.value)}
+                <RichTextEditor
+                  content={galleryTitle}
+                  onChange={setGalleryTitle}
                   placeholder="Vd: Hình ảnh thực tế, Gallery..."
-                  className="w-full bg-black/40 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-medium"
+                  className="bg-black/40 border-zinc-800"
+                  editable={true}
                 />
               </div>
 

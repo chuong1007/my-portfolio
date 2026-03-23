@@ -191,14 +191,13 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
 
       {/* Gallery Section - Pinterest Style Masonry */}
       <section className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-zinc-50"
-        >
-          {project.gallery_title || "Hình ảnh dự án"}
-        </motion.h2>
+          dangerouslySetInnerHTML={{ __html: project.gallery_title || "Hình ảnh dự án" }}
+        />
         
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
         <MasonryContainer 
