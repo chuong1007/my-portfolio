@@ -696,6 +696,12 @@ export default function AdminPage() {
                   </span>
                 </div>
               )}
+              
+              {project.is_featured && (
+                <div className="absolute top-2 right-2 w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl">
+                  <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
+                </div>
+              )}
             </div>
 
             {/* Info */}

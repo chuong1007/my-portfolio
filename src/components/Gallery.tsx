@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowDown } from "lucide-react";
+import { ArrowRight, ArrowDown, Star } from "lucide-react";
 import { getAllProjects } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -419,8 +419,8 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                         )}
                       />
                       {project.is_featured && (
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1 bg-orange-500 rounded-lg text-[9px] font-black uppercase tracking-widest text-white shadow-xl">
-                          Nổi bật
+                        <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/50 backdrop-blur-md border border-white/10 rounded-full shadow-2xl transition-transform group-hover:scale-110">
+                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
                         </div>
                       )}
                       {isAdmin && project.is_visible === false && (
