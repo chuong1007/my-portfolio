@@ -60,5 +60,15 @@ export default async function ProjectPage({ params }: PageProps) {
     notFound();
   }
 
-  return <ProjectDetail project={projectData} />;
+  // Fetch other projects for "Related Projects" section
+  const { data: relatedProjectsData } = await supabase
+    .from("projects")
+    .select("id, title, slug, cover_image, tags, is_featured")
+    .eq("is_visible", true)
+    .neq("id", projectData.id)
+    .order("is_featured", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(4);
+
+  return <ProjectDetail project={projectData} relatedProjects={relatedProjectsData || []} />;
 }

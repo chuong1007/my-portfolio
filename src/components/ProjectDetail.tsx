@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Pencil, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Pencil, X, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { createClient } from "@/lib/supabase";
@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 
 type ProjectDetailProps = {
   project: Project;
+  relatedProjects?: any[];
 };
 
 // Component con sử dụng MasonryItem mới.
@@ -54,7 +55,7 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
   );
 }
 
-export function ProjectDetail({ project }: ProjectDetailProps) {
+export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -304,6 +305,58 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Related Projects Section */}
+      {relatedProjects.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 md:px-12 py-24 border-t border-zinc-900">
+          <div className="flex items-end justify-between mb-12">
+            <h2 className="text-3xl font-bold tracking-tight">Dự án khác</h2>
+            <Link 
+              href="/#dự-án"
+              className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-semibold uppercase tracking-widest"
+            >
+              Xem tất cả
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProjects.map((p, index) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Link href={`/project/${p.slug || p.id}`} className="group flex flex-col gap-4">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                    <img
+                      src={p.cover_image}
+                      alt={p.title}
+                      loading="lazy"
+                      className="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75"
+                    />
+                    {p.is_featured && (
+                      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl">
+                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="px-1">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-tight">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-zinc-500 mt-2 font-medium uppercase tracking-wider">
+                      {Array.isArray(p.tags) ? p.tags.join(", ") : ""}
+                    </p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Footer CTA */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-20 pt-8">
