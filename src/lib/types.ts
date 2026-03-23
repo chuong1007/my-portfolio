@@ -8,6 +8,8 @@ export type DbProject = {
   is_visible: boolean;
   is_featured?: boolean;
   gallery_columns?: number;
+  gallery_title?: string;
+  gallery_bottom_content?: string;
   created_at: string;
 };
 

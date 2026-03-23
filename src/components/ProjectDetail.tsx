@@ -197,7 +197,7 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-zinc-50"
         >
-          Hình ảnh dự án
+          {project.gallery_title || "Hình ảnh dự án"}
         </motion.h2>
         
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
@@ -221,6 +221,18 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
             />
           ))}
         </MasonryContainer>
+
+        {/* Gallery Bottom Content */}
+        {project.gallery_bottom_content && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="mt-20 prose prose-invert prose-zinc max-w-none text-zinc-400 [&_p]:leading-relaxed [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_strong]:text-zinc-200"
+            dangerouslySetInnerHTML={{ __html: project.gallery_bottom_content }}
+          />
+        )}
       </section>
 
       {/* Lightbox Modal */}

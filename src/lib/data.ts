@@ -7,6 +7,8 @@ export type Project = {
   description: string;
   galleryImages: GalleryImage[];
   gallery_columns?: number;
+  gallery_title?: string;
+  gallery_bottom_content?: string;
 };
 
 export type GalleryImage = {

@@ -34,6 +34,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [isVisible, setIsVisible] = useState<boolean>(project?.is_visible !== false);
   const [isFeatured, setIsFeatured] = useState<boolean>(project?.is_featured || false);
   const [galleryColumns, setGalleryColumns] = useState<number>(project?.gallery_columns || 4);
+  const [galleryTitle, setGalleryTitle] = useState<string>(project?.gallery_title || "Hình ảnh dự án");
+  const [galleryBottomContent, setGalleryBottomContent] = useState<string>(project?.gallery_bottom_content || "");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -355,6 +357,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             is_visible: isVisible,
             is_featured: isFeatured,
             gallery_columns: galleryColumns,
+            gallery_title: galleryTitle,
+            gallery_bottom_content: galleryBottomContent,
             updated_at: new Date().toISOString(),
           })
           .eq("id", projectId);
@@ -411,6 +415,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             is_visible: isVisible,
             is_featured: isFeatured,
             gallery_columns: galleryColumns,
+            gallery_title: galleryTitle,
+            gallery_bottom_content: galleryBottomContent,
             created_at: new Date().toISOString(),
           })
           .select()
@@ -793,35 +799,53 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               )}
             </div>
 
-            {/* Gallery Column Selector */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
-                  <Grid className="w-3.5 h-3.5 text-blue-400" />
-                  Số cột hiển thị (Desktop)
-                </span>
-                <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
-                  {galleryColumns} Cột
-                </span>
+            {/* Gallery Settings Section */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                    <FileText className="w-3.5 h-3.5 text-blue-400" />
+                    Tiêu đề phần Gallery
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={galleryTitle}
+                  onChange={(e) => setGalleryTitle(e.target.value)}
+                  placeholder="Vd: Hình ảnh thực tế, Gallery..."
+                  className="w-full bg-black/40 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-medium"
+                />
               </div>
-              <div className="flex bg-black/40 p-1 rounded-xl border border-zinc-800">
-                {[2, 3, 4, 5].map((cols) => (
-                  <button
-                    key={cols}
-                    type="button"
-                    onClick={() => setGalleryColumns(cols)}
-                    className={cn(
-                      "flex-1 py-2 rounded-lg text-xs font-bold transition-all",
-                      galleryColumns === cols 
-                        ? "bg-zinc-800 text-white shadow-lg border border-white/5" 
-                        : "text-zinc-500 hover:text-zinc-300"
-                    )}
-                  >
-                    {cols}
-                  </button>
-                ))}
+
+              <div className="space-y-3 pt-2 border-t border-zinc-800/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                    <Grid className="w-3.5 h-3.5 text-blue-400" />
+                    Số cột hiển thị (Desktop)
+                  </span>
+                  <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                    {galleryColumns} Cột
+                  </span>
+                </div>
+                <div className="flex bg-black/40 p-1 rounded-xl border border-zinc-800">
+                  {[2, 3, 4, 5].map((cols) => (
+                    <button
+                      key={cols}
+                      type="button"
+                      onClick={() => setGalleryColumns(cols)}
+                      className={cn(
+                        "flex-1 py-1.5 rounded-lg text-xs font-bold transition-all",
+                        galleryColumns === cols 
+                          ? "bg-zinc-800 text-white shadow-lg border border-white/5" 
+                          : "text-zinc-500 hover:text-zinc-300"
+                      )}
+                    >
+                      {cols}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10px] text-zinc-500 italic">Bro chọn số cột phù hợp với tính chất của từng project nhé!</p>
               </div>
-              <p className="text-[10px] text-zinc-500 italic">Bro chọn số cột phù hợp với tính chất của từng project nhé!</p>
             </div>
 
           {/* Upload Drop Zone */}
@@ -971,6 +995,22 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               );
             })}
           </MasonryContainer>
+
+          {/* Gallery Bottom Content (Rich Text) */}
+          <div className="mt-12 space-y-4 bg-zinc-900/50 border border-zinc-800/50 rounded-2xl p-6">
+            <div className="flex items-center gap-2 text-zinc-300 mb-2">
+              <FileIcon className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-bold uppercase tracking-wider">Nội dung bổ sung phía cuối Gallery</span>
+            </div>
+            <p className="text-xs text-zinc-500 mb-4 italic">Bro có thể viết gì đó ở đây để kết thúc phần gallery này (ví dụ: lời nhắn, chi tiết thêm...)</p>
+            <RichTextEditor
+              content={galleryBottomContent}
+              onChange={setGalleryBottomContent}
+              placeholder="Viết nội dung kết thúc gallery ở đây..."
+              className="bg-black/40 border-zinc-800 min-h-[150px]"
+              editable={true}
+            />
+          </div>
           </div>
         </div>
       </div>
