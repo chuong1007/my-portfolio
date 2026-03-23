@@ -66,6 +66,7 @@ export default function AdminPage() {
     const { data: projectsData } = await supabase
       .from("projects")
       .select("*")
+      .order("is_featured", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (projectsData && projectsData.length > 0) {

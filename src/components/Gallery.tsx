@@ -88,6 +88,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       const { data: projectsData } = await supabase
         .from('projects')
         .select('*')
+        .order('is_featured', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (projectsData) {

@@ -19,7 +19,7 @@ export default async function Home() {
     { data: dbBlogs }
   ] = await Promise.all([
     supabase.from('site_content').select('*'),
-    supabase.from('projects').select('*').order('created_at', { ascending: false }),
+    supabase.from('projects').select('*').order('is_featured', { ascending: false }).order('created_at', { ascending: false }),
     supabase.from('blogs').select('*').order('created_at', { ascending: false })
   ]);
 
