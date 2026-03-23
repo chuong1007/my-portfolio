@@ -436,15 +436,23 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                         </span>
                       </div>
                     </div>
-                    <div className="px-1 flex flex-col flex-1">
+                    <div className="px-1 flex flex-col">
                       <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
                         {project.title}
                       </h3>
-                      <p className="text-sm text-zinc-500 mt-1">
-                        {project.tags.join(", ")}
-                      </p>
                     </div>
                   </Link>
+                  <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1">
+                    {project.tags.map((tag: string, i: number) => (
+                      <Link 
+                        key={tag} 
+                        href={`/tag/${encodeURIComponent(tag)}`}
+                        className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        {tag}{i < project.tags.length - 1 ? "," : ""}
+                      </Link>
+                    ))}
+                  </div>
                 </motion.div>
               ))
             )}

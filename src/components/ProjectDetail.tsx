@@ -163,12 +163,13 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
           {/* Tags */}
           <div className="flex flex-wrap gap-3">
             {project.tags.map((tag) => (
-              <span
+              <Link
                 key={tag}
-                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300"
+                href={`/tag/${encodeURIComponent(tag)}`}
+                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-500 transition-all duration-300 active:scale-95"
               >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
 
