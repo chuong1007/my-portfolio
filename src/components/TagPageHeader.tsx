@@ -21,8 +21,8 @@ export default function TagPageHeader({ tagName, resultsCount }: { tagName: stri
           <div className="flex items-center justify-center w-10 h-10 md:w-16 md:h-16 rounded-full border-2 border-white/20 text-white font-bold text-xl md:text-3xl shrink-0">
             #
           </div>
-          <h1 className="text-4xl md:text-7xl font-bold tracking-tighter leading-tight italic">
-            <span className="bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-7xl font-bold tracking-tighter leading-tight italic py-2 leading-[1.1]">
+            <span className="bg-gradient-to-r from-zinc-200 via-zinc-400 to-zinc-600 bg-clip-text text-transparent inline-block pr-6">
               {tagName}
             </span>
           </h1>
