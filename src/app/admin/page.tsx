@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette, BarChart3, Star, Tag } from "lucide-react";
+import { BarChart3, ChevronRight, Image as ImageIcon, LayoutDashboard, LogOut, Pencil, Plus, Settings, Target, Trash2, Tag, GripVertical, MoreHorizontal, Save, FileText, Eye, EyeOff, Star, Palette } from "lucide-react";
+import { Reorder } from "framer-motion";
 import { createClient } from "@/lib/supabase";
 import { revalidateCache } from "@/app/actions";
 import { getAllProjects } from "@/lib/data";
@@ -47,6 +48,8 @@ export default function AdminPage() {
   );
   const [tags, setTags] = useState<DbTag[]>([]);
   const [allUsedTags, setAllUsedTags] = useState<string[]>([]);
+  const [tagToRename, setTagToRename] = useState<{old: string, new: string} | null>(null);
+  const [showRenameDialog, setShowRenameDialog] = useState(false);
   
   useEffect(() => {
     if (tabParam === 'homepage') setActiveTab('homepage');
@@ -156,14 +159,20 @@ export default function AdminPage() {
       setTags(tagsData);
     }
 
-    // Extract all unique tags used in projects
-    const allUniqueTags = new Set<string>();
+    // Extract all unique tags used in projects, normalized for case to handle duplicates
+    const allUniqueTags = new Map<string, string>(); // map: lowercase -> original-casing
     projectsData?.forEach((p: any) => {
       if (Array.isArray(p.tags)) {
-        p.tags.forEach((t: string) => allUniqueTags.add(t));
+        p.tags.forEach((t: string) => {
+          const lower = t.toLowerCase();
+          // Prefer "E-Commerce" (with big C) if both exist, or just keep the first one found
+          if (!allUniqueTags.has(lower) || (t.includes('-Commerce') && !allUniqueTags.get(lower)?.includes('-Commerce'))) {
+            allUniqueTags.set(lower, t);
+          }
+        });
       }
     });
-    setAllUsedTags(Array.from(allUniqueTags));
+    setAllUsedTags(Array.from(allUniqueTags.values()));
 
     setLoading(false);
   }, [editId]);
@@ -214,6 +223,13 @@ export default function AdminPage() {
   const handleAddTag = async (name: string) => {
     if (!name) return;
     const supabase = createClient();
+    
+    // Case-insensitive check if it already exists in the official tags list
+    if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+      alert(`Tag "${name}" đã tồn tại trong danh sách lọc!`);
+      return;
+    }
+
     const { error } = await supabase
       .from('project_tags')
       .insert({ name, display_order: tags.length + 1 });
@@ -248,8 +264,7 @@ export default function AdminPage() {
       .eq('id', id);
     
     if (!error) {
-      await revalidateCache('/');
-      fetchData();
+      setTags(prev => prev.map(t => t.id === id ? { ...t, display_order: newOrder } : t));
     }
   };
 
@@ -266,7 +281,50 @@ export default function AdminPage() {
     }
   };
 
+  const handleReorderTags = async (newTags: DbTag[]) => {
+    // Update local state for flicker-free reordering
+    setTags(newTags.map((t, idx) => ({ ...t, display_order: idx + 1 })));
+    
+    const supabase = createClient();
+    // Update all in DB
+    const updates = newTags.map((t, idx) => 
+      supabase.from('project_tags').update({ display_order: idx + 1 }).eq('id', t.id)
+    );
+    await Promise.all(updates);
+    await revalidateCache('/');
+  };
 
+  const handleRenameTagGlobal = async (oldName: string, newName: string) => {
+    if (!newName || oldName === newName) return;
+    const supabase = createClient();
+    setLoading(true);
+
+    try {
+      // 1. Update in project_tags table
+      await supabase.from('project_tags').update({ name: newName }).eq('name', oldName);
+
+      // 2. Fetch all projects containing the old tag
+      const { data: projectsToUpdate } = await supabase
+        .from('projects')
+        .select('id, tags')
+        .contains('tags', [oldName]);
+
+      if (projectsToUpdate) {
+        for (const p of projectsToUpdate) {
+          const updatedTags = p.tags.map((t: string) => t === oldName ? newName : t);
+          await supabase.from('projects').update({ tags: updatedTags }).eq('id', p.id);
+        }
+      }
+
+      await revalidateCache('/');
+      await fetchData();
+    } catch (err) {
+      alert("Lỗi khi đổi tên: " + err);
+    } finally {
+      setLoading(false);
+      setShowRenameDialog(false);
+    }
+  };
 
   const handleFormClose = () => {
     setShowProjectForm(false);
@@ -451,33 +509,36 @@ export default function AdminPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                   Danh mục đang sử dụng ({tags.length})
                 </h3>
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                <Reorder.Group 
+                  axis="y" 
+                  values={tags} 
+                  onReorder={handleReorderTags}
+                  className="space-y-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar"
+                >
                   {tags.map((tag) => (
-                    <div 
-                      key={tag.id}
+                    <Reorder.Item 
+                      key={tag.id} 
+                      value={tag}
                       className="flex items-center gap-3 p-2 bg-zinc-950/50 border border-zinc-800/50 rounded-lg group hover:border-emerald-500/30 transition-colors"
                     >
-                      <input
-                        type="number"
-                        value={tag.display_order}
-                        onChange={(e) => handleUpdateTagOrder(tag.id, parseInt(e.target.value) || 0)}
-                        className="w-10 bg-zinc-900 border-none rounded text-[10px] text-center text-emerald-400 font-bold focus:ring-1 focus:ring-emerald-500/50"
-                        title="Thứ tự"
-                      />
-                      <input
-                        type="text"
-                        defaultValue={tag.name}
-                        onBlur={(e) => e.target.value !== tag.name && handleUpdateTagName(tag.id, e.target.value)}
-                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-0 h-auto text-zinc-300 font-medium"
-                      />
+                      <div className="cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-500 transition-colors">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      <div className="w-6 text-[10px] text-zinc-600 font-mono font-bold text-center">
+                        {tag.display_order}
+                      </div>
+                      <div className="flex-1 text-sm text-zinc-300 font-medium py-0.5">
+                        {tag.name}
+                      </div>
                       <button
                         onClick={() => handleDeleteTag(tag.id)}
                         className="p-1 px-2 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                    </div>
+                    </Reorder.Item>
                   ))}
+                </Reorder.Group>
                   <form 
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -499,7 +560,6 @@ export default function AdminPage() {
                     </button>
                   </form>
                 </div>
-             </div>
 
              {/* Column 2: Suggested Tags from Projects */}
              <div>
@@ -509,16 +569,22 @@ export default function AdminPage() {
                 </h3>
                 <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar content-start">
                   {allUsedTags.sort().map((tagName) => {
-                    const isOfficial = tags.some(t => t.name === tagName);
+                    const isOfficial = tags.some(t => t.name.toLowerCase() === tagName.toLowerCase());
                     return (
                       <div 
                         key={tagName}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setTagToRename({old: tagName, new: tagName});
+                          setShowRenameDialog(true);
+                        }}
                         className={cn(
-                          "relative group px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300",
+                          "relative group px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300 select-none",
                           isOfficial 
                             ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500/70 cursor-default" 
-                            : "bg-zinc-800/30 border-zinc-800 text-zinc-500 hover:border-emerald-500/30 hover:text-emerald-400"
+                            : "bg-zinc-800/30 border-zinc-800 text-zinc-500 hover:border-emerald-500/30 hover:text-emerald-400 cursor-context-menu"
                         )}
+                        title="Chuột phải để đổi tên"
                       >
                         {tagName}
                         {!isOfficial && (
@@ -535,6 +601,40 @@ export default function AdminPage() {
                   })}
                 </div>
              </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rename Dialog */}
+      {showRenameDialog && tagToRename && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-lg font-bold mb-4 text-zinc-100">Đổi tên tag</h3>
+            <p className="text-xs text-zinc-500 mb-4">
+              Lưu ý: Tên tag sẽ được thay đổi trong tất cả dự án đang sử dụng và bảng lọc.
+            </p>
+            <input
+              type="text"
+              value={tagToRename.new}
+              onChange={(e) => setTagToRename({...tagToRename, new: e.target.value})}
+              autoFocus
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 transition-colors mb-6 text-zinc-300"
+            />
+            <div className="flex gap-2 justify-end">
+              <button 
+                onClick={() => setShowRenameDialog(false)}
+                className="px-4 py-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={() => handleRenameTagGlobal(tagToRename.old, tagToRename.new)}
+                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-semibold transition-colors"
+                disabled={loading}
+              >
+                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+              </button>
+            </div>
           </div>
         </div>
       )}
