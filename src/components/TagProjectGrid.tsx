@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 
 type Project = {
   id: string;
@@ -59,7 +59,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
             {project.tags.map((tag: string, i: number) => (
               <Link 
                 key={tag} 
-                href={`/tag/${encodeURIComponent(tag)}`}
+                href={`/tag/${generateSlug(tag)}`}
                 className="text-sm text-zinc-500 hover:text-blue-400 transition-colors"
               >
                 {tag}{i < project.tags.length - 1 ? "," : ""}

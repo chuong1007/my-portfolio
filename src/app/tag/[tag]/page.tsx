@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import TagPageHeader from "@/components/TagPageHeader";
 import TagProjectGrid from "@/components/TagProjectGrid";
+import { generateSlug } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,19 +13,33 @@ type PageProps = {
 };
 
 export default async function TagPage({ params }: PageProps) {
-  const { tag } = await params;
-  const decodedTag = decodeURIComponent(tag);
+  const { tag: tagSlug } = await params;
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
   );
 
+  // Fetch all unique tags first to find the original tag from the slug
+  // We can fetch from public.project_tags table
+  const { data: allTagsRows } = await supabase
+    .from('project_tags')
+    .select('name');
+  
+  // Find the original tag that matches the slug
+  let originalTag = decodeURIComponent(tagSlug);
+  if (allTagsRows) {
+    const matched = allTagsRows.find(t => generateSlug(t.name) === tagSlug);
+    if (matched) {
+      originalTag = matched.name;
+    }
+  }
+
   // Fetch projects with this tag
   const { data: projects, error } = await supabase
     .from('projects')
     .select("id, title, slug, cover_image, tags, is_featured, is_visible")
-    .contains('tags', [decodedTag])
+    .contains('tags', [originalTag])
     .eq('is_visible', true)
     .order('is_featured', { ascending: false })
     .order('featured_order', { ascending: true })
@@ -40,7 +55,7 @@ export default async function TagPage({ params }: PageProps) {
     <main className="min-h-screen pt-32 pb-24 dark bg-zinc-950 text-white">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         {/* Navigation & Title */}
-        <TagPageHeader tagName={decodedTag} resultsCount={resultsCount} />
+        <TagPageHeader tagName={originalTag} resultsCount={resultsCount} />
 
         {/* Content */}
         {resultsCount > 0 ? (

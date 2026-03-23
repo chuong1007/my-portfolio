@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowDown, Star } from "lucide-react";
 import { getAllProjects } from "@/lib/data";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { SectionEditor } from "./SectionEditor";
@@ -446,7 +446,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                     {project.tags.map((tag: string, i: number) => (
                       <Link 
                         key={tag} 
-                        href={`/tag/${encodeURIComponent(tag)}`}
+                        href={`/tag/${generateSlug(tag)}`}
                         className="text-sm text-zinc-500 hover:text-blue-400 transition-colors"
                       >
                         {tag}{i < project.tags.length - 1 ? "," : ""}

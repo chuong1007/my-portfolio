@@ -7,7 +7,7 @@ import Link from "next/link";
 import type { Project } from "@/lib/data";
 import { createClient } from "@/lib/supabase";
 import { MasonryContainer, MasonryItem } from "./MasonryLayout";
-import { cn } from "@/lib/utils";
+import { cn, generateSlug } from "@/lib/utils";
 
 type ProjectDetailProps = {
   project: Project;
@@ -163,7 +163,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       >
         {/* Project Info */}
         <div className="flex flex-col gap-6">
-          <h1 className="text-[31px] md:text-[55px] font-bold tracking-[-0.015em] leading-[1.2]">
+          <h1 className="text-[31px] md:text-[55px] font-bold tracking-[-0.07em] leading-[1.2]">
             {typeof project.title === 'string' ? project.title : String(project.title)}
           </h1>
 
@@ -172,7 +172,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
             {project.tags.map((tag) => (
               <Link
                 key={tag}
-                href={`/tag/${encodeURIComponent(tag)}`}
+                href={`/tag/${generateSlug(tag)}`}
                 className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
               >
                 {tag}
@@ -342,8 +342,11 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       loading="lazy"
                       className="w-full h-full object-cover transition-all duration-700 ease-in-out"
                     />
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 flex items-center justify-center">
-                      <ArrowRight className="w-5 h-5 text-zinc-50" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
+                      <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10 whitespace-nowrap">
+                        Xem ngay
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </span>
                     </div>
                     {p.is_featured && (
                       <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-10">
@@ -355,9 +358,17 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                     <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3]">
                       {p.title}
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-1 font-medium">
-                      {Array.isArray(p.tags) ? p.tags.join(", ") : ""}
-                    </p>
+                  <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1 mt-1">
+                    {Array.isArray(p.tags) && p.tags.map((tag: string, i: number) => (
+                      <Link 
+                        key={tag} 
+                        href={`/tag/${generateSlug(tag)}`}
+                        className="text-xs text-zinc-500 hover:text-blue-400 transition-colors font-medium border-none p-0 bg-transparent inline"
+                      >
+                        {tag}{i < p.tags.length - 1 ? "," : ""}
+                      </Link>
+                    ))}
+                  </div>
                   </div>
                 </Link>
               </motion.div>
