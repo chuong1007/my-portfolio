@@ -948,11 +948,17 @@ export function RichTextEditor({
           margin-top: 1rem;
           margin-bottom: 0.5rem;
         }
-        /* Horizontal rule styling */
+        /* Horizontal rule styling - make it full width */
         .custom-tiptap-content .ProseMirror hr {
           border: none;
-          border-top: 1px solid #3f3f46;
-          margin: 1.5rem 0;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          margin: 2rem 0;
+          display: block;
+          width: 100%;
+        }
+        .custom-tiptap-content .ProseMirror hr.ProseMirror-selectednode {
+          border-top: 1px solid #3b82f6;
+          outline: none;
         }
       `}</style>
     </div>
