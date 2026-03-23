@@ -36,6 +36,13 @@ export type DbBlog = {
   created_at: string;
 };
 
+export type DbTag = {
+  id: string;
+  name: string;
+  display_order: number;
+  created_at: string;
+};
+
 export type SiteContent = {
   id: string;
   data: Record<string, unknown>;

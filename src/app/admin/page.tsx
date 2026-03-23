@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2, Image as ImageIcon, Save, LayoutDashboard, Eye, EyeOff, FileText, ArrowRight, Palette, BarChart3, Star, Tag } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { revalidateCache } from "@/app/actions";
 import { getAllProjects } from "@/lib/data";
-import type { DbProject, DbProjectImage } from "@/lib/types";
+import type { DbProject, DbProjectImage, DbTag } from "@/lib/types";
 import { ProjectForm } from "@/components/admin/ProjectForm";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
@@ -41,11 +41,17 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics'>(tabParam === 'homepage' ? 'homepage' : tabParam === 'analytics' ? 'analytics' : 'projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics' | 'tags'>(
+    tabParam === 'homepage' ? 'homepage' : 
+    tabParam === 'analytics' ? 'analytics' : 
+    tabParam === 'tags' ? 'tags' : 'projects'
+  );
+  const [tags, setTags] = useState<DbTag[]>([]);
   
   useEffect(() => {
     if (tabParam === 'homepage') setActiveTab('homepage');
     if (tabParam === 'analytics') setActiveTab('analytics');
+    if (tabParam === 'tags') setActiveTab('tags');
   }, [tabParam]);
 
   // Site content state
@@ -141,6 +147,16 @@ export default function AdminPage() {
       }
     }
 
+    // Fetch Tags
+    const { data: tagsData } = await supabase
+      .from('project_tags')
+      .select('*')
+      .order('display_order', { ascending: true });
+    
+    if (tagsData) {
+      setTags(tagsData);
+    }
+
     setLoading(false);
   }, [editId]);
 
@@ -161,6 +177,19 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpdateFeatured = async (id: string, isFeatured: boolean, featuredOrder: number) => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("projects")
+      .update({ is_featured: isFeatured, featured_order: featuredOrder })
+      .eq("id", id);
+
+    if (!error) {
+      await revalidateCache('/');
+      fetchData();
+    }
+  };
+
   const handleDeleteProject = async (id: string) => {
     if (!confirm("Bạn chắc chắn muốn xóa dự án này?")) return;
 
@@ -173,6 +202,60 @@ export default function AdminPage() {
 
     await revalidateCache('/');
     fetchData();
+  };
+  const handleAddTag = async (name: string) => {
+    if (!name) return;
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('project_tags')
+      .insert({ name, display_order: tags.length + 1 });
+    
+    if (!error) {
+      await revalidateCache('/');
+      fetchData();
+    }
+    else alert("Lỗi khi thêm tag: " + error.message);
+  };
+
+  const handleDeleteTag = async (id: string) => {
+    if (!confirm("Xóa tag này?")) return;
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('project_tags')
+      .delete()
+      .eq('id', id);
+    
+    if (!error) {
+      await revalidateCache('/');
+      fetchData();
+    }
+    else alert("Lỗi khi xóa tag: " + error.message);
+  };
+
+  const handleUpdateTagOrder = async (id: string, newOrder: number) => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('project_tags')
+      .update({ display_order: newOrder })
+      .eq('id', id);
+    
+    if (!error) {
+      await revalidateCache('/');
+      fetchData();
+    }
+  };
+
+  const handleUpdateTagName = async (id: string, newName: string) => {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from('project_tags')
+      .update({ name: newName })
+      .eq('id', id);
+    
+    if (!error) {
+      await revalidateCache('/');
+      fetchData();
+    }
   };
 
 
@@ -327,6 +410,18 @@ export default function AdminPage() {
               <BarChart3 className="w-4 h-4" />
               Analytics
             </button>
+            <div className="w-px h-4 bg-zinc-800 mx-1" />
+            <button
+              onClick={() => setActiveTab('tags')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                activeTab === 'tags'
+                  ? 'bg-zinc-800 text-zinc-50 border border-zinc-700'
+                  : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              <Tag className="w-4 h-4" />
+              Tags
+            </button>
           </div>
         </div>
         {activeTab === 'projects' && (
@@ -393,7 +488,7 @@ export default function AdminPage() {
 
             {/* Info */}
             <div className="p-5">
-              <h3 className="text-lg font-bold text-zinc-200 mb-1">{project.title}</h3>
+              <h3 className="text-lg font-bold text-zinc-200 mb-2 leading-relaxed">{project.title}</h3>
               <p className="text-sm text-zinc-500 line-clamp-2 mb-3">{project.description}</p>
 
               {/* Tags */}
@@ -422,6 +517,37 @@ export default function AdminPage() {
                 >
                   {project.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                 </button>
+
+                {/* Quick Featured Toggle */}
+                <div className="flex items-center shrink-0">
+                  <button
+                    onClick={() => handleUpdateFeatured(project.id, !project.is_featured, project.featured_order || 0)}
+                    className={cn(
+                      "p-1.5 transition-colors border shrink-0",
+                      project.is_featured 
+                        ? "text-amber-400 border-amber-500/30 bg-amber-500/10 rounded-l-lg hover:bg-amber-500/20" 
+                        : "text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-100 rounded-lg"
+                    )}
+                    title={project.is_featured ? "Bỏ ghim nổi bật" : "Ghim nổi bật"}
+                  >
+                    <Star className={cn("w-4 h-4", project.is_featured && "fill-current")} />
+                  </button>
+                  {project.is_featured && (
+                    <input
+                      type="number"
+                      value={project.featured_order || 0}
+                      onChange={async (e) => {
+                        const newOrder = parseInt(e.target.value) || 0;
+                        const supabase = createClient();
+                        await supabase.from("projects").update({ featured_order: newOrder }).eq("id", project.id);
+                        fetchData();
+                      }}
+                      className="w-10 h-[34px] px-1 bg-amber-500/5 border-y border-r border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-r-lg focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-center"
+                      min="0"
+                      title="Thứ tự ghim"
+                    />
+                  )}
+                </div>
                 
                 <Link
                   href={`/project/${project.slug || project.id}`}
@@ -450,6 +576,85 @@ export default function AdminPage() {
           </div>
         ))}
       </div>
+      )}
+
+      {/* Tags Management */}
+      {!loading && activeTab === 'tags' && (
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
+              <Tag className="w-5 h-5 text-emerald-400" />
+              Quản lý danh mục dự án (Tags)
+            </h2>
+            
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const input = form.elements.namedItem('tagName') as HTMLInputElement;
+                if (!input.value.trim()) return;
+                handleAddTag(input.value.trim());
+                input.value = '';
+              }}
+              className="flex gap-2 mb-8"
+            >
+              <input
+                name="tagName"
+                type="text"
+                placeholder="Tên danh mục mới (vd: Motion Graphics)"
+                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Thêm
+              </button>
+            </form>
+
+            <div className="space-y-3">
+              {tags.map((tag) => (
+                <div 
+                  key={tag.id}
+                  className="flex items-center gap-3 p-3 bg-zinc-950 border border-zinc-800 rounded-xl group"
+                >
+                  <div className="flex flex-col items-center gap-1 pr-3 border-r border-zinc-800 min-w-[40px]">
+                    <span className="text-[10px] text-zinc-600 font-mono uppercase">Pos</span>
+                    <input
+                      type="number"
+                      value={tag.display_order}
+                      onChange={(e) => handleUpdateTagOrder(tag.id, parseInt(e.target.value) || 0)}
+                      className="w-10 bg-zinc-900 border border-zinc-800 rounded text-[10px] text-center text-emerald-400 font-bold"
+                    />
+                  </div>
+                  
+                  <input
+                    type="text"
+                    defaultValue={tag.name}
+                    onBlur={(e) => e.target.value !== tag.name && handleUpdateTagName(tag.id, e.target.value)}
+                    className="flex-1 bg-transparent border-none focus:ring-0 font-medium text-zinc-200"
+                  />
+
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleDeleteTag(tag.id)}
+                      className="p-2 text-zinc-500 hover:text-red-400 transition-colors"
+                      title="Xóa tag"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-zinc-500 text-xs mt-6 italic">
+              * Thay đổi thứ tự bằng cách điều chỉnh số Pos. Thứ tự xuất hiện trên bộ lọc sẽ tuân theo số này (tăng dần).
+            </p>
+          </div>
+        </div>
       )}
 
       {/* Homepage Content Editor */}

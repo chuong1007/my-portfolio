@@ -7,12 +7,13 @@ import { MasonryContainer, MasonryItem } from "@/components/MasonryLayout";
 import { createClient } from "@/lib/supabase";
 import { cn, generateSlug } from "@/lib/utils";
 import { compressImage } from "@/lib/compressImage";
-import type { DbProject, DbProjectImage } from "@/lib/types";
+import type { DbProject, DbProjectImage, DbTag } from "@/lib/types";
 import { revalidateCache } from "@/app/actions";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
-const AVAILABLE_TAGS = ["Poster", "Branding", "Logo Design", "UX/UI"];
+// Default tags as fallback if DB fails
+const FALLBACK_TAGS = ["Poster", "Branding", "Logo Design", "UX/UI"];
 
 type ProjectFormProps = {
   project?: (DbProject & { images: DbProjectImage[] }) | null;
@@ -42,6 +43,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [copied, setCopied] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string>("");
   const [newTagInput, setNewTagInput] = useState("");
+  const [availableTags, setAvailableTags] = useState<DbTag[]>([]);
 
   // RAM Optimization: Manage preview URLs to prevent memory leaks
   const previewUrlsRef = useRef<Map<File, string>>(new Map());
@@ -63,6 +65,21 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       }
     });
   }, [newImageFiles]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from('project_tags')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (data && data.length > 0) {
+        setAvailableTags(data);
+      }
+    };
+    fetchTags();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -800,18 +817,23 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             {/* Suggested Tags */}
             <div className="pt-4 border-t border-zinc-800/50">
               <p className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-3">Gợi ý</p>
-              <div className="flex flex-wrap gap-1.5">
-                {AVAILABLE_TAGS.filter(t => !tags.includes(t)).map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => toggleTag(tag)}
-                    className="px-2.5 py-1 bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 border border-zinc-800 rounded-md text-[10px] transition-all"
-                  >
-                    + {tag}
-                  </button>
-                ))}
-              </div>
+              <div className="flex flex-wrap gap-2">
+                  {(availableTags.length > 0 ? availableTags.map(t => t.name) : FALLBACK_TAGS).map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={cn(
+                        "px-4 py-2 rounded-xl text-sm font-medium transition-all border",
+                        tags.includes(tag)
+                          ? "bg-emerald-500/10 border-emerald-500 text-emerald-400 ring-2 ring-emerald-500/20"
+                          : "bg-zinc-800/50 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-300"
+                      )}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
             </div>
           </div>
         </div>

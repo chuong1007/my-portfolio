@@ -32,7 +32,7 @@ const normalize = (val: any): RichTextData => {
   };
 };
 
-const CATEGORIES = ["All", "Poster", "Branding", "Logo Design", "UX/UI"];
+const FALLBACK_CATEGORIES = ["All", "Poster", "Branding", "Logo Design", "UX/UI"];
 
 // Use cached projects from data layer
 const MOCK_PROJECTS = getAllProjects();
@@ -59,6 +59,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
   const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
+  const [dbCategories, setDbCategories] = useState<string[]>(FALLBACK_CATEGORIES);
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
   const pathname = usePathname();
   const isProjectsPage = pathname === '/projects';
@@ -94,6 +95,16 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
 
       if (projectsData) {
         setDbProjects(projectsData);
+      }
+
+      // Fetch dynamic categories
+      const { data: tagsData } = await supabase
+        .from('project_tags')
+        .select('name')
+        .order('display_order', { ascending: true });
+      
+      if (tagsData && tagsData.length > 0) {
+        setDbCategories(["All", ...tagsData.map(t => t.name)]);
       }
     } catch (e) {
       console.error("Gallery section error:", e);
@@ -343,7 +354,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
  
           {/* Filters */}
           <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
-            {CATEGORIES.map((category) => {
+            {dbCategories.map((category) => {
               const isActive = activeCategory === category;
               return (
                 <button
