@@ -41,17 +41,16 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics' | 'tags'>(
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics'>(
     tabParam === 'homepage' ? 'homepage' : 
-    tabParam === 'analytics' ? 'analytics' : 
-    tabParam === 'tags' ? 'tags' : 'projects'
+    tabParam === 'analytics' ? 'analytics' : 'projects'
   );
   const [tags, setTags] = useState<DbTag[]>([]);
+  const [allUsedTags, setAllUsedTags] = useState<string[]>([]);
   
   useEffect(() => {
     if (tabParam === 'homepage') setActiveTab('homepage');
     if (tabParam === 'analytics') setActiveTab('analytics');
-    if (tabParam === 'tags') setActiveTab('tags');
   }, [tabParam]);
 
   // Site content state
@@ -156,6 +155,15 @@ export default function AdminPage() {
     if (tagsData) {
       setTags(tagsData);
     }
+
+    // Extract all unique tags used in projects
+    const allUniqueTags = new Set<string>();
+    projectsData?.forEach((p: any) => {
+      if (Array.isArray(p.tags)) {
+        p.tags.forEach((t: string) => allUniqueTags.add(t));
+      }
+    });
+    setAllUsedTags(Array.from(allUniqueTags));
 
     setLoading(false);
   }, [editId]);
@@ -410,18 +418,6 @@ export default function AdminPage() {
               <BarChart3 className="w-4 h-4" />
               Analytics
             </button>
-            <div className="w-px h-4 bg-zinc-800 mx-1" />
-            <button
-              onClick={() => setActiveTab('tags')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                activeTab === 'tags'
-                  ? 'bg-zinc-800 text-zinc-50 border border-zinc-700'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              <Tag className="w-4 h-4" />
-              Tags
-            </button>
           </div>
         </div>
         {activeTab === 'projects' && (
@@ -434,6 +430,114 @@ export default function AdminPage() {
         </button>
         )}
       </div>
+
+      {/* Tags Management Integrated */}
+      {!loading && activeTab === 'projects' && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-10 overflow-hidden">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Tag className="w-5 h-5 text-emerald-400" />
+              Quản lý danh mục (Filter Tags)
+            </h2>
+            <div className="text-[10px] text-zinc-500 bg-zinc-800 px-3 py-1 rounded-full uppercase font-bold tracking-wider">
+              Bấm số Pos để sắp xếp
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+             {/* Column 1: Current Tags */}
+             <div>
+                <h3 className="text-xs font-black text-zinc-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Danh mục đang sử dụng ({tags.length})
+                </h3>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  {tags.map((tag) => (
+                    <div 
+                      key={tag.id}
+                      className="flex items-center gap-3 p-2 bg-zinc-950/50 border border-zinc-800/50 rounded-lg group hover:border-emerald-500/30 transition-colors"
+                    >
+                      <input
+                        type="number"
+                        value={tag.display_order}
+                        onChange={(e) => handleUpdateTagOrder(tag.id, parseInt(e.target.value) || 0)}
+                        className="w-10 bg-zinc-900 border-none rounded text-[10px] text-center text-emerald-400 font-bold focus:ring-1 focus:ring-emerald-500/50"
+                        title="Thứ tự"
+                      />
+                      <input
+                        type="text"
+                        defaultValue={tag.name}
+                        onBlur={(e) => e.target.value !== tag.name && handleUpdateTagName(tag.id, e.target.value)}
+                        className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-0 h-auto text-zinc-300 font-medium"
+                      />
+                      <button
+                        onClick={() => handleDeleteTag(tag.id)}
+                        className="p-1 px-2 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const input = e.currentTarget.elements.namedItem('tagName') as HTMLInputElement;
+                      if (!input.value.trim()) return;
+                      handleAddTag(input.value.trim());
+                      input.value = '';
+                    }}
+                    className="flex gap-2 pt-2"
+                  >
+                    <input
+                      name="tagName"
+                      type="text"
+                      placeholder="Thêm nhanh..."
+                      className="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-1.5 text-xs text-zinc-400 focus:outline-none focus:border-emerald-500/50"
+                    />
+                    <button type="submit" className="p-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-zinc-400 transition-colors">
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
+             </div>
+
+             {/* Column 2: Suggested Tags from Projects */}
+             <div>
+                <h3 className="text-xs font-black text-zinc-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>
+                  Tất cả tag trong dự án ({allUsedTags.length})
+                </h3>
+                <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar content-start">
+                  {allUsedTags.sort().map((tagName) => {
+                    const isOfficial = tags.some(t => t.name === tagName);
+                    return (
+                      <div 
+                        key={tagName}
+                        className={cn(
+                          "relative group px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-300",
+                          isOfficial 
+                            ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500/70 cursor-default" 
+                            : "bg-zinc-800/30 border-zinc-800 text-zinc-500 hover:border-emerald-500/30 hover:text-emerald-400"
+                        )}
+                      >
+                        {tagName}
+                        {!isOfficial && (
+                          <button
+                            onClick={() => handleAddTag(tagName)}
+                            className="absolute -top-1 -right-1 bg-emerald-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                            title="Thêm vào thanh lọc"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
 
       {/* Loading */}
       {loading && (
@@ -578,84 +682,7 @@ export default function AdminPage() {
       </div>
       )}
 
-      {/* Tags Management */}
-      {!loading && activeTab === 'tags' && (
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 mb-8">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <Tag className="w-5 h-5 text-emerald-400" />
-              Quản lý danh mục dự án (Tags)
-            </h2>
-            
-            <form 
-              onSubmit={(e) => {
-                e.preventDefault();
-                const form = e.currentTarget;
-                const input = form.elements.namedItem('tagName') as HTMLInputElement;
-                if (!input.value.trim()) return;
-                handleAddTag(input.value.trim());
-                input.value = '';
-              }}
-              className="flex gap-2 mb-8"
-            >
-              <input
-                name="tagName"
-                type="text"
-                placeholder="Tên danh mục mới (vd: Motion Graphics)"
-                className="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-semibold transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Thêm
-              </button>
-            </form>
 
-            <div className="space-y-3">
-              {tags.map((tag) => (
-                <div 
-                  key={tag.id}
-                  className="flex items-center gap-3 p-3 bg-zinc-950 border border-zinc-800 rounded-xl group"
-                >
-                  <div className="flex flex-col items-center gap-1 pr-3 border-r border-zinc-800 min-w-[40px]">
-                    <span className="text-[10px] text-zinc-600 font-mono uppercase">Pos</span>
-                    <input
-                      type="number"
-                      value={tag.display_order}
-                      onChange={(e) => handleUpdateTagOrder(tag.id, parseInt(e.target.value) || 0)}
-                      className="w-10 bg-zinc-900 border border-zinc-800 rounded text-[10px] text-center text-emerald-400 font-bold"
-                    />
-                  </div>
-                  
-                  <input
-                    type="text"
-                    defaultValue={tag.name}
-                    onBlur={(e) => e.target.value !== tag.name && handleUpdateTagName(tag.id, e.target.value)}
-                    className="flex-1 bg-transparent border-none focus:ring-0 font-medium text-zinc-200"
-                  />
-
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={() => handleDeleteTag(tag.id)}
-                      className="p-2 text-zinc-500 hover:text-red-400 transition-colors"
-                      title="Xóa tag"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-zinc-500 text-xs mt-6 italic">
-              * Thay đổi thứ tự bằng cách điều chỉnh số Pos. Thứ tự xuất hiện trên bộ lọc sẽ tuân theo số này (tăng dần).
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Homepage Content Editor */}
       {activeTab === 'homepage' && !loading && (
