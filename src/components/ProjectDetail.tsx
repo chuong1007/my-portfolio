@@ -166,7 +166,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
               <Link
                 key={tag}
                 href={`/tag/${encodeURIComponent(tag)}`}
-                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-500 transition-all duration-300 active:scale-95"
+                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
               >
                 {tag}
               </Link>

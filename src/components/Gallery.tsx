@@ -447,7 +447,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                       <Link 
                         key={tag} 
                         href={`/tag/${encodeURIComponent(tag)}`}
-                        className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+                        className="text-sm text-zinc-500 hover:text-blue-400 transition-colors"
                       >
                         {tag}{i < project.tags.length - 1 ? "," : ""}
                       </Link>
