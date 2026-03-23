@@ -7,6 +7,7 @@ export type DbProject = {
   cover_image: string;
   is_visible: boolean;
   is_featured?: boolean;
+  gallery_columns?: number;
   created_at: string;
 };
 

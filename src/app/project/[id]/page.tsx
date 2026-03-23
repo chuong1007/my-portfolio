@@ -43,6 +43,7 @@ export default async function ProjectPage({ params }: PageProps) {
       description: dbProject.description,
       tags: dbProject.tags,
       imageUrl: dbProject.cover_image,
+      gallery_columns: dbProject.gallery_columns || 4,
       galleryImages: (images || []).map((img: any) => ({
         id: img.id,
         url: img.image_url,

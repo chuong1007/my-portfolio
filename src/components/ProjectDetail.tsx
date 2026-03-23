@@ -201,9 +201,18 @@ export function ProjectDetail({ project }: ProjectDetailProps) {
         >
           Hình ảnh dự án
         </motion.h2>
-
+        
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
-        <MasonryContainer className="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4">
+        <MasonryContainer 
+          className={cn(
+            "grid-cols-2 sm:grid-cols-3 gap-x-4",
+            project.gallery_columns === 2 && "md:grid-cols-2",
+            project.gallery_columns === 3 && "md:grid-cols-3",
+            project.gallery_columns === 4 && "md:grid-cols-4",
+            project.gallery_columns === 5 && "md:grid-cols-5",
+            (!project.gallery_columns || project.gallery_columns === 4) && "md:grid-cols-4"
+          )}
+        >
           {allImages.map((image, index) => (
             <MasonryDetailImage
               key={image.id}

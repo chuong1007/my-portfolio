@@ -6,6 +6,7 @@ export type Project = {
   aspectRatio: "square" | "portrait" | "landscape";
   description: string;
   galleryImages: GalleryImage[];
+  gallery_columns?: number;
 };
 
 export type GalleryImage = {
