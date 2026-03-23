@@ -340,7 +340,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                     <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-tight">
                       {p.title}
                     </h3>
-                    <p className="text-xs text-zinc-500 mt-2 font-medium uppercase tracking-wider">
+                    <p className="text-xs text-zinc-500 mt-1 font-medium">
                       {Array.isArray(p.tags) ? p.tags.join(", ") : ""}
                     </p>
                   </div>
