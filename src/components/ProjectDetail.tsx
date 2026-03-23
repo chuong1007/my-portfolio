@@ -36,8 +36,15 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
           loading={index < 8 ? "eager" : "lazy"}
           referrerPolicy="no-referrer"
           draggable={isAdmin}
-          className="block w-full h-auto transition-all duration-700 ease-out group-hover:scale-105 select-none pointer-events-none sm:pointer-events-auto"
-          style={{ userSelect: 'none', WebkitUserSelect: "none" } as any}
+          className={cn(
+            "block w-full h-auto transition-all duration-700 ease-out group-hover:scale-105 select-none",
+            !isAdmin && "pointer-events-none"
+          )}
+          style={{ 
+            userSelect: 'none', 
+            WebkitUserSelect: "none",
+            WebkitTouchCallout: isAdmin ? 'default' : 'none'
+          } as any}
           onDragStart={(e) => e.preventDefault()}
         />
         
@@ -300,7 +307,11 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                 draggable={false}
                 onDragStart={(e) => e.preventDefault()}
                 className="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl select-none"
-                style={{ userSelect: 'none', WebkitUserSelect: 'none' } as any}
+                style={{ 
+                  userSelect: 'none', 
+                  WebkitUserSelect: 'none',
+                  WebkitTouchCallout: isAdmin ? 'default' : 'none'
+                } as any}
               />
             </motion.div>
           </motion.div>
@@ -329,16 +340,19 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       src={p.cover_image}
                       alt={p.title}
                       loading="lazy"
-                      className="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75"
+                      className="w-full h-full object-cover transition-all duration-700 ease-in-out"
                     />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60 flex items-center justify-center">
+                      <ArrowRight className="w-5 h-5 text-zinc-50" />
+                    </div>
                     {p.is_featured && (
-                      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl">
+                      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-10">
                         <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
                       </div>
                     )}
                   </div>
                   <div className="px-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-tight">
+                    <h3 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-[1.6] tracking-wider line-clamp-2">
                       {p.title}
                     </h3>
                     <p className="text-xs text-zinc-500 mt-1 font-medium">
@@ -359,10 +373,11 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
             © CHUONG.GRAPHIC
           </p>
           <Link
-            href="/#dự-án"
-            className="px-6 py-3 rounded-full border border-zinc-700 text-zinc-300 hover:bg-zinc-800 transition-colors text-sm font-medium"
+            href="/projects"
+            className="group flex items-center gap-2 px-6 py-3 rounded-full border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors text-sm font-medium"
           >
-            ← Xem tất cả dự án
+            Xem tất cả dự án
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
       </div>

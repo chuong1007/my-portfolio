@@ -414,7 +414,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                         loading="lazy"
                         referrerPolicy="no-referrer"
                         className={cn(
-                          "w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75",
+                          "w-full h-full object-cover transition-all duration-700 ease-in-out",
                           isAdmin && project.is_visible === false && "opacity-40 grayscale"
                         )}
                       />
@@ -429,7 +429,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                           Đang ẩn
                         </div>
                       )}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
                         <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
                           {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -437,7 +437,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                       </div>
                     </div>
                     <div className="px-1 flex flex-col">
-                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors">
+                      <h3 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-[1.6] tracking-wider line-clamp-2">
                         {project.title}
                       </h3>
                     </div>

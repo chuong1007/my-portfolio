@@ -32,16 +32,16 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
                 alt={project.title}
                 loading="lazy"
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:brightness-75"
+                className="w-full h-full object-cover transition-all duration-700 ease-in-out"
               />
               
               {project.is_featured && (
-                <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/50 backdrop-blur-md border border-white/10 rounded-full shadow-2xl transition-transform group-hover:scale-110">
+                <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/50 backdrop-blur-md border border-white/10 rounded-full shadow-2xl transition-transform group-hover:scale-110 z-10">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
                 </div>
               )}
 
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
                 <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
                   Xem ngay
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -50,7 +50,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
             </div>
             
             <div className="px-1">
-              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-1">
+              <h3 className="text-[13px] font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors leading-[1.6] tracking-wider line-clamp-2">
                 {project.title}
               </h3>
             </div>
