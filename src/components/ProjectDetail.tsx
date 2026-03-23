@@ -35,13 +35,11 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
           loading={index < 8 ? "eager" : "lazy"}
           referrerPolicy="no-referrer"
           draggable={isAdmin}
-          className="block w-full h-auto transition-all duration-700 ease-out group-hover:scale-105 group-hover:brightness-110 select-none pointer-events-none sm:pointer-events-auto"
+          className="block w-full h-auto transition-all duration-700 ease-out group-hover:scale-105 select-none pointer-events-none sm:pointer-events-auto"
           style={{ userSelect: 'none', WebkitUserSelect: "none" } as any}
           onDragStart={(e) => e.preventDefault()}
         />
         
-        {/* Visual Glass Overlay on Hover */}
-        <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 transition-colors duration-300 pointer-events-none" />
         
         {/* Zoom Icon */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 text-white">
