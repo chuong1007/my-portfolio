@@ -860,8 +860,15 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             </div>
           </div>
 
-          {/* Image Grid - 4-column vertical flow per request */}
-          <MasonryContainer className="grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4">
+          <MasonryContainer 
+            className={cn(
+              "grid-cols-2 sm:grid-cols-3 gap-x-4",
+              galleryColumns === 2 && "md:grid-cols-2",
+              galleryColumns === 3 && "md:grid-cols-3",
+              galleryColumns === 4 && "md:grid-cols-4",
+              galleryColumns === 5 && "md:grid-cols-5"
+            )}
+          >
             {getGalleryItems().map((item, index) => {
               const isExisting = item.type === 'existing';
               const imgUrl = isExisting ? (item.data as DbProjectImage).image_url : getPreviewUrl(item.data as File);
