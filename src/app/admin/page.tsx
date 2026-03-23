@@ -159,13 +159,21 @@ export default function AdminPage() {
       setTags(tagsData);
     }
 
-    // Extract all unique tags used in projects, normalized for case to handle duplicates
+    // Extract all unique tags used in projects AND those in official tags table
     const allUniqueTags = new Map<string, string>(); // map: lowercase -> original-casing
+    
+    // First, add tags from official list
+    tagsData?.forEach((t: any) => {
+      allUniqueTags.set(t.name.toLowerCase(), t.name);
+    });
+
+    // Then, add tags from project data (projects override casing preference found in official tags if needed, 
+    // but usually they should match)
     projectsData?.forEach((p: any) => {
       if (Array.isArray(p.tags)) {
         p.tags.forEach((t: string) => {
           const lower = t.toLowerCase();
-          // Prefer "E-Commerce" (with big C) if both exist, or just keep the first one found
+          // Maintain capitalization preference, specially for "E-Commerce"
           if (!allUniqueTags.has(lower) || (t.includes('-Commerce') && !allUniqueTags.get(lower)?.includes('-Commerce'))) {
             allUniqueTags.set(lower, t);
           }
