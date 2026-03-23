@@ -215,6 +215,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   editable?: boolean;
+  minHeight?: string;
 }
 
 const FONTS = [
@@ -268,7 +269,15 @@ const LINE_HEIGHTS = [
 ];
 
 
-export function RichTextEditor({ content, onChange, isPreviewingLocal, placeholder = "Bắt đầu viết...", className, editable: forceEditable }: RichTextEditorProps) {
+export function RichTextEditor({ 
+  content, 
+  onChange, 
+  isPreviewingLocal, 
+  placeholder = "Bắt đầu viết...", 
+  className, 
+  editable: forceEditable,
+  minHeight = "200px" 
+}: RichTextEditorProps) {
   const adminContext = useAdmin();
   const isEditMode = adminContext ? adminContext.isEditMode : true; // Fallback for specialized pages
   const editable = forceEditable !== undefined ? forceEditable : (isEditMode && !isPreviewingLocal);
@@ -878,9 +887,10 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
       <div 
         className={cn(
           "relative group flex flex-col", 
-          !isPreviewingLocal ? "rounded-b-xl resize-y overflow-hidden min-h-[400px] bg-black/20" : "",
+          !isPreviewingLocal ? "rounded-b-xl resize-y overflow-hidden bg-black/20" : "",
           className
         )}
+        style={{ minHeight: !isPreviewingLocal ? minHeight : 'auto' }}
       >
         {showHtmlEditor && editable ? (
           <div className="flex-1 p-4">
@@ -924,7 +934,7 @@ export function RichTextEditor({ content, onChange, isPreviewingLocal, placehold
           scrollbar-width: none; /* Firefox */
         }
         .custom-tiptap-content .ProseMirror {
-          min-height: 400px;
+          min-height: ${minHeight};
           outline: none;
         }
         /* Reset margins for first elements in editor to avoid excessive gaps */

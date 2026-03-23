@@ -693,6 +693,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               placeholder="Viết mô tả dự án tuyệt vời của bạn ở đây..."
               className="bg-zinc-900 border-zinc-800"
               editable={true}
+              minHeight="400px"
             />
           </div>
           
@@ -708,6 +709,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               placeholder="Vd: Hình ảnh thực tế, Gallery..."
               className="bg-black/40 border-zinc-800 transition-all focus-within:ring-2 focus-within:ring-blue-500/20"
               editable={true}
+              minHeight="100px"
             />
           </div>
 
@@ -722,8 +724,9 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               content={galleryBottomContent}
               onChange={setGalleryBottomContent}
               placeholder="Viết nội dung kết thúc gallery ở đây..."
-              className="bg-black/40 border-zinc-800 min-h-[150px] transition-all focus-within:ring-2 focus-within:ring-blue-500/20"
+              className="bg-black/40 border-zinc-800 transition-all focus-within:ring-2 focus-within:ring-blue-500/20"
               editable={true}
+              minHeight="150px"
             />
           </div>
 
