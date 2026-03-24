@@ -355,7 +355,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                     )}
                   </div>
                   <div className="px-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[-1pt]">
+                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[0.5pt]">
                       {p.title}
                     </h3>
                   <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1 mt-1">
