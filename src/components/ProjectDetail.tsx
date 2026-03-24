@@ -163,7 +163,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       >
         {/* Project Info */}
         <div className="flex flex-col gap-6">
-          <h1 className="text-[31px] md:text-[55px] font-bold tracking-[0.7pt] leading-[1.2]">
+          <h1 className="text-[31px] md:text-[55px] font-bold tracking-[-0.07em] leading-[1.2]">
             {typeof project.title === 'string' ? project.title : String(project.title)}
           </h1>
 
