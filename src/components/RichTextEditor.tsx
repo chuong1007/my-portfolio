@@ -6,11 +6,12 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Paragraph from '@tiptap/extension-paragraph';
 import { Extension } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
-import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2, Palette } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
 import { getResponsiveValue } from '@/lib/responsive-helpers';
+import { SketchPicker } from 'react-color';
 import { compressImage } from '@/lib/compressImage';
 import { createClient } from '@/lib/supabase';
 
@@ -37,6 +38,7 @@ declare module '@tiptap/core' {
 }
 
 import FontFamily from '@tiptap/extension-font-family';
+import Color from '@tiptap/extension-color';
 
 const FontWeight = Extension.create({
   name: 'fontWeight',
@@ -150,12 +152,19 @@ export type ResponsiveFontWeight = {
   desktop: string;
 };
 
+export type ResponsiveColor = {
+  mobile: string;
+  tablet: string;
+  desktop: string;
+};
+
 export type RichTextData = {
   content: string | ResponsiveContent;
   fontSize: ResponsiveFontSize;
   lineHeight: ResponsiveLineHeight;
   fontFamily?: ResponsiveFontFamily;
   fontWeight?: ResponsiveFontWeight;
+  textColor?: ResponsiveColor;
 };
 
 type RichTextEditorProps = {
@@ -189,6 +198,12 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     tablet: '400',
     desktop: '400'
   });
+  const [localTextColor, setLocalTextColor] = useState<ResponsiveColor>({
+    mobile: 'inherit',
+    tablet: 'inherit',
+    desktop: 'inherit'
+  });
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [localContent, setLocalContent] = useState<ResponsiveContent>({
     mobile: '',
     tablet: '',
@@ -247,6 +262,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
     const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
     const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
+    const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
     const defaultContent = { mobile: '', tablet: '', desktop: '' };
 
     if (v === null || v === undefined) {
@@ -255,7 +271,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         fontSize: defaultFS, 
         lineHeight: defaultLH, 
         fontFamily: defaultFF, 
-        fontWeight: defaultFW 
+        fontWeight: defaultFW,
+        textColor: defaultColor
       };
     }
     
@@ -265,7 +282,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         fontSize: defaultFS,
         lineHeight: defaultLH,
         fontFamily: defaultFF,
-        fontWeight: defaultFW
+        fontWeight: defaultFW,
+        textColor: defaultColor
       };
     }
 
@@ -277,8 +295,9 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     const lineHeight = v.lineHeight || defaultLH;
     const fontFamily = v.fontFamily || defaultFF;
     const fontWeight = v.fontWeight || defaultFW;
+    const textColor = v.textColor || defaultColor;
 
-    return { content, fontSize, lineHeight, fontFamily, fontWeight };
+    return { content, fontSize, lineHeight, fontFamily, fontWeight, textColor };
   };
 
   const normalizedValue = normalize(value);
@@ -288,6 +307,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     setLocalLineHeight(normalizedValue.lineHeight);
     setLocalFontFamily(normalizedValue.fontFamily || { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' });
     setLocalFontWeight(normalizedValue.fontWeight || { mobile: '400', tablet: '400', desktop: '400' });
+    setLocalTextColor(normalizedValue.textColor || { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' });
     setLocalContent(normalizedValue.content as ResponsiveContent);
   }, [value]);
 
@@ -310,6 +330,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       LineHeight,
       FontFamily,
       FontWeight,
+      Color,
       ...(enterAsBreak ? [
         Extension.create({
           name: 'enterHandler',
@@ -334,7 +355,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         fontSize: localFontSize,
         lineHeight: localLineHeight,
         fontFamily: localFontFamily,
-        fontWeight: localFontWeight
+        fontWeight: localFontWeight,
+        textColor: localTextColor
       });
     },
     editorProps: {
@@ -439,6 +461,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   const selectionAttributes = editor?.getAttributes('textStyle') || {};
   const currentFontFamily = selectionAttributes.fontFamily || baseFontFamily;
   const currentFontWeight = selectionAttributes.fontWeight || baseFontWeight;
+  const currentTextColor = selectionAttributes.color || localTextColor[globalPreviewMode] || '#FFFFFF';
 
   const FONT_FAMILIES = [
     { label: 'Default', value: 'inherit' },
@@ -499,6 +522,44 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             >
               <Italic className="w-3.5 h-3.5" />
             </button>
+            
+            {/* Color Picker Toolbar Item */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className={cn(
+                  "p-1.5 rounded transition-colors group relative",
+                  showColorPicker ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
+                )}
+                title="Màu chữ"
+              >
+                <Palette className="w-3.5 h-3.5" />
+                <div 
+                  className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full border border-zinc-900 shadow-sm"
+                  style={{ backgroundColor: currentTextColor }}
+                />
+              </button>
+              
+              {showColorPicker && (
+                <div className="absolute top-10 left-0 z-[100]">
+                  <div className="fixed inset-0" onClick={() => setShowColorPicker(false)} />
+                  <div className="relative z-[101] bg-[#1a1a1a] border border-[#222] rounded-xl shadow-2xl p-2">
+                    <SketchPicker
+                      color={currentTextColor === 'inherit' ? '#FFFFFF' : currentTextColor}
+                      onChange={(color) => updateTextColor(color.hex)}
+                      className="!bg-[#222] !shadow-none !border-none"
+                      styles={{
+                        default: {
+                          picker: { background: '#222', borderRadius: '8px', border: '1px solid #333' }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingImage}

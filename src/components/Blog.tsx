@@ -21,18 +21,27 @@ import { usePathname } from "next/navigation";
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+  const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
+  const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
   
   if (typeof val === 'object' && val !== null && 'content' in val) {
     return {
       ...val,
       fontSize: val.fontSize || defaultFS,
-      lineHeight: val.lineHeight || defaultLH
+      lineHeight: val.lineHeight || defaultLH,
+      fontFamily: val.fontFamily || defaultFF,
+      fontWeight: val.fontWeight || defaultFW,
+      textColor: val.textColor || defaultColor
     };
   }
   return { 
     content: val || '', 
     fontSize: defaultFS,
-    lineHeight: defaultLH
+    lineHeight: defaultLH,
+    fontFamily: defaultFF,
+    fontWeight: defaultFW,
+    textColor: defaultColor
   };
 };
 
@@ -274,6 +283,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                   "--b-fw-desk": titleData.fontWeight?.desktop || '700',
                   "--b-fw-tab": titleData.fontWeight?.tablet || '700',
                   "--b-fw-mob": titleData.fontWeight?.mobile || '700',
+                  "--b-color-desk": titleData.textColor?.desktop === 'inherit' ? undefined : titleData.textColor?.desktop,
+                  "--b-color-tab": titleData.textColor?.tablet === 'inherit' ? undefined : titleData.textColor?.tablet,
+                  "--b-color-mob": titleData.textColor?.mobile === 'inherit' ? undefined : titleData.textColor?.mobile,
+                  color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--b-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--b-color-tab)' : 'var(--b-color-desk)'),
                 } as any}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
               />
@@ -291,6 +304,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                   "--bs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
                   "--bs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
                   "--bs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
+                  "--bs-color-desk": subtitleData.textColor?.desktop === 'inherit' ? undefined : subtitleData.textColor?.desktop,
+                  "--bs-color-tab": subtitleData.textColor?.tablet === 'inherit' ? undefined : subtitleData.textColor?.tablet,
+                  "--bs-color-mob": subtitleData.textColor?.mobile === 'inherit' ? undefined : subtitleData.textColor?.mobile,
+                  color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--bs-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--bs-color-tab)' : 'var(--bs-color-desk)'),
                 } as any}
                 dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
               />

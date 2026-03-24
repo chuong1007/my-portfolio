@@ -49,7 +49,10 @@ export function Contact() {
     return { 
       content: val || '', 
       fontSize: { mobile: defaultSize, tablet: defaultSize + 2, desktop: defaultSize + 4 },
-      lineHeight: { mobile: '1.4', tablet: '1.4', desktop: '1.4' }
+      lineHeight: { mobile: '1.4', tablet: '1.4', desktop: '1.4' },
+      fontFamily: { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' },
+      fontWeight: { mobile: '400', tablet: '400', desktop: '400' },
+      textColor: { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' }
     };
   }, []);
 
@@ -186,6 +189,10 @@ export function Contact() {
                     "--h-fw-desk": heading.fontWeight?.desktop || '700',
                     "--h-fw-tab": heading.fontWeight?.tablet || '700',
                     "--h-fw-mob": heading.fontWeight?.mobile || '700',
+                    "--h-color-desk": heading.textColor?.desktop === 'inherit' ? undefined : heading.textColor?.desktop,
+                    "--h-color-tab": heading.textColor?.tablet === 'inherit' ? undefined : heading.textColor?.tablet,
+                    "--h-color-mob": heading.textColor?.mobile === 'inherit' ? undefined : heading.textColor?.mobile,
+                    color: globalPreviewMode === 'mobile' ? 'var(--h-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--h-color-tab)' : 'var(--h-color-desk)'
                   } as any}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') || "" }}
                 />
@@ -200,6 +207,10 @@ export function Contact() {
                     "--s-lh-desk": subtitle.lineHeight?.desktop || '1.4',
                     "--s-lh-tab": subtitle.lineHeight?.tablet || '1.4',
                     "--s-lh-mob": subtitle.lineHeight?.mobile || '1.4',
+                    "--s-color-desk": subtitle.textColor?.desktop === 'inherit' ? undefined : subtitle.textColor?.desktop,
+                    "--s-color-tab": subtitle.textColor?.tablet === 'inherit' ? undefined : subtitle.textColor?.tablet,
+                    "--s-color-mob": subtitle.textColor?.mobile === 'inherit' ? undefined : subtitle.textColor?.mobile,
+                    color: globalPreviewMode === 'mobile' ? 'var(--s-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--s-color-tab)' : 'var(--s-color-desk)'
                   } as any}
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') || "" }}
                 />

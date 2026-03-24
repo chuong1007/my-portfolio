@@ -11,18 +11,27 @@ import { cn } from "@/lib/utils";
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
+  const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+  const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
+  const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
   
   if (typeof val === 'object' && val !== null && 'content' in val) {
     return {
       ...val,
       fontSize: val.fontSize || defaultFS,
-      lineHeight: val.lineHeight || defaultLH
+      lineHeight: val.lineHeight || defaultLH,
+      fontFamily: val.fontFamily || defaultFF,
+      fontWeight: val.fontWeight || defaultFW,
+      textColor: val.textColor || defaultColor
     };
   }
   return { 
     content: val || '', 
     fontSize: defaultFS,
-    lineHeight: defaultLH
+    lineHeight: defaultLH,
+    fontFamily: defaultFF,
+    fontWeight: defaultFW,
+    textColor: defaultColor
   };
 };
 
@@ -219,6 +228,9 @@ const formatFs = (val: string, fallback: string) => {
               "--fw-desk": titleData.fontWeight?.desktop || '700',
               "--fw-tab": titleData.fontWeight?.tablet || '700',
               "--fw-mob": titleData.fontWeight?.mobile || '700',
+              "--color-desk": titleData.textColor?.desktop === 'inherit' ? undefined : titleData.textColor?.desktop,
+              "--color-tab": titleData.textColor?.tablet === 'inherit' ? undefined : titleData.textColor?.tablet,
+              "--color-mob": titleData.textColor?.mobile === 'inherit' ? undefined : titleData.textColor?.mobile,
             } as any}
           >
             {/* Using arbitrary values with CSS variables for responsive styling */}
@@ -231,6 +243,7 @@ const formatFs = (val: string, fallback: string) => {
                 lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
                 fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'Syne, sans-serif') : undefined,
                 fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
+                color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-tab)' : 'var(--color-desk)'),
               }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
             />
@@ -262,6 +275,9 @@ const formatFs = (val: string, fallback: string) => {
     "--fw-sub-desk": subtitleData.fontWeight?.desktop || '500',
     "--fw-sub-tab": subtitleData.fontWeight?.tablet || '500',
     "--fw-sub-mob": subtitleData.fontWeight?.mobile || '500',
+    "--color-sub-desk": subtitleData.textColor?.desktop === 'inherit' ? undefined : subtitleData.textColor?.desktop,
+    "--color-sub-tab": subtitleData.textColor?.tablet === 'inherit' ? undefined : subtitleData.textColor?.tablet,
+    "--color-sub-mob": subtitleData.textColor?.mobile === 'inherit' ? undefined : subtitleData.textColor?.mobile,
   } as React.CSSProperties}
 >
   {/* Subtitle with responsive variants */}
@@ -275,6 +291,7 @@ const formatFs = (val: string, fallback: string) => {
       lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
       fontFamily: isEditor ? (subtitleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
       fontWeight: isEditor ? (subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '500') : undefined,
+      color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-sub-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-sub-tab)' : 'var(--color-sub-desk)'),
     }}
     dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
   />

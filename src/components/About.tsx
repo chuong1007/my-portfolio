@@ -15,7 +15,10 @@ const normalize = (val: any): RichTextData => {
   return { 
     content: val || '', 
     fontSize: { mobile: 16, tablet: 18, desktop: 20 },
-    lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' }
+    lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' },
+    fontFamily: { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' },
+    fontWeight: { mobile: '400', tablet: '400', desktop: '400' },
+    textColor: { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' }
   };
 };
 
@@ -182,7 +185,8 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                 fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
                 lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
                 fontFamily: heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700'
+                fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700',
+                color: heading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : heading.textColor?.[globalPreviewMode || 'desktop']
               }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }} 
             />
@@ -192,7 +196,8 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                 fontSize: `${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px`,
                 lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5',
                 fontFamily: subheading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                fontWeight: subheading.fontWeight?.[globalPreviewMode || 'desktop'] || '400'
+                fontWeight: subheading.fontWeight?.[globalPreviewMode || 'desktop'] || '400',
+                color: subheading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subheading.textColor?.[globalPreviewMode || 'desktop']
               }}
               dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }} 
             />
@@ -203,7 +208,10 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   key={i} 
                   style={{ 
                     fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
-                    lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6'
+                    lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6',
+                    fontFamily: p.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
+                    fontWeight: p.fontWeight?.[globalPreviewMode || 'desktop'] || '300',
+                    color: p.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : p.textColor?.[globalPreviewMode || 'desktop']
                   }}
                   className="whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
                   dangerouslySetInnerHTML={{ __html: getResponsiveValue(p.content, globalPreviewMode || 'desktop') }} 

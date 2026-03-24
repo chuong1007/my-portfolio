@@ -66,7 +66,16 @@ export default function AdminPage() {
   const [contactData, setContactData] = useState({ heading: '', subtitle: '', phone: '', email: '', isVisible: true, showFacebook: true, showZalo: true });
   const [galleryVisible, setGalleryVisible] = useState(true);
   const [blogVisible, setBlogVisible] = useState(true);
-  const [popupData, setPopupData] = useState({ isVisible: false, content: '', maxDisplayTimes: 1 });
+  const [popupData, setPopupData] = useState({ 
+    isVisible: false, 
+    content: '', 
+    maxDisplayTimes: 1,
+    delaySeconds: 1.5,
+    bgColor: '#18181b', // Default zinc-900
+    ctaEnabled: false,
+    ctaText: '',
+    ctaLink: ''
+  });
   const [savingContent, setSavingContent] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -152,7 +161,16 @@ export default function AdminPage() {
         });
         if (row.id === 'gallery') setGalleryVisible(d.isVisible !== false);
         if (row.id === 'blog') setBlogVisible(d.isVisible !== false);
-        if (row.id === 'popup') setPopupData({ isVisible: d.isVisible === true, content: getRawText(d), maxDisplayTimes: (d as any).maxDisplayTimes || 1 });
+        if (row.id === 'popup') setPopupData({ 
+          isVisible: d.isVisible === true, 
+          content: getRawText(d), 
+          maxDisplayTimes: (d as any).maxDisplayTimes || 1,
+          delaySeconds: (d as any).delaySeconds ?? 1.5,
+          bgColor: (d as any).bgColor || '#18181b',
+          ctaEnabled: (d as any).ctaEnabled || false,
+          ctaText: (d as any).ctaText || '',
+          ctaLink: (d as any).ctaLink || ''
+        });
       }
     }
 
@@ -435,7 +453,12 @@ export default function AdminPage() {
           ...currentData,
           isVisible: popupData.isVisible,
           content: mergeContent(currentData.content, popupData.content),
-          maxDisplayTimes: popupData.maxDisplayTimes || 1
+          maxDisplayTimes: popupData.maxDisplayTimes || 1,
+          delaySeconds: popupData.delaySeconds ?? 1.5,
+          bgColor: popupData.bgColor,
+          ctaEnabled: popupData.ctaEnabled,
+          ctaText: popupData.ctaText,
+          ctaLink: popupData.ctaLink
         };
       }
 
@@ -1163,14 +1186,87 @@ export default function AdminPage() {
             </div>
             
             <div className="pt-2">
-              <label className="block text-sm font-medium text-zinc-400 mb-2">Số lần hiển thị tối đa (cho mỗi khách truy cập)</label>
-              <input 
-                type="number" 
-                min="1"
-                value={popupData.maxDisplayTimes}
-                onChange={(e) => setPopupData({ ...popupData, maxDisplayTimes: parseInt(e.target.value) || 1 })}
-                className="w-full max-w-sm px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 mb-6"
-              />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Số lần hiển thị tối đa (cho mỗi khách)</label>
+                  <input 
+                    type="number" 
+                    min="1"
+                    value={popupData.maxDisplayTimes}
+                    onChange={(e) => setPopupData({ ...popupData, maxDisplayTimes: parseInt(e.target.value) || 1 })}
+                    className="w-full px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Thời gian chờ (giây)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    step="0.5"
+                    value={popupData.delaySeconds}
+                    onChange={(e) => setPopupData({ ...popupData, delaySeconds: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  />
+                  <p className="text-xs text-zinc-600 mt-1">Sau khi tải trang, đợi N giây trước khi hiện.</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Mã màu nền Popup</label>
+                  <div className="flex gap-2 items-center">
+                    <input 
+                      type="color" 
+                      value={popupData.bgColor}
+                      onChange={(e) => setPopupData({ ...popupData, bgColor: e.target.value })}
+                      className="w-10 h-10 p-0.5 bg-zinc-900 border border-zinc-800 rounded shrink-0 cursor-pointer"
+                    />
+                    <input 
+                      type="text" 
+                      value={popupData.bgColor}
+                      onChange={(e) => setPopupData({ ...popupData, bgColor: e.target.value })}
+                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 uppercase font-mono text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col gap-4 mb-6 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    id="cta-enabled"
+                    checked={popupData.ctaEnabled}
+                    onChange={(e) => setPopupData({ ...popupData, ctaEnabled: e.target.checked })}
+                    className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500"
+                  />
+                  <label htmlFor="cta-enabled" className="text-sm font-medium text-zinc-300 cursor-pointer">
+                    Hiển thị nút hành động (CTA)
+                  </label>
+                </div>
+                {popupData.ctaEnabled && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1">Nội dung nút</label>
+                      <input 
+                        type="text" 
+                        value={popupData.ctaText}
+                        onChange={(e) => setPopupData({ ...popupData, ctaText: e.target.value })}
+                        placeholder="Ví dụ: Đăng ký ngay"
+                        className="w-full px-3 py-2 text-sm bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-zinc-400 mb-1">Link chuyển hướng</label>
+                      <input 
+                        type="text" 
+                        value={popupData.ctaLink}
+                        onChange={(e) => setPopupData({ ...popupData, ctaLink: e.target.value })}
+                        placeholder="https://example.com"
+                        className="w-full px-3 py-2 text-sm bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:border-emerald-500/50"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <p className="text-xs text-zinc-500 mb-2">Popup hỗ trợ hiển thị hình ảnh và nội dung Text linh hoạt.</p>
               <RichTextEditor 
                 content={popupData.content}

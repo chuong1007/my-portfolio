@@ -35,10 +35,11 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
     setHtmlKey(contentKey);
 
     const maxDisplayTimes = rawContent.maxDisplayTimes || 1;
+    const delayMs = (typeof rawContent.delaySeconds === 'number' ? rawContent.delaySeconds : 1.5) * 1000;
     const seenTimes = parseInt(localStorage.getItem(contentKey) || "0", 10);
 
     if (seenTimes < maxDisplayTimes) {
-      const timer = setTimeout(() => setShow(true), 1500);
+      const timer = setTimeout(() => setShow(true), delayMs);
       return () => clearTimeout(timer);
     }
   }, [isVisible, rawContent]);
@@ -66,7 +67,8 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-zinc-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            className="relative w-full max-w-2xl backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            style={{ backgroundColor: rawContent?.bgColor || 'rgba(24, 24, 27, 0.9)' }}
           >
             <button
               onClick={handleClose}
@@ -75,11 +77,24 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
             >
               <X className="w-5 h-5" />
             </button>
-            <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar">
+            <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col justify-center">
               <div 
                 className="prose prose-invert max-w-none text-zinc-200 [&_img]:rounded-xl [&_img]:mx-auto"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
+              
+              {rawContent?.ctaEnabled && (
+                <div className="mt-8 flex justify-center w-full">
+                  <a 
+                    href={rawContent.ctaLink || "#"} 
+                    target={rawContent.ctaLink?.startsWith('http') ? '_blank' : undefined}
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center px-8 py-3.5 bg-zinc-100 hover:bg-white text-zinc-900 font-bold text-sm sm:text-base rounded-full shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_0_rgba(255,255,255,0.4)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
+                  >
+                    {rawContent.ctaText || "Nhấn vào đây"}
+                  </a>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
