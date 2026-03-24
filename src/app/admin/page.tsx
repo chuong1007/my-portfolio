@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { BarChart3, ChevronRight, Image as ImageIcon, LayoutDashboard, LogOut, Pencil, Plus, Settings, Target, Trash2, Tag, GripVertical, MoreHorizontal, Save, FileText, Eye, EyeOff, Star, Palette } from "lucide-react";
+import { BarChart3, ChevronRight, ChevronUp, ChevronDown, Image as ImageIcon, LayoutDashboard, LogOut, Pencil, Plus, Settings, Target, Trash2, Tag, GripVertical, MoreHorizontal, Save, FileText, Eye, EyeOff, Star, Palette } from "lucide-react";
 import { Reorder } from "framer-motion";
 import { createClient } from "@/lib/supabase";
 import { revalidateCache } from "@/app/actions";
@@ -303,16 +303,23 @@ export default function AdminPage() {
     await revalidateCache('/');
   };
 
-  const handleReorderProjects = async (newProjects: typeof projects) => {
-    // Update local state for flicker-free reordering
-    setProjects(newProjects.map((p, idx) => ({ ...p, display_order: idx + 1 })));
+  const handleMoveProject = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= projects.length) return;
     
+    const newProjects = [...projects];
+    [newProjects[index], newProjects[newIndex]] = [newProjects[newIndex], newProjects[index]];
+    
+    // Update local state immediately for responsive UI
+    const updated = newProjects.map((p, idx) => ({ ...p, display_order: idx + 1 }));
+    setProjects(updated);
+    
+    // Persist to DB (only update the 2 swapped items)
     const supabase = createClient();
-    // Update all in DB
-    const updates = newProjects.map((p, idx) => 
-      supabase.from('projects').update({ display_order: idx + 1 }).eq('id', p.id)
-    );
-    await Promise.all(updates);
+    await Promise.all([
+      supabase.from('projects').update({ display_order: updated[index].display_order }).eq('id', updated[index].id),
+      supabase.from('projects').update({ display_order: updated[newIndex].display_order }).eq('id', updated[newIndex].id)
+    ]);
     await revalidateCache('/');
   };
 
@@ -680,11 +687,10 @@ export default function AdminPage() {
 
       {/* Project List */}
       {activeTab === 'projects' && (
-      <Reorder.Group axis="y" values={projects} onReorder={handleReorderProjects} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {projects.map((project, idx) => (
-          <Reorder.Item
+          <div
             key={project.id}
-            value={project}
             className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group"
           >
             {/* Cover */}
@@ -704,10 +710,25 @@ export default function AdminPage() {
                 </div>
               )}
               
-              {/* Drag handle + order badge */}
+              {/* Move buttons + order badge */}
               <div className="absolute top-2 left-2 flex items-center gap-1">
-                <div className="cursor-grab active:cursor-grabbing w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                  <GripVertical className="w-3.5 h-3.5 text-zinc-300" />
+                <div className="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleMoveProject(idx, 'up')}
+                    disabled={idx === 0}
+                    className="w-6 h-6 bg-black/70 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl hover:bg-blue-600 hover:border-blue-500 transition-colors disabled:opacity-30 disabled:hover:bg-black/70"
+                    title="Di chuyển lên"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5 text-white" />
+                  </button>
+                  <button
+                    onClick={() => handleMoveProject(idx, 'down')}
+                    disabled={idx === projects.length - 1}
+                    className="w-6 h-6 bg-black/70 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl hover:bg-blue-600 hover:border-blue-500 transition-colors disabled:opacity-30 disabled:hover:bg-black/70"
+                    title="Di chuyển xuống"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5 text-white" />
+                  </button>
                 </div>
                 <div className="w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl">
                   <span className="text-[10px] font-bold text-zinc-300">{project.display_order ?? idx + 1}</span>
@@ -819,9 +840,9 @@ export default function AdminPage() {
                 </button>
               </div>
             </div>
-          </Reorder.Item>
+          </div>
         ))}
-      </Reorder.Group>
+      </div>
       )}
 
 
