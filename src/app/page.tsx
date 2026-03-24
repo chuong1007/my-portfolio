@@ -2,6 +2,7 @@ import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Gallery } from "@/components/Gallery";
 import { Blog } from "@/components/Blog";
+import { GlobalPopup } from "@/components/GlobalPopup";
 import { PageRenderer } from "@/components/builder/PageRenderer";
 import { createClient } from "@supabase/supabase-js";
 
@@ -34,6 +35,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen w-full">
+      <GlobalPopup isVisible={contentMap['popup']?.isVisible === true} rawContent={contentMap['popup']?.content} />
       <Hero initialContent={contentMap['hero']} />
       <About initialContent={contentMap['about']} />
       <Gallery initialContent={contentMap['gallery']} initialProjects={dbProjects || undefined} />

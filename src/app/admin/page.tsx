@@ -12,6 +12,9 @@ import { ProjectForm } from "@/components/admin/ProjectForm";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import dynamic from "next/dynamic";
+
+const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then((m: { RichTextEditor: React.ComponentType<any> }) => m.RichTextEditor), { ssr: false });
 
 // Convert mock projects to DbProject format for admin display
 function getMockProjectsAsDb(): (DbProject & { images: DbProjectImage[]; isMock?: boolean })[] {
@@ -42,7 +45,8 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics'>(
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics' | 'popup'>(
+    tabParam === 'popup' ? 'popup' :
     tabParam === 'homepage' ? 'homepage' : 
     tabParam === 'analytics' ? 'analytics' : 'projects'
   );
@@ -62,6 +66,7 @@ export default function AdminPage() {
   const [contactData, setContactData] = useState({ heading: '', subtitle: '', phone: '', email: '', isVisible: true, showFacebook: true, showZalo: true });
   const [galleryVisible, setGalleryVisible] = useState(true);
   const [blogVisible, setBlogVisible] = useState(true);
+  const [popupData, setPopupData] = useState({ isVisible: false, content: '', maxDisplayTimes: 1 });
   const [savingContent, setSavingContent] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
   const [showProjectForm, setShowProjectForm] = useState(false);
@@ -147,6 +152,7 @@ export default function AdminPage() {
         });
         if (row.id === 'gallery') setGalleryVisible(d.isVisible !== false);
         if (row.id === 'blog') setBlogVisible(d.isVisible !== false);
+        if (row.id === 'popup') setPopupData({ isVisible: d.isVisible === true, content: getRawText(d), maxDisplayTimes: (d as any).maxDisplayTimes || 1 });
       }
     }
 
@@ -361,7 +367,7 @@ export default function AdminPage() {
     fetchData();
   };
 
-  const handleSaveSiteContent = async (section: 'hero' | 'about' | 'contact' | 'gallery' | 'blog') => {
+  const handleSaveSiteContent = async (section: 'hero' | 'about' | 'contact' | 'gallery' | 'blog' | 'popup') => {
     setSavingContent(true);
     setSaveSuccess('');
     try {
@@ -424,6 +430,14 @@ export default function AdminPage() {
       
       if (section === 'gallery') payload = { ...currentData, isVisible: galleryVisible };
       if (section === 'blog') payload = { ...currentData, isVisible: blogVisible };
+      if (section === 'popup') {
+        payload = {
+          ...currentData,
+          isVisible: popupData.isVisible,
+          content: mergeContent(currentData.content, popupData.content),
+          maxDisplayTimes: popupData.maxDisplayTimes || 1
+        };
+      }
 
       const { error } = await supabase
         .from('site_content')
@@ -504,6 +518,18 @@ export default function AdminPage() {
             >
               <BarChart3 className="w-4 h-4" />
               Analytics
+            </button>
+            <div className="w-px h-4 bg-zinc-800 mx-1" />
+            <button
+              onClick={() => setActiveTab('popup')}
+              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                activeTab === 'popup'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-zinc-500 hover:text-blue-400 hover:bg-blue-500/10'
+              }`}
+            >
+              <ImageIcon className="w-4 h-4" />
+              Popup
             </button>
           </div>
         </div>
@@ -1105,6 +1131,58 @@ export default function AdminPage() {
       {/* Analytics Dashboard */}
       {activeTab === 'analytics' && !loading && (
         <AnalyticsDashboard />
+      )}
+
+      {/* Popup Editor */}
+      {activeTab === 'popup' && !loading && (
+        <div className="space-y-8 max-w-3xl">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-zinc-200">✨ Popup Khuyến mãi / Thông báo</h3>
+              <button
+                onClick={() => handleSaveSiteContent('popup')}
+                disabled={savingContent}
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {saveSuccess === 'popup' ? '✓ Đã lưu' : 'Lưu'}
+              </button>
+            </div>
+            
+            <div className="flex items-center gap-3 p-3 bg-zinc-800/30 rounded-xl border border-zinc-800">
+              <input
+                type="checkbox"
+                id="popup-visible"
+                checked={popupData.isVisible}
+                onChange={(e) => setPopupData({ ...popupData, isVisible: e.target.checked })}
+                className="w-4 h-4 rounded border-zinc-700 bg-zinc-800 text-emerald-500"
+              />
+              <label htmlFor="popup-visible" className="text-sm font-medium text-zinc-300 cursor-pointer">
+                Kích hoạt hiển thị Popup
+              </label>
+            </div>
+            
+            <div className="pt-2">
+              <label className="block text-sm font-medium text-zinc-400 mb-2">Số lần hiển thị tối đa (cho mỗi khách truy cập)</label>
+              <input 
+                type="number" 
+                min="1"
+                value={popupData.maxDisplayTimes}
+                onChange={(e) => setPopupData({ ...popupData, maxDisplayTimes: parseInt(e.target.value) || 1 })}
+                className="w-full max-w-sm px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 mb-6"
+              />
+              <p className="text-xs text-zinc-500 mb-2">Popup hỗ trợ hiển thị hình ảnh và nội dung Text linh hoạt.</p>
+              <RichTextEditor 
+                content={popupData.content}
+                onChange={(content: string) => setPopupData({ ...popupData, content })}
+                placeholder="Viết nội dung popup ở đây..."
+                className="bg-zinc-950 border-zinc-800 transition-all focus-within:ring-2 focus-within:ring-emerald-500/20"
+                editable={true}
+                minHeight="250px"
+              />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

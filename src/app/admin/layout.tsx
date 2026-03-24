@@ -86,7 +86,7 @@ export default function AdminLayout({
                 </span>
               ) : (
                 <img
-                  src={currentLogoUrl}
+                  src={currentLogoUrl || undefined}
                   alt="Logo"
                   className="h-6 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                   onError={(e) => {

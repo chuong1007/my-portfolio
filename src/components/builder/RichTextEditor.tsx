@@ -54,6 +54,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
+import { createClient } from "@/lib/supabase";
+import { compressImage } from "@/lib/compressImage";
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -72,6 +74,10 @@ declare module '@tiptap/core' {
     colorExtra: {
       setColor: (color: string) => ReturnType;
       unsetColor: () => ReturnType;
+    }
+    fontWeight: {
+      setFontWeight: (weight: string) => ReturnType;
+      unsetFontWeight: () => ReturnType;
     }
   }
 }
@@ -98,6 +104,7 @@ const TextStylesExtended = Extension.create({
               if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
               if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
               if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (attributes.fontWeight) styles.push(`font-weight: ${attributes.fontWeight} !important`);
               if (styles.length === 0) return {};
               return { style: styles.join('; ') };
             },
@@ -111,6 +118,7 @@ const TextStylesExtended = Extension.create({
               if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
               if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
               if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (attributes.fontWeight) styles.push(`font-weight: ${attributes.fontWeight} !important`);
               if (styles.length === 0) return {};
               return { style: styles.join('; ') };
             },
@@ -124,6 +132,7 @@ const TextStylesExtended = Extension.create({
               if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
               if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
               if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (attributes.fontWeight) styles.push(`font-weight: ${attributes.fontWeight} !important`);
               if (styles.length === 0) return {};
               return { style: styles.join('; ') };
             },
@@ -137,6 +146,21 @@ const TextStylesExtended = Extension.create({
               if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
               if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
               if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (attributes.fontWeight) styles.push(`font-weight: ${attributes.fontWeight} !important`);
+              if (styles.length === 0) return {};
+              return { style: styles.join('; ') };
+            },
+          },
+          fontWeight: {
+            default: null,
+            parseHTML: element => element.style.fontWeight,
+            renderHTML: attributes => {
+              const styles: string[] = [];
+              if (attributes.fontSize) styles.push(`font-size: ${attributes.fontSize} !important`);
+              if (attributes.letterSpacing) styles.push(`letter-spacing: ${attributes.letterSpacing} !important`);
+              if (attributes.lineHeight) styles.push(`line-height: ${attributes.lineHeight} !important`);
+              if (attributes.color) styles.push(`color: ${attributes.color} !important`);
+              if (attributes.fontWeight) styles.push(`font-weight: ${attributes.fontWeight} !important`);
               if (styles.length === 0) return {};
               return { style: styles.join('; ') };
             },
@@ -203,6 +227,20 @@ const TextStylesExtended = Extension.create({
           .updateAttributes('paragraph', { color: null })
           .run();
       },
+      setFontWeight: (weight: string) => ({ chain }: any) => {
+        return chain()
+          .setMark('textStyle', { fontWeight: weight })
+          .updateAttributes('heading', { fontWeight: weight })
+          .updateAttributes('paragraph', { fontWeight: weight })
+          .run();
+      },
+      unsetFontWeight: () => ({ chain }: any) => {
+        return chain()
+          .setMark('textStyle', { fontWeight: null })
+          .updateAttributes('heading', { fontWeight: null })
+          .updateAttributes('paragraph', { fontWeight: null })
+          .run();
+      },
     };
   },
 });
@@ -221,9 +259,22 @@ interface RichTextEditorProps {
 const FONTS = [
   { label: 'Default', value: '' },
   { label: 'Inter', value: 'Inter' },
+  { label: 'Roboto', value: 'Roboto' },
+  { label: 'Outfit', value: 'Outfit' },
+  { label: 'Open Sans', value: 'Open Sans' },
   { label: 'Serif', value: 'serif' },
   { label: 'Mono', value: 'monospace' },
   { label: 'Orbitron', value: 'Orbitron' },
+];
+
+const WEIGHTS = [
+  { label: 'Default', value: '' },
+  { label: 'Light', value: '300' },
+  { label: 'Regular', value: '400' },
+  { label: 'Medium', value: '500' },
+  { label: 'SemiBold', value: '600' },
+  { label: 'Bold', value: '700' },
+  { label: 'Black', value: '900' },
 ];
 
 const SIZES = [
@@ -282,6 +333,7 @@ export function RichTextEditor({
   const isEditMode = adminContext ? adminContext.isEditMode : true; // Fallback for specialized pages
   const editable = forceEditable !== undefined ? forceEditable : (isEditMode && !isPreviewingLocal);
   const [showFontMenu, setShowFontMenu] = useState(false);
+  const [showWeightMenu, setShowWeightMenu] = useState(false);
   const [showSizeMenu, setShowSizeMenu] = useState(false);
   const [showColorMenu, setShowColorMenu] = useState(false);
   const [showSpacingMenu, setShowSpacingMenu] = useState(false);
@@ -304,10 +356,104 @@ export function RichTextEditor({
 
   const closeAllMenus = () => {
     setShowFontMenu(false);
+    setShowWeightMenu(false);
     setShowSizeMenu(false);
     setShowColorMenu(false);
     setShowSpacingMenu(false);
     setShowLineHeightMenu(false);
+  };
+
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (file: File) => {
+    setIsUploadingImage(true);
+    
+    // Create temporary object URL and insert immediately
+    const tempUrl = URL.createObjectURL(file);
+    if (editor) {
+      editor.chain().focus().setImage({ src: tempUrl, alt: 'Đang tải...' }).run();
+    }
+
+    try {
+      const compressed = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.82,
+        maxSizeMB: 1,
+      });
+
+      const supabase = createClient();
+      const fileExt = compressed.name.split('.').pop() || 'jpg';
+      const fileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('project-images')
+        .upload(fileName, compressed, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: compressed.type,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(fileName);
+
+      // Swap the temp URL with the real public URL
+      if (editor) {
+        let posToUpdate: number | null = null;
+        let nodeAttrs: any = null;
+        
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name === 'image' && node.attrs.src === tempUrl) {
+            posToUpdate = pos;
+            nodeAttrs = node.attrs;
+            return false;
+          }
+        });
+        
+        if (posToUpdate !== null) {
+          editor.view.dispatch(
+            editor.state.tr.setNodeMarkup(posToUpdate, null, {
+              ...nodeAttrs,
+              src: data.publicUrl,
+              alt: ''
+            })
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      // Remove the image if upload failed
+      if (editor) {
+        let posToDelete: number | null = null;
+        let nodeSize = 0;
+        
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name === 'image' && node.attrs.src === tempUrl) {
+            posToDelete = pos;
+            nodeSize = node.nodeSize;
+            return false;
+          }
+        });
+        
+        if (posToDelete !== null) {
+          editor.view.dispatch(editor.state.tr.delete(posToDelete, posToDelete + nodeSize));
+        }
+      }
+      alert(`Lỗi khi tải ảnh lên: ${err instanceof Error ? err.message : "Vui lòng thử lại."}`);
+    } finally {
+      setIsUploadingImage(false);
+      URL.revokeObjectURL(tempUrl);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageUpload(file);
   };
 
   const editor = useEditor({
@@ -360,6 +506,30 @@ export function RichTextEditor({
     content,
     immediatelyRender: false,
     editable,
+    editorProps: {
+      handleDrop: function(view, event, slice, moved) {
+        if (!moved && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+          const file = event.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+            event.preventDefault();
+            handleImageUpload(file);
+            return true;
+          }
+        }
+        return false;
+      },
+      handlePaste: function(view, event, slice) {
+        if (event.clipboardData && event.clipboardData.files && event.clipboardData.files[0]) {
+          const file = event.clipboardData.files[0];
+          if (file.type.startsWith('image/')) {
+            event.preventDefault();
+            handleImageUpload(file);
+            return true;
+          }
+        }
+        return false;
+      }
+    },
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -541,6 +711,52 @@ export function RichTextEditor({
                       style={{ fontFamily: f.value }}
                     >
                       {f.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Font Weight Selector */}
+            <div className="relative">
+              <button
+                onClick={() => { 
+                  const newState = !showWeightMenu;
+                  closeAllMenus();
+                  setShowWeightMenu(newState);
+                }}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded hover:bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider transition-all border border-transparent",
+                  showWeightMenu && "bg-zinc-800 border-zinc-700 text-white"
+                )}
+              >
+                <Type className="w-3.5 h-3.5" />
+                <span className="w-16 truncate text-left">
+                  {WEIGHTS.find(w => editor.isActive('textStyle', { fontWeight: w.value }) || editor.isActive('heading', { fontWeight: w.value }) || editor.isActive('paragraph', { fontWeight: w.value }))?.label || 'Weight'}
+                </span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+              {showWeightMenu && (
+                <div className="absolute top-full left-0 mt-2 w-40 bg-zinc-950 border border-zinc-800 rounded-xl p-1 z-[100] shadow-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="p-2 text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-900 mb-1">
+                    Select Weight
+                  </div>
+                  {WEIGHTS.map(w => (
+                    <button
+                      key={w.label}
+                      onClick={() => {
+                        if (w.value) editor.chain().focus().setFontWeight(w.value).run();
+                        else editor.chain().focus().unsetFontWeight().run();
+                        closeAllMenus();
+                      }}
+                      className={cn(
+                        "w-full text-left px-3 py-2.5 rounded-lg text-[10px] uppercase tracking-widest hover:bg-zinc-900 transition-colors",
+                        editor.isActive('textStyle', { fontWeight: w.value }) ? "text-blue-500 bg-zinc-900 font-bold" : "text-zinc-500",
+                        w.value ? "" : "font-normal"
+                      )}
+                      style={w.value ? { fontWeight: w.value } : {}}
+                    >
+                      {w.label}
                     </button>
                   ))}
                 </div>
@@ -817,17 +1033,26 @@ export function RichTextEditor({
             </button>
             <button
               onClick={() => {
-                const url = window.prompt('Nhập địa chỉ Ảnh:');
-                if (url) {
-                  editor.chain().focus().setImage({ src: url }).run();
-                }
+                fileInputRef.current?.click();
                 closeAllMenus();
               }}
-              className="p-2 rounded hover:bg-zinc-800 text-zinc-400"
-              title="Thêm Ảnh (URL)"
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400 relative"
+              title="Thêm Ảnh"
+              disabled={isUploadingImage}
             >
-              <ImageIcon className="w-4 h-4" />
+              {isUploadingImage ? (
+                <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <ImageIcon className="w-4 h-4" />
+              )}
             </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept="image/*" 
+              onChange={handleFileInput} 
+            />
             <button
               onClick={() => {
                 const url = window.prompt('Nhập địa chỉ YouTube:');

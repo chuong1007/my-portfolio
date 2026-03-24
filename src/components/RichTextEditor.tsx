@@ -5,11 +5,14 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Paragraph from '@tiptap/extension-paragraph';
 import { Extension } from '@tiptap/core';
-import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical } from 'lucide-react';
+import Image from '@tiptap/extension-image';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
 import { getResponsiveValue } from '@/lib/responsive-helpers';
+import { compressImage } from '@/lib/compressImage';
+import { createClient } from '@/lib/supabase';
 
 // --- Custom Extensions ---
 declare module '@tiptap/core' {
@@ -192,6 +195,51 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     desktop: ''
   });
   const isUpdatingRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const compressed = await compressImage(file, {
+        maxWidth: 1920,
+        maxHeight: 1920,
+        quality: 0.82,
+        maxSizeMB: 1,
+      });
+
+      const supabase = createClient();
+      const fileExt = compressed.name.split('.').pop();
+      const fileName = `uploads/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('project-images')
+        .upload(fileName, compressed, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: compressed.type,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(fileName);
+
+      if (editor) {
+        editor.chain().focus().setImage({ src: data.publicUrl }).run();
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert(`Lỗi khi tải ảnh lên: ${err instanceof Error ? err.message : "Vui lòng thử lại."}`);
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   // Normalize initial value
   const normalize = (v: any): RichTextData => {
@@ -244,10 +292,17 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   }, [value]);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         hardBreak: {
           keepMarks: true,
+        },
+      }),
+      Image.configure({
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-xl max-w-full h-auto',
         },
       }),
       TextStyle,
@@ -444,6 +499,21 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             >
               <Italic className="w-3.5 h-3.5" />
             </button>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingImage}
+              className="p-1.5 rounded transition-colors text-zinc-500 hover:text-zinc-300 disabled:opacity-50"
+              title="Chèn ảnh"
+            >
+              {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" /> : <ImageIcon className="w-3.5 h-3.5" />}
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageUpload} 
+              accept="image/*" 
+              className="hidden" 
+            />
           </div>
 
           <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800 ml-1">
