@@ -395,7 +395,10 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     onChange({
       content: localContent,
       fontSize: updatedSizes,
-      lineHeight: localLineHeight
+      lineHeight: localLineHeight,
+      fontFamily: localFontFamily,
+      fontWeight: localFontWeight,
+      textColor: localTextColor
     });
   };
 
@@ -407,7 +410,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       fontSize: localFontSize,
       lineHeight: updatedLH,
       fontFamily: localFontFamily,
-      fontWeight: localFontWeight
+      fontWeight: localFontWeight,
+      textColor: localTextColor
     });
   };
 
@@ -427,7 +431,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         fontSize: localFontSize,
         lineHeight: localLineHeight,
         fontFamily: updatedFF,
-        fontWeight: localFontWeight
+        fontWeight: localFontWeight,
+        textColor: localTextColor
       });
     }
   };
@@ -448,7 +453,30 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         fontSize: localFontSize,
         lineHeight: localLineHeight,
         fontFamily: localFontFamily,
-        fontWeight: updatedFW
+        fontWeight: updatedFW,
+        textColor: localTextColor
+      });
+    }
+  };
+
+  const updateTextColor = (newColor: string) => {
+    if (!editor) return;
+    const { from, to } = editor.state.selection;
+    const isSelection = from !== to;
+
+    if (isSelection) {
+      editor.chain().focus().setColor(newColor).run();
+    } else {
+      const updatedColor = { ...localTextColor, [globalPreviewMode]: newColor };
+      setLocalTextColor(updatedColor);
+      editor.chain().focus().setColor(newColor).run();
+      onChange({
+        content: localContent,
+        fontSize: localFontSize,
+        lineHeight: localLineHeight,
+        fontFamily: localFontFamily,
+        fontWeight: localFontWeight,
+        textColor: updatedColor
       });
     }
   };
