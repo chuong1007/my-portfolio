@@ -12,6 +12,7 @@ import { ProjectForm } from "@/components/admin/ProjectForm";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { PopupPreview } from "@/components/admin/PopupPreview";
 import dynamic from "next/dynamic";
 
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then((m: { RichTextEditor: React.ComponentType<any> }) => m.RichTextEditor), { ssr: false });
@@ -1158,7 +1159,7 @@ export default function AdminPage() {
 
       {/* Popup Editor */}
       {activeTab === 'popup' && !loading && (
-        <div className="space-y-8 max-w-3xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-zinc-200">✨ Popup Khuyến mãi / Thông báo</h3>
@@ -1188,7 +1189,7 @@ export default function AdminPage() {
             <div className="pt-2">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">Số lần hiển thị tối đa (cho mỗi khách)</label>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Số lần hiển thị tối đa</label>
                   <input 
                     type="number" 
                     min="1"
@@ -1277,6 +1278,16 @@ export default function AdminPage() {
                 minHeight="250px"
               />
             </div>
+          </div>
+          
+          <div className="sticky top-10">
+            <PopupPreview 
+              content={popupData.content} 
+              bgColor={popupData.bgColor}
+              ctaEnabled={popupData.ctaEnabled}
+              ctaText={popupData.ctaText}
+              ctaLink={popupData.ctaLink}
+            />
           </div>
         </div>
       )}

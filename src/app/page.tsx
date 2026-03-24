@@ -35,7 +35,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen w-full">
-      <GlobalPopup isVisible={contentMap['popup']?.isVisible === true} rawContent={contentMap['popup']?.content} />
+      <GlobalPopup isVisible={contentMap['popup']?.isVisible === true} rawContent={contentMap['popup']} />
       <Hero initialContent={contentMap['hero']} />
       <About initialContent={contentMap['about']} />
       <Gallery initialContent={contentMap['gallery']} initialProjects={dbProjects || undefined} />
