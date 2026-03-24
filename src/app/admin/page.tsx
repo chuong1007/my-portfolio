@@ -76,6 +76,7 @@ export default function AdminPage() {
       .select("*")
       .order("is_featured", { ascending: false })
       .order("featured_order", { ascending: true })
+      .order("display_order", { ascending: true })
       .order("created_at", { ascending: false });
 
     if (projectsData && projectsData.length > 0) {
@@ -297,6 +298,19 @@ export default function AdminPage() {
     // Update all in DB
     const updates = newTags.map((t, idx) => 
       supabase.from('project_tags').update({ display_order: idx + 1 }).eq('id', t.id)
+    );
+    await Promise.all(updates);
+    await revalidateCache('/');
+  };
+
+  const handleReorderProjects = async (newProjects: typeof projects) => {
+    // Update local state for flicker-free reordering
+    setProjects(newProjects.map((p, idx) => ({ ...p, display_order: idx + 1 })));
+    
+    const supabase = createClient();
+    // Update all in DB
+    const updates = newProjects.map((p, idx) => 
+      supabase.from('projects').update({ display_order: idx + 1 }).eq('id', p.id)
     );
     await Promise.all(updates);
     await revalidateCache('/');
@@ -666,10 +680,11 @@ export default function AdminPage() {
 
       {/* Project List */}
       {activeTab === 'projects' && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <div
+      <Reorder.Group axis="y" values={projects} onReorder={handleReorderProjects} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {projects.map((project, idx) => (
+          <Reorder.Item
             key={project.id}
+            value={project}
             className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group"
           >
             {/* Cover */}
@@ -689,6 +704,16 @@ export default function AdminPage() {
                 </div>
               )}
               
+              {/* Drag handle + order badge */}
+              <div className="absolute top-2 left-2 flex items-center gap-1">
+                <div className="cursor-grab active:cursor-grabbing w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                  <GripVertical className="w-3.5 h-3.5 text-zinc-300" />
+                </div>
+                <div className="w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center shadow-2xl">
+                  <span className="text-[10px] font-bold text-zinc-300">{project.display_order ?? idx + 1}</span>
+                </div>
+              </div>
+
               {!project.is_visible && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="bg-zinc-950/80 text-zinc-400 text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-zinc-800">
@@ -705,35 +730,38 @@ export default function AdminPage() {
             </div>
 
             {/* Info */}
-            <div className="p-5">
-              <h3 className="text-lg font-bold text-zinc-200 mb-2 leading-relaxed">{project.title}</h3>
-              <p className="text-sm text-zinc-500 line-clamp-2 mb-3">{project.description}</p>
+            <div className="p-4">
+              <h3 className="text-sm font-bold text-zinc-200 mb-1 leading-snug line-clamp-2">{project.title}</h3>
+              <p className="text-xs text-zinc-500 line-clamp-1 mb-2">{project.description}</p>
 
               {/* Tags */}
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {project.tags?.map((tag: string) => (
+              <div className="flex flex-wrap gap-1 mb-3">
+                {project.tags?.slice(0, 3).map((tag: string) => (
                   <span
                     key={tag}
-                    className="text-xs px-2 py-1 bg-zinc-800 text-zinc-400 rounded-full"
+                    className="text-[10px] px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded-full"
                   >
                     {tag}
                   </span>
                 ))}
+                {project.tags && project.tags.length > 3 && (
+                  <span className="text-[10px] text-zinc-600">+{project.tags.length - 3}</span>
+                )}
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1.5 pt-3 border-t border-zinc-800 flex-nowrap overflow-x-auto custom-scrollbar-hidden">
+              <div className="flex items-center gap-1 pt-2 border-t border-zinc-800 flex-nowrap overflow-x-auto custom-scrollbar-hidden">
                 <button
                   onClick={() => handleToggleProjectVisibility(project.id, project.is_visible)}
                   className={cn(
-                    "p-1.5 rounded-lg transition-colors border shrink-0",
+                    "p-1 rounded-lg transition-colors border shrink-0",
                     project.is_visible 
                       ? "text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-100" 
                       : "text-emerald-500 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10"
                   )}
                   title={project.is_visible ? "Ẩn dự án" : "Hiện dự án"}
                 >
-                  {project.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                  {project.is_visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                 </button>
 
                 {/* Quick Featured Toggle */}
@@ -741,14 +769,14 @@ export default function AdminPage() {
                   <button
                     onClick={() => handleUpdateFeatured(project.id, !project.is_featured, project.featured_order || 0)}
                     className={cn(
-                      "p-1.5 transition-colors border shrink-0",
+                      "p-1 transition-colors border shrink-0",
                       project.is_featured 
                         ? "text-amber-400 border-amber-500/30 bg-amber-500/10 rounded-l-lg hover:bg-amber-500/20" 
                         : "text-zinc-400 border-transparent hover:bg-zinc-800 hover:text-zinc-100 rounded-lg"
                     )}
                     title={project.is_featured ? "Bỏ ghim nổi bật" : "Ghim nổi bật"}
                   >
-                    <Star className={cn("w-4 h-4", project.is_featured && "fill-current")} />
+                    <Star className={cn("w-3.5 h-3.5", project.is_featured && "fill-current")} />
                   </button>
                   {project.is_featured && (
                     <input
@@ -760,7 +788,7 @@ export default function AdminPage() {
                         await supabase.from("projects").update({ featured_order: newOrder }).eq("id", project.id);
                         fetchData();
                       }}
-                      className="w-10 h-[34px] px-1 bg-amber-500/5 border-y border-r border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-r-lg focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-center"
+                      className="w-8 h-[28px] px-0.5 bg-amber-500/5 border-y border-r border-amber-500/30 text-amber-400 text-[10px] font-bold rounded-r-lg focus:outline-none focus:ring-1 focus:ring-amber-500/50 text-center"
                       min="0"
                       title="Thứ tự ghim"
                     />
@@ -769,31 +797,31 @@ export default function AdminPage() {
                 
                 <Link
                   href={`/project/${project.slug || project.id}`}
-                  className="flex items-center gap-1 bg-amber-400 text-black px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-amber-300 transition-colors shrink-0"
+                  className="flex items-center gap-0.5 bg-amber-400 text-black px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider hover:bg-amber-300 transition-colors shrink-0"
                 >
                   <Palette className="w-3 h-3" />
-                  Thiết kế
+                  Xem
                 </Link>
 
                 <button
                   onClick={() => setEditingProject(project)}
-                  className="flex items-center gap-1 text-[10px] uppercase font-bold text-zinc-400 hover:text-zinc-100 transition-colors px-2 py-1.5 rounded-lg hover:bg-zinc-800 border border-transparent shrink-0"
+                  className="p-1 text-zinc-400 hover:text-zinc-100 transition-colors rounded-lg hover:bg-zinc-800 shrink-0"
+                  title="Sửa"
                 >
                   <Pencil className="w-3 h-3" />
-                  Sửa
                 </button>
                 <button
                   onClick={() => handleDeleteProject(project.id)}
-                  className="flex items-center gap-1 text-[10px] uppercase font-bold text-red-400/80 hover:text-red-300 transition-colors px-2 py-1.5 rounded-lg hover:bg-red-400/10 border border-transparent shrink-0"
+                  className="p-1 text-red-400/80 hover:text-red-300 transition-colors rounded-lg hover:bg-red-400/10 shrink-0"
+                  title="Xóa"
                 >
                   <Trash2 className="w-3 h-3" />
-                  Xóa
                 </button>
               </div>
             </div>
-          </div>
+          </Reorder.Item>
         ))}
-      </div>
+      </Reorder.Group>
       )}
 
 

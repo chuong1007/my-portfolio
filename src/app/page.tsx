@@ -24,6 +24,7 @@ export default async function Home() {
       .eq('is_visible', true)
       .order('is_featured', { ascending: false })
       .order('featured_order', { ascending: true })
+      .order('display_order', { ascending: true })
       .order('created_at', { ascending: false })
       .limit(12),
     supabase.from('blogs').select('*').order('created_at', { ascending: false })

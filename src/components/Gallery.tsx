@@ -91,6 +91,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
         .select('*')
         .order('is_featured', { ascending: false })
         .order('featured_order', { ascending: true })
+        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (projectsData) {
