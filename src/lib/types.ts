@@ -31,6 +31,7 @@ export type DbBlog = {
   tags: string[];
   image_url: string;
   is_featured: boolean;
+  display_order?: number;
   is_published?: boolean;
   custom_css?: string;
   custom_html?: string;

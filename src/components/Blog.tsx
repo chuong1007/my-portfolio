@@ -114,6 +114,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
       const supabase = createClient();
       let query = supabase.from("blogs")
         .select("*")
+        .order("display_order", { ascending: true })
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false });
       const { data: { session } } = await supabase.auth.getSession();
