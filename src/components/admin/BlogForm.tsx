@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Upload, X, Link2, Code2, Palette, Eye, EyeOff, ExternalLink, Save as SaveIcon, Copy, Check, Plus, Tag as TagIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { revalidateCache } from "@/app/actions";
@@ -10,19 +10,7 @@ import { ImageUpload } from "./ImageUpload";
 import dynamic from "next/dynamic";
 const RichTextEditor = dynamic(() => import("@/components/builder/RichTextEditor").then(m => m.RichTextEditor), { ssr: false });
 
-const AVAILABLE_TAGS = [
-  "Branding",
-  "UI/UX Design",
-  "Graphic Design",
-  "AI Tools",
-  "Digital Marketing",
-  "Content Strategy",
-  "Storytelling",
-  "Minimalism",
-  "Typography",
-  "Career Tips",
-  "AI Innovation"
-];
+
 
 type BlogFormProps = {
   blog?: DbBlog | null;
@@ -48,6 +36,36 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+
+  // Fetch all used and existing blog tags for suggestion
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      const supabase = createClient();
+      const uniqueTags = new Set<string>();
+
+      // Get official tags
+      const { data: dbTags } = await supabase.from('blog_tags').select('name');
+      if (dbTags) {
+        dbTags.forEach((t: any) => uniqueTags.add(t.name.trim()));
+      }
+
+      // Get tags from existing blogs
+      const { data: blogsData } = await supabase.from('blogs').select('tags');
+      if (blogsData) {
+        blogsData.forEach((b: any) => {
+          if (b.tags && Array.isArray(b.tags)) {
+            b.tags.forEach((t: any) => {
+              if (typeof t === 'string' && t.trim()) uniqueTags.add(t.trim());
+            });
+          }
+        });
+      }
+      
+      setAvailableTags(Array.from(uniqueTags).sort());
+    };
+    fetchSuggestions();
+  }, []);
 
   const handleCopyUrl = () => {
     if (!slug) return;
@@ -412,7 +430,7 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
             <div className="pt-4 border-t border-zinc-800/50">
               <p className="text-[10px] uppercase font-black tracking-widest text-zinc-600 mb-3">Gợi ý</p>
               <div className="flex flex-wrap gap-1.5">
-                {AVAILABLE_TAGS.filter(t => !tags.includes(t)).map((tag) => (
+                {availableTags.filter(t => !tags.includes(t)).map((tag) => (
                   <button
                     key={tag}
                     type="button"

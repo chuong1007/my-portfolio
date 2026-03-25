@@ -45,21 +45,6 @@ const normalize = (val: any): RichTextData => {
   };
 };
 
-const BLOG_TAGS = [
-  "All",
-  "Branding",
-  "UI/UX Design",
-  "Graphic Design",
-  "AI Tools",
-  "Digital Marketing",
-  "Content Strategy",
-  "Storytelling",
-  "Minimalism",
-  "Typography",
-  "Career Tips",
-  "AI Innovation"
-];
-
 type BlogProps = {
   variant?: 'homepage' | 'subpage';
   sectionId?: string;
@@ -71,6 +56,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
   const [blogs, setBlogs] = useState<DbBlog[]>(() => initialBlogs || []);
   const [loading, setLoading] = useState(initialBlogs ? false : true);
   const [activeTag, setActiveTag] = useState("All");
+  const [blogTags, setBlogTags] = useState<string[]>(["All"]);
   const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "128");
@@ -121,6 +107,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
       if (!session) query = query.eq("is_published", true);
       const { data } = await query;
       if (data) setBlogs(data);
+      
+      const { data: tagData } = await supabase.from('blog_tags').select('name').order('display_order', { ascending: true });
+      if (tagData) {
+        setBlogTags(["All", ...tagData.map((t: any) => t.name).filter((n: string) => n.toLowerCase() !== "all")]);
+      }
+
       setLoading(false);
     }
     fetchBlogs();
@@ -326,7 +318,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
 
           {!loading && blogs.length > 0 && (
             <div className="flex flex-wrap items-center gap-3 mb-10">
-              {BLOG_TAGS.map((tag) => (
+              {blogTags.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => setActiveTag(tag)}
