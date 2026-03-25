@@ -89,7 +89,7 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
                     href={rawContent.ctaLink || "#"} 
                     target={rawContent.ctaLink?.startsWith('http') ? '_blank' : undefined}
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center px-8 py-3.5 bg-zinc-100 hover:bg-white text-zinc-900 font-bold text-sm sm:text-base rounded-full shadow-[0_0_30px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_0_rgba(255,255,255,0.4)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
+                    className="inline-flex items-center justify-center px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base rounded-full shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] hover:shadow-[0_0_40px_0_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
                   >
                     {rawContent.ctaText || "Nhấn vào đây"}
                   </a>
