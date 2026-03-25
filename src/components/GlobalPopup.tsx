@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 
 export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, rawContent: any }) {
   const [show, setShow] = useState(false);
@@ -89,9 +89,10 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
                     href={rawContent.ctaLink || "#"} 
                     target={rawContent.ctaLink?.startsWith('http') ? '_blank' : undefined}
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm sm:text-base rounded-full shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] hover:shadow-[0_0_40px_0_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
+                    className="inline-flex items-center gap-2 justify-center px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-normal text-sm sm:text-base rounded-full shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] hover:shadow-[0_0_40px_0_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:-translate-y-1 hover:scale-105"
                   >
                     {rawContent.ctaText || "Nhấn vào đây"}
+                    <ArrowRight className="w-4 h-4" />
                   </a>
                 </div>
               )}
