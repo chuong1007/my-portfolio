@@ -371,7 +371,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
           </motion.div>
  
           {/* Filters */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-16">
+          <div className="flex flex-wrap items-center justify-start gap-3 mb-16">
             {dbCategories.map((category) => {
               const isActive = activeCategory === category;
               return (
