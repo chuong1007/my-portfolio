@@ -84,7 +84,7 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
               />
               
               {rawContent?.ctaEnabled && (
-                <div className="mt-8 flex justify-center w-full">
+                <div className="mt-4 flex justify-center w-full">
                   <a 
                     href={rawContent.ctaLink || "#"} 
                     target={rawContent.ctaLink?.startsWith('http') ? '_blank' : undefined}
