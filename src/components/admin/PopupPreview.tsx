@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Monitor, Tablet, Smartphone } from "lucide-react";
+import { X, ArrowRight, Monitor, Tablet, Smartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PopupPreviewProps {
@@ -147,8 +147,9 @@ export function PopupPreview({
 
                 {ctaEnabled && (
                   <div className={cn("flex justify-center w-full", device === "mobile" ? "mt-4" : "mt-8")}>
-                    <span className="inline-flex items-center justify-center px-8 py-3.5 bg-zinc-100 text-zinc-900 font-bold text-sm rounded-full shadow-lg cursor-default whitespace-nowrap">
+                    <span className="inline-flex items-center gap-2 justify-center px-8 py-3.5 bg-blue-600 text-white font-normal text-sm rounded-full shadow-lg cursor-default whitespace-nowrap">
                       {ctaText || "Nhấn vào đây"}
+                      <ArrowRight className="w-4 h-4" />
                     </span>
                   </div>
                 )}
