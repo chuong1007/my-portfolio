@@ -304,7 +304,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-16 flex items-end justify-between gap-4 border-b border-zinc-900 pb-8"
+            className="mb-10 flex items-end justify-between gap-4 border-b border-zinc-900 pb-8"
           >
             <div className="flex flex-col gap-2">
               <div 
@@ -371,7 +371,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
           </motion.div>
  
           {/* Filters */}
-          <div className="flex flex-wrap items-center justify-start gap-3 mb-16">
+          <div className="flex flex-wrap items-center justify-start gap-3 mb-10">
             {dbCategories.map((category) => {
               const isActive = activeCategory === category;
               return (
