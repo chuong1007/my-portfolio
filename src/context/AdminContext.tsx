@@ -83,6 +83,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           sectionId: event.data.sectionId,
           initialData: event.data.data
         });
+      } else if (event.data?.type === 'NAVIGATE_TO') {
+        window.location.href = event.data.url;
       }
     };
 

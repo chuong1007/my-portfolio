@@ -283,15 +283,16 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
         id="projects" 
         className={cn(
           "px-4 md:px-12 bg-zinc-950 relative",
-          !isEditor && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
+          !isEditor && variant === 'homepage' && "pt-0",
+          !isEditor && variant !== 'homepage' && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
           !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
         )}
         style={{
-          paddingTop: isEditor ? `${currentPt}px` : undefined,
+          paddingTop: variant === 'homepage' ? '0px' : (isEditor ? `${currentPt}px` : undefined),
           paddingBottom: isEditor ? `${currentPb}px` : undefined,
-          "--pt-desk": `${ptDesk}px`,
-          "--pt-tab": `${ptTab}px`,
-          "--pt-mob": `${ptMob}px`,
+          "--pt-desk": variant === 'homepage' ? '0px' : `${ptDesk}px`,
+          "--pt-tab": variant === 'homepage' ? '0px' : `${ptTab}px`,
+          "--pt-mob": variant === 'homepage' ? '0px' : `${ptMob}px`,
           "--pb-desk": `${pbDesk}px`,
           "--pb-tab": `${pbTab}px`,
           "--pb-mob": `${pbMob}px`,

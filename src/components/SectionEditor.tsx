@@ -43,6 +43,16 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
   }, [onSave]);
 
   const handleOpenEditor = () => {
+    // Nếu là các trang đã có menu riêng bên trái, chuyển hướng luôn tới đó
+    if (sectionId === 'about') {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'NAVIGATE_TO', url: '/admin/about' }, '*');
+      } else {
+        window.location.href = '/admin/about';
+      }
+      return;
+    }
+    
     // If inside iframe, tell parent to open editor
     if (window.parent !== window) {
       window.parent.postMessage({ 

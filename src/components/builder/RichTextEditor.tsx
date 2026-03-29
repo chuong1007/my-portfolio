@@ -19,6 +19,8 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
+import Mention from '@tiptap/extension-mention';
+import suggestion from './suggestion';
 import { useAdmin } from "@/context/AdminContext";
 import { 
   Bold, 
@@ -501,6 +503,16 @@ export function RichTextEditor({
         HTMLAttributes: {
           class: 'rounded-xl overflow-hidden my-8 shadow-2xl mx-auto',
         },
+      }),
+      Mention.configure({
+        HTMLAttributes: {
+          // Visual: styled like project tag pills — see globals.css .mention for hover/active
+          class: 'mention',
+        },
+        renderLabel({ node }) {
+          return `${node.attrs.label ?? node.attrs.id}`;
+        },
+        suggestion,
       }),
     ],
     content,
