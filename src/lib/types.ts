@@ -10,6 +10,8 @@ export type DbProject = {
   featured_order?: number;
   display_order?: number;
   gallery_columns?: number;
+  gallery_columns_mobile?: number;
+  gallery_columns_tablet?: number;
   gallery_title?: string;
   gallery_bottom_content?: string;
   created_at: string;

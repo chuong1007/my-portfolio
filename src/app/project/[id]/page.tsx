@@ -44,6 +44,8 @@ export default async function ProjectPage({ params }: PageProps) {
       tags: dbProject.tags,
       imageUrl: dbProject.cover_image,
       gallery_columns: dbProject.gallery_columns || 4,
+      gallery_columns_mobile: dbProject.gallery_columns_mobile || 1,
+      gallery_columns_tablet: dbProject.gallery_columns_tablet || 2,
       gallery_title: dbProject.gallery_title || "Hình ảnh dự án",
       gallery_bottom_content: dbProject.gallery_bottom_content || "",
       galleryImages: (images || []).map((img: any) => ({

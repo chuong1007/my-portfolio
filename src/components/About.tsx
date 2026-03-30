@@ -30,8 +30,8 @@ import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpe
 import type { RichTextData } from "./RichTextEditor";
 const normalize = (val: any): RichTextData => {
   if (typeof val === 'object' && val !== null && 'content' in val) return val;
-  return { 
-    content: val || '', 
+  return {
+    content: val || '',
     fontSize: { mobile: 16, tablet: 18, desktop: 20 },
     lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' },
     fontFamily: { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' },
@@ -41,24 +41,24 @@ const normalize = (val: any): RichTextData => {
 };
 
 const DEFAULTS = {
-  heading: { 
-    content: "About", 
+  heading: {
+    content: "About",
     fontSize: { desktop: 30, tablet: 24, mobile: 18 },
     lineHeight: { desktop: '1.2', tablet: '1.2', mobile: '1.2' }
   },
-  subheading: { 
-    content: "Senior Graphic Designer | 7 Years of Experience", 
+  subheading: {
+    content: "Senior Graphic Designer | 7 Years of Experience",
     fontSize: { desktop: 16, tablet: 14, mobile: 12 },
     lineHeight: { desktop: '1.4', tablet: '1.4', mobile: '1.4' }
   },
   paragraphs: [
-    { 
-      content: "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.", 
+    {
+      content: "Chuyên gia thiết kế với hơn 7 năm đồng hành cùng nhiều thương hiệu trong và ngoài nước. Thế mạnh của tôi là xây dựng hình ảnh chuyên nghiệp, thẩm mỹ và có chiến lược.",
       fontSize: { desktop: 18, tablet: 16, mobile: 14 },
       lineHeight: { desktop: '1.6', tablet: '1.6', mobile: '1.6' }
     },
-    { 
-      content: "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.", 
+    {
+      content: "Luôn đặt hiệu quả truyền thông và sự hài lòng của khách hàng làm trọng tâm trong mọi dự án.",
       fontSize: { desktop: 18, tablet: 16, mobile: 14 },
       lineHeight: { desktop: '1.6', tablet: '1.6', mobile: '1.6' }
     },
@@ -91,7 +91,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? (isContactPage ? "0" : "128"));
   const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
-  
+
   const [avatarUrl, setAvatarUrl] = useState<string>(
     initialContent?.avatarUrl ?? ""
   );
@@ -113,10 +113,10 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
         .single();
 
       if (data?.data) {
-        const d = data.data as { 
-          heading?: any; 
-          subheading?: any; 
-          paragraphs?: any[]; 
+        const d = data.data as {
+          heading?: any;
+          subheading?: any;
+          paragraphs?: any[];
           isVisible?: boolean;
           paddingTop?: ResponsiveValue;
           paddingBottom?: ResponsiveValue;
@@ -181,7 +181,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
 
     window.addEventListener('previewUpdate', handlePreviewUpdate);
     window.addEventListener('message', handleParentMessage);
-    
+
     return () => {
       window.removeEventListener('previewUpdate', handlePreviewUpdate);
       window.removeEventListener('message', handleParentMessage);
@@ -205,8 +205,8 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
       e.stopPropagation();
 
       const tag = mention.getAttribute('data-id') ||
-                  mention.getAttribute('data-label') ||
-                  mention.innerText;
+        mention.getAttribute('data-label') ||
+        mention.innerText;
       if (tag) {
         const cleanTag = tag.replace(/^#/, '').trim();
         const url = `/tag/${generateSlug(cleanTag)}`;
@@ -222,29 +222,29 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
   if (loaded && !isVisible && !isAdmin) return null;
 
   const contentData = { heading, subheading, paragraphs };
-  const initialData = { 
-    ...contentData, 
-    isVisible, 
+  const initialData = {
+    ...contentData,
+    isVisible,
     paddingTop: paddingTopData,
-    paddingBottom: paddingBottomData 
+    paddingBottom: paddingBottomData
   };
 
-        const isEditor = isAdmin && isEditMode;
-        const currentPx = globalPreviewMode === 'mobile' ? '1rem' : '3rem';
+  const isEditor = isAdmin && isEditMode;
+  const currentPx = globalPreviewMode === 'mobile' ? '1rem' : '3rem';
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
-      <section 
-        id="about" 
+      <section
+        id="about"
         className="relative bg-zinc-950 transition-all duration-700"
-        style={{ 
+        style={{
           paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
-          paddingBottom: isExpanded 
-            ? `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 80}px` 
+          paddingBottom: isExpanded
+            ? `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 80}px`
             : '0px',
         }}
       >
-        <div 
+        <div
           className={cn(
             "max-w-4xl mx-auto",
             !isEditor && "px-4 md:px-12"
@@ -283,34 +283,34 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                 )}
                 <div className="flex-1 space-y-4">
                   {/* Heading (Moved here to perfectly left-align with the rest of the text) */}
-                  <div 
-                    className="tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit" 
-                    style={{ 
+                  <div
+                    className="tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit"
+                    style={{
                       fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
                       lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
                       fontFamily: heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
                       fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700',
                       color: heading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : heading.textColor?.[globalPreviewMode || 'desktop']
                     }}
-                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }} 
+                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }}
                   />
-                  <div 
-                    className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0" 
-                    style={{ 
+                  <div
+                    className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
+                    style={{
                       fontSize: `${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px`,
                       lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5',
                       fontFamily: subheading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
                       fontWeight: subheading.fontWeight?.[globalPreviewMode || 'desktop'] || '400',
                       color: subheading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subheading.textColor?.[globalPreviewMode || 'desktop']
                     }}
-                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }} 
+                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }}
                   />
                   {/* Paragraphs */}
                   <div className="space-y-4 text-zinc-400 font-light">
                     {paragraphs.map((p, i) => (
-                      <div 
-                        key={i} 
-                        style={{ 
+                      <div
+                        key={i}
+                        style={{
                           fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
                           lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6',
                           fontFamily: p.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
@@ -318,7 +318,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                           color: p.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : p.textColor?.[globalPreviewMode || 'desktop']
                         }}
                         className="whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit"
-                        dangerouslySetInnerHTML={{ __html: getResponsiveValue(p.content, globalPreviewMode || 'desktop') }} 
+                        dangerouslySetInnerHTML={{ __html: getResponsiveValue(p.content, globalPreviewMode || 'desktop') }}
                       />
                     ))}
                   </div>
@@ -330,17 +330,17 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                         onClick={() => setIsExpanded(!isExpanded)}
                         className={cn(
                           "group flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-full transition-all duration-300 border",
-                          isExpanded 
+                          isExpanded
                             ? "text-zinc-400 border-zinc-700/60 hover:border-zinc-500 hover:text-zinc-300"
                             : "text-blue-400 border-blue-500/40 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)]"
                         )}
                       >
                         <span>{isExpanded ? "Rút gọn" : "Xem chi tiết"}</span>
-                        <ChevronDown 
+                        <ChevronDown
                           className={cn(
                             "w-4 h-4 transition-transform duration-300",
                             isExpanded && "rotate-180"
-                          )} 
+                          )}
                         />
                       </button>
 
@@ -348,7 +348,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       {/* Teaser Preview - 1 short blurred snippet */}
                       {!isExpanded && expandedBlocks.length > 0 && (
                         <div className="relative h-52 overflow-hidden pointer-events-none select-none w-full mt-2">
-                          <div 
+                          <div
                             className="prose prose-invert prose-zinc opacity-40 blur-[2px]"
                             // Teaser: strip stale mention classes too (no click needed here)
                             dangerouslySetInnerHTML={{ __html: stripMentionClasses(expandedBlocks[0].content) }}
@@ -384,7 +384,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       const strippedContent = stripMentionClasses(block.content);
                       // Step 2: style numbered list items as circular badges
                       let cleanContent = strippedContent.replace(
-                        /(<(?:h[1-6]|p|li|div)[^>]*>(?:\s*<[^>]+>)*)\s*(\d+)\.(?:\s|&nbsp;)*/gi, 
+                        /(<(?:h[1-6]|p|li|div)[^>]*>(?:\s*<[^>]+>)*)\s*(\d+)\.(?:\s|&nbsp;)*/gi,
                         '$1<span class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-500 text-[14px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
                       );
 
@@ -396,16 +396,16 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                         .replace(/Capcut/gi, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-black mr-1.5 border border-white/10 shadow-[0_0_8px_rgba(255,255,255,0.05)] align-middle select-none overflow-hidden"><img src="/capcut-circle.png" alt="Capcut" class="w-full h-full object-cover scale-[1.3]" /></span>Capcut');
 
                       return (
-                        <div 
+                        <div
                           key={block.id}
                           className={cn(
                             "text-zinc-400 font-light leading-snug prose prose-invert prose-zinc max-w-none",
                             "[&_p]:text-zinc-400 [&_p]:leading-snug [&_p]:mb-0",
-                            
+
                             "[&_h1]:text-zinc-200 [&_h1]:font-bold [&_h1]:mb-2",
                             "[&_h2]:text-zinc-200 [&_h2]:font-bold [&_h2]:mb-1",
                             "[&_h3]:text-zinc-300 [&_h3]:font-semibold [&_h3]:mb-0",
-                            
+
                             "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-0 [&_ul]:text-zinc-400",
                             "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-0 [&_ol]:text-zinc-400",
                             "[&_li]:mb-0",

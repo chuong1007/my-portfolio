@@ -8,6 +8,7 @@ import type { Project } from "@/lib/data";
 import { createClient } from "@/lib/supabase";
 import { MasonryContainer, MasonryItem } from "./MasonryLayout";
 import { cn, generateSlug } from "@/lib/utils";
+import { useAdmin } from "@/context/AdminContext";
 
 type ProjectDetailProps = {
   project: Project;
@@ -63,15 +64,8 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
 }
 
 export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailProps) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { isAdmin, globalPreviewMode } = useAdmin();
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setIsAdmin(true);
-    });
-  }, []);
 
   const allImages = useMemo(() => {
     return project.galleryImages || [];
@@ -163,7 +157,14 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       >
         {/* Project Info */}
         <div className="flex flex-col gap-6">
-          <h1 className="text-[31px] md:text-[55px] font-bold tracking-[-0.07em] leading-[1.2]">
+          <h1 className={cn(
+            "font-bold tracking-[-0.07em] leading-[1.2]",
+            globalPreviewMode === "mobile" 
+              ? "text-[28px]" 
+              : globalPreviewMode === "tablet"
+                ? "text-[40px]"
+                : "text-[31px] md:text-[55px]"
+          )}>
             {typeof project.title === 'string' ? project.title : String(project.title)}
           </h1>
 
@@ -173,7 +174,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
               <Link
                 key={tag}
                 href={`/tag/${generateSlug(tag)}`}
-                className="px-4 py-1.5 rounded-full text-sm font-medium border border-zinc-700 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
+                className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-zinc-700 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
               >
                 {tag}
               </Link>
@@ -184,8 +185,11 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-lg md:text-xl text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-700 [&_hr]:my-8"
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className={cn(
+               "text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-700 [&_hr]:my-8",
+               globalPreviewMode === "mobile" ? "text-base" : "text-lg md:text-xl"
+            )}
             dangerouslySetInnerHTML={{ 
               __html: typeof project.description === 'string' ? project.description : String(project.description) 
             }}
@@ -201,22 +205,37 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       {/* Gallery Section - Pinterest Style Masonry */}
       <section className="max-w-7xl mx-auto px-6 md:px-12 py-16">
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="text-4xl md:text-5xl font-bold tracking-tight mb-12 text-zinc-50"
+          className={cn(
+             "font-bold tracking-tight mb-12 text-zinc-50",
+             globalPreviewMode === "mobile" ? "text-3xl" : "text-4xl md:text-5xl"
+          )}
           dangerouslySetInnerHTML={{ __html: project.gallery_title || "Hình ảnh dự án" }}
         />
         
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
         <MasonryContainer 
           className={cn(
-            "grid-cols-2 sm:grid-cols-3 gap-x-4",
-            project.gallery_columns === 2 && "md:grid-cols-2",
-            project.gallery_columns === 3 && "md:grid-cols-3",
-            project.gallery_columns === 4 && "md:grid-cols-4",
-            project.gallery_columns === 5 && "md:grid-cols-5",
-            (!project.gallery_columns || project.gallery_columns === 4) && "md:grid-cols-4"
+            "gap-x-4",
+            globalPreviewMode === "mobile" 
+              ? (project.gallery_columns_mobile === 2 ? "grid-cols-2" : project.gallery_columns_mobile === 3 ? "grid-cols-3" : "grid-cols-1")
+              : globalPreviewMode === "tablet"
+                ? (project.gallery_columns_tablet === 3 ? "grid-cols-3" : project.gallery_columns_tablet === 4 ? "grid-cols-4" : "grid-cols-2")
+                : [
+                    // Desktop / Normal View (uses Tailwind media queries based on browser window)
+                    project.gallery_columns_mobile === 2 ? "grid-cols-2" : project.gallery_columns_mobile === 3 ? "grid-cols-3" : "grid-cols-1",
+                    
+                    project.gallery_columns_tablet === 2 ? "sm:grid-cols-2" : 
+                    project.gallery_columns_tablet === 3 ? "sm:grid-cols-3" : 
+                    project.gallery_columns_tablet === 4 ? "sm:grid-cols-4" : "sm:grid-cols-2",
+                    
+                    project.gallery_columns === 2 ? "md:grid-cols-2" : 
+                    project.gallery_columns === 3 ? "md:grid-cols-3" : 
+                    project.gallery_columns === 5 ? "md:grid-cols-5" : "md:grid-cols-4"
+                  ]
           )}
         >
           {allImages.map((image, index) => (
@@ -293,12 +312,23 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
             {/* Image */}
             <motion.div
               key={lightboxIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.9, x: 0 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="relative z-[1] max-w-[90vw] max-h-[85vh] flex items-center justify-center"
+              className="relative z-[1] max-w-[90vw] max-h-[85vh] flex items-center justify-center cursor-grab active:cursor-grabbing"
               onClick={(e) => e.stopPropagation()}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.8}
+              onDragEnd={(e, { offset, velocity }) => {
+                const swipe = Math.abs(offset.x) * velocity.x;
+                if (swipe < -100) {
+                  goNext();
+                } else if (swipe > 100) {
+                  goPrev();
+                }
+              }}
             >
               <img
                 src={allImages[lightboxIndex].url}

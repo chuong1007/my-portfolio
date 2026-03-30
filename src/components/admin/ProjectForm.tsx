@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Download, Check, Pen, CalendarDays, ExternalLink, ImageIcon, Grid, Tag as TagIcon, LayoutTemplate, Save, Search, Lock, Unlock, GripVertical, AlertCircle, Trash2, X, Trash, PlaySquare, Settings, Eye, EyeOff, LayoutPanelLeft, Link, Loader2, UploadCloud, Copy, FileIcon, User, Video, FileText, CheckCircle2, ChevronDown, Sparkles, FolderOpen, PanelTop, PanelBottom, ChevronRight, ArrowLeft, Upload, Plus, ImageIcon as ImageIconIcon, Link2, Save as SaveIcon, Star } from "lucide-react";
+import { Download, Check, Pen, CalendarDays, ExternalLink, ImageIcon, Grid, Tag as TagIcon, LayoutTemplate, Save, Search, Lock, Unlock, GripVertical, AlertCircle, Trash2, X, Trash, PlaySquare, Settings, Eye, EyeOff, LayoutPanelLeft, Link, Loader2, UploadCloud, Copy, FileIcon, User, Video, FileText, CheckCircle2, ChevronDown, Sparkles, FolderOpen, PanelTop, PanelBottom, ChevronRight, ArrowLeft, Upload, Plus, ImageIcon as ImageIconIcon, Link2, Save as SaveIcon, Star, Smartphone, Tablet } from "lucide-react";
 import { ImageUpload } from "./ImageUpload";
 import { MasonryContainer, MasonryItem } from "@/components/MasonryLayout";
 import { createClient } from "@/lib/supabase";
@@ -36,6 +36,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [isFeatured, setIsFeatured] = useState<boolean>(project?.is_featured || false);
   const [featuredOrder, setFeaturedOrder] = useState<number>(project?.featured_order || 0);
   const [galleryColumns, setGalleryColumns] = useState<number>(project?.gallery_columns || 4);
+  const [galleryColumnsMobile, setGalleryColumnsMobile] = useState<number>(project?.gallery_columns_mobile || 1);
+  const [galleryColumnsTablet, setGalleryColumnsTablet] = useState<number>(project?.gallery_columns_tablet || 2);
   const [galleryTitle, setGalleryTitle] = useState<string>(project?.gallery_title || "Hình ảnh dự án");
   const [galleryBottomContent, setGalleryBottomContent] = useState<string>(project?.gallery_bottom_content || "");
   const [uploading, setUploading] = useState(false);
@@ -376,6 +378,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             is_featured: isFeatured,
             featured_order: featuredOrder,
             gallery_columns: galleryColumns,
+            gallery_columns_mobile: galleryColumnsMobile,
+            gallery_columns_tablet: galleryColumnsTablet,
             gallery_title: galleryTitle,
             gallery_bottom_content: galleryBottomContent,
             updated_at: new Date().toISOString(),
@@ -435,6 +439,8 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
             is_featured: isFeatured,
             featured_order: featuredOrder,
             gallery_columns: galleryColumns,
+            gallery_columns_mobile: galleryColumnsMobile,
+            gallery_columns_tablet: galleryColumnsTablet,
             gallery_title: galleryTitle,
             gallery_bottom_content: galleryBottomContent,
             created_at: new Date().toISOString(),
@@ -871,29 +877,90 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               )}
             </div>
 
-            {/* Gallery Settings Section */}
-            <div className="bg-zinc-900 border border-zinc-900/50 rounded-xl p-4 mb-6">
+            {/* Gallery Settings Section - Expanded for Mobile/Tablet/Desktop */}
+            <div className="bg-zinc-900 border border-zinc-800/50 rounded-xl p-5 mb-6 space-y-6 shadow-inner">
+              {/* Desktop Settings */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
                     <Grid className="w-3.5 h-3.5 text-blue-400" />
-                    Số cột hiển thị (Desktop)
+                    Số cột (Desktop)
                   </span>
-                  <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
+                  <span className="text-[10px] font-mono font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md border border-blue-500/20">
                     {galleryColumns} Cột
                   </span>
                 </div>
-                <div className="flex bg-black/40 p-1 rounded-xl border border-zinc-800">
+                <div className="grid grid-cols-4 bg-black/40 p-1 rounded-xl border border-zinc-800/50">
                   {[2, 3, 4, 5].map((cols) => (
                     <button
                       key={cols}
                       type="button"
                       onClick={() => setGalleryColumns(cols)}
                       className={cn(
-                        "flex-1 py-1.5 rounded-lg text-xs font-bold transition-all",
+                        "py-2 rounded-lg text-xs font-bold transition-all",
                         galleryColumns === cols 
-                          ? "bg-zinc-800 text-white shadow-lg border border-white/5" 
-                          : "text-zinc-500 hover:text-zinc-300"
+                          ? "bg-zinc-800 text-white shadow-xl border border-white/5" 
+                          : "text-zinc-600 hover:text-zinc-400"
+                      )}
+                    >
+                      {cols}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tablet Settings */}
+              <div className="space-y-3 pt-4 border-t border-zinc-800/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Tablet className="w-3.5 h-3.5 text-indigo-400" />
+                    Số cột (Tablet)
+                  </span>
+                  <span className="text-[10px] font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
+                    {galleryColumnsTablet} Cột
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 bg-black/40 p-1 rounded-xl border border-zinc-800/50">
+                  {[2, 3, 4].map((cols) => (
+                    <button
+                      key={cols}
+                      type="button"
+                      onClick={() => setGalleryColumnsTablet(cols)}
+                      className={cn(
+                        "py-2 rounded-lg text-xs font-bold transition-all",
+                        galleryColumnsTablet === cols 
+                          ? "bg-zinc-800 text-white shadow-xl border border-white/5" 
+                          : "text-zinc-600 hover:text-zinc-400"
+                      )}
+                    >
+                      {cols}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mobile Settings */}
+              <div className="space-y-3 pt-4 border-t border-zinc-800/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                    <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                    Số cột (Mobile)
+                  </span>
+                  <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                    {galleryColumnsMobile} Cột
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 bg-black/40 p-1 rounded-xl border border-zinc-800/50">
+                  {[1, 2].map((cols) => (
+                    <button
+                      key={cols}
+                      type="button"
+                      onClick={() => setGalleryColumnsMobile(cols)}
+                      className={cn(
+                        "py-2 rounded-lg text-xs font-bold transition-all",
+                        galleryColumnsMobile === cols 
+                          ? "bg-zinc-800 text-white shadow-xl border border-white/5" 
+                          : "text-zinc-600 hover:text-zinc-400"
                       )}
                     >
                       {cols}
@@ -941,7 +1008,17 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
           <MasonryContainer 
             className={cn(
-              "grid-cols-2 sm:grid-cols-3 gap-x-4",
+              "gap-x-4",
+              // Mobile
+              galleryColumnsMobile === 1 ? "grid-cols-1" : "grid-cols-2",
+              galleryColumnsMobile === 3 && "grid-cols-3",
+              
+              // Tablet (sm)
+              galleryColumnsTablet === 2 && "sm:grid-cols-2",
+              galleryColumnsTablet === 3 && "sm:grid-cols-3",
+              galleryColumnsTablet === 4 && "sm:grid-cols-4",
+              
+              // Desktop (md)
               galleryColumns === 2 && "md:grid-cols-2",
               galleryColumns === 3 && "md:grid-cols-3",
               galleryColumns === 4 && "md:grid-cols-4",
