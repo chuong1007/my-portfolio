@@ -374,7 +374,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   className="overflow-hidden"
                 >
                   <div className={cn(
-                    "mt-16 pt-16 border-t border-zinc-800/60 grid gap-8 lg:gap-16",
+                    "mt-16 pt-16 border-t border-zinc-800/60 grid gap-x-12 lg:gap-x-20 gap-y-6 lg:gap-y-8",
                     globalPreviewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
                   )}>
                     {expandedBlocks.map((block) => {
@@ -385,7 +385,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       // Step 2: style numbered list items as circular badges
                       let cleanContent = strippedContent.replace(
                         /(<(?:h[1-6]|p|li|div)[^>]*>(?:\s*<[^>]+>)*)\s*(\d+)\.(?:\s|&nbsp;)*/gi, 
-                        '$1<span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-500 text-[15px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
+                        '$1<span class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-500 text-[14px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[1px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
                       );
 
                       // Step 3: Add software icons (Ps, Ai, Pr)
@@ -400,14 +400,14 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                           key={block.id}
                           className={cn(
                             "text-zinc-400 font-light leading-relaxed prose prose-invert prose-zinc max-w-none",
-                            "[&_p]:text-zinc-400 [&_p]:leading-relaxed [&_p]:mb-4",
+                            "[&_p]:text-zinc-400 [&_p]:leading-relaxed [&_p]:mb-2",
                             
                             "[&_h1]:text-zinc-200 [&_h1]:font-bold [&_h1]:mb-6",
                             "[&_h2]:text-zinc-200 [&_h2]:font-bold [&_h2]:mb-4",
                             "[&_h3]:text-zinc-300 [&_h3]:font-semibold [&_h3]:mb-2",
                             
-                            "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-6 [&_ul]:text-zinc-400",
-                            "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-6 [&_ol]:text-zinc-400",
+                            "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4 [&_ul]:text-zinc-400",
+                            "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4 [&_ol]:text-zinc-400",
                             
                             "[&_li]:mb-1",
                             "[&_a]:text-blue-400 [&_a]:underline",
