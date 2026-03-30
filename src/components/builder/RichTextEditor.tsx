@@ -51,16 +51,62 @@ import {
   Code2,
   List,
   ListOrdered,
-  Youtube as YoutubeIcon
+  Youtube as YoutubeIcon,
+  Film
 } from 'lucide-react';
+import { Node, mergeAttributes } from '@tiptap/core';
 import { cn } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
 import { SketchPicker } from 'react-color';
 import { createClient } from "@/lib/supabase";
 import { compressImage } from "@/lib/compressImage";
 
+export const VideoExtension = Node.create({
+  name: 'video',
+  group: 'block',
+  atom: true,
+  draggable: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      controls: {
+        default: true,
+      },
+    };
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'video',
+      },
+    ];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['video', mergeAttributes(HTMLAttributes, { class: 'rounded-xl border border-zinc-800 my-8 shadow-2xl w-full mx-auto', controls: 'true' })];
+  },
+
+  addCommands() {
+    return {
+      setVideo: (options: { src: string }) => ({ commands }: any) => {
+        return commands.insertContent({
+          type: this.name,
+          attrs: options,
+        });
+      },
+    };
+  },
+});
+
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
+    video: {
+      setVideo: (options: { src: string }) => ReturnType;
+    }
     fontSize: {
       setFontSize: (size: string) => ReturnType;
       unsetFontSize: () => ReturnType;
@@ -368,6 +414,91 @@ export function RichTextEditor({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleVideoUpload = async (file: File) => {
+    setIsUploadingVideo(true);
+    
+    // Create temporary object URL and insert immediately
+    const tempUrl = URL.createObjectURL(file);
+    if (editor) {
+      editor.chain().focus().setVideo({ src: tempUrl }).run();
+    }
+
+    try {
+      const supabase = createClient();
+      const fileExt = file.name.split('.').pop() || 'mp4';
+      const fileName = `uploads/videos/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('project-images') // Reusing active bucket
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('project-images')
+        .getPublicUrl(fileName);
+
+      // Swap the temp URL with the real public URL
+      if (editor) {
+        let posToUpdate: number | null = null;
+        let nodeAttrs: any = null;
+        
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name === 'video' && node.attrs.src === tempUrl) {
+            posToUpdate = pos;
+            nodeAttrs = node.attrs;
+            return false;
+          }
+        });
+        
+        if (posToUpdate !== null) {
+          editor.view.dispatch(
+            editor.state.tr.setNodeMarkup(posToUpdate, null, {
+              ...nodeAttrs,
+              src: data.publicUrl,
+            })
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      // Remove the video if upload failed
+      if (editor) {
+        let posToDelete: number | null = null;
+        let nodeSize = 0;
+        
+        editor.state.doc.descendants((node, pos) => {
+          if (node.type.name === 'video' && node.attrs.src === tempUrl) {
+            posToDelete = pos;
+            nodeSize = node.nodeSize;
+            return false;
+          }
+        });
+        
+        if (posToDelete !== null) {
+          editor.view.dispatch(editor.state.tr.delete(posToDelete, posToDelete + nodeSize));
+        }
+      }
+      alert(`Lỗi khi tải video lên: ${err instanceof Error ? err.message : "Vui lòng thử lại."}`);
+    } finally {
+      setIsUploadingVideo(false);
+      URL.revokeObjectURL(tempUrl);
+      if (videoInputRef.current) videoInputRef.current.value = '';
+    }
+  };
+
+  const handleVideoFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleVideoUpload(file);
+  };
+
   const handleImageUpload = async (file: File) => {
     setIsUploadingImage(true);
     
@@ -485,6 +616,7 @@ export function RichTextEditor({
           class: 'rounded-xl border border-zinc-800 my-8 shadow-2xl',
         },
       }),
+      VideoExtension,
       Placeholder.configure({
         placeholder,
       }),
@@ -527,6 +659,11 @@ export function RichTextEditor({
             handleImageUpload(file);
             return true;
           }
+          if (file.type.startsWith('video/')) {
+            event.preventDefault();
+            handleVideoUpload(file);
+            return true;
+          }
         }
         return false;
       },
@@ -536,6 +673,11 @@ export function RichTextEditor({
           if (file.type.startsWith('image/')) {
             event.preventDefault();
             handleImageUpload(file);
+            return true;
+          }
+          if (file.type.startsWith('video/')) {
+            event.preventDefault();
+            handleVideoUpload(file);
             return true;
           }
         }
@@ -1064,6 +1206,28 @@ export function RichTextEditor({
               className="hidden" 
               accept="image/*" 
               onChange={handleFileInput} 
+            />
+            <button
+              onClick={() => {
+                videoInputRef.current?.click();
+                closeAllMenus();
+              }}
+              className="p-2 rounded hover:bg-zinc-800 text-zinc-400 relative"
+              title="Tải Video Lên"
+              disabled={isUploadingVideo}
+            >
+              {isUploadingVideo ? (
+                <div className="w-4 h-4 border-2 border-zinc-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Film className="w-4 h-4" />
+              )}
+            </button>
+            <input 
+              type="file" 
+              ref={videoInputRef} 
+              className="hidden" 
+              accept="video/*" 
+              onChange={handleVideoFileInput} 
             />
             <button
               onClick={() => {

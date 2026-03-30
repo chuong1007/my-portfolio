@@ -42,12 +42,29 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
   useEffect(() => {
     const fetchSuggestions = async () => {
       const supabase = createClient();
-      const uniqueTags = new Set<string>();
+      const uniqueTagsMap = new Map<string, string>();
+
+      const addTag = (t: string) => {
+        if (typeof t !== 'string') return;
+        const trimmed = t.trim();
+        if (!trimmed) return;
+        const lower = trimmed.toLowerCase();
+        
+        if (!uniqueTagsMap.has(lower)) {
+          uniqueTagsMap.set(lower, trimmed);
+        } else {
+          // If we see a version with uppercase, prefer that over the lowercase one
+          const existing = uniqueTagsMap.get(lower)!;
+          if (trimmed.match(/[A-Z]/) && !existing.match(/[A-Z]/)) {
+            uniqueTagsMap.set(lower, trimmed);
+          }
+        }
+      };
 
       // Get official tags
       const { data: dbTags } = await supabase.from('blog_tags').select('name');
       if (dbTags) {
-        dbTags.forEach((t: any) => uniqueTags.add(t.name.trim()));
+        dbTags.forEach((t: any) => addTag(t.name));
       }
 
       // Get tags from existing blogs
@@ -55,14 +72,12 @@ export function BlogForm({ blog, onClose }: BlogFormProps) {
       if (blogsData) {
         blogsData.forEach((b: any) => {
           if (b.tags && Array.isArray(b.tags)) {
-            b.tags.forEach((t: any) => {
-              if (typeof t === 'string' && t.trim()) uniqueTags.add(t.trim());
-            });
+            b.tags.forEach((t: any) => addTag(t));
           }
         });
       }
       
-      setAvailableTags(Array.from(uniqueTags).sort());
+      setAvailableTags(Array.from(uniqueTagsMap.values()).sort());
     };
     fetchSuggestions();
   }, []);
