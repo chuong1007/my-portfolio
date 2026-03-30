@@ -392,8 +392,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       cleanContent = cleanContent
                         .replace(/(Adobe\s*)?Photoshop/g, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#001e36] text-[#31a8ff] text-[10px] font-black mr-1.5 border border-[#31a8ff]/20 shadow-[0_0_8px_rgba(49,168,255,0.2)] align-middle select-none">Ps</span>Photoshop')
                         .replace(/Adobe\s*Illustrator|Illustrator/gi, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#330000] text-[#ff9a00] text-[10px] font-black mr-1.5 border border-[#ff9a00]/20 shadow-[0_0_8px_rgba(255,154,0,0.2)] align-middle select-none">Ai</span>Illustrator')
-                        .replace(/Adobe\s*Premiere|Premiere/gi, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#2a065c] text-[#ea77ff] text-[10px] font-black mr-1.5 border border-[#ea77ff]/20 shadow-[0_0_8px_rgba(234,119,255,0.2)] align-middle select-none">Pr</span>Adobe Premiere')
-                        .replace(/Capcut/gi, '<img src="/capcut-logo.png" alt="Capcut" class="inline-block w-5 h-5 mr-1.5 align-middle rounded-md shadow-[0_0_8px_rgba(255,255,255,0.1)]" />Capcut');
+                        .replace(/Adobe\s*Premiere|Premiere/gi, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#2a065c] text-[#ea77ff] text-[10px] font-black mr-1.5 border border-[#ea77ff]/20 shadow-[0_0_8px_rgba(234,119,255,0.2)] align-middle select-none">Pr</span>Adobe Premiere');
 
                       return (
                         <div 
