@@ -383,10 +383,16 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       // Step 1: strip stale Tailwind classes from mention spans (DB content)
                       const strippedContent = stripMentionClasses(block.content);
                       // Step 2: style numbered list items as circular badges
-                      const cleanContent = strippedContent.replace(
+                      let cleanContent = strippedContent.replace(
                         /(<(?:h[1-6]|p|li|div)[^>]*>(?:\s*<[^>]+>)*)\s*(\d+)\.(?:\s|&nbsp;)*/gi, 
-                        '$1<span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-500 text-[15px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0">$2</span>'
+                        '$1<span class="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-500 text-[15px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
                       );
+
+                      // Step 3: Add software icons (Ps, Ai, Pr)
+                      cleanContent = cleanContent
+                        .replace(/(Adobe\s*)?Photoshop/g, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#001e36] text-[#31a8ff] text-[10px] font-black mr-1.5 border border-[#31a8ff]/20 shadow-[0_0_8px_rgba(49,168,255,0.2)] align-middle select-none">Ps</span>Photoshop')
+                        .replace(/Adobe\s*Illustrator|Illustrator/g, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#330000] text-[#ff9a00] text-[10px] font-black mr-1.5 border border-[#ff9a00]/20 shadow-[0_0_8px_rgba(255,154,0,0.2)] align-middle select-none">Ai</span>Illustrator')
+                        .replace(/Adobe\s*Premiere|Premiere/g, '<span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#2a065c] text-[#ea77ff] text-[10px] font-black mr-1.5 border border-[#ea77ff]/20 shadow-[0_0_8px_rgba(234,119,255,0.2)] align-middle select-none">Pr</span>Adobe Premiere');
 
                       return (
                         <div 

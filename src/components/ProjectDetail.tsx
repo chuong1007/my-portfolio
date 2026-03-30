@@ -334,31 +334,34 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Link href={`/project/${p.slug || p.id}`} className="group flex flex-col gap-4">
-                  <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
-                    <img
-                      src={p.cover_image}
-                      alt={p.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-all duration-700 ease-in-out"
-                    />
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                      <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10 whitespace-nowrap">
-                        Xem ngay
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                    {p.is_featured && (
-                      <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-10">
-                        <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                <div className="group flex flex-col gap-4">
+                  <Link href={`/project/${p.slug || p.id}`} className="flex flex-col gap-4">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                      <img
+                        src={p.cover_image}
+                        alt={p.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-all duration-700 ease-in-out"
+                      />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
+                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10 whitespace-nowrap">
+                          Xem ngay
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </span>
                       </div>
-                    )}
-                  </div>
-                  <div className="px-1">
-                    <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
-                      {p.title}
-                    </h3>
-                  <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1 mt-1">
+                      {p.is_featured && (
+                        <div className="absolute top-3 right-3 flex items-center justify-center w-7 h-7 bg-black/60 backdrop-blur-md border border-white/10 rounded-full shadow-2xl z-10">
+                          <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="px-1">
+                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
+                        {p.title}
+                      </h3>
+                    </div>
+                  </Link>
+                  <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1">
                     {Array.isArray(p.tags) && p.tags.map((tag: string, i: number) => (
                       <Link 
                         key={tag} 
@@ -369,8 +372,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       </Link>
                     ))}
                   </div>
-                  </div>
-                </Link>
+                </div>
               </motion.div>
             ))}
           </div>
