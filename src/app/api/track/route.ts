@@ -66,16 +66,15 @@ export async function POST(request: NextRequest) {
 
     const { device, browser } = parseUserAgent(userAgent);
 
-    // Upsert visitor directly by its ID
+    // Upsert visitor by unique visitor_hash
     const { data: visitorRecord, error: upsertError } = await supabase
       .from('visitors')
       .upsert({
-        id: effectiveId,
-        visitor_hash: effectiveId, // Re-use ID as hash if needed for compatibility
+        visitor_hash: effectiveId,
         device,
         browser,
         last_seen: new Date().toISOString()
-      }, { onConflict: 'id' })
+      }, { onConflict: 'visitor_hash' })
       .select('id')
       .single();
 

@@ -80,10 +80,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-zinc-950">
+    <html lang="en" className="dark bg-zinc-950" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${outfit.variable} ${syne.variable} ${montserrat.variable} antialiased selection:bg-zinc-50 selection:text-zinc-950 bg-zinc-950 text-zinc-50 min-h-screen font-sans flex flex-col`}
+        suppressHydrationWarning
       >
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                document.querySelectorAll('[bis_skin_checked]').forEach(function(el) {
+                  el.removeAttribute('bis_skin_checked');
+                });
+              } catch(e) {}
+            `,
+          }}
+        />
         <AdminProvider>
           <GlobalPreviewWrapper>
             {children}

@@ -54,8 +54,8 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center" suppressHydrationWarning>
+        <div className="w-8 h-8 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" suppressHydrationWarning />
       </div>
     );
   }
@@ -71,7 +71,7 @@ export default function AdminLayout({
   const currentLogoUrl = getResponsiveValue(logoConfig.url, 'desktop');
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50">
+    <div className="min-h-screen bg-zinc-950 text-zinc-50" suppressHydrationWarning>
       {/* Admin Top Bar */}
       <header className="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">

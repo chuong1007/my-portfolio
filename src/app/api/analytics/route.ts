@@ -111,13 +111,15 @@ export async function GET(request: NextRequest) {
 
     // Fetch page views for recent visitors
     const visitorIds = recentVisitors.map(v => v.id);
-    let visitorPagesQuery = supabase
-      .from('page_views')
-      .select('visitor_id, page_path, page_title, created_at')
-      .in('visitor_id', visitorIds.length > 0 ? visitorIds : ['__none__'])
-      .order('created_at', { ascending: false });
-
-    const { data: visitorPages } = await visitorPagesQuery;
+    let visitorPages: any[] = [];
+    if (visitorIds.length > 0) {
+      const { data } = await supabase
+        .from('page_views')
+        .select('visitor_id, page_path, page_title, created_at')
+        .in('visitor_id', visitorIds)
+        .order('created_at', { ascending: false });
+      visitorPages = data || [];
+    }
 
     // Group pages by visitor
     const visitorPagesMap = new Map<string, { page_path: string; page_title: string; created_at: string }[]>();

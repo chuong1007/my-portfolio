@@ -29,7 +29,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
   const isInsideIframe = searchParams.get("iframe") === "1";
   if (isInsideIframe) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden">
+      <div className="min-h-screen bg-zinc-950 text-zinc-50 overflow-x-hidden" suppressHydrationWarning>
         <Header />
         <main className="flex-grow">
           {children}

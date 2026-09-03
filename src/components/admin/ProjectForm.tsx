@@ -140,6 +140,12 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [lockedImageIds, setLockedImageIds] = useState<string[]>([]);
   const [wideImages, setWideImages] = useState<Set<string>>(new Set());
+  const [downloadMenuOpen, setDownloadMenuOpen] = useState(false);
+  const [downloadMode, setDownloadMode] = useState<'none' | 'select'>('none');
+  const [downloadSelectedIndices, setDownloadSelectedIndices] = useState<number[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState("");
+  const downloadMenuRef = useRef<HTMLDivElement>(null);
 
   const handleImageLoad = (url: string, e: React.SyntheticEvent<HTMLImageElement>) => {
     const { naturalWidth, naturalHeight } = e.currentTarget;
@@ -149,6 +155,18 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       }
     }
   };
+
+  // Close download dropdown when clicking outside
+  useEffect(() => {
+    if (!downloadMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (downloadMenuRef.current && !downloadMenuRef.current.contains(e.target as Node)) {
+        setDownloadMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [downloadMenuOpen]);
 
   // Unified image list for ordering: { type, id/index, url }
   type GalleryItem = { type: 'existing'; data: DbProjectImage } | { type: 'new'; data: File; index: number };
@@ -221,6 +239,90 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
 
   const removeNewImage = (idx: number) => {
     setNewImageFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleDownloadImages = async (indices?: number[]) => {
+    const allItems = getGalleryItems();
+    const targetItems = indices !== undefined
+      ? indices.map(i => allItems[i]).filter(Boolean)
+      : allItems;
+
+    if (targetItems.length === 0) return;
+    setIsDownloading(true);
+    setDownloadProgress(`Đang tải 0/${targetItems.length}...`);
+    setDownloadMenuOpen(false);
+
+    try {
+      const JSZip = (await import('jszip')).default;
+      const zip = new JSZip();
+      const projectSlug = slug || title.replace(/\s+/g, '-').toLowerCase() || 'project';
+      const folder = zip.folder(projectSlug)!;
+
+      let completed = 0;
+      const total = targetItems.length;
+      const BATCH_SIZE = 10;
+
+      for (let i = 0; i < targetItems.length; i += BATCH_SIZE) {
+        const batch = targetItems.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+          batch.map(async (item, batchIdx) => {
+            const idx = i + batchIdx;
+            let url: string;
+            let filename: string;
+            if (item.type === 'existing') {
+              url = (item.data as DbProjectImage).image_url;
+              const ext = url.split('?')[0].split('.').pop() || 'jpg';
+              filename = `image-${String(idx + 1).padStart(3, '0')}.${ext}`;
+            } else {
+              const file = item.data as File;
+              url = URL.createObjectURL(file);
+              filename = file.name;
+            }
+
+            try {
+              const response = await fetch(url);
+              const blob = await response.blob();
+              folder.file(filename, blob);
+            } catch {
+              // Skip failed image silently
+            }
+
+            if (item.type === 'new') {
+              URL.revokeObjectURL(url);
+            }
+
+            completed++;
+            setDownloadProgress(`Tải ${completed}/${total}...`);
+          })
+        );
+      }
+
+      setDownloadProgress(`Đang nén zip...`);
+      // STORE mode: Images (JPG/PNG/WebP) are already compressed, so DEFLATE is unnecessary and slow.
+      const zipBlob = await zip.generateAsync(
+        { type: 'blob', compression: 'STORE' },
+        (meta) => {
+          setDownloadProgress(`Nén ${Math.round(meta.percent)}%...`);
+        }
+      );
+
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(zipBlob);
+      a.download = `${projectSlug}-images.zip`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress("");
+      setDownloadMode('none');
+      setDownloadSelectedIndices([]);
+    }
+  };
+
+  const toggleDownloadSelect = (index: number) => {
+    setDownloadSelectedIndices(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
   };
 
   const handleImageClick = (e: React.MouseEvent, index: number) => {
@@ -862,18 +964,98 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                 Hình ảnh dự án ({existingImages.length + newImageFiles.length} ảnh)
               </label>
               {(existingImages.length + newImageFiles.length) > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (confirm("Bạn có chắc muốn xóa TẤT CẢ hình ảnh?")) {
-                      setExistingImages([]);
-                      setNewImageFiles([]);
-                    }
-                  }}
-                  className="text-[11px] text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/40 px-2.5 py-1 rounded-lg transition-all"
-                >
-                  Xóa tất cả
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Download Button */}
+                  <div className="relative" ref={downloadMenuRef}>
+                    <button
+                      type="button"
+                      disabled={isDownloading}
+                      onClick={() => {
+                        if (downloadMode === 'select') {
+                          // Cancel select mode
+                          setDownloadMode('none');
+                          setDownloadSelectedIndices([]);
+                          setDownloadMenuOpen(false);
+                        } else {
+                          setDownloadMenuOpen(prev => !prev);
+                        }
+                      }}
+                      className="flex items-center gap-1.5 text-[11px] text-blue-400 hover:text-blue-300 border border-blue-500/20 hover:border-blue-500/40 px-2.5 py-1 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Download className="w-3 h-3" />
+                      )}
+                      {isDownloading ? (
+                        downloadProgress || 'Đang tải...'
+                      ) : downloadMode === 'select' ? 'Huỷ chọn' : 'Tải ảnh'}
+                      {downloadMode !== 'select' && !isDownloading && <ChevronDown className="w-3 h-3" />}
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {downloadMenuOpen && downloadMode !== 'select' && (
+                      <div className="absolute right-0 top-full mt-1.5 z-50 w-48 bg-zinc-900 border border-zinc-700/60 rounded-xl shadow-2xl shadow-black/60 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDownloadMenuOpen(false);
+                            handleDownloadImages();
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-left"
+                        >
+                          <Download className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                          <div>
+                            <div className="font-medium">Tải về tất cả</div>
+                            <div className="text-[10px] text-zinc-500">{existingImages.length + newImageFiles.length} ảnh • .zip</div>
+                          </div>
+                        </button>
+                        <div className="border-t border-zinc-800" />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDownloadMenuOpen(false);
+                            setDownloadMode('select');
+                            setDownloadSelectedIndices([]);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-left"
+                        >
+                          <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <div>
+                            <div className="font-medium">Chọn để tải về</div>
+                            <div className="text-[10px] text-zinc-500">Click ảnh để chọn</div>
+                          </div>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Download selected confirm button */}
+                  {downloadMode === 'select' && downloadSelectedIndices.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadImages(downloadSelectedIndices)}
+                      disabled={isDownloading}
+                      className="flex items-center gap-1.5 text-[11px] text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 hover:border-emerald-500/50 bg-emerald-500/10 px-2.5 py-1 rounded-lg transition-all"
+                    >
+                      <Download className="w-3 h-3" />
+                      Tải {downloadSelectedIndices.length} ảnh
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (confirm("Bạn có chắc muốn xóa TẤT CẢ hình ảnh?")) {
+                        setExistingImages([]);
+                        setNewImageFiles([]);
+                      }
+                    }}
+                    className="text-[11px] text-red-400 hover:text-red-300 border border-red-500/20 hover:border-red-500/40 px-2.5 py-1 rounded-lg transition-all"
+                  >
+                    Xóa tất cả
+                  </button>
+                </div>
               )}
             </div>
 
@@ -970,6 +1152,29 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               </div>
             </div>
 
+          {/* Download Select Mode Banner */}
+          {downloadMode === 'select' && (
+            <div className="flex items-center justify-between bg-blue-500/10 border border-blue-500/30 rounded-xl px-4 py-2.5 mb-3">
+              <div className="flex items-center gap-2 text-[12px] text-blue-300">
+                <Download className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {downloadSelectedIndices.length === 0
+                    ? 'Nhấp vào ảnh để chọn ảnh cần tải về'
+                    : `Đã chọn ${downloadSelectedIndices.length} ảnh`}
+                </span>
+              </div>
+              {downloadSelectedIndices.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setDownloadSelectedIndices([])}
+                  className="text-[11px] text-blue-400 hover:text-blue-300 underline"
+                >
+                  Bỏ chọn tất cả
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Upload Drop Zone */}
           <div
             onDragOver={(e) => { e.preventDefault(); setGalleryDragging(true); }}
@@ -1034,25 +1239,36 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
               const isSelected = selectedIndices.includes(index);
               const isLocked = lockedImageIds.includes(imgId);
               const isWide = wideImages.has(imgUrl);
+              const isDownloadSelected = downloadSelectedIndices.includes(index);
 
               return (
                 <MasonryItem
                   key={imgId}
                   isWide={false}
                   gap={16}
-                  draggable={!isLocked}
-                  onClick={(e) => handleImageClick(e, index)}
+                  draggable={!isLocked && downloadMode !== 'select'}
+                  onClick={(e) => {
+                    if (downloadMode === 'select') {
+                      toggleDownloadSelect(index);
+                      return;
+                    }
+                    handleImageClick(e, index);
+                  }}
                   onDragStart={(e) => handleDragStart(e, index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
                   className={cn(
                     "relative group rounded-lg transition-all duration-200 ring-offset-zinc-950",
-                    isLocked ? "cursor-default" : "cursor-grab active:cursor-grabbing",
-                    isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
+                    downloadMode === 'select' ? "cursor-pointer" : (isLocked ? "cursor-default" : "cursor-grab active:cursor-grabbing"),
+                    downloadMode === 'select' && isDownloadSelected
+                      ? "ring-4 ring-blue-500 ring-offset-2 scale-[0.98]"
+                      : downloadMode === 'select'
+                        ? "ring-1 ring-blue-500/20 hover:ring-blue-500/50"
+                        : isSelected ? "ring-4 ring-emerald-500 ring-offset-2 scale-[0.98]" : "ring-1 ring-white/5",
                     isDragging && "opacity-50 scale-95",
                     isDragOver && !isSelected && "ring-2 ring-indigo-500 ring-offset-2 scale-[1.02]",
-                    isLocked && "ring-2 ring-amber-500/50" // Viền nhẹ để báo hiệu đang khoá
+                    isLocked && downloadMode !== 'select' && "ring-2 ring-amber-500/50"
                   )}
                 >
                   <img
@@ -1065,6 +1281,22 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
                       isLocked && "opacity-90 grayscale-[0.2]"
                     )}
                   />
+                  {/* Download select overlay */}
+                  {downloadMode === 'select' && (
+                    <div className={cn(
+                      "absolute inset-0 rounded-lg transition-all duration-200 flex items-center justify-center pointer-events-none",
+                      isDownloadSelected ? "bg-blue-500/20" : "bg-black/0 group-hover:bg-blue-500/10"
+                    )}>
+                      <div className={cn(
+                        "w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all",
+                        isDownloadSelected
+                          ? "bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/40"
+                          : "border-white/40 bg-black/30 opacity-0 group-hover:opacity-100"
+                      )}>
+                        {isDownloadSelected && <Check className="w-4 h-4 text-white" />}
+                      </div>
+                    </div>
+                  )}
                   {/* Lock button */}
                   <button
                     type="button"
