@@ -1,53 +1,41 @@
 const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs');
-const path = require('path');
 require('dotenv').config({ path: '.env.local' });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("❌ Thiếu NEXT_PUBLIC_SUPABASE_URL hoặc NEXT_PUBLIC_SUPABASE_ANON_KEY trong .env.local");
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-async function restore() {
-  const tables = ['blogs', 'projects', 'project_images', 'site_content', 'pages'];
+async function run() {
+  const { data: rowData, error } = await supabase.from('site_content').select('*').eq('id', 'about').single();
+  if (error) {
+    console.error("Fetch error:", error);
+    return;
+  }
   
-  console.log(`🚀 Đang chuẩn bị khôi phục database từ thư mục backups...`);
-
-  for (const table of tables) {
-    const latestPath = path.join(__dirname, 'backups', `latest_${table}.json`);
-    
-    if (!fs.existsSync(latestPath)) {
-      console.warn(`  - [!] Không tìm thấy tệp khôi phục ${latestPath}. Bỏ qua.`);
-      continue;
-    }
-
-    const data = JSON.parse(fs.readFileSync(latestPath, 'utf8'));
-    if (data.length === 0) {
-      console.warn(`  - [!] Tệp ${latestPath} trống. Bỏ qua.`);
-      continue;
-    }
-
-    console.log(`- Đang đẩy ${data.length} dòng vào bảng: ${table}...`);
-    
-    const { error } = await supabase.from(table).upsert(data, {
-      onConflict: 'id', // conflict logic
-      ignoreDuplicates: false // overwrite if conflict
-    });
-
-    if (error) {
-      console.error(`  ❌ Lỗi Upsert vào ${table}:`, error.message);
-      continue;
-    }
-
-    console.log(`  ✅ Khôi phục thành công bảng: ${table}`);
+  const content = rowData.data;
+  
+  // Restore avatarUrl if missing
+  if (!content.avatarUrl) {
+    content.avatarUrl = "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=2680&auto=format&fit=crop"; // fallback avatar
   }
 
-  console.log(`\n🎉 Khôi phục hoàn tất!`);
-}
+  // Restore expandedBlocks
+  content.expandedBlocks = [
+    {
+      id: "left",
+      type: "half",
+      content: "<p><strong>Graphic Designer với hơn 7 năm kinh nghiệm</strong> xây dựng hình ảnh thương hiệu và ấn phẩm truyền thông đa nền tảng - từ nhận diện thương hiệu, bao bì, giao diện website đến các ấn phẩm chiến dịch (Banner, Poster, Social Media post, KV).</p><p></p><p>Có kinh nghiệm dựng và chỉnh sửa video bằng Capcut, đồng thời ứng dụng công cụ AI để tạo video từ hình ảnh tĩnh, phục vụ nội dung marketing nhanh và hiệu quả.</p>"
+    },
+    {
+      id: "right",
+      type: "half",
+      content: "<p><strong>KỸ NĂNG CHUYÊN MÔN</strong></p><ul><li><p><strong>Thiết kế:</strong> Photoshop, Illustrator. Ứng dụng AI vào thiết kế đồ họa</p></li><li><p><strong>Dựng phim:</strong> Adobe Premiere, Capcut,... Ứng dụng AI vào dựng và edit clip.</p></li><li><p><strong>Kỹ năng mềm:</strong> Teamwork, Giao tiếp, Tiếng Anh giao tiếp tốt.</p></li></ul><p></p><p><strong>HỌC VẤN</strong></p><ul><li><p><strong>Đại học Công nghiệp TP.HCM (2013 - 2017):</strong> Tốt nghiệp chuyên ngành Quản trị kinh doanh.</p></li><li><p><strong>2017 - Nay:</strong> Tự học chuyên sâu về tư duy thiết kế, thẩm mỹ và công cụ qua thực tế.</p></li></ul>"
+    }
+  ];
 
-restore();
+  const { error: updateError } = await supabase.from('site_content').update({ data: content }).eq('id', 'about');
+  if (updateError) {
+    console.error("Update error:", updateError);
+  } else {
+    console.log("Database restored successfully!");
+  }
+}
+run();

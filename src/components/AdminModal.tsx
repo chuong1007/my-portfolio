@@ -255,7 +255,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
   return (
     <div className="fixed inset-0 z-[9999] flex justify-end pointer-events-none">
       {/* Backdrop mờ để user vẫn thấy nội dung website phía sau mà không bị che khuất */}
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-auto" onClick={onClose} />
+      {/* Sửa thành pointer-events-none để cho phép user scroll khung preview phía sau */}
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-none" />
       
       {/* Sidebar Panel - Pinned to the right */}
       <div className="relative bg-[var(--bg-base)]/95 backdrop-blur-xl border-l border-[var(--border-default)] w-full md:max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto">
@@ -457,7 +458,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="-200"
+                    min="-500"
                     max="500"
                     step="1"
                     value={getResponsiveValue(data.scrollOffset, globalPreviewMode) || "0"}
@@ -481,7 +482,23 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía trên Section.</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Bottom (px)</label>
+                    <span className="text-xs font-mono text-[var(--text-muted)]">{getResponsiveValue(data.paddingBottom, globalPreviewMode) || 0}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="-800"
+                    max="500"
+                    step="1"
+                    value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
+                    onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
+                    className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía dưới Section.</p>
                 </div>
               </div>
 
@@ -611,7 +628,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
@@ -629,7 +646,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
@@ -785,7 +802,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
@@ -803,7 +820,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
@@ -842,7 +859,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
@@ -860,7 +877,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}
@@ -1031,7 +1048,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}
@@ -1049,7 +1066,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   </div>
                   <input
                     type="range"
-                    min="0"
+                    min="-500"
                     max="1200"
                     step="1"
                     value={getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}

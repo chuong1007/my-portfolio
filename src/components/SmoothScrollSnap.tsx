@@ -28,7 +28,9 @@ export function SmoothScrollSnap() {
 
       if (sections.length === 0) return;
 
-      const scrollY = window.scrollY;
+      const scrollContainer = (lastScrollTarget instanceof Element && lastScrollTarget.classList.contains('custom-scrollbar')) ? lastScrollTarget : window;
+      const isWindow = scrollContainer === window;
+      const scrollY = isWindow ? window.scrollY : (scrollContainer as HTMLElement).scrollTop;
       const isMobile = window.innerWidth <= 768;
 
       let closestSection: HTMLElement | null = null;
@@ -37,6 +39,12 @@ export function SmoothScrollSnap() {
 
       sections.forEach(section => {
         const rect = section.getBoundingClientRect();
+        
+        let containerOffset = 0;
+        if (!isWindow) {
+          const containerRect = (scrollContainer as HTMLElement).getBoundingClientRect();
+          containerOffset = containerRect.top;
+        }
         
         const headerHeight = isMobile ? 56 : 64;
         const minBreathingRoom = 60; 
@@ -50,7 +58,7 @@ export function SmoothScrollSnap() {
         // Khoảng cách từ vị trí hiện tại của section top tới vị trí lý tưởng trên màn hình
         // Âm = section đang nằm cao hơn vị trí lý tưởng (bị cuộn qua)
         // Dương = section đang nằm thấp hơn vị trí lý tưởng (chưa cuộn tới)
-        const distanceFromIdeal = rect.top - idealTopOnScreen;
+        const distanceFromIdeal = (rect.top - containerOffset) - idealTopOnScreen;
         
         // VÙNG HÚT THÔNG MINH (SMART SNAP ZONE):
         // 1. Không hút giật ngược lên nếu người dùng đã cuộn qua section để đọc nội dung bên trong (distance < -200)
@@ -69,7 +77,7 @@ export function SmoothScrollSnap() {
       if (closestSection && minDistance > 10) {
         isSnappingRef.current = true;
         
-        const startScroll = window.scrollY;
+        const startScroll = isWindow ? window.scrollY : (scrollContainer as HTMLElement).scrollTop;
         const distance = targetScroll - startScroll;
         const duration = 800; // 800ms - Rất êm và chậm rãi
         let startTime: number | null = null;
@@ -88,12 +96,14 @@ export function SmoothScrollSnap() {
             isSnappingRef.current = false;
           }, 100);
 
-          window.removeEventListener('wheel', cancelAnimation);
-          window.removeEventListener('touchstart', cancelAnimation);
+          const container = document.querySelector('.custom-scrollbar') || window;
+          container.removeEventListener('wheel', cancelAnimation);
+          container.removeEventListener('touchstart', cancelAnimation);
         };
 
-        window.addEventListener('wheel', cancelAnimation, { passive: true });
-        window.addEventListener('touchstart', cancelAnimation, { passive: true });
+        const container = document.querySelector('.custom-scrollbar') || window;
+        container.addEventListener('wheel', cancelAnimation, { passive: true });
+        container.addEventListener('touchstart', cancelAnimation, { passive: true });
 
         const animateScroll = (currentTime: number) => {
           if (isCancelled) return;
@@ -103,7 +113,11 @@ export function SmoothScrollSnap() {
           const progress = Math.min(timeElapsed / duration, 1);
           
           const easeProgress = easeInOutCubic(progress);
-          window.scrollTo(0, startScroll + (distance * easeProgress));
+          if (isWindow) {
+            window.scrollTo(0, startScroll + (distance * easeProgress));
+          } else {
+            (scrollContainer as HTMLElement).scrollTo(0, startScroll + (distance * easeProgress));
+          }
 
           if (timeElapsed < duration) {
             animationFrameId = requestAnimationFrame(animateScroll);
@@ -121,25 +135,30 @@ export function SmoothScrollSnap() {
 
     // Lắng nghe sự kiện scroll thông thường nhưng dùng debounce RẤT DÀI (600ms)
     // Để đảm bảo người dùng đã HOÀN TOÀN DỪNG CUỘN kể cả khi cuộn chậm
-    const handleScroll = () => {
+    let lastScrollTarget: EventTarget | null = null;
+    const handleScroll = (e?: Event) => {
+      if (e) lastScrollTarget = e.target;
+
       if (isSnappingRef.current) return;
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(snapToClosestSection, 600);
     };
 
     // Cố gắng sử dụng scrollend nếu trình duyệt hỗ trợ (chính xác nhất)
-    const handleScrollEnd = () => {
+    const handleScrollEnd = (e?: Event) => {
+      if (e) lastScrollTarget = e.target;
+
       if (isSnappingRef.current) return;
       clearTimeout(scrollTimeout); // Hủy bỏ cái của scroll
       snapToClosestSection();
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("scrollend", handleScrollEnd);
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    window.addEventListener("scrollend", handleScrollEnd, { capture: true });
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("scrollend", handleScrollEnd);
+      window.removeEventListener("scroll", handleScroll, { capture: true } as any);
+      window.removeEventListener("scrollend", handleScrollEnd, { capture: true } as any);
       clearTimeout(scrollTimeout);
     };
   }, [pathname]);

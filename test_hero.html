@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { color: red; }
+  .parent {
+    /* --color-desk is undefined */
+  }
+  .child {
+    color: var(--color-desk); /* What happens here? */
+  }
+</style>
+</head>
+<body>
+  <div class="parent">
+    <div class="child">Hello World</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+{
+  "meta": {
+    "schema_version": "1.1.0",
+    "awf_version": "3.3.0"
+  },
+  "project": {
+    "name": "my-portfolio",
+    "type": "Next.js Portfolio",
+    "status": "active"
+  },
+  "tech_stack": {
+    "frontend": {
+      "framework": "Next.js",
+      "styling": "Tailwind CSS",
+      "animations": "Framer Motion"
+    },
+    "backend": {
+      "database": "Supabase"
+    }
+  },
+  "business_rules": [
+    "Trang Admin phải đồng bộ 100% bố cục và khoảng cách với trang Khách để review UI chuẩn.",
+    "Bắt buộc phản hồi bằng tiếng Việt theo yêu cầu của user."
+  ],
+  "features": [
+    "Portfolio đa mục đích",
+    "Trình tạo kéo thả khối (UX Builder)",
+    "Hỗ trợ Dark/Light mode",
+    "Cuộn hút thông minh (Smooth Scroll Snap)"
+  ],
+  "knowledge_items": {
+    "patterns": [
+      "Tính khoảng cách Snap động bằng cách đọc getComputedStyle(paddingTop) của section để bù đắp Header Height."
+    ],
+    "gotchas": [
+      "Không bao giờ chặn scroll event bằng setTimeout lâu gây cản trở cuộn của user. Luôn dùng requestAnimationFrame và có cơ chế cancel bằng wheel/touchstart.",
+      "Check kỹ điều kiện hiển thị CSS class, nếu có variant homepage coi chừng nuốt mất class styling cơ bản (Lỗi xảy ra ở Gallery.tsx)."
+    ],
+    "conventions": [
+      "Biến màu trong code phải lấy từ biến CSS (VD: var(--bg-base)) để hỗ trợ Dark Mode"
+    ]
+  }
+}

@@ -310,7 +310,7 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-16 flex flex-row items-end justify-between border-b border-[var(--border-subtle)] pb-8"
+            className="mb-10 flex flex-row items-end justify-between border-b border-[var(--border-subtle)] pb-8"
           >
             <div className="flex flex-col gap-2">
               <div 

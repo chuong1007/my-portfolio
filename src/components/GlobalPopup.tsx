@@ -39,8 +39,27 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
     const seenTimes = parseInt(localStorage.getItem(contentKey) || "0", 10);
 
     if (seenTimes < maxDisplayTimes) {
-      const timer = setTimeout(() => setShow(true), delayMs);
-      return () => clearTimeout(timer);
+      let isShown = false;
+      const showPopup = () => {
+        if (!isShown) {
+          isShown = true;
+          setShow(true);
+        }
+      };
+
+      // Fallback timer nếu ko có HeroAnimatedTitle
+      const timer = setTimeout(showPopup, delayMs);
+
+      // Lắng nghe sự kiện typographyFinished, đợi thêm 2s rồi hiện popup
+      const handleTypographyReady = () => {
+        setTimeout(showPopup, 2000);
+      };
+      window.addEventListener('typographyFinished', handleTypographyReady);
+
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('typographyFinished', handleTypographyReady);
+      };
     }
   }, [isVisible, rawContent]);
 

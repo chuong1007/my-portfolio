@@ -56,3 +56,39 @@ Tất cả các thay đổi đáng chú ý của dự án sẽ được ghi lạ
 | `src/app/layout.tsx` | Modified | Script xóa bis_skin_checked + suppressHydrationWarning |
 | `src/app/admin/layout.tsx` | Modified | suppressHydrationWarning cho spinner |
 | `src/app/GlobalPreviewWrapper.tsx` | Modified | suppressHydrationWarning cho container |
+
+## [2026-09-18] — Smooth Scroll Snap & UI Refinements
+
+### ✨ Cải tiến & Tính năng mới
+
+- **Vùng Hút Thông Minh (Smart Snap Zone)** (`SmoothScrollSnap.tsx`)
+  - Viết lại toàn bộ logic cuộn và hút màn hình (Snap) bằng `requestAnimationFrame`.
+  - Tự động tính toán khoảng cách lý tưởng (Header + Breathing room) tùy theo padding của từng Section.
+  - Hủy ngay hiệu ứng hút nếu người dùng chủ động thao tác cuộn (ưu tiên UX).
+  - Khắc phục lỗi giật ngược màn hình khi đọc giữa Section dài.
+
+- **Refactor Admin Dashboard** (`src/app/admin/page.tsx`)
+  - Tách trang quản trị khổng lồ thành các tab component riêng biệt (`ProjectsTab`, `BlogsTab`, `AnalyticsTab`, `SettingsTab`) để dễ quản lý.
+  
+- **Dark/Light Mode Setup**
+  - Đồng bộ thiết lập CSS variables cho Light/Dark mode trên các component cốt lõi (`About`, `Contact`, `GlobalPreviewWrapper`).
+
+### 🐛 Sửa lỗi
+
+- **Lệch khoảng cách Admin & Khách (Public)** (`Gallery.tsx`)
+  - Khắc phục lỗi component Gallery bị mất class `.gallery-container` ở chế độ trang chủ (public mode), gây ra lỗi mất khoảng cách (padding).
+  - Đảm bảo Admin và Public giống hệt nhau 100%.
+
+- **Viền & Bóng của Avatar Emoji** (`About.tsx`)
+  - Tự động loại bỏ khung tròn (border, bg, shadow) khi người dùng chọn hình ảnh đại diện là icon Emoji (`avatar-emoji.svg`), giúp Emoji hiển thị tự nhiên.
+
+### 📁 Files thay đổi
+
+| File | Loại | Mô tả |
+|------|------|-------|
+| `src/components/SmoothScrollSnap.tsx` | New | Logic cuộn Snap mới |
+| `src/app/admin/page.tsx` | Modified | Chia tab |
+| `src/app/admin/_tabs/*.tsx` | New | Các tab quản trị |
+| `src/components/sections/Gallery.tsx` | Modified | Fix lỗi padding |
+| `src/components/sections/About.tsx` | Modified | Xóa viền emoji, thêm CSS variables |
+| `src/components/sections/Contact.tsx` | Modified | CSS variables |

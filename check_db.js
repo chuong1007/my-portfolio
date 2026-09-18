@@ -1,22 +1,16 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config({ path: '.env.local' });
 
-const supabaseUrl = "https://sfjrfitckltbpevumcre.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmanJmaXRja2x0YnBldnVtY3JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzU3OTEsImV4cCI6MjA4ODk1MTc5MX0.OvaKfzsCO_t1phZUBNA4BzSokRFahNvpUlIWUYfm2R0";
-
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function check() {
-  const { data, error } = await supabase
-    .from('site_content')
-    .select('*')
-    .eq('id', 'about')
-    .single();
-  
+async function main() {
+  const { data, error } = await supabase.from('site_content').select('*').eq('id', 'about').single();
   if (error) {
-    console.error("Error fetching data:", error);
-  } else {
-    console.log(JSON.stringify(data, null, 2));
+    console.error("Fetch err:", error);
+    return;
   }
+  console.log(JSON.stringify(data.data.expandedBlocks, null, 2));
 }
-
-check();
+main();

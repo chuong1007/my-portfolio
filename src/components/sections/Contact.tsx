@@ -312,7 +312,7 @@ export function Contact() {
               )}
             </div>
 
-            <div className={cn("contact-grid w-full mt-4 gap-4 md:gap-8 grid", !isEditor && "not-is-editor", isEditor && "is-editor", isEditor && globalPreviewMode === 'mobile' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2')}>
+            <div className={cn("contact-grid w-full mt-4 gap-4 md:gap-8 grid", !isEditor && "not-is-editor", isEditor && "is-editor", !isAdmin ? "grid-cols-1 md:grid-cols-2" : (globalPreviewMode === 'mobile' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'))}>
               {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
                   href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}

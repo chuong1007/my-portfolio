@@ -4,7 +4,7 @@ import { MentionList } from './MentionList';
 import { createClient } from "@/lib/supabase";
 
 export default {
-  char: '/#', // Trigger exactly when user types /# 
+  char: '#', // Trigger when user types # 
   items: async ({ query }: { query: string }) => {
     try {
       // Create a temporary client since we are client-side

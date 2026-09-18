@@ -15,6 +15,23 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
   text = text.replace(/&nbsp;/g, ' ');
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
+  useEffect(() => {
+    if (mounted && lines.length === 3) {
+      const numLetters = lines[0].replace(' ', '').length;
+      const line0Done = (numLetters - 1) * 0.08 + 0.4;
+      const highlightDone = line0Done + 0.6;
+      const typeStart = highlightDone + 0.2;
+      const typeDur = lines[2].split('').length * 0.05;
+      const wipeOutStart = typeStart + typeDur + 1.0;
+      const totalDur = wipeOutStart + 0.6;
+
+      const timer = setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('typographyFinished'));
+      }, totalDur * 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [mounted, html]);
+
   if (!mounted || lines.length !== 3) {
     return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: html }} />;
   }

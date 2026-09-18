@@ -29,24 +29,24 @@ export function getResponsiveValue<T = any>(
     if (typeof field === 'object') {
       if ('content' in field && field.content !== null) {
          if (typeof field.content === 'object' && ('desktop' in field.content || 'tablet' in field.content || 'mobile' in field.content)) {
-            let raw = field.content[device] ?? field.content['desktop'] ?? field.content['tablet'] ?? field.content['mobile'];
+            let raw = field.content[device] || field.content['desktop'] || field.content['tablet'] || field.content['mobile'];
             if (typeof raw === 'object' && raw !== null && 'content' in raw) raw = raw.content;
-            return (raw !== undefined ? raw : fallback) as T;
+            return (raw !== undefined && raw !== '' ? raw : fallback) as T;
          }
          let raw = field.content;
          if (typeof raw === 'object' && raw !== null && 'content' in raw) raw = raw.content;
          return raw as T;
       }
 
-      let val = field[device] ?? field['desktop'] ?? field['tablet'] ?? field['mobile'];
+      let val = field[device] || field['desktop'] || field['tablet'] || field['mobile'];
       
       // Handle nested object from accidental nested setResponsiveValue
       if (typeof val === 'object' && val !== null) {
         if ('content' in val) val = val.content;
-        else if ('desktop' in val) val = val[device] ?? val['desktop'];
+        else if ('desktop' in val) val = val[device] || val['desktop'];
       }
       
-      if (val !== undefined && val !== null) {
+      if (val !== undefined && val !== null && val !== '') {
         if (typeof val === 'object') {
            return String(val) as T;
         }

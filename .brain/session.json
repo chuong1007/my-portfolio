@@ -1,0 +1,47 @@
+{
+  "updated_at": "2026-09-18T15:26:00Z",
+  "working_on": {
+    "feature": "Smooth Scroll Snap & Bugfixes",
+    "task": "Fix avatar border, adjust snap offset, fix Gallery padding",
+    "status": "completed",
+    "files": [
+      "src/components/SmoothScrollSnap.tsx",
+      "src/components/sections/Gallery.tsx",
+      "src/components/sections/About.tsx",
+      "src/app/admin/page.tsx"
+    ],
+    "blockers": [],
+    "notes": "Đã xử lý xong toàn bộ lỗi liên quan đến Snap và khoảng cách (padding)."
+  },
+  "pending_tasks": [],
+  "recent_changes": [
+    {
+      "timestamp": "2026-09-18T15:26:00Z",
+      "type": "bugfix",
+      "description": "Cập nhật logic Smooth Scroll Snap, fix lỗi padding ở public mode của Gallery, xóa viền emoji avatar.",
+      "files": [
+        "src/components/SmoothScrollSnap.tsx",
+        "src/components/sections/Gallery.tsx",
+        "src/components/sections/About.tsx"
+      ]
+    }
+  ],
+  "errors_encountered": [
+    {
+      "error": "Lệch khoảng cách giữa Admin và Public ở phần Gallery.",
+      "solution": "Loại bỏ điều kiện variant !== 'homepage' khi chèn class gallery-container.",
+      "resolved": true
+    },
+    {
+      "error": "Scroll snap giật lùi hoặc cản trở người dùng cuộn chậm.",
+      "solution": "Tạo Smart Snap Zone, chỉ snap khi tiêu đề vào tầm nhìn và thêm sự kiện wheel/touchstart để cancel animation.",
+      "resolved": true
+    }
+  ],
+  "decisions_made": [
+    {
+      "decision": "Dùng getComputedStyle(section).paddingTop để bù trừ chiều cao header khi snap",
+      "reason": "Các section có padding khác nhau (0px vs 128px), tránh để header lấp hoặc đẩy khoảng trắng quá lớn."
+    }
+  ]
+}

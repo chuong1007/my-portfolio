@@ -221,7 +221,7 @@ const formatFs = (val: string, fallback: string) => {
       <style dangerouslySetInnerHTML={{ __html: `
         .hero-container:not(.is-editor) {
           padding-top: var(--pad-mob);
-          padding-bottom: var(--pb-mob);
+          margin-bottom: var(--pb-mob);
         }
         .hero-title-inner:not(.is-editor) {
           font-size: var(--fs-mob);
@@ -238,13 +238,13 @@ const formatFs = (val: string, fallback: string) => {
           color: var(--color-sub-mob, inherit);
         }
         .hero-scroll:not(.is-editor) {
-          margin-bottom: var(--scroll-mob);
+          margin-top: var(--scroll-mob);
         }
 
         @media (min-width: 768px) {
           .hero-container:not(.is-editor) {
             padding-top: var(--pad-tab);
-            padding-bottom: var(--pb-tab);
+            margin-bottom: var(--pb-tab);
           }
           .hero-title-inner:not(.is-editor) {
             font-size: var(--fs-tab);
@@ -261,14 +261,14 @@ const formatFs = (val: string, fallback: string) => {
             color: var(--color-sub-tab, inherit);
           }
           .hero-scroll:not(.is-editor) {
-            margin-bottom: var(--scroll-tab);
+            margin-top: var(--scroll-tab);
           }
         }
 
         @media (min-width: 1024px) {
           .hero-container:not(.is-editor) {
             padding-top: var(--pad-desk);
-            padding-bottom: var(--pb-desk);
+            margin-bottom: var(--pb-desk);
           }
           .hero-title-inner:not(.is-editor) {
             font-size: var(--fs-desk);
@@ -285,7 +285,7 @@ const formatFs = (val: string, fallback: string) => {
             color: var(--color-sub-desk, inherit);
           }
           .hero-scroll:not(.is-editor) {
-            margin-bottom: var(--scroll-desk);
+            margin-top: var(--scroll-desk);
           }
         }
       `}} />
@@ -298,7 +298,7 @@ const formatFs = (val: string, fallback: string) => {
         )}
         style={{
           paddingTop: isEditor ? `${currentPt}px` : undefined,
-          paddingBottom: isEditor ? `${currentPb}px` : undefined,
+          marginBottom: isEditor ? `${currentPb}px` : undefined,
           "--pad-desk": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'desktop') || 0}px)`,
           "--pad-tab": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'tablet') || 0}px)`,
           "--pad-mob": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'mobile') || 0}px)`,
