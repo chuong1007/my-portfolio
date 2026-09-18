@@ -7,7 +7,7 @@ import { SectionEditor } from "@/components/SectionEditor";
 import { HeroAnimatedTitle } from "./HeroAnimatedTitle";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "@/components/builder/RichTextEditor";
+import type { RichTextData } from "@/components/RichTextEditor";
 import { cn } from "@/lib/utils";
 
 const cleanHtmlColors = (html?: string | null) => {

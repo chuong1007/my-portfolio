@@ -26,6 +26,11 @@ export type RichTextData = {
     tablet?: string;
     mobile?: string;
   };
+  letterSpacing?: {
+    desktop?: string;
+    tablet?: string;
+    mobile?: string;
+  };
 };
 "use client";
 
