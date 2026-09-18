@@ -422,8 +422,9 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       lineHeight: localLineHeight,
       fontFamily: localFontFamily,
       fontWeight: localFontWeight,
-      textColor: localTextColor
-    });
+      textColor: localTextColor,
+        letterSpacing: localLetterSpacing
+      });
   };
 
   const updateLineHeight = (newLineHeight: string) => {
@@ -435,8 +436,9 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       lineHeight: updatedLH,
       fontFamily: localFontFamily,
       fontWeight: localFontWeight,
-      textColor: localTextColor
-    });
+      textColor: localTextColor,
+        letterSpacing: localLetterSpacing
+      });
   };
 
   const updateFontFamily = (newFF: string) => {
@@ -456,7 +458,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         lineHeight: localLineHeight,
         fontFamily: updatedFF,
         fontWeight: localFontWeight,
-        textColor: localTextColor
+        textColor: localTextColor,
+        letterSpacing: localLetterSpacing
       });
     }
   };
@@ -478,7 +481,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         lineHeight: localLineHeight,
         fontFamily: localFontFamily,
         fontWeight: updatedFW,
-        textColor: localTextColor
+        textColor: localTextColor,
+        letterSpacing: localLetterSpacing
       });
     }
   };
@@ -500,7 +504,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         lineHeight: localLineHeight,
         fontFamily: localFontFamily,
         fontWeight: localFontWeight,
-        textColor: updatedColor
+        textColor: updatedColor,
+        letterSpacing: localLetterSpacing
       });
     }
   };
@@ -513,7 +518,12 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     const updated = { ...localLetterSpacing, [mode]: newSpacing };
     setLocalLetterSpacing(updated);
     onChange({
-      ...value,
+      content: localContent,
+      fontSize: localFontSize,
+      lineHeight: localLineHeight,
+      fontFamily: localFontFamily,
+      fontWeight: localFontWeight,
+      textColor: localTextColor,
       letterSpacing: updated
     });
   };
