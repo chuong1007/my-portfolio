@@ -33,15 +33,27 @@ const normalize = (val: any): RichTextData => {
   const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
   const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
   const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+
+  // Fill missing keys in a responsive object — fallback to desktop value if mobile/tablet missing
+  const fillKeys = (obj: any, def: any) => {
+    if (!obj || typeof obj !== 'object') return def;
+    const desk = obj.desktop ?? def.desktop;
+    return {
+      desktop: desk,
+      tablet: obj.tablet ?? desk,
+      mobile: obj.mobile ?? obj.tablet ?? desk,
+    };
+  };
   
   if (typeof val === 'object' && val !== null && 'content' in val) {
     return {
       ...val,
-      fontSize: val.fontSize || defaultFS,
-      lineHeight: val.lineHeight || defaultLH,
-      fontFamily: val.fontFamily || defaultFF,
-      fontWeight: val.fontWeight || defaultFW,
-      textColor: val.textColor || defaultColor
+      fontSize: fillKeys(val.fontSize, defaultFS),
+      lineHeight: fillKeys(val.lineHeight, defaultLH),
+      fontFamily: fillKeys(val.fontFamily, defaultFF),
+      fontWeight: fillKeys(val.fontWeight, defaultFW),
+      textColor: fillKeys(val.textColor, defaultColor),
+      letterSpacing: fillKeys(val.letterSpacing, { mobile: '0', tablet: '0', desktop: '0' }),
     };
   }
   return { 
@@ -66,6 +78,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
     lineHeight: { desktop: '1.1', tablet: '1.1', mobile: '1.1' }
   });
   const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Scroll to explore", fontSize: { desktop: 10, tablet: 10, mobile: 10 }, lineHeight: { mobile: '1.5', tablet: '1.5', desktop: '1.5' } });
+  const [locationData, setLocationData] = useState<RichTextData>(() => initialContent?.location ? normalize(initialContent.location) : { content: "based in Ho Chi Minh City", fontSize: { desktop: 80, tablet: 60, mobile: 32 }, lineHeight: { desktop: '1.1', tablet: '1.1', mobile: '1.1' } });
   const [scrollOffset, setScrollOffset] = useState<ResponsiveValue>(() => initialContent?.scrollOffset ?? "48");
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "0");
@@ -78,6 +91,44 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
   const [logoHeight, setLogoHeight] = useState<ResponsiveValue>(() => initialContent?.logoHeight ?? "40");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
   const heroRef = useRef<HTMLElement>(null);
+  const [scrollVisible, setScrollVisible] = useState(false);
+
+  // Track actual browser width for public mode (guests)
+  const [actualDeviceMode, setActualDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  useEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      setActualDeviceMode(w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop');
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
+  // The device mode to use for styling: admin uses globalPreviewMode, public uses actual width
+  const effectiveMode = isAdmin ? (globalPreviewMode || 'desktop') : actualDeviceMode;
+
+  useEffect(() => {
+    const handleFinished = () => {
+      setTimeout(() => setScrollVisible(true), 1000);
+    };
+    const handleStart = () => {
+      setScrollVisible(false);
+    };
+    window.addEventListener('typographyFinished', handleFinished);
+    window.addEventListener('typographyStarted', handleStart);
+    const fallback = setTimeout(() => setScrollVisible(true), 12000);
+    return () => {
+      window.removeEventListener('typographyFinished', handleFinished);
+      window.removeEventListener('typographyStarted', handleStart);
+      clearTimeout(fallback);
+    };
+  }, []);
+
+  // Also reset when data changes (for editor)
+  useEffect(() => {
+    setScrollVisible(false);
+  }, [titleData.content, locationData.content]);
   
   
   const { scrollYProgress } = useScroll({
@@ -101,6 +152,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
         const d = data.data as any;
         if (d.title !== undefined) setTitleData(normalize(d.title));
         if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
+        if (d.location !== undefined) setLocationData(normalize(d.location));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         
         // Preserve responsive objects if they exist
@@ -135,6 +187,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
     else if (d.paddingTopTextScroll !== undefined) setScrollPadding(d.paddingTopTextScroll);
     if (d.title !== undefined) setTitleData(normalize(d.title));
     if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
+    if (d.location !== undefined) setLocationData(normalize(d.location));
     if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
     if (d.logoText !== undefined) setLogoText(d.logoText);
     if (d.logoImageUrl !== undefined) setLogoImageUrl(d.logoImageUrl);
@@ -184,6 +237,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
     paddingBottom: paddingBottomData,
     title: titleData,
     subtitle: subtitleData,
+    location: locationData,
     scrollOffset: scrollOffset,
     scrollPadding: scrollPadding,
     logoType,
@@ -204,10 +258,10 @@ const formatFs = (val: string, fallback: string) => {
 
   // Parity 1:1 current values for Editor mode
   const ptOffset = 80;
-  const currentPt = (parseInt(String(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || '0'))) + ptOffset;
-  const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop');
-  const currentFs = titleData.fontSize?.[globalPreviewMode || 'desktop'] || 40;
-  const currentScroll = getResponsiveValue(scrollPadding, globalPreviewMode || 'desktop') ?? getResponsiveValue(scrollOffset, globalPreviewMode || 'desktop') ?? 0;
+  const currentPt = (parseInt(String(getResponsiveValue(paddingTopData, effectiveMode) || '0'))) + ptOffset;
+  const currentPb = getResponsiveValue(paddingBottomData, effectiveMode);
+  const currentFs = titleData.fontSize?.[effectiveMode] || 40;
+  const currentScroll = getResponsiveValue(scrollPadding, effectiveMode) ?? getResponsiveValue(scrollOffset, effectiveMode) ?? 0;
 
   return (
     <SectionEditor 
@@ -223,9 +277,38 @@ const formatFs = (val: string, fallback: string) => {
           padding-top: var(--pad-mob);
           margin-bottom: var(--pb-mob);
         }
+        .hero-title:not(.is-editor) .hero-location {
+          font-size: var(--fs-loc-mob);
+          line-height: var(--lh-loc-mob);
+          letter-spacing: var(--ls-loc-mob);
+          font-family: var(--ff-loc-mob);
+          font-weight: var(--fw-loc-mob);
+          color: var(--color-loc-mob, inherit);
+        }
+        @media (min-width: 768px) {
+          .hero-title:not(.is-editor) .hero-location {
+            font-size: var(--fs-loc-tab);
+            line-height: var(--lh-loc-tab);
+            letter-spacing: var(--ls-loc-tab);
+            font-family: var(--ff-loc-tab);
+            font-weight: var(--fw-loc-tab);
+            color: var(--color-loc-tab, inherit);
+          }
+        }
+        @media (min-width: 1024px) {
+          .hero-title:not(.is-editor) .hero-location {
+            font-size: var(--fs-loc-desk);
+            line-height: var(--lh-loc-desk);
+            letter-spacing: var(--ls-loc-desk);
+            font-family: var(--ff-loc-desk);
+            font-weight: var(--fw-loc-desk);
+            color: var(--color-loc-desk, inherit);
+          }
+        }
         .hero-title-inner:not(.is-editor) {
           font-size: var(--fs-mob);
           line-height: var(--lh-mob);
+          letter-spacing: var(--ls-mob);
           font-family: var(--ff-mob);
           font-weight: var(--fw-mob);
           color: var(--color-mob, inherit);
@@ -249,6 +332,7 @@ const formatFs = (val: string, fallback: string) => {
           .hero-title-inner:not(.is-editor) {
             font-size: var(--fs-tab);
             line-height: var(--lh-tab);
+            letter-spacing: var(--ls-tab);
             font-family: var(--ff-tab);
             font-weight: var(--fw-tab);
             color: var(--color-tab, inherit);
@@ -273,6 +357,7 @@ const formatFs = (val: string, fallback: string) => {
           .hero-title-inner:not(.is-editor) {
             font-size: var(--fs-desk);
             line-height: var(--lh-desk);
+            letter-spacing: var(--ls-desk);
             font-family: var(--ff-desk);
             font-weight: var(--fw-desk);
             color: var(--color-desk, inherit);
@@ -292,13 +377,13 @@ const formatFs = (val: string, fallback: string) => {
 
       <section ref={heroRef}
         className={cn(
-          "hero-container relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh]",
+          "hero-container relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh] overflow-x-hidden",
           !isEditor && "not-is-editor",
           isEditor && "is-editor"
         )}
         style={{
-          paddingTop: isEditor ? `${currentPt}px` : undefined,
-          marginBottom: isEditor ? `${currentPb}px` : undefined,
+          paddingTop: `${currentPt}px`,
+          marginBottom: currentPb ? `${currentPb}px` : undefined,
           "--pad-desk": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'desktop') || 0}px)`,
           "--pad-tab": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'tablet') || 0}px)`,
           "--pad-mob": `calc(${ptOffset}px + ${getResponsiveValue(paddingTopData, 'mobile') || 0}px)`,
@@ -317,19 +402,44 @@ const formatFs = (val: string, fallback: string) => {
               "tracking-tighter text-[var(--text-primary)] text-balance mx-auto whitespace-pre-wrap transition-all duration-300"
             )}
             style={{
-              fontSize: isEditor ? `${currentFs}px` : undefined,
+              fontSize: effectiveMode === 'mobile' 
+                ? `clamp(20px, ${(titleData.fontSize?.[effectiveMode] || 40) / 4}vw, ${titleData.fontSize?.[effectiveMode] || 40}px)`
+                : effectiveMode === 'tablet'
+                ? `clamp(30px, ${(titleData.fontSize?.[effectiveMode] || 60) / 8}vw, ${titleData.fontSize?.[effectiveMode] || 60}px)`
+                : `${titleData.fontSize?.[effectiveMode] || 80}px`,
               "--fs-desk": `${titleData.fontSize?.desktop || 80}px`,
               "--fs-tab": `${titleData.fontSize?.tablet || 60}px`,
               "--fs-mob": `${titleData.fontSize?.mobile || 40}px`,
               "--lh-desk": titleData.lineHeight?.desktop || '1.1',
               "--lh-tab": titleData.lineHeight?.tablet || '1.1',
               "--lh-mob": titleData.lineHeight?.mobile || '1.1',
+              "--ls-desk": `${titleData.letterSpacing?.desktop || '0'}px`,
+              "--ls-tab": `${titleData.letterSpacing?.tablet || '0'}px`,
+              "--ls-mob": `${titleData.letterSpacing?.mobile || '0'}px`,
               "--ff-desk": titleData.fontFamily?.desktop || 'Syne, sans-serif',
               "--ff-tab": titleData.fontFamily?.tablet || 'Syne, sans-serif',
               "--ff-mob": titleData.fontFamily?.mobile || 'Syne, sans-serif',
               "--fw-desk": titleData.fontWeight?.desktop || '700',
               "--fw-tab": titleData.fontWeight?.tablet || '700',
               "--fw-mob": titleData.fontWeight?.mobile || '700',
+              "--fs-loc-desk": `${locationData.fontSize?.desktop || 80}px`,
+              "--fs-loc-tab": `${locationData.fontSize?.tablet || 60}px`,
+              "--fs-loc-mob": `${locationData.fontSize?.mobile || 32}px`,
+              "--lh-loc-desk": locationData.lineHeight?.desktop || '1.1',
+              "--lh-loc-tab": locationData.lineHeight?.tablet || '1.1',
+              "--lh-loc-mob": locationData.lineHeight?.mobile || '1.1',
+              "--ls-loc-desk": `${locationData.letterSpacing?.desktop || '0'}px`,
+              "--ls-loc-tab": `${locationData.letterSpacing?.tablet || '0'}px`,
+              "--ls-loc-mob": `${locationData.letterSpacing?.mobile || '0'}px`,
+              "--ff-loc-desk": locationData.fontFamily?.desktop || 'Syne, sans-serif',
+              "--ff-loc-tab": locationData.fontFamily?.tablet || 'Syne, sans-serif',
+              "--ff-loc-mob": locationData.fontFamily?.mobile || 'Syne, sans-serif',
+              "--fw-loc-desk": locationData.fontWeight?.desktop || '300',
+              "--fw-loc-tab": locationData.fontWeight?.tablet || '300',
+              "--fw-loc-mob": locationData.fontWeight?.mobile || '300',
+              "--color-loc-desk": getSafeColor(locationData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(locationData.textColor?.desktop),
+              "--color-loc-tab": getSafeColor(locationData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(locationData.textColor?.tablet),
+              "--color-loc-mob": getSafeColor(locationData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(locationData.textColor?.mobile),
               "--color-desk": getSafeColor(titleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.desktop),
               "--color-tab": getSafeColor(titleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.tablet),
               "--color-mob": getSafeColor(titleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.mobile),
@@ -341,12 +451,21 @@ const formatFs = (val: string, fallback: string) => {
                 "w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]"
               )}
               style={{
-                lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
-                fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'Syne, sans-serif') : undefined,
-                fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
-                color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-tab)' : 'var(--color-desk)'),
+                lineHeight: titleData.lineHeight?.[effectiveMode] || '1.1',
+                fontFamily: titleData.fontFamily?.[effectiveMode] || 'Syne, sans-serif',
+                fontWeight: titleData.fontWeight?.[effectiveMode] || '700',
+                color: titleData.textColor?.[effectiveMode] === 'inherit' ? undefined : titleData.textColor?.[effectiveMode],
               }}
-              html={cleanHtmlColors(getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "")}
+              html={cleanHtmlColors(getResponsiveValue(titleData.content, effectiveMode) || "")}
+              locationHtml={cleanHtmlColors(getResponsiveValue(locationData.content, effectiveMode) || "")}
+              locationStyle={{
+                fontSize: `${locationData.fontSize?.[effectiveMode] || 32}px`,
+                lineHeight: locationData.lineHeight?.[effectiveMode] || '1.1',
+                letterSpacing: `${locationData.letterSpacing?.[effectiveMode] || '0'}px`,
+                fontFamily: locationData.fontFamily?.[effectiveMode] || 'Syne, sans-serif',
+                fontWeight: locationData.fontWeight?.[effectiveMode] || '300',
+                color: locationData.textColor?.[effectiveMode] === 'inherit' ? undefined : locationData.textColor?.[effectiveMode],
+              }}
             />
           </motion.h1>
         </motion.div>
@@ -356,8 +475,8 @@ const formatFs = (val: string, fallback: string) => {
         <motion.div style={{ scale: scrollScale, opacity: scrollOpacity, filter: scrollFilter }}>
         <motion.div
   initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ delay: 4.5, duration: 1 }}
+  animate={{ opacity: scrollVisible ? 1 : 0 }}
+  transition={{ duration: 1 }}
   className={cn("hero-scroll", !isEditor && "not-is-editor", isEditor && "is-editor",
     "flex flex-col items-center gap-2 text-[var(--text-muted)]"
   )}
@@ -389,13 +508,13 @@ const formatFs = (val: string, fallback: string) => {
       "uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] transition-all duration-300"
     )}
     style={{
-      fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 10}px` : undefined,
-      lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
-      fontFamily: isEditor ? (subtitleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
-      fontWeight: isEditor ? (subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '500') : undefined,
-      color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-sub-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-sub-tab)' : 'var(--color-sub-desk)'),
+      fontSize: `${subtitleData.fontSize?.[effectiveMode] || 10}px`,
+      lineHeight: subtitleData.lineHeight?.[effectiveMode] || '1.5',
+      fontFamily: subtitleData.fontFamily?.[effectiveMode] || 'inherit',
+      fontWeight: subtitleData.fontWeight?.[effectiveMode] || '500',
+      color: subtitleData.textColor?.[effectiveMode] === 'inherit' ? undefined : subtitleData.textColor?.[effectiveMode],
     }}
-    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "") }} 
+    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, effectiveMode) || "") }} 
   />
   <div className="w-[1px] h-12 bg-[var(--border-default)] overflow-hidden relative">
     <motion.div

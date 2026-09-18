@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
-export function HeroAnimatedTitle({ html, className, style }: { html: string, className?: string, style?: any }) {
+export function HeroAnimatedTitle({ html, locationHtml, className, style, locationStyle }: { html: string, locationHtml?: string, className?: string, style?: any, locationStyle?: any }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
@@ -13,15 +13,26 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
     .replace(/<[^>]+>/g, '')
     .trim();
   text = text.replace(/&nbsp;/g, ' ');
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  let lines = text.split('\n').map(l => l.trim()).filter(l => l);
+
+  let locText = "";
+  if (locationHtml) {
+    locText = locationHtml
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .trim();
+    locText = locText.replace(/&nbsp;/g, ' ');
+  }
 
   useEffect(() => {
-    if (mounted && lines.length === 3) {
+    if (mounted && lines.length >= 2) {
+      window.dispatchEvent(new CustomEvent('typographyStarted'));
       const numLetters = lines[0].replace(' ', '').length;
       const line0Done = (numLetters - 1) * 0.08 + 0.4;
       const highlightDone = line0Done + 0.6;
       const typeStart = highlightDone + 0.2;
-      const typeDur = lines[2].split('').length * 0.05;
+      const typeDur = (locText || (lines.length > 2 ? lines.slice(2).join('\n') : '')).split('').length * 0.05;
       const wipeOutStart = typeStart + typeDur + 1.0;
       const totalDur = wipeOutStart + 0.6;
 
@@ -32,7 +43,7 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
     }
   }, [mounted, html]);
 
-  if (!mounted || lines.length !== 3) {
+  if (!mounted || lines.length < 2) {
     return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
@@ -53,7 +64,8 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
   // Line 2: Typewriter
   const typeStart       = highlightDone + 0.2; // 1.6s
   const typeCharDur     = 0.05;
-  const typeChars       = lines[2].split('');
+  const actualLocText   = locText || (lines.length > 2 ? lines.slice(2).join('\n') : '');
+  const typeChars       = actualLocText.split('');
   const typeDur         = typeChars.length * typeCharDur; // ~1.25s (if 25 chars)
 
   // Cursor
@@ -74,7 +86,7 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
     <div className={className} style={style}>
 
       {/* ── LINE 0: "Visual" ── */}
-      <div className="flex justify-center font-black tracking-tight" style={{ overflow: 'visible' }}>
+      <div className="flex flex-wrap justify-center font-black tracking-tight w-full overflow-hidden" style={{ overflow: 'visible' }}>
         {lines[0].split('').map((char, i) => (
           <motion.span
             key={i}
@@ -92,21 +104,21 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
             }}
             style={{ display: 'inline-block', transformOrigin: 'center bottom' }}
           >
-            {char === ' ' ? '\u00A0' : char}
+            <span style={{ whiteSpace: 'pre-wrap' }}>{char}</span>
           </motion.span>
         ))}
       </div>
 
       {/* ── LINE 1: "Graphic Designer" ── */}
-      <div className="w-full flex justify-center"><div className="relative inline-flex justify-center items-center font-black tracking-tight px-[0.12em]">
-        {/* Invisible monospace text to dictate the true width of the container so monospace text doesn't get clipped */}
-        <span className="opacity-0 whitespace-nowrap pointer-events-none" >
+      <div className="w-full flex justify-center overflow-hidden"><div className="relative flex justify-center items-center font-black tracking-tight px-[0.12em] max-w-full w-full">
+        {/* Invisible text to dictate container height */}
+        <span className="opacity-0 whitespace-pre-wrap break-words text-center w-full pointer-events-none">
           {lines[1]}
         </span>
 
         {/* Base text: White text (Original Font) */}
-        <motion.span
-          className="absolute inset-0 flex items-center justify-center z-0 whitespace-nowrap"
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden"
           initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
           animate={{
             clipPath: [
@@ -121,8 +133,8 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
             ease: ['linear', 'easeInOut'],
           }}
         >
-          {lines[1]}
-        </motion.span>
+          <span className="whitespace-pre-wrap break-words text-center w-full">{lines[1]}</span>
+        </motion.div>
 
         {/* Yellow mask: Black text */}
         <motion.div
@@ -149,19 +161,19 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
             ease: ['linear', 'easeInOut', 'linear', 'easeInOut'],
           }}
         >
-          <span
-            className="text-[#09090b] absolute inset-0 flex items-center justify-center whitespace-nowrap"
+          <div
+            className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden"
             style={{ top: '-0.1em', bottom: '0.06em' }}
           >
-            {lines[1]}
-          </span>
+            <span className="whitespace-pre-wrap break-words text-center w-full">{lines[1]}</span>
+          </div>
         </motion.div>
       </div>
 
       </div>
       {/* ── LINE 2: "based in..." ── */}
-      <div className="flex justify-center items-center font-light" style={{ minHeight: '1.4em' }}>
-        <span style={{ display: 'inline-block', position: 'relative' }}>
+      <div className="flex justify-center items-center font-light hero-location px-4 text-center break-words max-w-full" style={{ minHeight: '1.4em', ...locationStyle }}>
+        <span style={{ display: 'inline-block', position: 'relative', maxWidth: '100%' }}>
           {typeChars.map((char, i) => (
             <motion.span
               key={i}
@@ -169,7 +181,7 @@ export function HeroAnimatedTitle({ html, className, style }: { html: string, cl
               animate={{ display: 'inline' }}
               transition={{ delay: typeStart + i * typeCharDur }}
             >
-              {char === ' ' ? '\u00A0' : char}
+              {char === '\n' ? <br /> : <span style={{ whiteSpace: 'pre-wrap' }}>{char}</span>}
             </motion.span>
           ))}
 

@@ -54,14 +54,28 @@ const normalize = (val: any): RichTextData => {
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
   const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
   const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
-  
+  const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+  const defaultLS = { mobile: '0', tablet: '0', desktop: '0' };
+
+  const fillKeys = (obj: any, def: any) => {
+    if (!obj || typeof obj !== 'object') return def;
+    const desk = obj.desktop ?? def.desktop;
+    return {
+      desktop: desk,
+      tablet: obj.tablet ?? desk,
+      mobile: obj.mobile ?? obj.tablet ?? desk,
+    };
+  };
+
   if (typeof val === 'object' && val !== null && 'content' in val) {
     return {
       ...val,
-      fontSize: val.fontSize || defaultFS,
-      lineHeight: val.lineHeight || defaultLH,
-      fontFamily: val.fontFamily || defaultFF,
-      fontWeight: val.fontWeight || defaultFW
+      fontSize: fillKeys(val.fontSize, defaultFS),
+      lineHeight: fillKeys(val.lineHeight, defaultLH),
+      fontFamily: fillKeys(val.fontFamily, defaultFF),
+      fontWeight: fillKeys(val.fontWeight, defaultFW),
+      textColor: fillKeys(val.textColor, defaultColor),
+      letterSpacing: fillKeys(val.letterSpacing, defaultLS),
     };
   }
   return { 
@@ -69,7 +83,9 @@ const normalize = (val: any): RichTextData => {
     fontSize: defaultFS,
     lineHeight: defaultLH,
     fontFamily: defaultFF,
-    fontWeight: defaultFW
+    fontWeight: defaultFW,
+    textColor: defaultColor,
+    letterSpacing: defaultLS,
   };
 };
 
@@ -443,6 +459,15 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   label="Title"
                   value={data.title}
                   onChange={(val) => setData({ ...data, title: val })}
+                  enterAsBreak={true}
+                />
+              </div>
+
+              <div className="space-y-4 mt-4">
+                <RichTextEditor
+                  label="Location Text (based in...)"
+                  value={data.location}
+                  onChange={(val) => setData({ ...data, location: val })}
                   enterAsBreak={true}
                 />
               </div>

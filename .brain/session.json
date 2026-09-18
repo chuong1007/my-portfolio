@@ -1,20 +1,29 @@
 {
-  "updated_at": "2026-09-18T15:26:00Z",
+  "updated_at": "2026-09-18T10:17:26.506Z",
   "working_on": {
-    "feature": "Smooth Scroll Snap & Bugfixes",
-    "task": "Fix avatar border, adjust snap offset, fix Gallery padding",
+    "feature": "Admin UI Fixes & About Section Enhancements",
+    "task": "Fix mobile preview grids, add auto-scroll on expand, support negative paddings, fix double dots.",
     "status": "completed",
     "files": [
-      "src/components/SmoothScrollSnap.tsx",
-      "src/components/sections/Gallery.tsx",
       "src/components/sections/About.tsx",
-      "src/app/admin/page.tsx"
+      "src/components/sections/Contact.tsx",
+      "src/components/AdminModal.tsx"
     ],
     "blockers": [],
-    "notes": "Đã xử lý xong toàn bộ lỗi liên quan đến Snap và khoảng cách (padding)."
+    "notes": "Đã khắc phục lỗi break layout 2 cột trên Admin, ẩn dot trình duyệt, kéo giãn slider padding xuống âm."
   },
   "pending_tasks": [],
   "recent_changes": [
+    {
+      "timestamp": "2026-09-18T10:17:26.506Z",
+      "type": "bugfix_and_feature",
+      "description": "Sửa lỗi layout mobile Admin, auto-scroll khi mở rộng About, hỗ trợ padding âm.",
+      "files": [
+        "src/components/sections/About.tsx",
+        "src/components/sections/Contact.tsx",
+        "src/components/AdminModal.tsx"
+      ]
+    },
     {
       "timestamp": "2026-09-18T15:26:00Z",
       "type": "bugfix",
@@ -36,12 +45,26 @@
       "error": "Scroll snap giật lùi hoặc cản trở người dùng cuộn chậm.",
       "solution": "Tạo Smart Snap Zone, chỉ snap khi tiêu đề vào tầm nhìn và thêm sự kiện wheel/touchstart để cancel animation.",
       "resolved": true
+    },
+    {
+      "error": "Admin mobile preview render 2 cột do ảnh hưởng Tailwind md: breakpoint của màn hình Desktop.",
+      "solution": "Thay !isEditor thành !isAdmin để các class grid luôn lấy chiều rộng giả lập (globalPreviewMode) khi ở trong Admin.",
+      "resolved": true
+    },
+    {
+      "error": "Margin/padding ảo khiến list có 2 dấu chấm.",
+      "solution": "Thêm CSS li::marker { content: none } để ẩn dấu chấm mặc định của trình duyệt.",
+      "resolved": true
     }
   ],
   "decisions_made": [
     {
       "decision": "Dùng getComputedStyle(section).paddingTop để bù trừ chiều cao header khi snap",
       "reason": "Các section có padding khác nhau (0px vs 128px), tránh để header lấp hoặc đẩy khoảng trắng quá lớn."
+    },
+    {
+      "decision": "Auto-scroll expanded content về y - 40px",
+      "reason": "Để giấu đường gạch ngang và nút Xem chi tiết dưới Header, đưa người dùng thẳng vào nội dung mới."
     }
   ]
 }

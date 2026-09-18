@@ -14,7 +14,7 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
 
 import Image from '@tiptap/extension-image';
-import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2, Palette, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline as UnderlineIcon, Strikethrough, Link as LinkIcon, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, MoveHorizontal, Image as ImageIcon, Loader2, Palette, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline as UnderlineIcon, Strikethrough, Link as LinkIcon, List, ListOrdered } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
@@ -142,6 +142,12 @@ export type ResponsiveContent = {
   desktop: string;
 };
 
+export type ResponsiveLetterSpacing = {
+  desktop?: string;
+  tablet?: string;
+  mobile?: string;
+};
+
 export type ResponsiveLineHeight = {
   mobile: string;
   tablet: string;
@@ -170,6 +176,7 @@ export type RichTextData = {
   content: string | ResponsiveContent;
   fontSize: ResponsiveFontSize;
   lineHeight: ResponsiveLineHeight;
+  letterSpacing?: ResponsiveLetterSpacing;
   fontFamily?: ResponsiveFontFamily;
   fontWeight?: ResponsiveFontWeight;
   textColor?: ResponsiveColor;
@@ -182,9 +189,10 @@ type RichTextEditorProps = {
   placeholder?: string;
   enterAsBreak?: boolean;
   hideLineHeight?: boolean;
+  hideLetterSpacing?: boolean;
 };
 
-export function RichTextEditor({ label, value, onChange, placeholder, enterAsBreak = false, hideLineHeight = false }: RichTextEditorProps) {
+export function RichTextEditor({ label, value, onChange, placeholder, enterAsBreak = false, hideLineHeight = false, hideLetterSpacing = false }: RichTextEditorProps) {
   const { globalPreviewMode } = useAdmin();
   const [localFontSize, setLocalFontSize] = useState<ResponsiveFontSize>({
     mobile: 16,
@@ -195,6 +203,11 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     mobile: '1.5',
     tablet: '1.5',
     desktop: '1.5'
+  });
+  const [localLetterSpacing, setLocalLetterSpacing] = useState<ResponsiveLetterSpacing>({
+    mobile: '0',
+    tablet: '0',
+    desktop: '0'
   });
   const [localFontFamily, setLocalFontFamily] = useState<ResponsiveFontFamily>({
     mobile: 'inherit',
@@ -271,41 +284,35 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     const defaultFF = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
     const defaultFW = { mobile: '400', tablet: '400', desktop: '400' };
     const defaultColor = { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' };
+    const defaultLS = { mobile: '0', tablet: '0', desktop: '0' };
     const defaultContent = { mobile: '', tablet: '', desktop: '' };
 
+    const fillKeys = (obj: any, def: any) => {
+      if (!obj || typeof obj !== 'object') return def;
+      const desk = obj.desktop ?? def.desktop;
+      return {
+        desktop: desk,
+        tablet: obj.tablet ?? desk,
+        mobile: obj.mobile ?? obj.tablet ?? desk,
+      };
+    };
+
     if (v === null || v === undefined) {
-      return { 
-        content: defaultContent, 
-        fontSize: defaultFS, 
-        lineHeight: defaultLH, 
-        fontFamily: defaultFF, 
-        fontWeight: defaultFW,
-        textColor: defaultColor
-      };
+      return { content: defaultContent, fontSize: defaultFS, lineHeight: defaultLH, fontFamily: defaultFF, fontWeight: defaultFW, textColor: defaultColor, letterSpacing: defaultLS };
     }
-    
     if (typeof v === 'string') {
-      return { 
-        content: { mobile: v, tablet: v, desktop: v }, 
-        fontSize: defaultFS,
-        lineHeight: defaultLH,
-        fontFamily: defaultFF,
-        fontWeight: defaultFW,
-        textColor: defaultColor
-      };
+      return { content: { mobile: v, tablet: v, desktop: v }, fontSize: defaultFS, lineHeight: defaultLH, fontFamily: defaultFF, fontWeight: defaultFW, textColor: defaultColor, letterSpacing: defaultLS };
     }
-
-    const content = typeof v.content === 'object' && v.content !== null
-      ? v.content
-      : { mobile: v.content || '', tablet: v.content || '', desktop: v.content || '' };
     
-    const fontSize = v.fontSize || defaultFS;
-    const lineHeight = v.lineHeight || defaultLH;
-    const fontFamily = v.fontFamily || defaultFF;
-    const fontWeight = v.fontWeight || defaultFW;
-    const textColor = v.textColor || defaultColor;
-
-    return { content, fontSize, lineHeight, fontFamily, fontWeight, textColor };
+    return {
+      content: typeof v.content === 'object' && v.content !== null ? fillKeys(v.content, defaultContent) : { mobile: v.content || '', tablet: v.content || '', desktop: v.content || '' },
+      fontSize: fillKeys(v.fontSize, defaultFS),
+      lineHeight: fillKeys(v.lineHeight, defaultLH),
+      fontFamily: fillKeys(v.fontFamily, defaultFF),
+      fontWeight: fillKeys(v.fontWeight, defaultFW),
+      textColor: fillKeys(v.textColor, defaultColor),
+      letterSpacing: fillKeys(v.letterSpacing, defaultLS),
+    };
   };
 
   const normalizedValue = normalize(value);
@@ -313,6 +320,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   useEffect(() => {
     setLocalFontSize(normalizedValue.fontSize);
     setLocalLineHeight(normalizedValue.lineHeight);
+    setLocalLetterSpacing(normalizedValue.letterSpacing || { mobile: '0', tablet: '0', desktop: '0' });
     setLocalFontFamily(normalizedValue.fontFamily || { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' });
     setLocalFontWeight(normalizedValue.fontWeight || { mobile: '400', tablet: '400', desktop: '400' });
     setLocalTextColor(normalizedValue.textColor || { mobile: 'inherit', tablet: 'inherit', desktop: 'inherit' });
@@ -371,7 +379,8 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         lineHeight: localLineHeight,
         fontFamily: localFontFamily,
         fontWeight: localFontWeight,
-        textColor: localTextColor
+        textColor: localTextColor,
+        letterSpacing: localLetterSpacing
       });
     },
     editorProps: {
@@ -402,7 +411,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     }
   }, [globalPreviewMode, value, editor]);
 
-  const currentSize = localFontSize[globalPreviewMode] || 16;
+  const currentSize = localFontSize[globalPreviewMode || 'desktop'] || 16;
 
   const updateFontSize = (newSize: number) => {
     const updatedSizes = { ...localFontSize, [globalPreviewMode]: newSize };
@@ -496,15 +505,26 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     }
   };
 
-  const currentLineHeight = localLineHeight[globalPreviewMode] || '1.5';
-  const baseFontFamily = localFontFamily[globalPreviewMode] || 'inherit';
-  const baseFontWeight = localFontWeight[globalPreviewMode] || '400';
+  const currentLineHeight = localLineHeight[globalPreviewMode || 'desktop'] || '1.5';
+  const currentLetterSpacing = localLetterSpacing[globalPreviewMode || 'desktop'] ?? '0';
+
+  const updateLetterSpacing = (newSpacing: string) => {
+    const mode = globalPreviewMode || 'desktop';
+    const updated = { ...localLetterSpacing, [mode]: newSpacing };
+    setLocalLetterSpacing(updated);
+    onChange({
+      ...value,
+      letterSpacing: updated
+    });
+  };
+  const baseFontFamily = localFontFamily[globalPreviewMode || 'desktop'] || 'inherit';
+  const baseFontWeight = localFontWeight[globalPreviewMode || 'desktop'] || '400';
 
   // Determine current weight/family at selection/cursor for dropdown display
   const selectionAttributes = editor?.getAttributes('textStyle') || {};
   const currentFontFamily = selectionAttributes.fontFamily || baseFontFamily;
   const currentFontWeight = selectionAttributes.fontWeight || baseFontWeight;
-  const currentTextColor = selectionAttributes.color || localTextColor[globalPreviewMode] || '#FFFFFF';
+  const currentTextColor = selectionAttributes.color || localTextColor[globalPreviewMode || 'desktop'] || '#FFFFFF';
 
   const FONT_FAMILIES = [
     { label: 'Default', value: 'inherit' },
@@ -546,7 +566,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
         <div className="flex flex-wrap items-center gap-1 p-1">
           
           {/* Main Formatting Tools */}
-          <div className="flex items-center gap-0.5 bg-[var(--bg-base)] p-1 rounded-lg border border-zinc-800/50">
+          <div className="flex flex-wrap items-center gap-0.5 bg-[var(--bg-base)] p-1 rounded-lg border border-zinc-800/50">
             <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('bold') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Bold"><Bold className="w-3.5 h-3.5" /></button>
             <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('italic') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Italic"><Italic className="w-3.5 h-3.5" /></button>
             <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('underline') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Underline"><UnderlineIcon className="w-3.5 h-3.5" /></button>
@@ -620,7 +640,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)] ml-1">
+          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)]">
              <select 
                value={currentFontFamily}
                onChange={(e) => updateFontFamily(e.target.value)}
@@ -632,7 +652,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
              </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)] ml-1">
+          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)]">
              <select 
                value={currentFontWeight}
                onChange={(e) => updateFontWeight(e.target.value)}
@@ -646,7 +666,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
           
           <div className="w-px h-4 bg-zinc-800 mx-1" />
           
-          <div className="flex items-center gap-3 px-3 py-1 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] ml-1 group/slider">
+          <div className="flex items-center gap-3 px-3 py-1 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] group/slider">
             <div className="flex items-center gap-1.5 min-w-[50px]">
               <Type className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               <div className="flex items-baseline gap-0.5">
@@ -676,33 +696,63 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
           </div>
         </div>
 
-        {!hideLineHeight && (
-          <div className="px-1 pb-1">
-            <div className="flex items-center gap-3 px-3 py-1.5 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] group/slider">
-              <div className="flex items-center gap-1.5 min-w-[50px]">
-                <FoldVertical className="w-3.5 h-3.5 text-[var(--text-muted)]" />
-                <div className="flex items-baseline gap-0.5">
-                  <input 
-                    type="number"
-                    step="0.1"
-                    value={currentLineHeight}
-                    onChange={(e) => updateLineHeight(e.target.value)}
-                    className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <span className="text-[9px] text-zinc-600 font-black uppercase">lh</span>
+        {(!hideLineHeight || !hideLetterSpacing) && (
+          <div className="px-1 pb-1 flex flex-col gap-1">
+            {!hideLineHeight && (
+              <div className="flex items-center gap-3 px-3 py-1.5 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] group/slider">
+                <div className="flex items-center gap-1.5 min-w-[50px]">
+                  <FoldVertical className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                  <div className="flex items-baseline gap-0.5">
+                    <input 
+                      type="number"
+                      step="0.1"
+                      value={currentLineHeight}
+                      onChange={(e) => updateLineHeight(e.target.value)}
+                      className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[9px] text-zinc-600 font-black uppercase">lh</span>
+                  </div>
                 </div>
+                
+                <input
+                  type="range"
+                  min="0.8"
+                  max="3"
+                  step="0.1"
+                  value={currentLineHeight}
+                  onChange={(e) => updateLineHeight(e.target.value)}
+                  className="flex-1 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+                />
               </div>
-              
-              <input
-                type="range"
-                min="0.8"
-                max="3"
-                step="0.1"
-                value={currentLineHeight}
-                onChange={(e) => updateLineHeight(e.target.value)}
-                className="flex-1 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
-              />
-            </div>
+            )}
+            
+            {!hideLetterSpacing && (
+              <div className="flex items-center gap-3 px-3 py-1.5 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] group/slider">
+                <div className="flex items-center gap-1.5 min-w-[50px]">
+                  <MoveHorizontal className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                  <div className="flex items-baseline gap-0.5">
+                    <input 
+                      type="number"
+                      step="0.1"
+                      value={currentLetterSpacing}
+                      onChange={(e) => updateLetterSpacing(e.target.value)}
+                      className="w-8 bg-transparent text-[11px] font-bold text-center focus:outline-none text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[9px] text-zinc-600 font-black uppercase">ls</span>
+                  </div>
+                </div>
+                
+                <input
+                  type="range"
+                  min="-5"
+                  max="20"
+                  step="0.5"
+                  value={currentLetterSpacing}
+                  onChange={(e) => updateLetterSpacing(e.target.value)}
+                  className="flex-1 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

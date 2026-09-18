@@ -124,7 +124,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
       setTimeout(() => {
         const y = expandRef.current!.getBoundingClientRect().top + window.scrollY;
         // Scroll so the expanded content is below the header, but the line and button are hidden under the header
-        window.scrollTo({ top: y - 40, behavior: 'smooth' });
+        window.scrollTo({ top: y - 35, behavior: 'smooth' });
       }, 300); // wait a bit for the height animation to start
     }
   }, [isExpanded]);

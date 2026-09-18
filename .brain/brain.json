@@ -30,11 +30,13 @@
   ],
   "knowledge_items": {
     "patterns": [
-      "Tính khoảng cách Snap động bằng cách đọc getComputedStyle(paddingTop) của section để bù đắp Header Height."
+      "Tính khoảng cách Snap động bằng cách đọc getComputedStyle(paddingTop) của section để bù đắp Header Height.",
+      "Hỗ trợ padding âm bằng cách cho phép Admin slider giá trị âm, và CSS variable map giá trị âm sang margin thay vì padding."
     ],
     "gotchas": [
       "Không bao giờ chặn scroll event bằng setTimeout lâu gây cản trở cuộn của user. Luôn dùng requestAnimationFrame và có cơ chế cancel bằng wheel/touchstart.",
-      "Check kỹ điều kiện hiển thị CSS class, nếu có variant homepage coi chừng nuốt mất class styling cơ bản (Lỗi xảy ra ở Gallery.tsx)."
+      "Check kỹ điều kiện hiển thị CSS class, nếu có variant homepage coi chừng nuốt mất class styling cơ bản (Lỗi xảy ra ở Gallery.tsx).",
+      "Khi thiết kế layout cho Admin Preview, dùng !isAdmin thay vì !isEditor để breakpoint giả lập không bị ghi đè bởi kích thước màn hình vật lý (Tailwind md:)."
     ],
     "conventions": [
       "Biến màu trong code phải lấy từ biến CSS (VD: var(--bg-base)) để hỗ trợ Dark Mode"
