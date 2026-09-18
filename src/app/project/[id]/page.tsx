@@ -1,7 +1,7 @@
 import { getProjectById } from "@/lib/data";
 import { ProjectDetail } from "@/components/ProjectDetail";
 import { notFound } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase-server";
 
 // Always fetch fresh data from Supabase (no stale static cache)
 export const dynamic = 'force-dynamic';
@@ -16,10 +16,7 @@ export default async function ProjectPage({ params }: PageProps) {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
 
   // Use server-side Supabase client (not browser client)
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
+  const supabase = await createClient();
 
   const { data: dbProject } = await supabase
     .from("projects")

@@ -302,7 +302,7 @@ export function ProjectForm({ project, onClose }: ProjectFormProps) {
       const zipBlob = await zip.generateAsync(
         { type: 'blob', compression: 'STORE' },
         (meta) => {
-          setDownloadProgress(`Nén ${Math.round(meta.percent)}%...`);
+          setDownloadProgress(`Đang tải... ${Math.round(meta.percent)}%`);
         }
       );
 

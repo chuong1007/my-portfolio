@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter, Outfit, Syne, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
-import { Contact } from "@/components/Contact";
+import { Contact } from "@/components/sections/Contact";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -69,10 +69,12 @@ export const metadata: Metadata = {
 };
 
 import { AdminProvider } from "@/context/AdminContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AdminEditButton } from "@/components/builder/AdminEditButton";
 import { GlobalPreviewWrapper } from "./GlobalPreviewWrapper";
 import { Analytics } from "@vercel/analytics/next";
 import { PageViewTracker } from "@/components/PageViewTracker";
+import { SmoothScrollSnap } from "@/components/SmoothScrollSnap";
 
 export default function RootLayout({
   children,
@@ -80,15 +82,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark bg-zinc-950" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${outfit.variable} ${syne.variable} ${montserrat.variable} antialiased selection:bg-zinc-50 selection:text-zinc-950 bg-zinc-950 text-zinc-50 min-h-screen font-sans flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${outfit.variable} ${syne.variable} ${montserrat.variable} antialiased min-h-screen font-sans flex flex-col`}
         suppressHydrationWarning
       >
+        {/* No-FOUC: apply theme class before first paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               try {
+                var t = localStorage.getItem('portfolio-theme');
+                var html = document.documentElement;
+                if (t === 'light') { html.classList.remove('dark'); }
+                else { html.classList.add('dark'); }
+                // Also clean browser extension attributes
                 document.querySelectorAll('[bis_skin_checked]').forEach(function(el) {
                   el.removeAttribute('bis_skin_checked');
                 });
@@ -96,11 +105,14 @@ export default function RootLayout({
             `,
           }}
         />
-        <AdminProvider>
-          <GlobalPreviewWrapper>
-            {children}
-          </GlobalPreviewWrapper>
-        </AdminProvider>
+        <ThemeProvider>
+          <AdminProvider>
+            <GlobalPreviewWrapper>
+              {children}
+            </GlobalPreviewWrapper>
+            <SmoothScrollSnap />
+          </AdminProvider>
+        </ThemeProvider>
         <Analytics />
         <PageViewTracker />
       </body>

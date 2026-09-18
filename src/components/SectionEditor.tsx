@@ -43,15 +43,7 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
   }, [onSave]);
 
   const handleOpenEditor = () => {
-    // Nếu là các trang đã có menu riêng bên trái, chuyển hướng luôn tới đó
-    if (sectionId === 'about') {
-      if (window.parent !== window) {
-        window.parent.postMessage({ type: 'NAVIGATE_TO', url: '/admin/about' }, '*');
-      } else {
-        window.location.href = '/admin/about';
-      }
-      return;
-    }
+
     
     // If inside iframe, tell parent to open editor
     if (window.parent !== window) {
@@ -118,7 +110,7 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
       {!isVisible && (
         <div className="absolute top-4 left-4 z-[70] bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none">
           <div className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />
-          <span className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Hidden Section</span>
+          <span className="text-[10px] uppercase tracking-wider font-bold text-[var(--text-muted)]">Hidden Section</span>
         </div>
       )}
 
@@ -142,7 +134,7 @@ export function SectionEditor({ sectionId, children, initialData, onSave, isVisi
             "p-3 rounded-full backdrop-blur-md border transition-all duration-300 shadow-xl pointer-events-auto",
             isVisible 
               ? "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border-emerald-500/20" 
-              : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400 border-zinc-700"
+              : "bg-zinc-800 hover:bg-zinc-700 text-[var(--text-muted)] border-zinc-700"
           )}
           title={isVisible ? "Ẩn Section" : "Hiện Section"}
         >

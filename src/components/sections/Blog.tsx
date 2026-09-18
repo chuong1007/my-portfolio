@@ -11,12 +11,30 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import type { DbBlog } from "@/lib/types";
-import { SectionEditor } from "./SectionEditor";
+import { SectionEditor } from "@/components/SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "./RichTextEditor";
+import type { RichTextData } from "@/components/builder/RichTextEditor";
 import { usePathname } from "next/navigation";
+
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
 
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
@@ -227,12 +245,53 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
 
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
-      <section 
-        id={sectionId} 
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .blog-title:not(.is-editor) {
+          font-size: var(--b-fs-mob);
+          line-height: var(--b-lh-mob);
+          font-family: var(--b-ff-mob);
+          font-weight: var(--b-fw-mob);
+        }
+        .blog-container:not(.is-editor) {
+          padding-top: var(--pt-mob);
+          padding-bottom: var(--pb-mob);
+        }
+        @media (min-width: 768px) {
+          .blog-title:not(.is-editor) {
+            font-size: var(--b-fs-tab);
+            line-height: var(--b-lh-tab);
+            font-family: var(--b-ff-tab);
+            font-weight: var(--b-fw-tab);
+          }
+          .blog-container:not(.is-editor) {
+            padding-top: var(--pt-tab);
+            padding-bottom: var(--pb-tab);
+          }
+        }
+        @media (min-width: 1024px) {
+          .blog-title:not(.is-editor) {
+            font-size: var(--b-fs-desk);
+            line-height: var(--b-lh-desk);
+            font-family: var(--b-ff-desk);
+            font-weight: var(--b-fw-desk);
+          }
+          .blog-container:not(.is-editor) {
+            padding-top: var(--pt-desk);
+            padding-bottom: var(--pb-desk);
+          }
+        }
+      `}} />
+
+      <section id={sectionId} 
         className={cn(
-          "px-4 md:px-12 bg-zinc-950 relative",
-          !isEditor && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
-          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+          "bg-[var(--bg-base)] relative",
+          !isEditor && "px-4 md:px-12",
+          isEditor && globalPreviewMode === 'mobile' && "px-4",
+          isEditor && globalPreviewMode === 'tablet' && "px-8",
+          isEditor && globalPreviewMode === 'desktop' && "px-12",
+          !isEditor && "blog-container not-is-editor",
+          isEditor && "is-editor"
         )}
         style={{
           paddingTop: isEditor ? `${currentPt}px` : undefined,
@@ -251,12 +310,12 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-16 flex flex-row items-end justify-between border-b border-zinc-900 pb-8"
+            className="mb-16 flex flex-row items-end justify-between border-b border-[var(--border-subtle)] pb-8"
           >
             <div className="flex flex-col gap-2">
               <div 
                 className={cn(
-                  "tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  "tracking-tighter text-[var(--text-primary)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   !isEditor && "text-[length:var(--b-fs-mob)] md:text-[length:var(--b-fs-tab)] lg:text-[length:var(--b-fs-desk)] leading-[var(--b-lh-mob)] md:leading-[var(--b-lh-tab)] lg:leading-[var(--b-lh-desk)] [font-family:var(--b-ff-mob)] md:[font-family:var(--b-ff-tab)] lg:[font-family:var(--b-ff-desk)] font-[var(--b-fw-mob)] md:font-[var(--b-fw-tab)] lg:font-[var(--b-fw-desk)]"
                 )}
                 style={{ 
@@ -276,16 +335,16 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                   "--b-fw-desk": titleData.fontWeight?.desktop || '700',
                   "--b-fw-tab": titleData.fontWeight?.tablet || '700',
                   "--b-fw-mob": titleData.fontWeight?.mobile || '700',
-                  "--b-color-desk": titleData.textColor?.desktop === 'inherit' ? undefined : titleData.textColor?.desktop,
-                  "--b-color-tab": titleData.textColor?.tablet === 'inherit' ? undefined : titleData.textColor?.tablet,
-                  "--b-color-mob": titleData.textColor?.mobile === 'inherit' ? undefined : titleData.textColor?.mobile,
+                  "--b-color-desk": getSafeColor(titleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.desktop),
+                  "--b-color-tab": getSafeColor(titleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.tablet),
+                  "--b-color-mob": getSafeColor(titleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.mobile),
                   color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--b-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--b-color-tab)' : 'var(--b-color-desk)'),
                 } as any}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
+                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "") }} 
               />
               <div 
                 className={cn(
-                  "text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  "text-[var(--text-muted)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   !isEditor && "text-[length:var(--bs-fs-mob)] md:text-[length:var(--bs-fs-tab)] lg:text-[length:var(--bs-fs-desk)] leading-[var(--bs-lh-mob)] md:leading-[var(--bs-lh-tab)] lg:leading-[var(--bs-lh-desk)]"
                 )}
                 style={{ 
@@ -297,18 +356,18 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                   "--bs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
                   "--bs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
                   "--bs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
-                  "--bs-color-desk": subtitleData.textColor?.desktop === 'inherit' ? undefined : subtitleData.textColor?.desktop,
-                  "--bs-color-tab": subtitleData.textColor?.tablet === 'inherit' ? undefined : subtitleData.textColor?.tablet,
-                  "--bs-color-mob": subtitleData.textColor?.mobile === 'inherit' ? undefined : subtitleData.textColor?.mobile,
+                  "--bs-color-desk": getSafeColor(subtitleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.desktop),
+                  "--bs-color-tab": getSafeColor(subtitleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.tablet),
+                  "--bs-color-mob": getSafeColor(subtitleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.mobile),
                   color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--bs-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--bs-color-tab)' : 'var(--bs-color-desk)'),
                 } as any}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
+                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "") }} 
               />
             </div>
             {((showSeeAll && currentSeeAllPos === 'top' && !isBlogPage) || (variant === 'homepage' && !showSeeAll && !isBlogPage)) && (
               <Link 
                 href={showSeeAll ? (getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || "/blog") : "/blog"}
-                className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
+                className="hidden lg:flex group items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-semibold tracking-tight"
               >
                 {showSeeAll ? (getResponsiveValue(seeAllLabel, globalPreviewMode || 'desktop') || "Xem tất cả") : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -325,8 +384,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
                   className={cn(
                     "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
                     activeTag === tag
-                      ? "bg-zinc-50 text-zinc-950 border-zinc-50"
-                      : "bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-zinc-200"
+                      ? "bg-[var(--text-primary)] text-[var(--bg-base)] border-[var(--text-primary)]"
+                      : "bg-transparent text-[var(--text-muted)] border-[var(--border-default)] hover:border-zinc-500 hover:text-[var(--text-secondary)]"
                   )}
                 >
                   {tag}
@@ -351,10 +410,10 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             >
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="flex flex-col gap-3 animate-pulse">
-                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50" />
+                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50" />
                   <div className="space-y-2">
-                    <div className="h-4 bg-zinc-900 rounded-md w-2/3" />
-                    <div className="h-3 bg-zinc-900 rounded-md w-full" />
+                    <div className="h-4 bg-[var(--bg-surface)] rounded-md w-2/3" />
+                    <div className="h-3 bg-[var(--bg-surface)] rounded-md w-full" />
                   </div>
                 </div>
               ))}
@@ -387,14 +446,14 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
             <div className="mt-16 flex justify-center">
               <button
                 onClick={handleLoadMore}
-                className="group relative flex items-center gap-3 px-10 py-5 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
+                className="group relative flex items-center gap-3 px-10 py-5 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.2em] transition-colors relative z-10">
+                <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-[0.2em] transition-colors relative z-10">
                   Xem thêm
                 </span>
-                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
-                  <ArrowDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                <div className="relative z-10 w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
+                  <ArrowDown className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
                 </div>
               </button>
             </div>
@@ -408,17 +467,17 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
               className={cn("mt-20 flex justify-center", !showSeeAll && "lg:hidden")}
             >
               {showSeeAll ? (
-                <Link href={getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || seeAllLink || "/blog"} className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
+                <Link href={getResponsiveValue(seeAllLink, globalPreviewMode || 'desktop') || seeAllLink || "/blog"} className="group relative flex items-center gap-3 px-8 py-4 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
+                  <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-widest transition-colors">
                     {getResponsiveValue(seeAllLabel, globalPreviewMode || 'desktop') || seeAllLabel}
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
-                    <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                  <div className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
+                    <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
                   </div>
                 </Link>
               ) : (
-                <Link href="/blog" className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest border border-zinc-800 px-6 py-3 rounded-full hover:border-zinc-500 w-full md:w-auto text-center justify-center">
+                <Link href="/blog" className="group flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-bold uppercase tracking-widest border border-[var(--border-default)] px-6 py-3 rounded-full hover:border-zinc-500 w-full md:w-auto text-center justify-center">
                   Xem tất cả bài viết
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
@@ -427,8 +486,8 @@ export function Blog({ variant = 'homepage', sectionId = 'blog', initialContent,
           )}
 
           {!loading && filteredBlogs.length === 0 && blogs.length > 0 && (
-            <div className="text-center py-20 border border-dashed border-zinc-800 rounded-2xl">
-              <p className="text-zinc-500 text-lg">Không có bài viết nào với tag &quot;{activeTag}&quot;</p>
+            <div className="text-center py-20 border border-dashed border-[var(--border-default)] rounded-2xl">
+              <p className="text-[var(--text-muted)] text-lg">Không có bài viết nào với tag &quot;{activeTag}&quot;</p>
             </div>
           )}
         </div>
@@ -444,10 +503,10 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: index * 0.1 }}
-      className="group flex flex-col bg-zinc-900 border border-zinc-800 rounded-3xl transition-all duration-300 p-5 hover:bg-zinc-800/50 h-full"
+      className="group flex flex-col bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-3xl transition-all duration-300 p-5 hover:bg-[var(--bg-elevated)] h-full"
     >
       <Link href={`/blog/${post.slug}`} className="flex flex-col w-full h-full">
-        <div className="overflow-hidden bg-zinc-800 w-full aspect-video rounded-2xl mb-6 relative">
+        <div className="overflow-hidden bg-[var(--bg-elevated)] w-full aspect-video rounded-2xl mb-6 relative">
           {post.is_featured && (
             <div className="bg-orange-500 text-white text-[10px] font-bold px-3 py-1 uppercase rounded-md absolute top-3 left-3 z-10 shadow-lg tracking-wider">
               NỔI BẬT
@@ -461,15 +520,15 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
           />
         </div>
         <div className="flex flex-col flex-1">
-          <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-3 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
             <span>{new Date(post.created_at).toLocaleDateString("vi-VN")}</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-elevated)]" />
             <span className="text-blue-500">{post.tags?.[0] || "Blog"}</span>
           </div>
-          <h3 className="font-bold text-zinc-100 mb-4 group-hover:text-white transition-colors leading-tight text-xl line-clamp-2">
+          <h3 className="font-bold text-[var(--text-primary)] mb-4 group-hover:text-[var(--text-primary)] transition-colors leading-tight text-xl line-clamp-2">
             {post.title}
           </h3>
-          <p className="text-zinc-500 leading-relaxed text-sm line-clamp-2 mt-auto">
+          <p className="text-[var(--text-muted)] leading-relaxed text-sm line-clamp-2 mt-auto">
             {post.excerpt}
           </p>
         </div>

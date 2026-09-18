@@ -73,33 +73,83 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Map design tokens to Tailwind utilities */
+  --color-bg-base:      var(--bg-base);
+  --color-bg-surface:   var(--bg-surface);
+  --color-bg-elevated:  var(--bg-elevated);
+  --color-bg-overlay:   var(--bg-overlay);
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted:     var(--text-muted);
+  --color-border-subtle:  var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-accent:         var(--accent);
 }
 
+/* ─── LIGHT MODE (default) ─────────────────────────────── */
 :root {
-  --background: #09090b; /* zinc-950 */
-  --foreground: #fafafa; /* zinc-50 */
+  --background: #f4f4f5;
+  --foreground: #09090b;
+
+  /* Background layers */
+  --bg-base:     #f4f4f5;   /* zinc-100 — page background */
+  --bg-surface:  #ffffff;   /* white    — cards, nav */
+  --bg-elevated: #e4e4e7;   /* zinc-200 — hover, subtle fill */
+  --bg-overlay:  rgba(244,244,245,0.85); /* glass header */
+
+  /* Text */
+  --text-primary:   #09090b; /* zinc-950 */
+  --text-secondary: #27272a; /* zinc-700 (darker) */
+  --text-muted:     #3f3f46; /* zinc-500 (darker) */
+
+  /* Border */
+  --border-subtle:  #e4e4e7; /* zinc-200 */
+  --border-default: #d4d4d8;/* zinc-300 */
+
+  /* Accent */
+  --accent:       #3b82f6; /* blue-500 */
+  --accent-hover: #2563eb; /* blue-600 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;
-    --foreground: #fafafa;
-  }
+/* ─── DARK MODE ─────────────────────────────────────────── */
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+
+  --bg-base:     #09090b;   /* zinc-950 */
+  --bg-surface:  #18181b;   /* zinc-900 */
+  --bg-elevated: #27272a;   /* zinc-800 */
+  --bg-overlay:  rgba(9,9,11,0.85);
+
+  --text-primary:   #fafafa; /* zinc-50 */
+  --text-secondary: #e4e4e7; /* zinc-400 */
+  --text-muted:     #a1a1aa; /* zinc-600 */
+
+  --border-subtle:  rgba(255,255,255,0.06);
+  --border-default: rgba(255,255,255,0.10);
+
+  --accent:       #3b82f6;
+  --accent-hover: #60a5fa;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
 }
 
+/* ─── SCROLL SNAP — handled by JS (SmoothScrollSnap.tsx) ── */
+
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   font-family: var(--font-sans), sans-serif;
+  transition: background-color 0.3s ease, color 0.2s ease;
 }
 
 ::selection {
-  background-color: #fafafa;
-  color: #09090b;
+  background-color: var(--text-primary);
+  color: var(--bg-base);
 }
 
 /* Tiptap Alignment Support */
@@ -117,17 +167,17 @@ body {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-default);
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--text-muted);
 }
 .custom-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
 }
 
-/* Optional global scrollbar styling if requested */
+/* Optional global scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -136,11 +186,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border-default);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--text-muted);
 }
 ::-webkit-scrollbar-corner {
   background: transparent;
@@ -277,8 +327,8 @@ body {
   margin: 2px 4px !important;
   line-height: 1 !important;
   border-radius: 9999px !important;
-  border: 1px solid #3f3f46 !important; /* viền mỏng màu xám zinc-700 */
-  color: #ffffff !important; /* chữ trắng */
+  border: 1px solid var(--border-default) !important; 
+  color: var(--text-primary) !important;
   font-weight: 500 !important;
   font-size: 0.875rem !important;
   background-color: transparent !important;
@@ -293,10 +343,10 @@ body {
 
 .mention:hover,
 [data-type="mention"]:hover {
-  background-color: rgba(59, 130, 246, 0.05) !important;
-  border-color: rgba(59, 130, 246, 0.5) !important;
-  color: #60a5fa !important;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3) !important;
+  background-color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
 }
 
 .mention:active,

@@ -9,9 +9,8 @@ import { LoginModal } from "@/components/admin/LoginModal";
 
 import { createClient } from "@/lib/supabase";
 
-
-
 import { useAdmin } from "@/context/AdminContext";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import { Eye, EyeOff, LogOut, Edit2, Settings, Briefcase, FileText, Layout, Monitor, Tablet, Smartphone, Menu, X } from "lucide-react";
 
@@ -37,10 +36,10 @@ export function Header() {
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Auto close mobile menu on resize to desktop
+  // Auto close mobile menu on resize to desktop (lg = 1024px)
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -208,10 +207,10 @@ export function Header() {
           !isEditor && "text-[color:var(--logo-clr-mob)] md:text-[color:var(--logo-clr-tab)] lg:text-[color:var(--logo-clr-desk)]"
         )}
         style={{ 
-          color: isEditor ? (currentLogoColor as string) : undefined,
-          "--logo-clr-desk": getResponsiveValue(logoConfig.color, 'desktop') || '#FFFFFF',
-          "--logo-clr-tab": getResponsiveValue(logoConfig.color, 'tablet') || '#FFFFFF',
-          "--logo-clr-mob": getResponsiveValue(logoConfig.color, 'mobile') || '#FFFFFF',
+          color: isEditor ? ((!currentLogoColor || (currentLogoColor as string).toUpperCase() === '#FFFFFF') ? 'var(--text-primary)' : (currentLogoColor as string)) : undefined,
+          "--logo-clr-desk": (!getResponsiveValue(logoConfig.color, 'desktop') || getResponsiveValue(logoConfig.color, 'desktop')?.toUpperCase() === '#FFFFFF') ? 'var(--text-primary)' : getResponsiveValue(logoConfig.color, 'desktop'),
+          "--logo-clr-tab": (!getResponsiveValue(logoConfig.color, 'tablet') || getResponsiveValue(logoConfig.color, 'tablet')?.toUpperCase() === '#FFFFFF') ? 'var(--text-primary)' : getResponsiveValue(logoConfig.color, 'tablet'),
+          "--logo-clr-mob": (!getResponsiveValue(logoConfig.color, 'mobile') || getResponsiveValue(logoConfig.color, 'mobile')?.toUpperCase() === '#FFFFFF') ? 'var(--text-primary)' : getResponsiveValue(logoConfig.color, 'mobile'),
           fontFamily: 'monospace',
           fontSize: '1.5rem'
         } as React.CSSProperties}
@@ -227,7 +226,9 @@ export function Header() {
         className={cn(
           (isAdmin && globalPreviewMode !== "desktop") || isEditor ? "sticky" : "fixed",
           "top-0 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
-          (scrolled || globalPreviewMode !== 'desktop' || isEditor) ? "bg-zinc-950/90 backdrop-blur-md border-b border-zinc-900" : "bg-transparent lg:bg-transparent"
+          (scrolled || globalPreviewMode !== 'desktop' || isEditor)
+            ? "bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-subtle)]"
+            : "bg-transparent"
         )}
       >
         <Link href="/" className="flex items-center group flex-shrink-0">
@@ -257,7 +258,7 @@ export function Header() {
 
             {/* Global Responsive Preview Toggle - Admin Only */}
             {isAdmin && (
-              <div className="flex bg-zinc-900/80 rounded-full border border-zinc-800 p-0.5">
+              <div className="flex bg-[var(--bg-elevated)] rounded-full border border-[var(--border-default)] p-0.5">
                 {([
                   { mode: 'desktop' as const, icon: Monitor, label: 'Desktop' },
                   { mode: 'tablet' as const, icon: Tablet, label: 'Tablet' },
@@ -270,7 +271,7 @@ export function Header() {
                       "p-1.5 rounded-full transition-all duration-200",
                       globalPreviewMode === mode
                         ? "text-blue-500"
-                        : "text-zinc-500 hover:text-zinc-300"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                     )}
                     title={label}
                   >
@@ -287,8 +288,8 @@ export function Header() {
                   className={cn(
                     "flex items-center justify-center w-9 h-9 rounded-full transition-all border active:scale-95",
                     adminMenuOpen
-                      ? "bg-zinc-800 border-zinc-700 text-white"
-                      : "bg-transparent border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 shadow-lg"
+                      ? "bg-zinc-800 border-zinc-700 text-[var(--text-primary)]"
+                      : "bg-transparent border-[var(--border-default)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-zinc-700 shadow-lg"
                   )}
                   title="Quản lý"
                 >
@@ -296,7 +297,7 @@ export function Header() {
                 </button>
 
                 {adminMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[1000] animate-in fade-in zoom-in-95 duration-200">
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-[var(--bg-surface)] backdrop-blur-xl border border-[var(--border-default)] rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[1000] animate-in fade-in zoom-in-95 duration-200">
                     <Link
                       href="/admin"
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-500/10 transition-colors"
@@ -340,7 +341,9 @@ export function Header() {
                     href={item.href}
                     className={cn(
                       "transition-colors text-sm font-medium uppercase tracking-widest",
-                      isActive ? "text-zinc-50" : "text-zinc-400 hover:text-zinc-50"
+                      isActive
+                        ? "text-[var(--text-primary)]"
+                        : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     )}
                   >
                     {item.label}
@@ -348,45 +351,51 @@ export function Header() {
                 );
               })}
 
-            {/* Desktop Auth Buttons */}
-            {isAdmin && isEditMode ? (
-              <button
-                onClick={handleLogout}
-                className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors ml-4"
-                aria-label="Admin Logout"
-                title="Đăng xuất"
-              >
-                <LogOut className="w-5 h-5 text-zinc-400 hover:text-red-400" />
-              </button>
-            ) : !isAdmin && (
-              <button
-                onClick={() => setLoginOpen(true)}
-                className="flex items-center justify-center w-10 h-10 border border-zinc-800 rounded-md hover:bg-zinc-800 transition-colors ml-4"
-                aria-label="Admin Login"
-                title="Đăng nhập Admin"
-              >
-                <User className="w-5 h-5 text-zinc-400" />
-              </button>
-            )}
+            {/* Theme Toggle + Auth Buttons */}
+            <div className="hidden lg:flex items-center gap-2 ml-4">
+              <ThemeToggle />
+              {isAdmin && isEditMode ? (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center w-8 h-8 border border-[var(--border-default)] rounded-md hover:bg-[var(--bg-surface)] transition-colors"
+                  aria-label="Admin Logout"
+                  title="Đăng xuất"
+                >
+                  <LogOut className="w-4 h-4 text-[var(--text-muted)] hover:text-red-400" />
+                </button>
+              ) : !isAdmin && (
+                <button
+                  onClick={() => setLoginOpen(true)}
+                  className="flex items-center justify-center w-8 h-8 border border-[var(--border-default)] rounded-md hover:bg-[var(--bg-surface)] transition-colors"
+                  aria-label="Admin Login"
+                  title="Đăng nhập Admin"
+                >
+                  <User className="w-4 h-4 text-[var(--text-muted)]" />
+                </button>
+              )}
+            </div>
           </nav>
 
-          {/* Mobile Menu Toggle Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={cn(
-              "flex items-center justify-center w-10 h-10 bg-zinc-900 border border-zinc-800 rounded-md text-zinc-400 hover:text-white transition-colors relative z-[1001]",
-              (isAdmin && globalPreviewMode !== 'desktop') ? "flex" : (isAdmin ? "hidden lg:flex" : "flex lg:hidden")
-            )}
-            aria-label={isMobileMenuOpen ? "Close Mobile Menu" : "Open Mobile Menu"}
-          >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          {/* Mobile: ThemeToggle + Menu Toggle */}
+          <div className={cn(
+            "flex items-center gap-2",
+            isAdmin && globalPreviewMode !== 'desktop' ? "" : "lg:hidden"
+          )}>
+            <ThemeToggle size="sm" />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="flex items-center justify-center w-10 h-10 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors relative z-[1001]"
+              aria-label={isMobileMenuOpen ? "Close Mobile Menu" : "Open Mobile Menu"}
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-[1000] bg-zinc-950/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[1000] bg-[var(--bg-base)]/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
 
           <nav className="flex flex-col items-center gap-8 w-full mt-12 overflow-y-auto">
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
@@ -404,7 +413,7 @@ export function Header() {
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       "transition-colors text-2xl font-bold uppercase tracking-widest",
-                      isActive ? "text-emerald-400" : "text-zinc-300 hover:text-white"
+                      isActive ? "text-emerald-400" : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
                     )}
                   >
                     {item.label}
@@ -427,7 +436,7 @@ export function Header() {
                   {isEditMode ? "Admin Mode: ON" : "Edit Mode: OFF"}
                 </button>
 
-                <div className="flex bg-zinc-900/80 rounded-full border border-zinc-800 p-1">
+                <div className="flex bg-[var(--bg-elevated)] rounded-full border border-[var(--border-default)] p-1">
                   {([
                     { mode: 'desktop' as const, icon: Monitor, label: 'Desktop' },
                     { mode: 'tablet' as const, icon: Tablet, label: 'Tablet' },
@@ -443,7 +452,7 @@ export function Header() {
                         "p-3 rounded-full transition-all duration-200",
                         globalPreviewMode === mode
                           ? "text-blue-500 bg-blue-500/10"
-                          : "text-zinc-500 hover:text-zinc-300"
+                          : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                       )}
                     >
                       <Icon className="w-6 h-6" />
@@ -453,7 +462,7 @@ export function Header() {
               </div>
             )}
 
-            <div className="w-16 h-px bg-zinc-800 my-4" />
+            <div className="w-16 h-px bg-[var(--border-default)] my-4" />
 
             {/* Mobile Auth Buttons */}
             {isAdmin ? (
@@ -462,7 +471,7 @@ export function Header() {
                   setIsMobileMenuOpen(false);
                   handleLogout();
                 }}
-                className="flex items-center gap-3 px-6 py-3 border border-red-500/20 bg-red-500/10 text-red-400 rounded-full text-sm font-bold uppercase tracking-wider uppercase transition-colors"
+                className="flex items-center gap-3 px-6 py-3 border border-red-500/20 bg-red-500/10 text-red-400 rounded-full text-sm font-bold uppercase tracking-wider transition-colors"
               >
                 <LogOut className="w-5 h-5" />
                 Đăng xuất Admin
@@ -473,7 +482,7 @@ export function Header() {
                   setIsMobileMenuOpen(false);
                   setLoginOpen(true);
                 }}
-                className="flex items-center justify-center w-12 h-12 border border-zinc-800 rounded-full hover:bg-zinc-800 hover:text-white text-zinc-500 transition-colors mt-auto"
+                className="flex items-center justify-center w-12 h-12 border border-[var(--border-default)] rounded-full hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mt-auto"
                 title="Đăng nhập Admin"
               >
                 <User className="w-5 h-5" />

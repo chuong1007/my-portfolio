@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Gallery } from "../Gallery";
-import { Blog } from "../Blog";
+import { Gallery } from "../sections/Gallery";
+import { Blog } from "../sections/Blog";
 import { cn } from "@/lib/utils";
 import { getResponsiveValue } from "@/lib/responsive-helpers";
 import { useAdmin } from "@/context/AdminContext";

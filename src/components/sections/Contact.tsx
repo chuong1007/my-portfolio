@@ -6,10 +6,28 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SectionEditor } from "./SectionEditor";
+import { SectionEditor } from "@/components/SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "./RichTextEditor";
+import type { RichTextData } from "@/components/builder/RichTextEditor";
+
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
 
 const DEFAULTS = {
   heading: { 
@@ -43,6 +61,7 @@ export function Contact() {
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>("128");
   const [isVisible, setIsVisible] = useState(true);
   const { isAdmin, globalPreviewMode } = useAdmin();
+  const isEditor = isAdmin;
 
   const normalize = useCallback((val: any, defaultSize: number = 16): RichTextData => {
     if (typeof val === 'object' && val !== null && 'content' in val) return val;
@@ -144,11 +163,77 @@ export function Contact() {
       onSave={fetchContent}
       isVisible={isVisible}
     >
-      <section 
-        id="contact" 
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .contact-container:not(.is-editor) {
+          padding-top: var(--pt-mob);
+          padding-bottom: var(--pb-mob);
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .contact-heading:not(.is-editor) {
+          font-size: var(--h-fs-mob);
+          line-height: var(--h-lh-mob);
+          font-family: var(--h-ff-mob);
+          font-weight: var(--h-fw-mob);
+        }
+        .contact-subheading:not(.is-editor) {
+          font-size: var(--s-fs-mob);
+          line-height: var(--s-lh-mob);
+        }
+        .contact-grid:not(.is-editor) {
+          grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+
+        @media (min-width: 768px) {
+          .contact-container:not(.is-editor) {
+            padding-top: var(--pt-tab);
+            padding-bottom: var(--pb-tab);
+            padding-left: 48px;
+            padding-right: 48px;
+          }
+          .contact-heading:not(.is-editor) {
+            font-size: var(--h-fs-tab);
+            line-height: var(--h-lh-tab);
+            font-family: var(--h-ff-tab);
+            font-weight: var(--h-fw-tab);
+          }
+          .contact-subheading:not(.is-editor) {
+            font-size: var(--s-fs-tab);
+            line-height: var(--s-lh-tab);
+          }
+          .contact-grid:not(.is-editor) {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .contact-container:not(.is-editor) {
+            padding-top: var(--pt-desk);
+            padding-bottom: var(--pb-desk);
+          }
+          .contact-heading:not(.is-editor) {
+            font-size: var(--h-fs-desk);
+            line-height: var(--h-lh-desk);
+            font-family: var(--h-ff-desk);
+            font-weight: var(--h-fw-desk);
+          }
+          .contact-subheading:not(.is-editor) {
+            font-size: var(--s-fs-desk);
+            line-height: var(--s-lh-desk);
+          }
+        }
+      `}} />
+
+      <section id="contact" 
         className={cn(
-          "px-4 md:px-12 bg-zinc-950 pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)] pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]",
-          isContactPage ? "flex flex-col" : "border-t border-zinc-900"
+          "contact-container bg-[var(--bg-base)]",
+          !isEditor && "not-is-editor",
+          isEditor && "is-editor",
+          isEditor && globalPreviewMode === 'mobile' && "px-4",
+          isEditor && globalPreviewMode === 'tablet' && "px-8",
+          isEditor && globalPreviewMode === 'desktop' && "px-12",
+          isContactPage ? "flex flex-col" : "border-t border-[var(--border-subtle)]"
         )}
         style={{
           "--pt-desk": `${getResponsiveValue(paddingTopData, 'desktop') || 0}px`,
@@ -156,13 +241,17 @@ export function Contact() {
           "--pt-mob": `${getResponsiveValue(paddingTopData, 'mobile') || 0}px`,
           "--pb-desk": `${getResponsiveValue(paddingBottomData, 'desktop') || 0}px`,
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
-          "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
+          "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`,
+          ...(isEditor ? {
+             paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0}px`,
+             paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0}px`
+          } : {})
         } as any}
       >
         <div className="max-w-4xl mx-auto relative w-full">
           {/* Separator Line only for Contact Page */}
           {isContactPage && (
-            <div className="absolute top-[-5rem] left-0 right-0 h-px bg-zinc-800" />
+            <div className="absolute top-[-5rem] left-0 right-0 h-px bg-[var(--bg-elevated)]" />
           )}
 
           <motion.div
@@ -175,8 +264,12 @@ export function Contact() {
             <div className="flex flex-col gap-2 md:gap-3">
               {heading && (
                 <div 
-                  className="tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--h-fs-mob)] md:text-[length:var(--h-fs-tab)] lg:text-[length:var(--h-fs-desk)] leading-[var(--h-lh-mob)] md:leading-[var(--h-lh-tab)] lg:leading-[var(--h-lh-desk)] [font-family:var(--h-ff-mob)] md:[font-family:var(--h-ff-tab)] lg:[font-family:var(--h-ff-desk)] font-[var(--h-fw-mob)] md:font-[var(--h-fw-tab)] lg:font-[var(--h-fw-desk)]"
-                  style={{ 
+                  className={cn("contact-heading tracking-tighter text-[var(--text-primary)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0", !isEditor && "not-is-editor", isEditor && "is-editor")}
+                  style={{
+                    fontSize: isEditor ? `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 80}px` : undefined,
+                    lineHeight: isEditor ? (heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
+                    fontFamily: isEditor ? (heading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
+                    fontWeight: isEditor ? (heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
                     "--h-fs-desk": `${heading.fontSize?.desktop || 80}px`,
                     "--h-fs-tab": `${heading.fontSize?.tablet || 48}px`,
                     "--h-fs-mob": `${heading.fontSize?.mobile || 32}px`,
@@ -189,46 +282,48 @@ export function Contact() {
                     "--h-fw-desk": heading.fontWeight?.desktop || '700',
                     "--h-fw-tab": heading.fontWeight?.tablet || '700',
                     "--h-fw-mob": heading.fontWeight?.mobile || '700',
-                    "--h-color-desk": heading.textColor?.desktop === 'inherit' ? undefined : heading.textColor?.desktop,
-                    "--h-color-tab": heading.textColor?.tablet === 'inherit' ? undefined : heading.textColor?.tablet,
-                    "--h-color-mob": heading.textColor?.mobile === 'inherit' ? undefined : heading.textColor?.mobile,
+                    "--h-color-desk": getSafeColor(heading.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(heading.textColor?.desktop),
+                    "--h-color-tab": getSafeColor(heading.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(heading.textColor?.tablet),
+                    "--h-color-mob": getSafeColor(heading.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(heading.textColor?.mobile),
                     color: globalPreviewMode === 'mobile' ? 'var(--h-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--h-color-tab)' : 'var(--h-color-desk)'
                   } as any}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') || "" }}
+                  dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(heading.content, globalPreviewMode || 'desktop') || "") }}
                 />
               )}
               {subtitle && (
                 <div 
-                  className="text-zinc-400 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 text-[length:var(--s-fs-mob)] md:text-[length:var(--s-fs-tab)] lg:text-[length:var(--s-fs-desk)] leading-[var(--s-lh-mob)] md:leading-[var(--s-lh-tab)] lg:leading-[var(--s-lh-desk)]"
-                  style={{ 
+                  className={cn("contact-subheading text-[var(--text-muted)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0", !isEditor && "not-is-editor", isEditor && "is-editor")}
+                  style={{
+                    fontSize: isEditor ? `${subtitle.fontSize?.[globalPreviewMode || 'desktop'] || 24}px` : undefined,
+                    lineHeight: isEditor ? (subtitle.lineHeight?.[globalPreviewMode || 'desktop'] || '1.4') : undefined,
                     "--s-fs-desk": `${subtitle.fontSize?.desktop || 24}px`,
                     "--s-fs-tab": `${subtitle.fontSize?.tablet || 20}px`,
                     "--s-fs-mob": `${subtitle.fontSize?.mobile || 18}px`,
                     "--s-lh-desk": subtitle.lineHeight?.desktop || '1.4',
                     "--s-lh-tab": subtitle.lineHeight?.tablet || '1.4',
                     "--s-lh-mob": subtitle.lineHeight?.mobile || '1.4',
-                    "--s-color-desk": subtitle.textColor?.desktop === 'inherit' ? undefined : subtitle.textColor?.desktop,
-                    "--s-color-tab": subtitle.textColor?.tablet === 'inherit' ? undefined : subtitle.textColor?.tablet,
-                    "--s-color-mob": subtitle.textColor?.mobile === 'inherit' ? undefined : subtitle.textColor?.mobile,
+                    "--s-color-desk": getSafeColor(subtitle.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(subtitle.textColor?.desktop),
+                    "--s-color-tab": getSafeColor(subtitle.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(subtitle.textColor?.tablet),
+                    "--s-color-mob": getSafeColor(subtitle.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(subtitle.textColor?.mobile),
                     color: globalPreviewMode === 'mobile' ? 'var(--s-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--s-color-tab)' : 'var(--s-color-desk)'
                   } as any}
-                  dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') || "" }}
+                  dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitle.content, globalPreviewMode || 'desktop') || "") }}
                 />
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 w-full mt-4">
+            <div className={cn("contact-grid w-full mt-4 gap-4 md:gap-8 grid", !isEditor && "not-is-editor", isEditor && "is-editor", isEditor && globalPreviewMode === 'mobile' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2')}>
               {getResponsiveValue(showPhone, globalPreviewMode) !== false && (
                 <a
                   href={`tel:${(getResponsiveValue(phone, globalPreviewMode) || '').toString().replace(/\s/g, '')}`}
-                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-[var(--border-default)] rounded-2xl hover:bg-[var(--bg-surface)] transition-colors w-full"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-red-500/10 transition-colors shrink-0">
-                    <Phone className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-red-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-red-500/10 transition-colors shrink-0">
+                    <Phone className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-secondary)] group-hover:text-red-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Phone Number</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(phone, globalPreviewMode)}</span>
+                    <span className="block text-[10px] md:text-sm text-[var(--text-muted)] mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Phone Number</span>
+                    <span className="text-base md:text-xl font-medium text-[var(--text-secondary)] block truncate">{getResponsiveValue(phone, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -236,14 +331,14 @@ export function Contact() {
               {getResponsiveValue(showEmail, globalPreviewMode) !== false && (
                 <a
                   href={`mailto:${getResponsiveValue(email, globalPreviewMode)}`}
-                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-[var(--border-default)] rounded-2xl hover:bg-[var(--bg-surface)] transition-colors w-full"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-orange-500/10 transition-colors shrink-0">
-                    <Mail className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-orange-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-orange-500/10 transition-colors shrink-0">
+                    <Mail className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-secondary)] group-hover:text-orange-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 block break-all leading-tight">{getResponsiveValue(email, globalPreviewMode)}</span>
+                    <span className="block text-[10px] md:text-sm text-[var(--text-muted)] mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Email Address</span>
+                    <span className="text-base md:text-xl font-medium text-[var(--text-secondary)] block break-all leading-tight">{getResponsiveValue(email, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -254,14 +349,14 @@ export function Contact() {
                   href={getResponsiveValue(facebook, globalPreviewMode)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-[var(--border-default)] rounded-2xl hover:bg-[var(--bg-surface)] transition-colors w-full"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-600/10 transition-colors shrink-0">
-                    <Facebook className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-blue-500 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-blue-600/10 transition-colors shrink-0">
+                    <Facebook className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-secondary)] group-hover:text-blue-500 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Facebook</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(facebookLabel, globalPreviewMode)}</span>
+                    <span className="block text-[10px] md:text-sm text-[var(--text-muted)] mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Facebook</span>
+                    <span className="text-base md:text-xl font-medium text-[var(--text-secondary)] block truncate">{getResponsiveValue(facebookLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}
@@ -272,14 +367,14 @@ export function Contact() {
                   href={typeof getResponsiveValue(zalo, globalPreviewMode) === 'string' && getResponsiveValue(zalo, globalPreviewMode).startsWith('http') ? getResponsiveValue(zalo, globalPreviewMode) : `https://zalo.me/${(getResponsiveValue(zalo, globalPreviewMode) || '').toString().replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 group p-4 md:p-6 border border-zinc-800 rounded-2xl hover:bg-zinc-900 transition-colors w-full"
+                  className="flex items-center gap-4 group p-4 md:p-6 border border-[var(--border-default)] rounded-2xl hover:bg-[var(--bg-surface)] transition-colors w-full"
                 >
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-zinc-800 flex items-center justify-center group-hover:bg-blue-500/10 transition-colors shrink-0">
-                    <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-zinc-300 group-hover:text-blue-400 transition-colors" />
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center group-hover:bg-blue-500/10 transition-colors shrink-0">
+                    <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-[var(--text-secondary)] group-hover:text-blue-400 transition-colors" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-[10px] md:text-sm text-zinc-500 mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Zalo</span>
-                    <span className="text-base md:text-xl font-medium text-zinc-200 block truncate">{getResponsiveValue(zaloLabel, globalPreviewMode)}</span>
+                    <span className="block text-[10px] md:text-sm text-[var(--text-muted)] mb-0.5 md:mb-1 uppercase tracking-wider font-bold">Zalo</span>
+                    <span className="text-base md:text-xl font-medium text-[var(--text-secondary)] block truncate">{getResponsiveValue(zaloLabel, globalPreviewMode)}</span>
                   </div>
                 </a>
               )}

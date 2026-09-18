@@ -8,6 +8,24 @@ import { createClient } from "@/lib/supabase";
 import { useAdmin } from "@/context/AdminContext";
 import type { DbBlog } from "@/lib/types";
 
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
+
 export function BlogDetail({ slug }: { slug: string }) {
   const [blog, setBlog] = useState<DbBlog | null>(null);
   const [suggestedPosts, setSuggestedPosts] = useState<DbBlog[]>([]);
@@ -48,19 +66,19 @@ export function BlogDetail({ slug }: { slug: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-zinc-800 border-t-zinc-200 rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[var(--border-default)] border-t-zinc-200 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (!blog) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6">
-        <h1 className="text-4xl font-bold text-zinc-50 mb-4">
+      <div className="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6">
+        <h1 className="text-4xl font-bold text-[var(--text-primary)] mb-4">
           Bài viết không tồn tại
         </h1>
-        <p className="text-zinc-400 mb-8">
+        <p className="text-[var(--text-muted)] mb-8">
           Có vẻ như bài viết này đã bị xóa hoặc đường dẫn không hợp lệ.
         </p>
         <Link
@@ -80,7 +98,7 @@ export function BlogDetail({ slug }: { slug: string }) {
         <div className="flex items-center justify-between mb-12">
           <Link
             href="/#blog"
-            className="inline-flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors"
+            className="inline-flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Quay lại Blogs</span>
@@ -91,8 +109,8 @@ export function BlogDetail({ slug }: { slug: string }) {
               href={`/admin/blogs?edit=${blog.id}`}
               className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
             >
-              <Pencil className="w-4 h-4 text-zinc-300" />
-              <span className="text-sm font-medium text-zinc-300">Chỉnh sửa</span>
+              <Pencil className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span className="text-sm font-medium text-[var(--text-secondary)]">Chỉnh sửa</span>
             </Link>
           )}
         </div>
@@ -104,14 +122,14 @@ export function BlogDetail({ slug }: { slug: string }) {
                 {blog?.tags?.map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs px-3 py-1 bg-zinc-800/50 text-blue-500 rounded-full border border-zinc-800"
+                    className="text-xs px-3 py-1 bg-zinc-800/50 text-blue-500 rounded-full border border-[var(--border-default)]"
                   >
                     {tag}
                   </span>
                 ))}
               </div>
               <span className="w-1 h-1 rounded-full bg-zinc-700" />
-              <div className="flex items-center gap-2 text-sm text-zinc-500">
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
                 <Calendar className="w-4 h-4" />
                 {blog?.created_at ? new Date(blog.created_at).toLocaleDateString("vi-VN", {
                   year: 'numeric',
@@ -121,11 +139,11 @@ export function BlogDetail({ slug }: { slug: string }) {
               </div>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-zinc-50 tracking-tight leading-tight mb-6">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--text-primary)] tracking-tight leading-tight mb-6">
             {typeof blog?.title === 'string' ? blog?.title : String(blog?.title || '')}
           </h1>
 
-          <p className="text-xl text-zinc-400 leading-relaxed">
+          <p className="text-xl text-[var(--text-muted)] leading-relaxed">
             {typeof blog?.excerpt === 'string' ? blog?.excerpt : String(blog?.excerpt || '')}
           </p>
         </header>
@@ -135,7 +153,7 @@ export function BlogDetail({ slug }: { slug: string }) {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full aspect-video rounded-3xl overflow-hidden mb-16 bg-zinc-900"
+            className="w-full aspect-video rounded-3xl overflow-hidden mb-16 bg-[var(--bg-surface)]"
           >
             <img
               src={blog.image_url}
@@ -148,32 +166,32 @@ export function BlogDetail({ slug }: { slug: string }) {
 
         {/* Custom CSS */}
         {blog?.custom_css && (
-          <style dangerouslySetInnerHTML={{ __html: blog.custom_css }} />
+          <style dangerouslySetInnerHTML={{ __html: cleanHtmlColors(blog.custom_css) }} />
         )}
 
         {/* Content */}
         <div 
-          className="prose prose-invert prose-lg max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
-          dangerouslySetInnerHTML={{ __html: blog?.content || "" }}
+          className="prose dark:prose-invert prose-lg max-w-none text-[var(--text-secondary)] custom-tiptap-content ProseMirror tiptap"
+          dangerouslySetInnerHTML={{ __html: cleanHtmlColors(blog?.content || "") }}
         />
 
         {/* Custom HTML Layout */}
         {blog?.custom_html && (
           <div 
             className="mt-12 custom-html-section"
-            dangerouslySetInnerHTML={{ __html: typeof blog.custom_html === 'string' ? blog.custom_html : String(blog.custom_html || '') }}
+            dangerouslySetInnerHTML={{ __html: cleanHtmlColors(typeof blog.custom_html === 'string' ? blog.custom_html : String(blog.custom_html || '')) }}
           />
         )}
 
         {/* Notable Tags */}
-        <div className="mt-24 pt-12 border-t border-zinc-900">
-          <h3 className="text-xl font-bold text-zinc-50 mb-8 uppercase tracking-widest text-center">Tag Nổi Bật</h3>
+        <div className="mt-24 pt-12 border-t border-[var(--border-subtle)]">
+          <h3 className="text-xl font-bold text-[var(--text-primary)] mb-8 uppercase tracking-widest text-center">Tag Nổi Bật</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {["Branding", "UI/UX Design", "Graphic Design", "AI Tools", "Digital Marketing", "Storytelling", "Minimalism"].map(tag => (
               <Link 
                 key={tag} 
                 href={`/#blog`}
-                className="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-sm text-zinc-400 hover:text-white hover:border-zinc-700 transition-all duration-300"
+                className="px-6 py-2 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-full text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-zinc-700 transition-all duration-300"
               >
                 {tag}
               </Link>
@@ -185,7 +203,7 @@ export function BlogDetail({ slug }: { slug: string }) {
         {(suggestedPosts?.length || 0) > 0 && (
           <div className="mt-32 pb-24">
             <div className="flex items-center justify-between mb-12">
-              <h3 className="text-2xl font-bold text-zinc-50 tracking-tight">Bài viết gợi ý</h3>
+              <h3 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Bài viết gợi ý</h3>
               <Link href="/blog" className="group/all flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
                 Xem tất cả
                 <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" />
@@ -195,7 +213,7 @@ export function BlogDetail({ slug }: { slug: string }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {suggestedPosts?.map((post) => (
                 <Link key={post?.id} href={`/blog/${post?.slug}`} className="group">
-                  <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800 mb-4">
+                  <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-default)] mb-4">
                     {post?.image_url && (
                       <img 
                         src={post.image_url} 
@@ -204,12 +222,12 @@ export function BlogDetail({ slug }: { slug: string }) {
                       />
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                  <div className="flex items-center gap-2 mb-2 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">
                     <span>{post?.tags?.[0] || "Blog"}</span>
                     <span className="w-1 h-1 rounded-full bg-zinc-800" />
                     <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : '---'}</span>
                   </div>
-                  <h4 className="text-lg font-bold text-zinc-100 group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                  <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
                     {typeof post?.title === 'string' ? post?.title : String(post?.title || '')}
                   </h4>
                 </Link>

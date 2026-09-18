@@ -11,12 +11,12 @@ export function HeroMinimal() {
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="max-w-4xl"
       >
-        <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-zinc-50 leading-[0.9]">
+        <h1 className="text-5xl md:text-8xl font-bold tracking-tighter text-[var(--text-primary)] leading-[0.9]">
           Elevating <br />
           Digital <br />
           Experiences.
         </h1>
-        <p className="mt-8 text-xl md:text-2xl text-zinc-400 font-light max-w-2xl leading-relaxed">
+        <p className="mt-8 text-xl md:text-2xl text-[var(--text-muted)] font-light max-w-2xl leading-relaxed">
           A design-driven developer focused on building high-performance, minimalist digital products that stand the test of time.
         </p>
       </motion.div>

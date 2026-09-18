@@ -1,13 +1,32 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState, useEffect, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
-import { SectionEditor } from "./SectionEditor";
+import { SectionEditor } from "@/components/SectionEditor";
+import { HeroAnimatedTitle } from "./HeroAnimatedTitle";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "./RichTextEditor";
+import type { RichTextData } from "@/components/builder/RichTextEditor";
 import { cn } from "@/lib/utils";
+
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
   const defaultLH = { mobile: '1.5', tablet: '1.5', desktop: '1.5' };
@@ -58,6 +77,16 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
   const [logoColor, setLogoColor] = useState(() => initialContent?.logoColor ?? '#FFFFFF');
   const [logoHeight, setLogoHeight] = useState<ResponsiveValue>(() => initialContent?.logoHeight ?? "40");
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
+  const heroRef = useRef<HTMLElement>(null);
+  
+  
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  const scrollScale = useTransform(scrollYProgress, [0, 1], [1, 0.6]);
+  const scrollOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+  const scrollFilter = useTransform(scrollYProgress, [0, 0.1, 0.5], ["blur(0px)", "blur(0px)", "blur(12px)"]);
 
   const fetchContent = useCallback(async () => {
     const supabase = createClient();
@@ -188,11 +217,84 @@ const formatFs = (val: string, fallback: string) => {
       isVisible={isVisible}
       controlsOffset="top-32"
     >
-      <section 
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .hero-container:not(.is-editor) {
+          padding-top: var(--pad-mob);
+          padding-bottom: var(--pb-mob);
+        }
+        .hero-title-inner:not(.is-editor) {
+          font-size: var(--fs-mob);
+          line-height: var(--lh-mob);
+          font-family: var(--ff-mob);
+          font-weight: var(--fw-mob);
+          color: var(--color-mob, inherit);
+        }
+        .hero-subtitle:not(.is-editor) {
+          font-size: var(--fs-sub-mob);
+          line-height: var(--lh-sub-mob);
+          font-family: var(--ff-sub-mob);
+          font-weight: var(--fw-sub-mob);
+          color: var(--color-sub-mob, inherit);
+        }
+        .hero-scroll:not(.is-editor) {
+          margin-bottom: var(--scroll-mob);
+        }
+
+        @media (min-width: 768px) {
+          .hero-container:not(.is-editor) {
+            padding-top: var(--pad-tab);
+            padding-bottom: var(--pb-tab);
+          }
+          .hero-title-inner:not(.is-editor) {
+            font-size: var(--fs-tab);
+            line-height: var(--lh-tab);
+            font-family: var(--ff-tab);
+            font-weight: var(--fw-tab);
+            color: var(--color-tab, inherit);
+          }
+          .hero-subtitle:not(.is-editor) {
+            font-size: var(--fs-sub-tab);
+            line-height: var(--lh-sub-tab);
+            font-family: var(--ff-sub-tab);
+            font-weight: var(--fw-sub-tab);
+            color: var(--color-sub-tab, inherit);
+          }
+          .hero-scroll:not(.is-editor) {
+            margin-bottom: var(--scroll-tab);
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .hero-container:not(.is-editor) {
+            padding-top: var(--pad-desk);
+            padding-bottom: var(--pb-desk);
+          }
+          .hero-title-inner:not(.is-editor) {
+            font-size: var(--fs-desk);
+            line-height: var(--lh-desk);
+            font-family: var(--ff-desk);
+            font-weight: var(--fw-desk);
+            color: var(--color-desk, inherit);
+          }
+          .hero-subtitle:not(.is-editor) {
+            font-size: var(--fs-sub-desk);
+            line-height: var(--lh-sub-desk);
+            font-family: var(--ff-sub-desk);
+            font-weight: var(--fw-sub-desk);
+            color: var(--color-sub-desk, inherit);
+          }
+          .hero-scroll:not(.is-editor) {
+            margin-bottom: var(--scroll-desk);
+          }
+        }
+      `}} />
+
+      <section ref={heroRef}
         className={cn(
-          "relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh]",
-          !isEditor && "pt-[var(--pad-mob)] md:pt-[var(--pad-tab)] lg:pt-[var(--pad-desk)]",
-          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+          "hero-container relative flex flex-col items-center justify-start px-4 text-center min-h-[90vh]",
+          !isEditor && "not-is-editor",
+          isEditor && "is-editor"
         )}
         style={{
           paddingTop: isEditor ? `${currentPt}px` : undefined,
@@ -205,14 +307,14 @@ const formatFs = (val: string, fallback: string) => {
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
         } as React.CSSProperties}
       >
-        <div className="flex flex-col items-center w-full">
+        <motion.div className="flex flex-col items-center w-full" >
+            <motion.div className="flex flex-col items-center w-full" style={{ scale: scrollScale, opacity: scrollOpacity, filter: scrollFilter }}>
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className={cn(
-              "tracking-tighter text-zinc-50 text-balance mx-auto whitespace-pre-wrap transition-all duration-300",
-              !isEditor && "text-[length:var(--fs-mob)] md:text-[length:var(--fs-tab)] lg:text-[length:var(--fs-desk)]"
+            className={cn("hero-title", !isEditor && "not-is-editor", isEditor && "is-editor",
+              "tracking-tighter text-[var(--text-primary)] text-balance mx-auto whitespace-pre-wrap transition-all duration-300"
             )}
             style={{
               fontSize: isEditor ? `${currentFs}px` : undefined,
@@ -228,16 +330,15 @@ const formatFs = (val: string, fallback: string) => {
               "--fw-desk": titleData.fontWeight?.desktop || '700',
               "--fw-tab": titleData.fontWeight?.tablet || '700',
               "--fw-mob": titleData.fontWeight?.mobile || '700',
-              "--color-desk": titleData.textColor?.desktop === 'inherit' ? undefined : titleData.textColor?.desktop,
-              "--color-tab": titleData.textColor?.tablet === 'inherit' ? undefined : titleData.textColor?.tablet,
-              "--color-mob": titleData.textColor?.mobile === 'inherit' ? undefined : titleData.textColor?.mobile,
+              "--color-desk": getSafeColor(titleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.desktop),
+              "--color-tab": getSafeColor(titleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.tablet),
+              "--color-mob": getSafeColor(titleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.mobile),
             } as any}
           >
             {/* Using arbitrary values with CSS variables for responsive styling */}
-            <div 
-              className={cn(
-                "w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]",
-                !isEditor && "leading-[var(--lh-mob)] md:leading-[var(--lh-tab)] lg:leading-[var(--lh-desk)] [font-family:var(--ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--ff-desk)] font-[var(--fw-mob)] md:font-[var(--fw-tab)] lg:font-[var(--fw-desk)]"
+            <HeroAnimatedTitle
+              className={cn("hero-title-inner", !isEditor && "not-is-editor", isEditor && "is-editor",
+                "w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]"
               )}
               style={{
                 lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
@@ -245,18 +346,20 @@ const formatFs = (val: string, fallback: string) => {
                 fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
                 color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-tab)' : 'var(--color-desk)'),
               }}
-              dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
+              html={cleanHtmlColors(getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "")}
             />
           </motion.h1>
-        </div>
+        </motion.div>
+        </motion.div>
         
+        <motion.div >
+        <motion.div style={{ scale: scrollScale, opacity: scrollOpacity, filter: scrollFilter }}>
         <motion.div
   initial={{ opacity: 0 }}
   animate={{ opacity: 1 }}
-  transition={{ delay: 0.5, duration: 1 }}
-  className={cn(
-    "flex flex-col items-center gap-2 text-zinc-500",
-    !isEditor && "mt-[var(--scroll-mob)] md:mt-[var(--scroll-tab)] lg:mt-[var(--scroll-desk)]"
+  transition={{ delay: 4.5, duration: 1 }}
+  className={cn("hero-scroll", !isEditor && "not-is-editor", isEditor && "is-editor",
+    "flex flex-col items-center gap-2 text-[var(--text-muted)]"
   )}
   style={{
     marginTop: isEditor ? `${currentScroll}px` : undefined,
@@ -275,16 +378,15 @@ const formatFs = (val: string, fallback: string) => {
     "--fw-sub-desk": subtitleData.fontWeight?.desktop || '500',
     "--fw-sub-tab": subtitleData.fontWeight?.tablet || '500',
     "--fw-sub-mob": subtitleData.fontWeight?.mobile || '500',
-    "--color-sub-desk": subtitleData.textColor?.desktop === 'inherit' ? undefined : subtitleData.textColor?.desktop,
-    "--color-sub-tab": subtitleData.textColor?.tablet === 'inherit' ? undefined : subtitleData.textColor?.tablet,
-    "--color-sub-mob": subtitleData.textColor?.mobile === 'inherit' ? undefined : subtitleData.textColor?.mobile,
+    "--color-sub-desk": getSafeColor(subtitleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.desktop),
+    "--color-sub-tab": getSafeColor(subtitleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.tablet),
+    "--color-sub-mob": getSafeColor(subtitleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.mobile),
   } as React.CSSProperties}
 >
   {/* Subtitle with responsive variants */}
   <div 
-    className={cn(
-      "uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] transition-all duration-300",
-      !isEditor && "text-[length:var(--fs-sub-mob)] md:text-[length:var(--fs-sub-tab)] lg:text-[length:var(--fs-sub-desk)] leading-[var(--lh-sub-mob)] md:leading-[var(--lh-sub-tab)] lg:leading-[var(--lh-sub-desk)] [font-family:var(--ff-sub-mob)] md:[font-family:var(--ff-sub-tab)] lg:[font-family:var(--ff-sub-desk)] font-[var(--fw-sub-mob)] md:font-[var(--fw-sub-tab)] lg:font-[var(--fw-sub-desk)]"
+    className={cn("hero-subtitle", !isEditor && "not-is-editor", isEditor && "is-editor",
+      "uppercase tracking-[0.2em] whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] transition-all duration-300"
     )}
     style={{
       fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 10}px` : undefined,
@@ -293,17 +395,19 @@ const formatFs = (val: string, fallback: string) => {
       fontWeight: isEditor ? (subtitleData.fontWeight?.[globalPreviewMode || 'desktop'] || '500') : undefined,
       color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--color-sub-mob)' : globalPreviewMode === 'tablet' ? 'var(--color-sub-tab)' : 'var(--color-sub-desk)'),
     }}
-    dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
+    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "") }} 
   />
-  <div className="w-[1px] h-12 bg-zinc-800 overflow-hidden relative">
+  <div className="w-[1px] h-12 bg-[var(--border-default)] overflow-hidden relative">
     <motion.div
-      className="absolute top-0 w-full h-full bg-zinc-400"
+      className="absolute top-0 w-full h-full bg-[var(--text-muted)]"
       initial={{ y: "-100%" }}
       animate={{ y: "100%" }}
       transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
     />
   </div>
 </motion.div>
+        </motion.div>
+        </motion.div>
       </section>
     </SectionEditor>
   );

@@ -1,18 +1,16 @@
-import { Hero } from "@/components/Hero";
-import { About } from "@/components/About";
-import { Gallery } from "@/components/Gallery";
-import { Blog } from "@/components/Blog";
+import { Hero } from "@/components/sections/Hero";
+import { About } from "@/components/sections/About";
+import { Gallery } from "@/components/sections/Gallery";
+import { Blog } from "@/components/sections/Blog";
+import { Contact } from "@/components/sections/Contact";
 import { GlobalPopup } from "@/components/GlobalPopup";
 import { PageRenderer } from "@/components/builder/PageRenderer";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase-server";
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-  );
+  const supabase = await createClient();
 
   const [
     { data: siteContent },

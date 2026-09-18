@@ -5,9 +5,9 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { SectionEditor } from "./SectionEditor";
+import { SectionEditor } from "@/components/SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
-import { ChevronDown, ArrowRight } from "lucide-react";
+import { ChevronDown, ArrowRight, Pencil } from "lucide-react";
 import { generateSlug } from "@/lib/utils";
 
 /**
@@ -27,7 +27,25 @@ function stripMentionClasses(html: string): string {
 }
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "./RichTextEditor";
+import type { RichTextData } from "@/components/builder/RichTextEditor";
+
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
 const normalize = (val: any): RichTextData => {
   if (typeof val === 'object' && val !== null && 'content' in val) return val;
   return {
@@ -138,11 +156,29 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
         if (d.expandedBlocks !== undefined) {
           setExpandedBlocks(d.expandedBlocks);
         } else {
-          const blocks: ExpandedBlock[] = [];
-          const left = d.detailContentLeft || d.detailContent || "";
-          const right = d.detailContentRight || "";
-          if (left) blocks.push({ id: 'left', type: 'half', content: left });
-          if (right) blocks.push({ id: 'right', type: 'half', content: right });
+          setAvatarUrl('/avatar-emoji.svg');
+          const blocks: ExpandedBlock[] = [
+            {
+              id: "block-1",
+              type: "half",
+              content: "<p><strong>1. Giới thiệu bản thân</strong></p><p>Graphic Designer với hơn 7 năm kinh nghiệm xây dựng hình ảnh thương hiệu và ấn phẩm truyền thông đa nền tảng - từ nhận diện thương hiệu, bao bì, giao diện website đến các ấn phẩm chiến dịch (Banner, Poster, Social Media post, KV).</p><p>Có kinh nghiệm dựng và chỉnh sửa video bằng Capcut, đồng thời ứng dụng công cụ AI để tạo video từ hình ảnh tĩnh, phục vụ nội dung marketing nhanh và hiệu quả.</p><p>Kết hợp tư duy chiến lược với thẩm mỹ hiện đại, quen thuộc với việc phối hợp cùng đội ngũ Content và Marketing để phát triển ý tưởng hình ảnh, đảm bảo tính đồng bộ và bám sát mục tiêu chiến dịch. Khả năng thích ứng nhanh, làm việc tốt dưới áp lực deadline và luôn cập nhật xu hướng thiết kế, công nghệ AI mới.</p>"
+            },
+            {
+              id: "block-2",
+              type: "half",
+              content: "<p><strong>2. Kỹ năng chuyên môn</strong></p><ul><li><strong>Thiết kế:</strong> Photoshop, Illustrator (Sử dụng thành thạo). Ứng dụng AI vào thiết kế đồ họa.</li><li><strong>Dựng phim:</strong> Adobe Premiere, Capcut,... Ứng dụng AI vào dựng và edit clip.</li><li><strong>Kỹ năng mềm:</strong> Làm việc nhóm & Quản lý tiến độ, Giao tiếp & Thuyết trình ý tưởng, Tiếng Anh giao tiếp công việc.</li></ul>"
+            },
+            {
+              id: "block-3",
+              type: "full",
+              content: "<p><strong>3. Mục tiêu & Sở thích</strong></p><ul><li><strong>Mục tiêu:</strong> Không ngừng nghiên cứu tâm lý thị giác và hành vi người dùng ứng dụng vào thiết kế; hướng tới việc dẫn dắt các dự án sáng tạo toàn diện từ định vị thương hiệu, tối ưu trải nghiệm số cho đến hoàn thiện bao bì sản phẩm.</li><li><strong>Sở thích:</strong> Viết lách, nghe nhạc, xem phim, du lịch và đặc biệt hứng thú nghiên cứu về tâm lý học ứng dụng vào thiết kế.</li></ul>"
+            },
+            {
+              id: "block-4",
+              type: "full",
+              content: "<p><strong>4. Kinh nghiệm làm việc</strong></p><p><strong>FREELANCER DESIGNER (02/2020 - Nay)</strong><br><strong>Senior Graphic / Web UI & Packaging Designer</strong></p><ul><li>Nghiên cứu, lên khung cấu trúc và thiết kế giao diện Website/Landing Page chuẩn UI/UX trên nền tảng Figma, đảm bảo tính thẩm mỹ và tối ưu bàn giao cho lập trình viên.</li><li>Định hướng phong cách hình ảnh chiến dịch (Key Visual, Poster, Banner), bảo đảm tính đồng bộ thị giác và độ nhận diện thương hiệu trên mọi điểm chạm.</li><li>Phụ trách thiết kế trọn gói từ bộ nhận diện thương hiệu (Logo, Brand Guidelines), bao bì sản phẩm đến các ấn phẩm truyền thông số cho nhiều nhóm khách hàng doanh nghiệp.</li></ul><br><p><strong>CÔNG TY CPDV AZSEO (09/2018 - 02/2020)</strong><br><strong>Leader Team Graphic, thiết kế giao diện Website / Chạy quảng cáo Google - Facebook.</strong></p><ul><li>Quản lý nhóm thiết kế, trực tiếp phân chia khối lượng công việc, kiểm soát chất lượng và tiến độ bàn giao ấn phẩm cho các dự án khách hàng của công ty.</li><li>Thiết kế giao diện Website (UI) chuẩn responsive cho các dự án trên nền tảng WordPress.</li><li>Phối hợp cùng phòng Marketing lên ý tưởng hình ảnh, tối ưu định dạng ấn phẩm quảng cáo chạy Ads (Google, Facebook) nhằm nâng cao tỷ lệ chuyển đổi.</li></ul><br><p><strong>VIỆN THẨM MỸ JENNA THANH (07/2016 - 08/2017)</strong><br><strong>Nhân viên thiết kế đồ họa / Chạy quảng cáo Google - Facebook</strong></p><ul><li>Thiết kế hình ảnh social, tối ưu cho quảng cáo Google, Facebook.</li><li>Thiết kế các ấn phẩm in ấn: Brochure, Name card, Thẻ bảo hành, Standee.</li><li>Sáng tạo nội dung (Copywriting), chăm sóc Fanpage và Website.</li><li>Lên kế hoạch từ khóa và tối ưu hóa ngân sách Ads.</li></ul>"
+            }
+          ];
           setExpandedBlocks(blocks);
         }
       }
@@ -226,29 +262,137 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
     ...contentData,
     isVisible,
     paddingTop: paddingTopData,
-    paddingBottom: paddingBottomData
+    paddingBottom: paddingBottomData,
+    avatarUrl,
+    expandedBlocks
   };
 
   const isEditor = isAdmin && isEditMode;
   const currentPx = globalPreviewMode === 'mobile' ? '1rem' : '3rem';
 
+  
+
   return (
     <SectionEditor sectionId={sectionId} initialData={initialData} onSave={fetchContent} isVisible={isVisible}>
-      <section
-        id="about"
-        className="relative bg-zinc-950 transition-all duration-700"
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .about-container:not(.is-editor) {
+          padding-top: var(--pt-mob);
+          padding-bottom: var(--pb-mob);
+        }
+        .about-inner:not(.is-editor) {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+        .about-heading:not(.is-editor) {
+          font-size: var(--fs-mob);
+          line-height: var(--lh-mob);
+          font-family: var(--ff-mob);
+          font-weight: var(--fw-mob);
+          white-space: normal;
+          overflow-wrap: break-word;
+          word-break: break-word;
+          text-wrap: balance;
+        }
+        .about-heading:not(.is-editor) p,
+        .about-heading:not(.is-editor) h1,
+        .about-heading:not(.is-editor) h2,
+        .about-heading:not(.is-editor) h3 {
+          white-space: normal !important;
+        }
+        .about-p:not(.is-editor) p,
+        .about-p:not(.is-editor) div {
+          white-space: normal !important;
+        }
+        .about-p:not(.is-editor) {
+          font-size: var(--fs-p-mob);
+          white-space: normal;
+        }
+        .about-subheading:not(.is-editor) {
+          font-size: clamp(12px, 6cqi, var(--fs-sub-mob));
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          line-height: var(--lh-sub-mob);
+          font-family: var(--ff-sub-mob);
+          font-weight: var(--fw-sub-mob);
+        }
+        
+        .about-layout:not(.is-editor) {
+          flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+          .about-container:not(.is-editor) {
+            padding-top: var(--pt-tab);
+            padding-bottom: var(--pb-tab);
+          }
+          .about-inner:not(.is-editor) {
+            padding-left: 48px;
+            padding-right: 48px;
+          }
+          .about-heading:not(.is-editor) {
+            font-size: var(--fs-tab);
+            line-height: var(--lh-tab);
+            font-family: var(--ff-tab);
+            font-weight: var(--fw-tab);
+          }
+          .about-subheading:not(.is-editor) {
+            font-size: clamp(14px, 4cqi, var(--fs-sub-tab));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: var(--lh-sub-tab);
+            font-family: var(--ff-sub-tab);
+            font-weight: var(--fw-sub-tab);
+          }
+          .about-p:not(.is-editor) {
+            font-size: var(--fs-p-tab);
+          }
+          .about-layout:not(.is-editor) {
+            flex-direction: row;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .about-container:not(.is-editor) {
+            padding-top: var(--pt-desk);
+            padding-bottom: var(--pb-desk);
+          }
+          .about-heading:not(.is-editor) {
+            font-size: var(--fs-desk);
+            line-height: var(--lh-desk);
+            font-family: var(--ff-desk);
+            font-weight: var(--fw-desk);
+          }
+          .about-subheading:not(.is-editor) {
+            font-size: clamp(14px, 3.5cqi, var(--fs-sub-desk));
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: var(--lh-sub-desk);
+            font-family: var(--ff-sub-desk);
+            font-weight: var(--fw-sub-desk);
+          }
+          .about-p:not(.is-editor) {
+            font-size: var(--fs-p-desk);
+          }
+        }
+      `}} />
+
+      <section id="about"
+        className={cn("about-container relative bg-[var(--bg-base)] transition-all duration-700", !isEditor && "not-is-editor", isEditor && "is-editor")}
         style={{
-          paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode ?? 'desktop') || 0}px`,
-          paddingBottom: isExpanded
-            ? `${getResponsiveValue(paddingBottomData, globalPreviewMode ?? 'desktop') || 80}px`
-            : '0px',
+          paddingTop: isEditor ? `${getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0}px` : undefined,
+          paddingBottom: isEditor ? (isExpanded ? `${getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 80}px` : '0px') : undefined,
         }}
       >
         <div
-          className={cn(
-            "max-w-4xl mx-auto",
-            !isEditor && "px-4 md:px-12"
-          )}
+          className={cn("about-inner max-w-4xl mx-auto", !isEditor && "not-is-editor", isEditor && "is-editor",
+    isEditor && globalPreviewMode === 'mobile' && "px-4",
+    isEditor && globalPreviewMode === 'tablet' && "px-8",
+    isEditor && globalPreviewMode === 'desktop' && "px-12"
+  )}
           style={{
             paddingLeft: isEditor ? currentPx : undefined,
             paddingRight: isEditor ? currentPx : undefined
@@ -265,7 +409,10 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
             {/* Top Section */}
             <div className="max-w-4xl mx-auto space-y-8">
               {/* Avatar left + Text right layout */}
-              <div className={cn("flex flex-col md:flex-row gap-6 md:gap-8", avatarUrl ? "md:items-start" : "")}>
+              <div className={cn("about-layout flex", !isEditor && "not-is-editor", isEditor && "is-editor",
+    isEditor && globalPreviewMode !== 'desktop' ? 'flex-col gap-2' : 'flex-col md:flex-row gap-2 md:gap-8',
+    avatarUrl ? "md:items-start" : ""
+  )}>
                 {avatarUrl && (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -277,14 +424,20 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                     <img
                       src={avatarUrl}
                       alt="Avatar"
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-zinc-700/50 shadow-xl shadow-black/30"
+                      className={cn(
+                        "object-cover",
+                        avatarUrl.startsWith('data:image/svg') || avatarUrl.includes('avatar-emoji.svg') 
+                          ? "" // Không viền, không bóng cho emoji
+                          : "rounded-full border-2 border-[var(--border-default)]/50 shadow-xl shadow-black/30",
+                        isEditor && globalPreviewMode !== 'desktop' ? "w-16 h-16" : "w-16 h-16 md:w-24 md:h-24"
+                      )}
                     />
                   </motion.div>
                 )}
-                <div className="flex-1 space-y-4">
+                <div className="flex-1 space-y-4 @container">
                   {/* Heading (Moved here to perfectly left-align with the rest of the text) */}
                   <div
-                    className="tracking-tighter text-zinc-50 text-balance whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit"
+                    className={cn("about-heading tracking-tighter text-[var(--text-primary)] text-balance [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit", !isEditor && "not-is-editor", isEditor && "is-editor")}
                     style={{
                       fontSize: `${heading.fontSize?.[globalPreviewMode || 'desktop'] || 30}px`,
                       lineHeight: heading.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1',
@@ -292,21 +445,21 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       fontWeight: heading.fontWeight?.[globalPreviewMode || 'desktop'] || '700',
                       color: heading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : heading.textColor?.[globalPreviewMode || 'desktop']
                     }}
-                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(heading.content, globalPreviewMode || 'desktop') }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(heading.content, globalPreviewMode || 'desktop')) }}
                   />
                   <div
-                    className="text-zinc-500 whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0"
+                    className={cn("about-subheading text-[var(--text-muted)] whitespace-nowrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0", !isEditor && "not-is-editor", isEditor && "is-editor")}
                     style={{
-                      fontSize: `${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px`,
+                      fontSize: `clamp(14px, ${globalPreviewMode === 'mobile' ? '6cqi' : globalPreviewMode === 'tablet' ? '4cqi' : '3.5cqi'}, ${getResponsiveValue(subheading.fontSize, globalPreviewMode || 'desktop') || 18}px)`,
                       lineHeight: getResponsiveValue(subheading.lineHeight, globalPreviewMode || 'desktop') || '1.5',
                       fontFamily: subheading.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
                       fontWeight: subheading.fontWeight?.[globalPreviewMode || 'desktop'] || '400',
                       color: subheading.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subheading.textColor?.[globalPreviewMode || 'desktop']
                     }}
-                    dangerouslySetInnerHTML={{ __html: getResponsiveValue(subheading.content, globalPreviewMode || 'desktop') }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subheading.content, globalPreviewMode || 'desktop')) }}
                   />
                   {/* Paragraphs */}
-                  <div className="space-y-4 text-zinc-400 font-light">
+                  <div className="space-y-4 text-[var(--text-muted)]">
                     {paragraphs.map((p, i) => (
                       <div
                         key={i}
@@ -314,11 +467,11 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                           fontSize: `${p.fontSize?.[globalPreviewMode || 'desktop'] || 18}px`,
                           lineHeight: p.lineHeight?.[globalPreviewMode || 'desktop'] || '1.6',
                           fontFamily: p.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit',
-                          fontWeight: p.fontWeight?.[globalPreviewMode || 'desktop'] || '300',
+                          fontWeight: p.fontWeight?.[globalPreviewMode || 'desktop'] || '400',
                           color: p.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : p.textColor?.[globalPreviewMode || 'desktop']
                         }}
-                        className="whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit"
-                        dangerouslySetInnerHTML={{ __html: getResponsiveValue(p.content, globalPreviewMode || 'desktop') }}
+                        className="text-justify [text-wrap:pretty] [&_p]:m-0 [&_p]:leading-[inherit] [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0 [&_span[style*='color']_strong]:text-inherit"
+                        dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(p.content, globalPreviewMode || 'desktop')) }}
                       />
                     ))}
                   </div>
@@ -331,7 +484,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                         className={cn(
                           "group flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-full transition-all duration-300 border",
                           isExpanded
-                            ? "text-zinc-400 border-zinc-700/60 hover:border-zinc-500 hover:text-zinc-300"
+                            ? "text-[var(--text-muted)] border-[var(--border-default)]/60 hover:border-[var(--border-default)] hover:text-[var(--text-secondary)]"
                             : "text-blue-400 border-blue-500/40 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.25)]"
                         )}
                       >
@@ -349,12 +502,12 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       {!isExpanded && expandedBlocks.length > 0 && (
                         <div className="relative h-52 overflow-hidden pointer-events-none select-none w-full mt-2">
                           <div
-                            className="prose prose-invert prose-zinc opacity-40 blur-[2px]"
+                            className="prose dark:prose-invert opacity-40 blur-[2px]"
                             // Teaser: strip stale mention classes too (no click needed here)
-                            dangerouslySetInnerHTML={{ __html: stripMentionClasses(expandedBlocks[0].content) }}
+                            dangerouslySetInnerHTML={{ __html: cleanHtmlColors(stripMentionClasses(expandedBlocks[0].content)) }}
                           />
                           {/* Gradient fade to black */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/70 to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/70 to-transparent" />
                         </div>
                       )}
                     </div>
@@ -371,10 +524,9 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   animate={{ height: "auto", opacity: 1, filter: "blur(0px)", scaleY: 1, originY: 0 }}
                   exit={{ height: 0, opacity: 0, filter: "blur(12px)", scaleY: 0.9, originY: 0 }}
                   transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
+                  className="overflow-hidden relative"
                 >
-                  <div className={cn(
-                    "mt-16 pt-16 border-t border-zinc-800/60 grid gap-x-12 lg:gap-x-20 gap-y-0.5",
+<div className={cn("mt-8 pt-8 border-t border-[var(--border-subtle)] grid gap-x-12 lg:gap-x-20 gap-y-0.5",
                     globalPreviewMode === 'mobile' ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
                   )}>
                     {expandedBlocks.map((block) => {
@@ -385,7 +537,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       // Step 2: style numbered list items as circular badges
                       let cleanContent = strippedContent.replace(
                         /(<(?:h[1-6]|p|li|div)[^>]*>(?:\s*<[^>]+>)*)\s*(\d+)\.(?:\s|&nbsp;)*/gi,
-                        '$1<span class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-500 text-[14px] font-normal text-zinc-400 bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
+                        '$1<span class="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-500 text-[14px] font-normal text-[var(--text-muted)] bg-transparent mr-3 align-middle -translate-y-[2px] shrink-0 transition-all duration-300 hover:border-blue-400/80 hover:text-blue-400 hover:shadow-[0_0_12px_rgba(59,130,246,0.35)] cursor-default">$2</span>'
                       );
 
                       // Step 3: Add software icons (Ps, Ai, Pr)
@@ -399,21 +551,18 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                         <div
                           key={block.id}
                           className={cn(
-                            "text-zinc-400 font-light leading-snug prose prose-invert prose-zinc max-w-none",
-                            "[&_p]:text-zinc-400 [&_p]:leading-snug [&_p]:mb-0",
-
-                            "[&_h1]:text-zinc-200 [&_h1]:font-bold [&_h1]:mb-2",
-                            "[&_h2]:text-zinc-200 [&_h2]:font-bold [&_h2]:mb-1",
-                            "[&_h3]:text-zinc-300 [&_h3]:font-semibold [&_h3]:mb-0",
-
-                            "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-0 [&_ul]:text-zinc-400",
-                            "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-0 [&_ol]:text-zinc-400",
+                            "text-[var(--text-muted)] leading-snug prose prose-sm dark:prose-invert max-w-none text-justify",
+                            "[&_p]:mb-3 [&_ul]:my-2 [&_li]:my-1",
+                            "[&_strong]:text-[var(--text-secondary)] [&_strong]:font-semibold",
+                            "[&_ul]:list-none [&_ul]:pl-0 [&_li]:relative [&_li]:pl-5",
+                            "[&_li::before]:content-['•'] [&_li::before]:absolute [&_li::before]:left-1 [&_li::before]:text-[var(--text-muted)]",
                             "[&_li]:mb-0",
                             "[&_a]:text-blue-400 [&_a]:underline",
                             "[&_span.mention]:text-blue-400 [&_span.mention]:cursor-default [&_span.mention]:transition-colors",
+                            "[&_hr]:my-3 [&_hr]:border-[var(--border-default)]",
                             block.type === 'full' ? 'md:col-span-2' : ''
                           )}
-                          dangerouslySetInnerHTML={{ __html: cleanContent }}
+                          dangerouslySetInnerHTML={{ __html: cleanHtmlColors(cleanContent) }}
                         />
                       );
                     })}
@@ -423,7 +572,22 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
             </AnimatePresence>
           </motion.div>
         </div>
+
+        {isEditor && isExpanded && (
+          <div className="absolute bottom-16 right-4 md:right-8 z-[100]">
+            <a
+              href="/admin/about"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center bg-white text-black p-3 rounded-full border border-white/20 hover:bg-zinc-200 transition-all duration-300 shadow-xl pointer-events-auto"
+              title="Chỉnh sửa cột mở rộng"
+            >
+              <Pencil className="w-5 h-5" />
+            </a>
+          </div>
+        )}
       </section>
+
     </SectionEditor>
   );
 }

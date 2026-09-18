@@ -1,3 +1,32 @@
+
+export type RichTextData = {
+  content: string;
+  fontSize?: {
+    desktop?: number;
+    tablet?: number;
+    mobile?: number;
+  };
+  lineHeight?: {
+    desktop?: string;
+    tablet?: string;
+    mobile?: string;
+  };
+  fontFamily?: {
+    desktop?: string;
+    tablet?: string;
+    mobile?: string;
+  };
+  fontWeight?: {
+    desktop?: string;
+    tablet?: string;
+    mobile?: string;
+  };
+  textColor?: {
+    desktop?: string;
+    tablet?: string;
+    mobile?: string;
+  };
+};
 "use client";
 
 import { useEditor, EditorContent, Extension } from '@tiptap/react';

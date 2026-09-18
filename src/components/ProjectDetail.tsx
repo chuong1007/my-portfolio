@@ -10,6 +10,24 @@ import { MasonryContainer, MasonryItem } from "./MasonryLayout";
 import { cn, generateSlug } from "@/lib/utils";
 import { useAdmin } from "@/context/AdminContext";
 
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
+
 type ProjectDetailProps = {
   project: Project;
   relatedProjects?: any[];
@@ -29,7 +47,7 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, margin: "50px" }}
         transition={{ duration: 0.4, delay: (index % 12) * 0.05 }}
-        className="w-full relative overflow-hidden rounded-xl bg-zinc-900 shadow-xl border border-white/5"
+        className="w-full relative overflow-hidden rounded-xl bg-[var(--bg-surface)] shadow-xl border border-white/5"
       >
         <img
           src={image.url}
@@ -51,7 +69,7 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
         
         
         {/* Zoom Icon */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 text-white">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 text-[var(--text-primary)]">
           <div className="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
@@ -131,7 +149,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 pt-28 pb-4">
         <Link
           href="/#dự-án"
-          className="flex items-center gap-2 text-zinc-400 hover:text-zinc-50 transition-colors"
+          className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="text-sm font-medium">Quay lại</span>
@@ -139,11 +157,11 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
 
         {isAdmin && (
           <Link
-            href={`/admin?edit=${project.id}`}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
+            href={`/admin/projects?edit=${project.id}`}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] hover:bg-zinc-700 border border-[var(--border-default)] rounded-lg transition-colors"
           >
-            <Pencil className="w-4 h-4 text-zinc-300" />
-            <span className="text-sm font-medium text-zinc-300">Chỉnh sửa</span>
+            <Pencil className="w-4 h-4 text-[var(--text-secondary)]" />
+            <span className="text-sm font-medium text-[var(--text-secondary)]">Chỉnh sửa</span>
           </Link>
         )}
       </div>
@@ -174,7 +192,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
               <Link
                 key={tag}
                 href={`/tag/${generateSlug(tag)}`}
-                className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-zinc-700 text-zinc-300 hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
+                className="px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-blue-400 hover:border-blue-500/50 hover:bg-blue-500/5 hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] transition-all duration-300 active:scale-95"
               >
                 {tag}
               </Link>
@@ -187,19 +205,18 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
             className={cn(
-               "text-zinc-400 leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-700 [&_hr]:my-8",
+               "text-[var(--text-muted)] leading-relaxed max-w-3xl [&_p]:mb-4 last:[&_p]:mb-0 [&_hr]:border-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-[var(--border-default)] [&_hr]:my-8",
                globalPreviewMode === "mobile" ? "text-base" : "text-lg md:text-xl"
             )}
             dangerouslySetInnerHTML={{ 
-              __html: typeof project.description === 'string' ? project.description : String(project.description) 
-            }}
+              __html: cleanHtmlColors(typeof project.description === 'string' ? project.description : String(project.description)) }}
           />
         </div>
       </motion.section>
 
       {/* Separator */}
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="border-t border-zinc-800" />
+        <div className="border-t border-[var(--border-default)]" />
       </div>
 
       {/* Gallery Section - Pinterest Style Masonry */}
@@ -210,10 +227,10 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
           viewport={{ once: true }}
           transition={{ delay: 0.4, duration: 0.5 }}
           className={cn(
-             "font-bold tracking-tight mb-12 text-zinc-50",
+             "font-bold tracking-tight mb-12 text-[var(--text-primary)]",
              globalPreviewMode === "mobile" ? "text-3xl" : "text-4xl md:text-5xl"
           )}
-          dangerouslySetInnerHTML={{ __html: project.gallery_title || "Hình ảnh dự án" }}
+          dangerouslySetInnerHTML={{ __html: cleanHtmlColors(project.gallery_title || "Hình ảnh dự án") }}
         />
         
         {/* Masonry — Preserving original aspect ratios (Pinterest style) — matching admin vertical flow */}
@@ -256,8 +273,8 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="mt-20 prose prose-invert prose-zinc max-w-none text-zinc-400 [&_p]:leading-relaxed [&_h1]:text-white [&_h2]:text-white [&_h3]:text-white [&_strong]:text-zinc-200"
-            dangerouslySetInnerHTML={{ __html: project.gallery_bottom_content }}
+            className="mt-20 prose dark:prose-invert prose-zinc max-w-none text-[var(--text-muted)] [&_p]:leading-relaxed [&_h1]:text-[var(--text-primary)] [&_h2]:text-[var(--text-primary)] [&_h3]:text-[var(--text-primary)] [&_strong]:text-[var(--text-secondary)]"
+            dangerouslySetInnerHTML={{ __html: cleanHtmlColors(project.gallery_bottom_content) }}
           />
         )}
       </section>
@@ -350,7 +367,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
 
       {/* Related Projects Section */}
       {relatedProjects.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 md:px-12 py-24 border-t border-zinc-900">
+        <section className="max-w-7xl mx-auto px-6 md:px-12 py-24 border-t border-[var(--border-subtle)]">
           <div className="flex items-end justify-between mb-12">
             <h2 className="text-3xl font-bold tracking-tight">Khám phá các dự án khác</h2>
           </div>
@@ -366,7 +383,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
               >
                 <div className="group flex flex-col gap-4">
                   <Link href={`/project/${p.slug || p.id}`} className="flex flex-col gap-4">
-                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                    <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50">
                       <img
                         src={p.cover_image}
                         alt={p.title}
@@ -374,7 +391,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                         className="w-full h-full object-cover transition-all duration-700 ease-in-out"
                       />
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10 whitespace-nowrap">
+                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-white backdrop-blur-sm bg-white/10 whitespace-nowrap">
                           Xem ngay
                           <ArrowRight className="w-3.5 h-3.5" />
                         </span>
@@ -386,7 +403,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       )}
                     </div>
                     <div className="px-1">
-                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
+                      <h3 className="text-lg font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
                         {p.title}
                       </h3>
                     </div>
@@ -396,7 +413,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       <Link 
                         key={tag} 
                         href={`/tag/${generateSlug(tag)}`}
-                        className="text-xs text-zinc-500 hover:text-blue-400 transition-colors font-medium border-none p-0 bg-transparent inline"
+                        className="text-xs text-[var(--text-muted)] hover:text-blue-400 transition-colors font-medium border-none p-0 bg-transparent inline"
                       >
                         {tag}{i < p.tags.length - 1 ? "," : ""}
                       </Link>
@@ -411,13 +428,13 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
 
       {/* Footer CTA */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 pb-20 pt-8">
-        <div className="border-t border-zinc-800 pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-zinc-500 text-sm">
+        <div className="border-t border-[var(--border-default)] pt-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-[var(--text-muted)] text-sm">
             © CHUONG.GRAPHIC
           </p>
           <Link
             href="/projects"
-            className="group flex items-center gap-2 px-6 py-3 rounded-full border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors text-sm font-medium"
+            className="group flex items-center gap-2 px-6 py-3 rounded-full border border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors text-sm font-medium"
           >
             Xem tất cả dự án
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

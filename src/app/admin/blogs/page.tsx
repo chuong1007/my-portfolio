@@ -703,16 +703,16 @@ function BlogCardHorizontal({
           )}
         </div>
         <p className="text-xs text-zinc-500 line-clamp-1">{blog.excerpt}</p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex flex-wrap items-center gap-2 mt-0.5">
           {blog.slug && (
             <span className="text-[9px] font-mono text-zinc-600 bg-zinc-800/50 px-1.5 py-0.5 rounded truncate max-w-[180px]">
               /blog/{blog.slug}
             </span>
           )}
-          {blog.tags?.slice(0, 2).map((tag: string) => (
+          {blog.tags?.map((tag: string) => (
             <span
               key={tag}
-              className="text-[9px] px-1.5 py-0.5 bg-zinc-800 text-zinc-500 rounded"
+              className="text-[9px] px-1.5 py-0.5 bg-zinc-800 text-zinc-500 rounded whitespace-nowrap"
             >
               {tag}
             </span>

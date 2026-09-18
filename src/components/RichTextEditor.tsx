@@ -5,8 +5,16 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Paragraph from '@tiptap/extension-paragraph';
 import { Extension } from '@tiptap/core';
+import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
+import Strike from '@tiptap/extension-strike';
+import Link from '@tiptap/extension-link';
+import BulletList from '@tiptap/extension-bullet-list';
+import OrderedList from '@tiptap/extension-ordered-list';
+import ListItem from '@tiptap/extension-list-item';
+
 import Image from '@tiptap/extension-image';
-import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2, Palette } from 'lucide-react';
+import { Bold, Italic, Type, Plus, Minus, CornerDownLeft, FoldVertical, Image as ImageIcon, Loader2, Palette, AlignLeft, AlignCenter, AlignRight, AlignJustify, Underline as UnderlineIcon, Strikethrough, Link as LinkIcon, List, ListOrdered } from 'lucide-react';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { useAdmin } from '@/context/AdminContext';
@@ -314,6 +322,13 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
+      Underline,
+      Strike,
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'text-blue-400 underline cursor-pointer' } }),
+      BulletList.configure({ HTMLAttributes: { class: 'list-disc ml-4 space-y-1' } }),
+      OrderedList.configure({ HTMLAttributes: { class: 'list-decimal ml-4 space-y-1' } }),
+      ListItem,
+      TextAlign.configure({ types: ['heading', 'paragraph'], alignments: ['left', 'center', 'right', 'justify'] }),
       StarterKit.configure({
         hardBreak: {
           keepMarks: true,
@@ -361,7 +376,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none focus:outline-none min-h-[100px] bg-zinc-950 p-4 border border-zinc-800 rounded-xl leading-relaxed',
+        class: 'prose prose-invert max-w-none focus:outline-none min-h-[100px] bg-[var(--bg-base)] p-4 border border-[var(--border-default)] rounded-xl leading-relaxed',
       },
     },
   });
@@ -521,36 +536,36 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
     <div className="space-y-4">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{label}</label>
-          <span className="text-[9px] bg-zinc-800/50 text-zinc-500 px-1.5 py-0.5 rounded uppercase font-bold border border-zinc-700/50">{globalPreviewMode}</span>
+          <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">{label}</label>
+          <span className="text-[9px] bg-zinc-800/50 text-[var(--text-muted)] px-1.5 py-0.5 rounded uppercase font-bold border border-zinc-700/50">{globalPreviewMode}</span>
         </div>
       </div>
       
-      <div className="flex flex-col gap-1.5 p-1 bg-zinc-900/50 border border-zinc-800 rounded-xl overflow-hidden shadow-inner">
+      <div className="flex flex-col gap-1.5 p-1 bg-zinc-900/50 border border-[var(--border-default)] rounded-xl overflow-hidden shadow-inner">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-1 p-1">
-          <div className="flex items-center gap-0.5 bg-zinc-950 p-1 rounded-lg border border-zinc-800/50">
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={cn(
-                "p-1.5 rounded transition-colors",
-                editor.isActive('bold') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
-              )}
-              title="Bold"
-            >
-              <Bold className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={cn(
-                "p-1.5 rounded transition-colors",
-                editor.isActive('italic') ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
-              )}
-              title="Italic"
-            >
-              <Italic className="w-3.5 h-3.5" />
-            </button>
+          
+          {/* Main Formatting Tools */}
+          <div className="flex items-center gap-0.5 bg-[var(--bg-base)] p-1 rounded-lg border border-zinc-800/50">
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('bold') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Bold"><Bold className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('italic') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Italic"><Italic className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleUnderline().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('underline') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Underline"><UnderlineIcon className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleStrike().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('strike') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Strikethrough"><Strikethrough className="w-3.5 h-3.5" /></button>
             
+            <div className="w-px h-4 bg-zinc-800 mx-0.5" />
+            
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('left').run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive({ textAlign: 'left' }) ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Align Left"><AlignLeft className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('center').run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive({ textAlign: 'center' }) ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Align Center"><AlignCenter className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('right').run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive({ textAlign: 'right' }) ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Align Right"><AlignRight className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().setTextAlign('justify').run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive({ textAlign: 'justify' }) ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Justify"><AlignJustify className="w-3.5 h-3.5" /></button>
+            
+            <div className="w-px h-4 bg-zinc-800 mx-0.5" />
+            
+            <button onClick={(e) => { e.preventDefault(); const previousUrl = editor.getAttributes('link').href; const url = window.prompt('URL', previousUrl); if (url === null) return; if (url === '') { editor.chain().focus().extendMarkRange('link').unsetLink().run(); return; } editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('link') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Link"><LinkIcon className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('bulletList') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Bullet List"><List className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().toggleOrderedList().run(); }} className={cn("p-1.5 rounded transition-colors", editor.isActive('orderedList') ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Ordered List"><ListOrdered className="w-3.5 h-3.5" /></button>
+            <button onClick={(e) => { e.preventDefault(); editor.chain().focus().setHorizontalRule().run(); }} className={cn("p-1.5 rounded transition-colors", "text-[var(--text-muted)] hover:text-[var(--text-secondary)]")} title="Horizontal Line"><Minus className="w-3.5 h-3.5" /></button>
+
             {/* Color Picker Toolbar Item */}
             <div className="relative">
               <button
@@ -558,13 +573,13 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
                 onClick={() => setShowColorPicker(!showColorPicker)}
                 className={cn(
                   "p-1.5 rounded transition-colors group relative",
-                  showColorPicker ? "bg-zinc-800 text-blue-400" : "text-zinc-500 hover:text-zinc-300"
+                  showColorPicker ? "bg-zinc-800 text-blue-400" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                 )}
                 title="Màu chữ"
               >
                 <Palette className="w-3.5 h-3.5" />
                 <div 
-                  className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full border border-zinc-900 shadow-sm"
+                  className="absolute bottom-1 right-1 w-1.5 h-1.5 rounded-full border border-[var(--border-subtle)] shadow-sm"
                   style={{ backgroundColor: currentTextColor }}
                 />
               </button>
@@ -591,7 +606,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingImage}
-              className="p-1.5 rounded transition-colors text-zinc-500 hover:text-zinc-300 disabled:opacity-50"
+              className="p-1.5 rounded transition-colors text-[var(--text-muted)] hover:text-[var(--text-secondary)] disabled:opacity-50"
               title="Chèn ảnh"
             >
               {isUploadingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-400" /> : <ImageIcon className="w-3.5 h-3.5" />}
@@ -605,35 +620,35 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             />
           </div>
 
-          <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800 ml-1">
+          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)] ml-1">
              <select 
                value={currentFontFamily}
                onChange={(e) => updateFontFamily(e.target.value)}
-               className="bg-transparent text-[11px] font-bold text-zinc-400 focus:outline-none cursor-pointer hover:text-zinc-200"
+               className="bg-transparent text-[11px] font-bold text-[var(--text-muted)] focus:outline-none cursor-pointer hover:text-[var(--text-secondary)]"
              >
                {FONT_FAMILIES.map(ff => (
-                 <option key={ff.value} value={ff.value} className="bg-zinc-900 text-zinc-300">{ff.label}</option>
+                 <option key={ff.value} value={ff.value} className="bg-[var(--bg-surface)] text-[var(--text-secondary)]">{ff.label}</option>
                ))}
              </select>
           </div>
 
-          <div className="flex items-center gap-1.5 bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-800 ml-1">
+          <div className="flex items-center gap-1.5 bg-[var(--bg-base)] px-2 py-1 rounded-lg border border-[var(--border-default)] ml-1">
              <select 
                value={currentFontWeight}
                onChange={(e) => updateFontWeight(e.target.value)}
-               className="bg-transparent text-[11px] font-bold text-zinc-400 focus:outline-none cursor-pointer hover:text-zinc-200"
+               className="bg-transparent text-[11px] font-bold text-[var(--text-muted)] focus:outline-none cursor-pointer hover:text-[var(--text-secondary)]"
              >
                {FONT_WEIGHTS.map(fw => (
-                 <option key={fw.value} value={fw.value} className="bg-zinc-900 text-zinc-300">{fw.label}</option>
+                 <option key={fw.value} value={fw.value} className="bg-[var(--bg-surface)] text-[var(--text-secondary)]">{fw.label}</option>
                ))}
              </select>
           </div>
           
           <div className="w-px h-4 bg-zinc-800 mx-1" />
           
-          <div className="flex items-center gap-3 px-3 py-1 bg-zinc-950 rounded-lg border border-zinc-800 ml-1 group/slider">
+          <div className="flex items-center gap-3 px-3 py-1 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] ml-1 group/slider">
             <div className="flex items-center gap-1.5 min-w-[50px]">
-              <Type className="w-3.5 h-3.5 text-zinc-500" />
+              <Type className="w-3.5 h-3.5 text-[var(--text-muted)]" />
               <div className="flex items-baseline gap-0.5">
                 <input 
                   type="number"
@@ -655,17 +670,17 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
             />
             
             <div className="flex flex-col gap-0.5 pr-1">
-                <button onClick={() => updateFontSize(currentSize + 1)} className="text-zinc-500 hover:text-blue-400 transition-colors"><Plus className="w-2.5 h-2.5" /></button>
-                <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="text-zinc-500 hover:text-blue-400 transition-colors"><Minus className="w-2.5 h-2.5" /></button>
+                <button onClick={() => updateFontSize(currentSize + 1)} className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"><Plus className="w-2.5 h-2.5" /></button>
+                <button onClick={() => updateFontSize(Math.max(8, currentSize - 1))} className="text-[var(--text-muted)] hover:text-blue-400 transition-colors"><Minus className="w-2.5 h-2.5" /></button>
             </div>
           </div>
         </div>
 
         {!hideLineHeight && (
           <div className="px-1 pb-1">
-            <div className="flex items-center gap-3 px-3 py-1.5 bg-zinc-950 rounded-lg border border-zinc-800 group/slider">
+            <div className="flex items-center gap-3 px-3 py-1.5 bg-[var(--bg-base)] rounded-lg border border-[var(--border-default)] group/slider">
               <div className="flex items-center gap-1.5 min-w-[50px]">
-                <FoldVertical className="w-3.5 h-3.5 text-zinc-500" />
+                <FoldVertical className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                 <div className="flex items-baseline gap-0.5">
                   <input 
                     type="number"
@@ -693,7 +708,7 @@ export function RichTextEditor({ label, value, onChange, placeholder, enterAsBre
       </div>
 
       <div className="min-h-[100px] p-4 bg-zinc-900/30 rounded-xl border border-zinc-800/50 shadow-inner">
-        <EditorContent editor={editor} className="prose prose-invert max-w-none text-zinc-300 [&_.ProseMirror]:outline-none" />
+        <EditorContent editor={editor} className="prose prose-invert max-w-none text-[var(--text-secondary)] [&_.ProseMirror]:outline-none" />
       </div>
     </div>
   );

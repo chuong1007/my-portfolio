@@ -7,12 +7,30 @@ import { getAllProjects } from "@/lib/data";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
-import { SectionEditor } from "./SectionEditor";
+import { SectionEditor } from "@/components/SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
 
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
-import type { RichTextData } from "./RichTextEditor";
+import type { RichTextData } from "@/components/builder/RichTextEditor";
 import { usePathname } from "next/navigation";
+
+const cleanHtmlColors = (html?: string | null) => {
+  if (!html) return "";
+  return html
+    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
+    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
+    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
+    .replace(/background-clip:\s*text/gi, '');
+};
+
+const getSafeColor = (color?: string | null) => {
+  if (!color || color === 'inherit') return undefined;
+  const upper = color.toUpperCase();
+  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
+    return 'var(--text-primary)';
+  }
+  return color;
+};
 
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
@@ -269,23 +287,63 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       extraActions={
         isAdmin && isEditMode ? (
           <Link
-            href="/admin?tab=projects"
-            className="px-4 py-3 bg-zinc-900/80 backdrop-blur-md hover:bg-zinc-800 border border-zinc-700/50 rounded-full transition-all duration-300 shadow-xl group/admin-btn"
+            href="/admin/projects"
+            className="px-4 py-3 bg-[var(--bg-surface)]/80 backdrop-blur-md hover:bg-[var(--bg-elevated)] border border-[var(--border-default)]/50 rounded-full transition-all duration-300 shadow-xl group/admin-btn"
           >
-            <span className="text-[10px] font-bold text-zinc-400 group-hover/admin-btn:text-white uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-[var(--text-muted)] group-hover/admin-btn:text-[var(--text-primary)] uppercase tracking-widest">
               Quản lý dự án
             </span>
           </Link>
         ) : null
       }
     >
-      <section 
-        id="projects" 
+      
+      <style dangerouslySetInnerHTML={{ __html: `
+        .gallery-title:not(.is-editor) {
+          font-size: var(--g-fs-mob);
+          line-height: var(--g-lh-mob);
+          font-family: var(--g-ff-mob);
+          font-weight: var(--g-fw-mob);
+        }
+        .gallery-container:not(.is-editor) {
+          padding-top: var(--pt-mob);
+          padding-bottom: var(--pb-mob);
+        }
+        @media (min-width: 768px) {
+          .gallery-title:not(.is-editor) {
+            font-size: var(--g-fs-tab);
+            line-height: var(--g-lh-tab);
+            font-family: var(--g-ff-tab);
+            font-weight: var(--g-fw-tab);
+          }
+          .gallery-container:not(.is-editor) {
+            padding-top: var(--pt-tab);
+            padding-bottom: var(--pb-tab);
+          }
+        }
+        @media (min-width: 1024px) {
+          .gallery-title:not(.is-editor) {
+            font-size: var(--g-fs-desk);
+            line-height: var(--g-lh-desk);
+            font-family: var(--g-ff-desk);
+            font-weight: var(--g-fw-desk);
+          }
+          .gallery-container:not(.is-editor) {
+            padding-top: var(--pt-desk);
+            padding-bottom: var(--pb-desk);
+          }
+        }
+      `}} />
+
+      <section id="projects" 
         className={cn(
-          "px-4 md:px-12 bg-zinc-950 relative",
-          !isEditor && variant === 'homepage' && "pt-0",
-          !isEditor && variant !== 'homepage' && "pt-[var(--pt-mob)] md:pt-[var(--pt-tab)] lg:pt-[var(--pt-desk)]",
-          !isEditor && "pb-[var(--pb-mob)] md:pb-[var(--pb-tab)] lg:pb-[var(--pb-desk)]"
+          "bg-[var(--bg-base)] relative",
+          !isEditor && "px-4 md:px-12",
+          isEditor && globalPreviewMode === 'mobile' && "px-4",
+          isEditor && globalPreviewMode === 'tablet' && "px-8",
+          isEditor && globalPreviewMode === 'desktop' && "px-12",
+          !isEditor && "gallery-container not-is-editor",
+          isEditor && "is-editor"
         )}
         style={{
           paddingTop: variant === 'homepage' ? '0px' : (isEditor ? `${currentPt}px` : undefined),
@@ -305,13 +363,13 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-10 flex items-end justify-between gap-4 border-b border-zinc-900 pb-8"
+            className="mb-10 flex items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-8"
           >
             <div className="flex flex-col gap-2">
               <div 
                 className={cn(
-                  "tracking-tighter text-zinc-50 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                  !isEditor && "text-[length:var(--g-fs-mob)] md:text-[length:var(--g-fs-tab)] lg:text-[length:var(--g-fs-desk)] leading-[var(--g-lh-mob)] md:leading-[var(--g-lh-tab)] lg:leading-[var(--g-lh-desk)] [font-family:var(--g-ff-mob)] md:[font-family:var(--ff-tab)] lg:[font-family:var(--g-ff-desk)] font-[var(--g-fw-mob)] md:font-[var(--g-fw-tab)] lg:font-[var(--g-fw-desk)]"
+                  "tracking-tighter text-[var(--text-primary)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  !isEditor && "gallery-title not-is-editor", isEditor && "is-editor"
                 )}
                 style={{ 
                   fontSize: isEditor ? `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` : undefined,
@@ -330,16 +388,16 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                   "--g-fw-desk": titleData.fontWeight?.desktop || '700',
                   "--g-fw-tab": titleData.fontWeight?.tablet || '700',
                   "--g-fw-mob": titleData.fontWeight?.mobile || '700',
-                  "--g-color-desk": titleData.textColor?.desktop === 'inherit' ? undefined : titleData.textColor?.desktop,
-                  "--g-color-tab": titleData.textColor?.tablet === 'inherit' ? undefined : titleData.textColor?.tablet,
-                  "--g-color-mob": titleData.textColor?.mobile === 'inherit' ? undefined : titleData.textColor?.mobile,
+                  "--g-color-desk": getSafeColor(titleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.desktop),
+                  "--g-color-tab": getSafeColor(titleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.tablet),
+                  "--g-color-mob": getSafeColor(titleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.mobile),
                   color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--g-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--g-color-tab)' : 'var(--g-color-desk)'),
                 } as any}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "" }} 
+                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "") }} 
               />
               <div 
                 className={cn(
-                  "text-zinc-500 whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
+                  "text-[var(--text-muted)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
                   !isEditor && "text-[length:var(--gs-fs-mob)] md:text-[length:var(--gs-fs-tab)] lg:text-[length:var(--gs-fs-desk)] leading-[var(--gs-lh-mob)] md:leading-[var(--gs-lh-tab)] lg:leading-[var(--gs-lh-desk)]"
                 )}
                 style={{ 
@@ -351,19 +409,19 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                   "--gs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
                   "--gs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
                   "--gs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
-                  "--gs-color-desk": subtitleData.textColor?.desktop === 'inherit' ? undefined : subtitleData.textColor?.desktop,
-                  "--gs-color-tab": subtitleData.textColor?.tablet === 'inherit' ? undefined : subtitleData.textColor?.tablet,
-                  "--gs-color-mob": subtitleData.textColor?.mobile === 'inherit' ? undefined : subtitleData.textColor?.mobile,
+                  "--gs-color-desk": getSafeColor(subtitleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.desktop),
+                  "--gs-color-tab": getSafeColor(subtitleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.tablet),
+                  "--gs-color-mob": getSafeColor(subtitleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.mobile),
                   color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--gs-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--gs-color-tab)' : 'var(--gs-color-desk)'),
                 } as any}
-                dangerouslySetInnerHTML={{ __html: getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "" }} 
+                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "") }} 
               />
             </div>
 
             {((showSeeAll && currentSeeAllPos === 'top' && !isProjectsPage) || (!showSeeAll && !isProjectsPage)) && (
               <Link 
                 href={showSeeAll ? (getResponsiveValue(seeAllLink, currentDevice) || "/projects") : "/projects"}
-                className="hidden lg:flex group items-center gap-1.5 text-zinc-400 hover:text-white transition-colors text-sm font-semibold tracking-tight"
+                className="hidden lg:flex group items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-semibold tracking-tight"
               >
                 {showSeeAll ? (getResponsiveValue(seeAllLabel, currentDevice) || "Xem tất cả") : "Xem tất cả"}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -382,8 +440,8 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                   className={cn(
                     "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
                     isActive
-                      ? "bg-zinc-50 text-zinc-950 border-zinc-50"
-                      : "bg-transparent text-zinc-400 border-zinc-800 hover:border-zinc-500 hover:text-zinc-200"
+                      ? "bg-[var(--text-primary)] text-[var(--bg-base)] border-[var(--text-primary)]"
+                      : "bg-transparent text-[var(--text-muted)] border-[var(--border-default)] hover:border-zinc-500 hover:text-[var(--text-secondary)]"
                   )}
                 >
                   {category}
@@ -408,10 +466,10 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
             {loading && dbProjects.length === 0 ? (
               [1, 2, 3, 4, 5, 6].map((i) => (
                 <div key={i} className="flex flex-col gap-3 animate-pulse">
-                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50" />
+                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]" />
                   <div className="space-y-2">
-                    <div className="h-4 bg-zinc-900 rounded-md w-2/3" />
-                    <div className="h-3 bg-zinc-900 rounded-md w-full" />
+                    <div className="h-4 bg-[var(--bg-surface)] rounded-md w-2/3" />
+                    <div className="h-3 bg-[var(--bg-surface)] rounded-md w-full" />
                   </div>
                 </div>
               ))
@@ -426,7 +484,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                   className="group flex flex-col gap-3"
                 >
                   <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3">
-                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50">
                       <img
                         src={project.imageUrl}
                         alt={project.title}
@@ -443,20 +501,20 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                         </div>
                       )}
                       {isAdmin && project.is_visible === false && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-zinc-950/80 border border-zinc-700 rounded-full text-[10px] uppercase tracking-wider text-zinc-400">
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-[var(--bg-base)]/80 border border-[var(--border-default)] rounded-full text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                           <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
                           Đang ẩn
                         </div>
                       )}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
+                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-white backdrop-blur-sm bg-white/10">
                           {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
                           <ArrowRight className="w-3.5 h-3.5" />
                         </span>
                       </div>
                     </div>
                     <div className="px-1 flex flex-col">
-                      <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
+                      <h3 className="text-lg font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
                         {project.title}
                       </h3>
                     </div>
@@ -466,7 +524,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                       <Link 
                         key={tag} 
                         href={`/tag/${generateSlug(tag)}`}
-                        className="text-sm text-zinc-500 hover:text-blue-400 transition-colors"
+                        className="text-sm text-[var(--text-muted)] hover:text-blue-400 transition-colors"
                       >
                         {tag}{i < project.tags.length - 1 ? "," : ""}
                       </Link>
@@ -481,14 +539,14 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
             <div className="mt-16 flex justify-center">
               <button
                 onClick={handleLoadMore}
-                className="group relative flex items-center gap-3 px-10 py-5 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
+                className="group relative flex items-center gap-3 px-10 py-5 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-[0.2em] transition-colors relative z-10">
+                <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-[0.2em] transition-colors relative z-10">
                   Xem thêm
                 </span>
-                <div className="relative z-10 w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
-                  <ArrowDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                <div className="relative z-10 w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
+                  <ArrowDown className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
                 </div>
               </button>
             </div>
@@ -507,20 +565,20 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
               {showSeeAll ? (
                 <Link 
                   href={getResponsiveValue(seeAllLink, currentDevice) || seeAllLink || "/projects"}
-                  className="group relative flex items-center gap-3 px-8 py-4 bg-zinc-900/50 border border-zinc-800 hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
+                  className="group relative flex items-center gap-3 px-8 py-4 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <span className="text-sm font-bold text-zinc-300 group-hover:text-white uppercase tracking-widest transition-colors">
+                  <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-widest transition-colors">
                     {getResponsiveValue(seeAllLabel, currentDevice) || seeAllLabel}
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
-                    <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-zinc-950" />
+                  <div className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
+                    <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
                   </div>
                 </Link>
               ) : (
                 <Link 
                   href="/projects"
-                  className="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest border border-zinc-800 px-6 py-3 rounded-full hover:border-zinc-500"
+                  className="group flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-bold uppercase tracking-widest border border-[var(--border-default)] px-6 py-3 rounded-full hover:border-zinc-500"
                 >
                   Xem tất cả dự án
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -530,7 +588,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
           )}
 
           {filteredProjects.length === 0 && (
-            <div className="w-full py-20 text-center text-zinc-500">
+            <div className="w-full py-20 text-center text-[var(--text-muted)]">
               No projects found for this category.
             </div>
           )}

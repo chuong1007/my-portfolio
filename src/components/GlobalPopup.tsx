@@ -35,7 +35,7 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
     setHtmlKey(contentKey);
 
     const maxDisplayTimes = rawContent.maxDisplayTimes || 1;
-    const delayMs = (typeof rawContent.delaySeconds === 'number' ? rawContent.delaySeconds : 1.5) * 1000;
+    const delayMs = (typeof rawContent.delaySeconds === 'number' ? rawContent.delaySeconds : 8.5) * 1000;
     const seenTimes = parseInt(localStorage.getItem(contentKey) || "0", 10);
 
     if (seenTimes < maxDisplayTimes) {
@@ -55,7 +55,7 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
   return (
     <AnimatePresence>
       {show && (
-        <div key="global-popup-modal" className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+        <div key="global-popup-modal" className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -72,14 +72,14 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
           >
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 z-10 p-2 bg-black/30 hover:bg-black/50 backdrop-blur-md rounded-full text-white transition-colors border border-white/10"
+              className="absolute top-4 right-4 z-10 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors border border-white/10"
               title="Đóng"
             >
               <X className="w-5 h-5" />
             </button>
             <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col justify-center">
               <div 
-                className="prose prose-invert max-w-none text-zinc-200 [&_img]:rounded-xl [&_img]:mx-auto"
+                className="prose prose-invert max-w-none text-zinc-300 [&_img]:rounded-xl [&_img]:mx-auto"
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               />
               

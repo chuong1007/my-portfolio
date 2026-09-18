@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
+import {  
   X, 
   Save,
   Plus, 
@@ -20,13 +20,14 @@ import {
   Mail,
   Facebook,
   MessageSquare
-} from "lucide-react";
+, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { RichTextEditor, type RichTextData } from "./RichTextEditor";
 import { cn } from "@/lib/utils";
 import { SketchPicker } from "react-color";
 import { useAdmin } from "@/context/AdminContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { AvatarSelector } from "./admin/AvatarSelector";
 import { getResponsiveValue, setResponsiveValue, type DeviceMode, type ResponsiveValue } from "@/lib/responsive-helpers";
 
 type AdminModalProps = {
@@ -257,12 +258,12 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] pointer-events-auto" onClick={onClose} />
       
       {/* Sidebar Panel - Pinned to the right */}
-      <div className="relative bg-zinc-950/95 backdrop-blur-xl border-l border-zinc-800 w-full md:max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+      <div className="relative bg-[var(--bg-base)]/95 backdrop-blur-xl border-l border-[var(--border-default)] w-full md:max-w-md h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 pointer-events-auto">
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border-default)]">
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white capitalize">Edit {sectionId} Section</h2>
+            <h2 className="text-xl font-bold text-[var(--text-primary)] capitalize">Edit {sectionId} Section</h2>
             {/* Device Indicator */}
-            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-full p-1 shadow-inner translate-x-3">
+            <div className="flex items-center bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-full p-1 shadow-inner translate-x-3">
               {(['desktop', 'tablet', 'mobile'] as const).map((mode) => {
                 const Icon = DEVICE_ICONS[mode];
                 const isActive = globalPreviewMode === mode;
@@ -274,7 +275,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       "p-1.5 rounded-full transition-all duration-300 relative group",
                       isActive 
                         ? (mode === 'desktop' ? "bg-blue-500/10 text-blue-400" : mode === 'tablet' ? "bg-purple-500/10 text-purple-400" : "bg-orange-500/10 text-orange-400")
-                        : "text-zinc-600 hover:text-zinc-400"
+                        : "text-zinc-600 hover:text-[var(--text-muted)]"
                     )}
                     title={`Switch to ${DEVICE_LABELS[mode]}`}
                   >
@@ -297,21 +298,21 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
             window.dispatchEvent(new CustomEvent('previewUpdate', { detail: { sectionId, data: initialData } }));
             onClose();
           }} className="p-2 hover:bg-zinc-800 rounded-full transition-colors">
-            <X className="w-5 h-5 text-zinc-400" />
+            <X className="w-5 h-5 text-[var(--text-muted)]" />
           </button>
         </div>
 
         <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
           {sectionId === 'hero' && (
             <div className="space-y-4">
-              <div className="p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Cấu hình Logo Header</label>
-                <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+              <div className="p-4 bg-zinc-800/30 border border-[var(--border-default)] rounded-2xl space-y-4">
+                <label className="block text-sm font-bold text-[var(--text-secondary)]">Cấu hình Logo Header</label>
+                <div className="flex bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-default)]">
                   <button
                     onClick={() => setData({ ...data, logoType: setResponsiveValue(data.logoType, globalPreviewMode, 'text') })}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-sm font-medium transition-all",
-                      (getResponsiveValue(data.logoType, globalPreviewMode) || 'text') === 'text' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                      (getResponsiveValue(data.logoType, globalPreviewMode) || 'text') === 'text' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                     )}
                   >
                     Text Logo
@@ -320,7 +321,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onClick={() => setData({ ...data, logoType: setResponsiveValue(data.logoType, globalPreviewMode, 'image') })}
                     className={cn(
                       "flex-1 py-2 rounded-lg text-sm font-medium transition-all",
-                      getResponsiveValue(data.logoType, globalPreviewMode) === 'image' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                      getResponsiveValue(data.logoType, globalPreviewMode) === 'image' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                     )}
                   >
                     Image Logo
@@ -330,17 +331,17 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 {(getResponsiveValue(data.logoType, globalPreviewMode) || 'text') === 'text' ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Logo Text</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5 ml-1">Logo Text</label>
                       <input
                         type="text"
                         value={getResponsiveValue(data.logoText, globalPreviewMode) || ''}
                         placeholder="VD: CHUONG.GRAPHIC"
                         onChange={(e) => setData({ ...data, logoText: setResponsiveValue(data.logoText, globalPreviewMode, e.target.value) })}
-                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                        className="w-full bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Màu Logo</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5 ml-1">Màu Logo</label>
                       <div className="relative">
                         <button
                           type="button"
@@ -349,9 +350,9 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-6 h-6 rounded-md shadow-sm border border-zinc-700" style={{ backgroundColor: getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF' }} />
-                            <span className="text-sm font-mono text-zinc-300">{getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF'}</span>
+                            <span className="text-sm font-mono text-[var(--text-secondary)]">{getResponsiveValue(data.logoColor, globalPreviewMode) || '#FFFFFF'}</span>
                           </div>
-                          <Palette className="w-4 h-4 text-zinc-500" />
+                          <Palette className="w-4 h-4 text-[var(--text-muted)]" />
                         </button>
                         
                         {showColorPicker && (
@@ -377,7 +378,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Logo Image (Ảnh/SVG)</label>
+                      <label className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5 ml-1">Logo Image (Ảnh/SVG)</label>
                       <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-3">
                           <input
@@ -385,7 +386,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                             value={getResponsiveValue(data.logoImageUrl, globalPreviewMode) || ''}
                             placeholder="https://path-to-your-logo.png"
                             onChange={(e) => setData({ ...data, logoImageUrl: setResponsiveValue(data.logoImageUrl, globalPreviewMode, e.target.value) })}
-                            className="flex-1 bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                            className="flex-1 bg-zinc-900/50 border border-zinc-700/50 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                           />
                           <label className="cursor-pointer bg-white text-black px-4 py-3 rounded-xl flex items-center justify-center hover:bg-zinc-200 transition-all shrink-0">
                             {logoUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Upload className="w-5 h-5" />}
@@ -402,7 +403,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                         </div>
                         
                         {data.logoImageUrl && (
-                          <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center justify-center">
+                          <div className="p-4 bg-zinc-900/50 border border-[var(--border-default)] rounded-xl flex items-center justify-center">
                             <img 
                               src={getResponsiveValue(data.logoImageUrl, globalPreviewMode)} 
                               alt="Logo Preview" 
@@ -416,9 +417,9 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 )}
                 
                 {/* Logo Height Slider */}
-                <div className="mt-4 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-3">
+                <div className="mt-4 p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Chiều cao Logo (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Chiều cao Logo (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.logoHeight, globalPreviewMode) || "40"}px
                     </span>
@@ -432,7 +433,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, logoHeight: setResponsiveValue(data.logoHeight, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[9px] text-zinc-500 italic">Điều chỉnh kích thước logo trên từng thiết bị.</p>
+                  <p className="text-[9px] text-[var(--text-muted)] italic">Điều chỉnh kích thước logo trên từng thiết bị.</p>
                 </div>
               </div>
 
@@ -448,11 +449,11 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               {/* Font sizes are now controlled inside RichTextEditor */}
 
               {/* Sliders for Max Width & Padding */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Scroll Button Offset (px)</label>
-                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.scrollOffset, globalPreviewMode) || 0}px</span>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Scroll Button Offset (px)</label>
+                    <span className="text-xs font-mono text-[var(--text-muted)]">{getResponsiveValue(data.scrollOffset, globalPreviewMode) || 0}px</span>
                   </div>
                   <input
                     type="range"
@@ -463,13 +464,13 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, scrollOffset: setResponsiveValue(data.scrollOffset, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Chỉnh vị trí nút kéo xuống (Margin Top).</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh vị trí nút kéo xuống (Margin Top).</p>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
-                    <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.paddingTop, globalPreviewMode) || 80}px</span>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Top (px)</label>
+                    <span className="text-xs font-mono text-[var(--text-muted)]">{getResponsiveValue(data.paddingTop, globalPreviewMode) || 80}px</span>
                   </div>
                   <input
                     type="range"
@@ -480,7 +481,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, paddingTop: setResponsiveValue(data.paddingTop, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía trên Section.</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía trên Section.</p>
                 </div>
               </div>
 
@@ -495,10 +496,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               {/* Slider for Scroll Down Distance */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-3">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4 space-y-3">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">KHOẢNG CÁCH SCROLL DOWN (MARGIN TOP)</label>
-                  <span className="text-xs font-mono text-zinc-500">{getResponsiveValue(data.scrollPadding, globalPreviewMode) || 0}px</span>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">KHOẢNG CÁCH SCROLL DOWN (MARGIN TOP)</label>
+                  <span className="text-xs font-mono text-[var(--text-muted)]">{getResponsiveValue(data.scrollPadding, globalPreviewMode) || 0}px</span>
                 </div>
                 <input
                   type="range"
@@ -509,7 +510,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   onChange={(e) => setData({ ...data, scrollPadding: setResponsiveValue(data.scrollPadding, globalPreviewMode, e.target.value) })}
                   className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                 />
-                <p className="text-[10px] text-zinc-500 italic">Điều chỉnh khoảng cách (Margin Top) cho cụm chữ Scroll Down. Hỗ trợ số âm để kéo lên cao.</p>
+                <p className="text-[10px] text-[var(--text-muted)] italic">Điều chỉnh khoảng cách (Margin Top) cho cụm chữ Scroll Down. Hỗ trợ số âm để kéo lên cao.</p>
               </div>
             </div>
           )}
@@ -517,6 +518,16 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           {sectionId === 'about' && (
             <div className="space-y-4">
               <div className="space-y-6">
+                <div className="p-4 bg-zinc-800/30 border border-[var(--border-default)] rounded-2xl space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">
+                    Ảnh đại diện (Avatar)
+                  </label>
+                  <AvatarSelector
+                    value={data.avatarUrl || ''}
+                    onChange={(url) => setData({ ...data, avatarUrl: url })}
+                  />
+                </div>
+
                 <RichTextEditor
                   label="Heading"
                   value={data.heading}
@@ -531,7 +542,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Paragraphs</label>
+                    <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-muted)]">Paragraphs</label>
                     <button 
                       onClick={() => setData({ ...data, paragraphs: [...data.paragraphs, { content: '', fontSize: { mobile: 16, tablet: 18, desktop: 20 } }] })}
                       className="p-1 hover:bg-zinc-800 rounded-lg text-emerald-500 transition-colors"
@@ -569,11 +580,31 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 </div>
               </div>
 
+              
+
+              {/* CỘT MỞ RỘNG */}
+              <div className="p-5 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 rounded-2xl flex flex-col items-center justify-center text-center space-y-3 mt-4">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-1">
+                  <ExternalLink className="w-6 h-6 text-blue-400" />
+                </div>
+                <h3 className="text-[var(--text-primary)] font-semibold">Cột mở rộng (Kỹ năng, Học vấn)</h3>
+                <p className="text-[var(--text-muted)] text-sm max-w-sm">
+                  Khu vực này có nhiều nội dung và đã có một không gian rộng rãi để chỉnh sửa riêng biệt.
+                </p>
+                <a 
+                  href="/admin/about"
+                  target="_blank"
+                  className="mt-2 inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-all shadow-[0_0_20px_rgba(37,99,235,0.2)]"
+                >
+                  Mở trang chỉnh sửa
+                </a>
+              </div>
+    
               {/* Padding Top Slider for About */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Top (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
                     </span>
@@ -591,7 +622,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 
                 <div className="space-y-3 mt-4">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Bottom (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
                     </span>
@@ -605,7 +636,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section About.</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía dưới Section About.</p>
                 </div>
               </div>
             </div>
@@ -629,12 +660,12 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               <div className="space-y-3">
                  <div className="flex items-center justify-between">
-                  <label className="text-sm text-zinc-500 font-medium">Số điện thoại</label>
+                  <label className="text-sm text-[var(--text-muted)] font-medium">Số điện thoại</label>
                   <button
                     onClick={() => setData({ ...data, showPhone: setResponsiveValue(data.showPhone, globalPreviewMode, !(getResponsiveValue(data.showPhone, globalPreviewMode) !== false)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showPhone, globalPreviewMode) !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -645,18 +676,18 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   type="text"
                   value={getResponsiveValue(data.phone, globalPreviewMode)}
                   onChange={(e) => setData({ ...data, phone: setResponsiveValue(data.phone, globalPreviewMode, e.target.value) })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500"
                 />
               </div>
 
               <div className="space-y-3">
                  <div className="flex items-center justify-between">
-                  <label className="text-sm text-zinc-500 font-medium">Email</label>
+                  <label className="text-sm text-[var(--text-muted)] font-medium">Email</label>
                   <button
                     onClick={() => setData({ ...data, showEmail: setResponsiveValue(data.showEmail, globalPreviewMode, !(getResponsiveValue(data.showEmail, globalPreviewMode) !== false)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showEmail, globalPreviewMode) !== false ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -667,18 +698,18 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   type="text"
                   value={getResponsiveValue(data.email, globalPreviewMode)}
                   onChange={(e) => setData({ ...data, email: setResponsiveValue(data.email, globalPreviewMode, e.target.value) })}
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500"
                 />
               </div>
 
               <div className="col-span-1 md:col-span-2 space-y-3">
                  <div className="flex items-center justify-between">
-                  <label className="text-sm text-zinc-500 font-medium">Kết nối Facebook</label>
+                  <label className="text-sm text-[var(--text-muted)] font-medium">Kết nối Facebook</label>
                   <button
                     onClick={() => setData({ ...data, showFacebook: setResponsiveValue(data.showFacebook, globalPreviewMode, !getResponsiveValue(data.showFacebook, globalPreviewMode)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      getResponsiveValue(data.showFacebook, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showFacebook, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showFacebook, globalPreviewMode) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -691,7 +722,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       type="text"
                       value={getResponsiveValue(data.facebook, globalPreviewMode) || ''}
                       onChange={(e) => setData({ ...data, facebook: setResponsiveValue(data.facebook, globalPreviewMode, e.target.value) })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Link Facebook (https://...)"
                     />
                   </div>
@@ -700,7 +731,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       type="text"
                       value={getResponsiveValue(data.facebookLabel, globalPreviewMode) || ''}
                       onChange={(e) => setData({ ...data, facebookLabel: setResponsiveValue(data.facebookLabel, globalPreviewMode, e.target.value) })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Nhãn (VD: Ghé thăm)"
                     />
                   </div>
@@ -709,12 +740,12 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               <div className="col-span-1 md:col-span-2 space-y-3">
                  <div className="flex items-center justify-between">
-                  <label className="text-sm text-zinc-500 font-medium">Kết nối Zalo</label>
+                  <label className="text-sm text-[var(--text-muted)] font-medium">Kết nối Zalo</label>
                   <button
                     onClick={() => setData({ ...data, showZalo: setResponsiveValue(data.showZalo, globalPreviewMode, !getResponsiveValue(data.showZalo, globalPreviewMode)) })}
                     className={cn(
                       "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all text-sm font-medium",
-                      getResponsiveValue(data.showZalo, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showZalo, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showZalo, globalPreviewMode) ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
@@ -727,7 +758,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       type="text"
                       value={getResponsiveValue(data.zalo, globalPreviewMode) || ''}
                       onChange={(e) => setData({ ...data, zalo: setResponsiveValue(data.zalo, globalPreviewMode, e.target.value) })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Zalo (Số điện thoại hoặc Link)"
                     />
                   </div>
@@ -736,7 +767,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                       type="text"
                       value={getResponsiveValue(data.zaloLabel, globalPreviewMode) || ''}
                       onChange={(e) => setData({ ...data, zaloLabel: setResponsiveValue(data.zaloLabel, globalPreviewMode, e.target.value) })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-zinc-500 text-sm"
+                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500 text-sm"
                       placeholder="Nhãn (VD: Nhắn Zalo)"
                     />
                   </div>
@@ -744,10 +775,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
               
               {/* Padding Sliders for Contact */}
-              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-6">
+              <div className="col-span-1 md:col-span-2 p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Top (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
                     </span>
@@ -765,7 +796,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Bottom (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
                     </span>
@@ -786,7 +817,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
           {sectionId === 'gallery' && (
             <div className="space-y-4">
-              <p className="text-zinc-400 text-sm italic py-4">
+              <p className="text-[var(--text-muted)] text-sm italic py-4">
                 Cấu hình hiển thị cho section Dự án.
               </p>
               <RichTextEditor
@@ -801,10 +832,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               />
 
               {/* Padding Top Slider for Gallery */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Top (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
                     </span>
@@ -822,7 +853,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 
                 <div className="space-y-3 mt-4">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Bottom (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
                     </span>
@@ -836,15 +867,15 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section này.</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía dưới Section này.</p>
                 </div>
               </div>
 
               {/* Items to Show */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:16, T:6, M:4)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Số lượng hiển thị (D:16, T:6, M:4)</label>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '4' : globalPreviewMode === 'tablet' ? '6' : '16')} bài
                     </span>
@@ -858,14 +889,14 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, itemsToShow: setResponsiveValue(data.itemsToShow, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[9px] text-zinc-500 italic">Chỉnh số lượng dự án hiển thị trên mỗi giao diện.</p>
+                  <p className="text-[9px] text-[var(--text-muted)] italic">Chỉnh số lượng dự án hiển thị trên mỗi giao diện.</p>
                 </div>
               </div>
 
               {/* Column Slider for Gallery */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-3">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl space-y-3">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
                   <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                     {getResponsiveValue(data.columns, globalPreviewMode) || "3"} cột
                   </span>
@@ -879,18 +910,18 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, parseInt(e.target.value)) })}
                   className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                 />
-                <p className="text-[9px] text-zinc-500 italic">Số lượng cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
+                <p className="text-[9px] text-[var(--text-muted)] italic">Số lượng cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
               </div>
 
               {/* See All Button */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl space-y-4">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl space-y-4">
                  <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Nút Xem tất cả</label>
                   <button
                     onClick={() => setData({ ...data, showSeeAll: setResponsiveValue(data.showSeeAll, globalPreviewMode, !getResponsiveValue(data.showSeeAll, globalPreviewMode)) })}
                     className={cn(
                       "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "ĐANG HIỆN" : "ĐANG ẨN"}
@@ -901,35 +932,35 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Nhãn nút</label>
                         <input
                           type="text"
                           value={getResponsiveValue(data.seeAllLabel, globalPreviewMode) || 'Xem tất cả dự án'}
                           onChange={(e) => setData({ ...data, seeAllLabel: setResponsiveValue(data.seeAllLabel, globalPreviewMode, e.target.value) })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          className="w-full bg-[var(--bg-surface)] border border-zinc-700 rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:border-zinc-500 outline-none"
                           placeholder="Xem tất cả..."
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Đường dẫn</label>
                         <input
                           type="text"
                           value={getResponsiveValue(data.seeAllLink, globalPreviewMode) || '/projects'}
                           onChange={(e) => setData({ ...data, seeAllLink: setResponsiveValue(data.seeAllLink, globalPreviewMode, e.target.value) })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          className="w-full bg-[var(--bg-surface)] border border-zinc-700 rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:border-zinc-500 outline-none"
                           placeholder="/projects"
                         />
                       </div>
                     </div>
                     
                     <div className="space-y-2">
-                       <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
-                       <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                       <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
+                       <div className="flex bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-default)]">
                         <button
                           onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'top') })}
                           className={cn(
                             "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
-                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                           )}
                         >
                           Cạnh tiêu đề
@@ -938,7 +969,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                           onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'bottom') })}
                           className={cn(
                             "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
-                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                           )}
                         >
                           Dưới cùng
@@ -953,7 +984,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
           {sectionId === 'blog' && (
             <div className="space-y-4">
-              <p className="text-zinc-400 text-sm italic py-4">
+              <p className="text-[var(--text-muted)] text-sm italic py-4">
                 Cấu hình hiển thị cho section Blog.
               </p>
               <RichTextEditor
@@ -968,10 +999,10 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               />
 
               {/* Grid Columns Controller */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Số cột hiển thị ({DEVICE_LABELS[globalPreviewMode]})</label>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       {getResponsiveValue(data.columns, globalPreviewMode) || "3"} cột
                     </span>
@@ -985,15 +1016,15 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, columns: setResponsiveValue(data.columns, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic mt-1">Ghi chú: Chỉnh số cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic mt-1">Ghi chú: Chỉnh số cột hiển thị trên {DEVICE_LABELS[globalPreviewMode]} (1-4).</p>
                 </div>
               </div>
 
               {/* Padding Top Slider for Blog */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Top (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Top (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingTop, globalPreviewMode) || "0"}px
                     </span>
@@ -1011,7 +1042,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                 
                 <div className="space-y-3 mt-4">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Padding Bottom (px)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Padding Bottom (px)</label>
                     <span className="text-[10px] font-mono text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20">
                       {getResponsiveValue(data.paddingBottom, globalPreviewMode) || "0"}px
                     </span>
@@ -1025,14 +1056,14 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     onChange={(e) => setData({ ...data, paddingBottom: setResponsiveValue(data.paddingBottom, globalPreviewMode, e.target.value) })}
                     className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
                   />
-                  <p className="text-[10px] text-zinc-500 italic">Chỉnh khoảng cách phía dưới Section này.</p>
+                  <p className="text-[10px] text-[var(--text-muted)] italic">Chỉnh khoảng cách phía dưới Section này.</p>
                 </div>
               </div>
               {/* Items to Show for Blog */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Số lượng hiển thị (D:3, T:6, M:5)</label>
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Số lượng hiển thị (D:3, T:6, M:5)</label>
                     <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       {getResponsiveValue(data.itemsToShow, globalPreviewMode) || (globalPreviewMode === 'mobile' ? '5' : globalPreviewMode === 'tablet' ? '6' : '3')} bài
                     </span>
@@ -1050,14 +1081,14 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               {/* See All Button for Blog */}
-              <div className="p-4 bg-zinc-800/20 border border-zinc-800 rounded-2xl mt-4 space-y-4">
+              <div className="p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4 space-y-4">
                  <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Nút Xem tất cả</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Nút Xem tất cả</label>
                   <button
                     onClick={() => setData({ ...data, showSeeAll: setResponsiveValue(data.showSeeAll, globalPreviewMode, !getResponsiveValue(data.showSeeAll, globalPreviewMode)) })}
                     className={cn(
                       "px-3 py-1 rounded-lg text-xs font-bold transition-all",
-                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-zinc-500"
+                      getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "bg-emerald-500/10 text-emerald-500" : "bg-zinc-800 text-[var(--text-muted)]"
                     )}
                   >
                     {getResponsiveValue(data.showSeeAll, globalPreviewMode) ? "ĐANG HIỆN" : "ĐANG ẨN"}
@@ -1068,35 +1099,35 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Nhãn nút</label>
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Nhãn nút</label>
                         <input
                           type="text"
                           value={getResponsiveValue(data.seeAllLabel, globalPreviewMode) || 'Xem tất cả bài viết'}
                           onChange={(e) => setData({ ...data, seeAllLabel: setResponsiveValue(data.seeAllLabel, globalPreviewMode, e.target.value) })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          className="w-full bg-[var(--bg-surface)] border border-zinc-700 rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:border-zinc-500 outline-none"
                           placeholder="Xem tất cả..."
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Đường dẫn</label>
+                        <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Đường dẫn</label>
                         <input
                           type="text"
                           value={getResponsiveValue(data.seeAllLink, globalPreviewMode) || '/blog'}
                           onChange={(e) => setData({ ...data, seeAllLink: setResponsiveValue(data.seeAllLink, globalPreviewMode, e.target.value) })}
-                          className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white focus:border-zinc-500 outline-none"
+                          className="w-full bg-[var(--bg-surface)] border border-zinc-700 rounded-xl px-3 py-2 text-sm text-[var(--text-primary)] focus:border-zinc-500 outline-none"
                           placeholder="/blog"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] text-zinc-500 uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
-                       <div className="flex bg-zinc-900 p-1 rounded-xl border border-zinc-800">
+                       <label className="text-[10px] text-[var(--text-muted)] uppercase font-bold ml-1">Vị trí nút ({DEVICE_LABELS[globalPreviewMode]})</label>
+                       <div className="flex bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-default)]">
                         <button
                           onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'top') })}
                           className={cn(
                             "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
-                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'top' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                           )}
                         >
                           Cạnh tiêu đề
@@ -1105,7 +1136,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                           onClick={() => setData({ ...data, seeAllPosition: setResponsiveValue(data.seeAllPosition, globalPreviewMode, 'bottom') })}
                           className={cn(
                             "flex-1 py-1.5 rounded-lg text-xs font-medium transition-all",
-                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-white shadow-sm" : "text-zinc-500 hover:text-zinc-300"
+                            (getResponsiveValue(data.seeAllPosition, globalPreviewMode) || 'bottom') === 'bottom' ? "bg-zinc-800 text-[var(--text-primary)] shadow-sm" : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
                           )}
                         >
                           Dưới cùng
@@ -1120,8 +1151,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
           {sectionId.includes('col-') && (
             <div className="space-y-6">
-              <div className="p-4 bg-zinc-800/30 border border-zinc-800 rounded-2xl space-y-4">
-                <label className="block text-sm font-bold text-zinc-300">Loại nội dung cột</label>
+              <div className="p-4 bg-zinc-800/30 border border-[var(--border-default)] rounded-2xl space-y-4">
+                <label className="block text-sm font-bold text-[var(--text-secondary)]">Loại nội dung cột</label>
                 <div className="grid grid-cols-2 gap-2">
                   {['text', 'image', 'projects', 'blogs'].map((t) => (
                     <button
@@ -1131,7 +1162,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                         "py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all border",
                         data.type === t 
                           ? "bg-white text-black border-white" 
-                          : "bg-zinc-900 text-zinc-500 border-zinc-800 hover:border-zinc-700"
+                          : "bg-[var(--bg-surface)] text-[var(--text-muted)] border-[var(--border-default)] hover:border-zinc-700"
                       )}
                     >
                       {t}
@@ -1158,13 +1189,13 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               {data.type === 'image' && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Link ảnh</label>
+                    <label className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5 ml-1">Link ảnh</label>
                     <div className="flex gap-3">
                       <input
                         type="text"
                         value={data.data?.url || ''}
                         onChange={(e) => handleBlockDataChange({ url: e.target.value })}
-                        className="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                        className="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500"
                         placeholder="https://..."
                       />
                       <label className="cursor-pointer bg-white text-black px-5 py-4 rounded-2xl flex items-center justify-center hover:bg-zinc-200 transition-all shrink-0">
@@ -1198,7 +1229,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
                     type="text"
                     value={data.data?.alt || ''}
                     onChange={(e) => handleBlockDataChange({ alt: e.target.value })}
-                    className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                    className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500"
                     placeholder="Mô tả ảnh (Alt text)"
                   />
                 </div>
@@ -1206,14 +1237,14 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               {(data.type === 'projects' || data.type === 'blogs') && (
                 <div className="space-y-4">
-                   <p className="text-zinc-500 text-sm italic">Khối này sẽ tự động lấy danh sách {data.type === 'projects' ? 'Dự án' : 'Bài viết'} mới nhất.</p>
+                   <p className="text-[var(--text-muted)] text-sm italic">Khối này sẽ tự động lấy danh sách {data.type === 'projects' ? 'Dự án' : 'Bài viết'} mới nhất.</p>
                    <div>
-                    <label className="block text-[10px] uppercase tracking-wider text-zinc-500 mb-1.5 ml-1">Tiêu đề nhóm (Không bắt buộc)</label>
+                    <label className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5 ml-1">Tiêu đề nhóm (Không bắt buộc)</label>
                     <input
                       type="text"
                       value={data.data?.title || ''}
                       onChange={(e) => handleBlockDataChange({ title: e.target.value })}
-                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-zinc-500"
+                      className="w-full bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-4 text-[var(--text-primary)] focus:outline-none focus:border-zinc-500"
                     />
                   </div>
                 </div>
@@ -1228,7 +1259,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               "flex items-center gap-3 w-full p-4 rounded-2xl border transition-all duration-300",
               getResponsiveValue(data.isVisible, globalPreviewMode) === true 
                 ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.05)]" 
-                : "bg-zinc-800/30 border-zinc-800 text-zinc-500"
+                : "bg-zinc-800/30 border-[var(--border-default)] text-[var(--text-muted)]"
             )}
           >
             <div className={cn(
@@ -1254,13 +1285,13 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
           </div>
         )}
 
-        <div className="p-6 border-t border-zinc-800 bg-zinc-950 shrink-0 flex justify-end gap-3">
+        <div className="p-6 border-t border-[var(--border-default)] bg-[var(--bg-base)] shrink-0 flex justify-end gap-3">
           <button
             onClick={() => {
               window.dispatchEvent(new CustomEvent('previewUpdate', { detail: { sectionId, data: initialData } }));
               onClose();
             }}
-            className="px-6 py-3 rounded-2xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
+            className="px-6 py-3 rounded-2xl text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-zinc-800 transition-all"
           >
             Cancel
           </button>

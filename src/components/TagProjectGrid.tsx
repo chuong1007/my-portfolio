@@ -26,7 +26,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
           className="group"
         >
           <Link href={`/project/${project.slug || project.id}`} className="flex flex-col gap-3">
-            <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800/50">
+            <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50">
               <img
                 src={project.cover_image}
                 alt={project.title}
@@ -42,7 +42,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
               )}
 
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-zinc-50 backdrop-blur-sm bg-white/10">
+                <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-[var(--text-primary)] backdrop-blur-sm bg-white/10">
                   Xem ngay
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
@@ -50,7 +50,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
             </div>
             
             <div className="px-1">
-              <h3 className="text-lg font-bold text-zinc-200 group-hover:text-zinc-50 transition-colors line-clamp-2 leading-[1.3]">
+              <h3 className="text-lg font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3]">
                 {project.title}
               </h3>
             </div>
@@ -60,7 +60,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
               <Link 
                 key={tag} 
                 href={`/tag/${generateSlug(tag)}`}
-                className="text-sm text-zinc-500 hover:text-blue-400 transition-colors"
+                className="text-sm text-[var(--text-muted)] hover:text-blue-400 transition-colors"
               >
                 {tag}{i < project.tags.length - 1 ? "," : ""}
               </Link>

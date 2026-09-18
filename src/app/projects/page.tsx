@@ -1,4 +1,4 @@
-import { Gallery } from "@/components/Gallery";
+import { Gallery } from "@/components/sections/Gallery";
 
 export const metadata = {
   title: "Dự án - CHUONG.GRAPHIC",
