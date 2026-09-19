@@ -3,6 +3,8 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
+const stepEase = (t: number) => Math.floor(t * 16) / 16;
+
 export function HeroAnimatedTitle({ html, locationHtml, className, style, locationStyle }: { html: string, locationHtml?: string, className?: string, style?: any, locationStyle?: any }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
@@ -189,7 +191,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     (wipeOutStart + highlightSweep + 0.01) / T,
                     1
                   ],
-                  ease: ['linear', 'linear', 'linear', 'linear'],
+                  ease: ['linear', stepEase, 'linear', 'linear'],
                 }}
               >
                 <span 
@@ -239,7 +241,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       (wipeOutStart + highlightSweep + 0.01) / T,
                       1
                     ],
-                    ease: ['linear', 'linear', 'linear', 'linear', 'linear', 'linear'],
+                    ease: ['linear', stepEase, 'linear', stepEase, 'linear', 'linear'],
                   }}
                 >
                   <span 
