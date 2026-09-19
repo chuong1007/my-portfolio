@@ -129,6 +129,33 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             </span>
           </div>
 
+          {/* Mouse Cursor for realistic selection effect */}
+          <motion.div
+            className="absolute z-50 pointer-events-none"
+            initial={{ left: '0%', top: '20%', opacity: 0, x: '-50%', y: '-50%' }}
+            animate={{
+              left: ['0%', '0%', '100%', '100%', '100%'],
+              top: ['20%', '20%', '80%', '80%', '80%'],
+              opacity: [0, 1, 1, 0, 0],
+              scale: [1, 1, 0.9, 0.9, 0.9] // slight press effect
+            }}
+            transition={{
+              duration: T,
+              times: [
+                0,
+                highlightStart / T,
+                highlightDone  / T,
+                (highlightDone + 0.1) / T,
+                1,
+              ],
+              ease: ['linear', 'easeOut', 'linear', 'linear'],
+            }}
+          >
+            <svg width="24" height="36" viewBox="0 0 24 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-lg">
+              <path d="M2 2L9.5 28L13.5 19L22.5 15.5L2 2Z" fill="black" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+            </svg>
+          </motion.div>
+
           {/* Base text: White text (Original Font) */}
           <div className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden">
             <div className="text-center">
@@ -136,6 +163,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                 style={{
                   WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 50%)',
                   WebkitMaskSize: '200% 100%',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
                   WebkitBoxDecorationBreak: 'slice',
                   boxDecorationBreak: 'slice',
                   display: 'inline',
@@ -172,6 +201,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   style={{
                     WebkitMaskImage: 'linear-gradient(to right, transparent 33.333%, black 33.333%, black 66.666%, transparent 66.666%)',
                     WebkitMaskSize: '300% 100%',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
                     WebkitBoxDecorationBreak: 'slice',
                     boxDecorationBreak: 'slice',
                     display: 'inline',
