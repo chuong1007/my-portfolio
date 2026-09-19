@@ -106,7 +106,7 @@ export default function RootLayout({
           }}
         />
         <ThemeProvider>
-          <AdminProvider>
+                    <AdminProvider>
             <GlobalPreviewWrapper>
               {children}
             </GlobalPreviewWrapper>

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { LoginModal } from "@/components/admin/LoginModal";
 
 import { createClient } from "@/lib/supabase";
 
@@ -366,7 +365,7 @@ export function Header() {
             {/* Theme Toggle + Auth Buttons */}
             <div className="hidden lg:flex items-center gap-2 ml-4">
               <ThemeToggle />
-              {isAdmin && isEditMode ? (
+              {isAdmin && isEditMode && (
                 <button
                   onClick={handleLogout}
                   className="flex items-center justify-center w-8 h-8 border border-[var(--border-default)] rounded-md hover:bg-[var(--bg-surface)] transition-colors"
@@ -374,15 +373,6 @@ export function Header() {
                   title="Đăng xuất"
                 >
                   <LogOut className="w-4 h-4 text-[var(--text-muted)] hover:text-red-400" />
-                </button>
-              ) : !isAdmin && (
-                <button
-                  onClick={() => setLoginOpen(true)}
-                  className="flex items-center justify-center w-8 h-8 border border-[var(--border-default)] rounded-md hover:bg-[var(--bg-surface)] transition-colors"
-                  aria-label="Admin Login"
-                  title="Đăng nhập Admin"
-                >
-                  <User className="w-4 h-4 text-[var(--text-muted)]" />
                 </button>
               )}
             </div>
@@ -477,7 +467,7 @@ export function Header() {
             <div className="w-16 h-px bg-[var(--border-default)] my-4" />
 
             {/* Mobile Auth Buttons */}
-            {isAdmin ? (
+            {isAdmin && (
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -488,24 +478,12 @@ export function Header() {
                 <LogOut className="w-5 h-5" />
                 Đăng xuất Admin
               </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  setLoginOpen(true);
-                }}
-                className="flex items-center justify-center w-12 h-12 border border-[var(--border-default)] rounded-full hover:bg-[var(--bg-surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mt-auto"
-                title="Đăng nhập Admin"
-              >
-                <User className="w-5 h-5" />
-              </button>
             )}
           </nav>
         </div>
       )}
 
-      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
-    </>
+          </>
   );
 }
 

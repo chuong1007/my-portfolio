@@ -125,6 +125,45 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
           
           
 
+          
+          {/* I-beam Mouse Cursor */}
+          <motion.div
+            className="absolute z-50 pointer-events-none text-white"
+            initial={{ left: '10%', top: '40%', opacity: 0, x: '-50%', y: '-50%' }}
+            animate={{
+              left:    ['10%', '10%', '0%',   '0%',   '100%', '105%', '105%'],
+              top:     ['40%', '40%', '20%',  '20%',  '80%',  '90%',  '90%'],
+              opacity: [0, 0, 1, 1, 1, 0, 0],
+              scale:   [1,     1,     0.9,    0.9,    0.9,    1,      1]
+            }}
+            transition={{ delay: startDelay,
+              duration: T,
+              times: [
+                0,
+                Math.max(0, (highlightStart - 0.75) / T),
+                Math.max(0, (highlightStart - 0.45) / T),
+                highlightStart / T,
+                highlightDone / T,
+                Math.min(1, (highlightDone + 0.2) / T),
+                1
+              ],
+              ease: "linear"
+            }}
+          >
+            <svg width="0.25em" height="0.95em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
+              <g stroke="white" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                <line x1="30" y1="100" x2="70" y2="100" />
+              </g>
+              <g stroke="black" strokeWidth="10" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                <line x1="30" y1="100" x2="70" y2="100" />
+              </g>
+            </svg>
+          </motion.div>
+
           {/* Characters Grouped by Words to Prevent Mid-Word Wrapping */}
           {(() => {
             let absoluteIndex = 0;
@@ -146,46 +185,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
 
               return (
                 <span key={wIdx} className="relative" style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
-                  {/* WORD-LEVEL SWEEPING CURSOR */}
-                  <motion.div
-                    className="absolute z-20 pointer-events-none"
-                    style={{ top: '50%', x: '-50%', y: '-50%' }}
-                    initial={{ left: '0%', opacity: 0 }}
-                    animate={{
-                      left: ['0%', '0%', '0%', '100%', '100%', '100%', '100%', '0%', '0%', '0%'],
-                      opacity: [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
-                    }}
-                    transition={{ delay: startDelay,
-                      duration: T,
-                      times: [
-                        0,
-                        Math.max(0, (tWordHighlightStart - 0.01) / T),
-                        tWordHighlightStart / T,
-                        tWordHighlightEnd / T,
-                        Math.min(1, (tWordHighlightEnd + 0.01) / T),
-                        
-                        Math.max(0, (tWordWipeStart - 0.01) / T),
-                        tWordWipeStart / T,
-                        tWordWipeEnd / T,
-                        Math.min(1, (tWordWipeEnd + 0.01) / T),
-                        1
-                      ],
-                      ease: "linear"
-                    }}
-                  >
-                    <svg width="0.25em" height="0.95em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
-                      <g stroke="white" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
-                        <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
-                        <line x1="30" y1="100" x2="70" y2="100" />
-                      </g>
-                      <g stroke="black" strokeWidth="10" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
-                        <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
-                        <line x1="30" y1="100" x2="70" y2="100" />
-                      </g>
-                    </svg>
-                  </motion.div>
+                  
 
                   {word.split('').map((char, cIdx) => {
                     const i = absoluteIndex++;

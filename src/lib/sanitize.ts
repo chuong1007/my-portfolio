@@ -5,8 +5,8 @@ export const cleanHtmlColors = (html?: string | null) => {
   
   // 1. Sanitize against XSS
   const sanitized = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'li', 'ol', 'div', 'img', 'blockquote', 'code', 'pre'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style', 'src', 'alt', 'width', 'height'],
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'li', 'ol', 'div', 'img', 'blockquote', 'code', 'pre', 'svg', 'path', 'g', 'circle', 'rect', 'line', 'polygon', 'polyline'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style', 'src', 'alt', 'width', 'height', 'fill', 'viewBox', 'xmlns', 'd', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin'],
   });
 
   // 2. Clean colors for Dark/Light mode overrides
