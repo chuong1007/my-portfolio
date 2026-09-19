@@ -116,7 +116,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
       </div>
 
       {/* ── LINE 1: "Graphic Designer" ── */}
-      <div className="w-full flex justify-center overflow-hidden">
+      <div className="w-full flex justify-center">
         <div className="relative flex justify-center items-center font-black tracking-tight max-w-full">
           
           {/* Invisible text to dictate container height & width */}
@@ -161,8 +161,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             <div className="text-center">
               <motion.span
                 style={{
-                  WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 50%)',
-                  WebkitMaskSize: '200% 100%',
+                  WebkitMaskImage: 'linear-gradient(to right, black 60%, transparent 60%)',
+                  WebkitMaskSize: '500% 100%',
                   WebkitMaskRepeat: 'no-repeat',
                   maskRepeat: 'no-repeat',
                   WebkitBoxDecorationBreak: 'slice',
@@ -174,7 +174,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   WebkitMaskPosition: [
                     '100% 0%', 
                     '100% 0%',
-                    '0% 0%',   
+                    '25% 0%',   
                   ]
                 }}
                 transition={{
@@ -194,13 +194,13 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
           </div>
 
           {/* Yellow mask: Black text with inline background AND line-by-line selection sweep */}
-          <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 z-10 pointer-events-none">
             <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
               <div className="text-center">
                 <motion.span
                   style={{
-                    WebkitMaskImage: 'linear-gradient(to right, transparent 33.333%, black 33.333%, black 66.666%, transparent 66.666%)',
-                    WebkitMaskSize: '300% 100%',
+                    WebkitMaskImage: 'linear-gradient(to right, transparent 28.5%, black 28.5%, black 71.5%, transparent 71.5%)',
+                    WebkitMaskSize: '700% 100%',
                     WebkitMaskRepeat: 'no-repeat',
                     maskRepeat: 'no-repeat',
                     WebkitBoxDecorationBreak: 'slice',
