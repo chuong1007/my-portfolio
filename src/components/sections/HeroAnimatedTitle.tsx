@@ -92,7 +92,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
       <div className="flex flex-wrap justify-center font-black tracking-tight w-full overflow-hidden" style={{ overflow: 'visible' }}>
         {lines[0].split('').map((char, i, arr) => {
           const center = (arr.length - 1) / 2;
-          const initialX = `calc(${(i - center)} * min(0.8em, 5vw))`;
+          const initialX = `calc(${(i - center)} * min(0.6em, 2vw))`;
           return (
             <motion.span
               key={i}
@@ -124,7 +124,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
           {/* Invisible text to dictate container height & width */}
           <div className="text-center pointer-events-none opacity-0">
             <span 
-              className="whitespace-pre-wrap break-words"
+              className="whitespace-nowrap"
               style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
             >
               {lines[1]}
@@ -169,8 +169,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   WebkitMaskSize: '500% 100%',
                   WebkitMaskRepeat: 'no-repeat',
                   maskRepeat: 'no-repeat',
-                  WebkitBoxDecorationBreak: 'slice',
-                  boxDecorationBreak: 'slice',
+                  WebkitBoxDecorationBreak: 'clone',
+                  boxDecorationBreak: 'clone',
                   display: 'inline',
                 }}
                 initial={{ WebkitMaskPosition: '100% 0%' } as any}
@@ -196,7 +196,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                 }}
               >
                 <span 
-                  className="whitespace-pre-wrap break-words"
+                  className="whitespace-nowrap"
                   style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
                 >
                   {lines[1]}
@@ -215,8 +215,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     WebkitMaskSize: '700% 100%',
                     WebkitMaskRepeat: 'no-repeat',
                     maskRepeat: 'no-repeat',
-                    WebkitBoxDecorationBreak: 'slice',
-                    boxDecorationBreak: 'slice',
+                    WebkitBoxDecorationBreak: 'clone',
+                    boxDecorationBreak: 'clone',
                     display: 'inline',
                   }}
                   initial={{ WebkitMaskPosition: '100% 0%' } as any}
@@ -246,7 +246,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   }}
                 >
                   <span 
-                    className="bg-yellow-400 whitespace-pre-wrap break-words"
+                    className="bg-yellow-400 whitespace-nowrap"
                     style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
                   >
                     {lines[1]}
