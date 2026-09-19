@@ -48,16 +48,24 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
       };
 
       // Fallback timer nếu ko có HeroAnimatedTitle
-      const timer = setTimeout(showPopup, delayMs);
+      let timer = setTimeout(showPopup, delayMs);
+
+      const handleTypographyStarted = () => {
+        // Hero is animating, so cancel the fallback timer and wait for finished event
+        clearTimeout(timer);
+      };
 
       // Lắng nghe sự kiện typographyFinished, đợi thêm 2s rồi hiện popup
       const handleTypographyReady = () => {
         setTimeout(showPopup, 2000);
       };
+      
+      window.addEventListener('typographyStarted', handleTypographyStarted);
       window.addEventListener('typographyFinished', handleTypographyReady);
 
       return () => {
         clearTimeout(timer);
+        window.removeEventListener('typographyStarted', handleTypographyStarted);
         window.removeEventListener('typographyFinished', handleTypographyReady);
       };
     }
