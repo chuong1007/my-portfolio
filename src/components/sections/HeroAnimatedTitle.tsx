@@ -131,7 +131,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             animate={{
               left:    ['10%', '10%', '0%',   '0%',   '100%', '105%', '105%'],
               top:     ['40%', '40%', '20%',  '20%',  '80%',  '90%',  '90%'],
-              opacity: [0, 1, 1, 1, 1, 0, 0],
+              opacity: [0, 0, 1, 1, 1, 0, 0],
               scale:   [1,     1,     0.9,    0.9,    0.9,    1,      1]
             }}
             transition={{
