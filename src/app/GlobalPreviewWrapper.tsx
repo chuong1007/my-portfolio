@@ -101,7 +101,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
             className={cn(
               "relative z-10 transition-all duration-500 ease-in-out flex flex-col overflow-hidden",
               "border-[12px] border-[var(--border-default)] rounded-[3rem] shadow-2xl shadow-black/80 bg-[var(--bg-base)]",
-              globalPreviewMode === 'mobile' ? "w-[375px] h-[812px]" : "w-[1024px] h-[768px]"
+              globalPreviewMode === 'mobile' ? "w-[375px] h-[812px] scale-[0.85] origin-top" : "w-[768px] h-[1024px] scale-[0.65] origin-top"
             )}
           >
             {/* Device Notch */}

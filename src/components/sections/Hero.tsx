@@ -73,10 +73,17 @@ type HeroProps = {
   initialContent?: any;
   initialProjects?: any[];
   customCarouselImages?: any[];
-  tiltDirection?: "inward" | "outward";
+  tiltDirection?: "inward" | "outward" | "inward-reverse-scale";
+  carouselGap?: number;
+  carouselPerspective?: number;
+  dTheta?: number;
+  w_card?: number;
+  blurStrength?: number;
+  dimStrength?: number;
+  displayCount?: number;
 };
 
-export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages, tiltDirection = "inward" }: HeroProps) {
+export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages, tiltDirection = "inward", carouselGap, carouselPerspective, dTheta, w_card, blurStrength, dimStrength, displayCount }: HeroProps) {
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { 
     content: "Visual Designer based in Ho Chi Minh City", 
     fontSize: { desktop: 80, tablet: 60, mobile: 32 },
@@ -429,6 +436,13 @@ const formatFs = (val: string, fallback: string) => {
           <HeroIntroCarousel 
             projects={finalProjects}
             tiltDirection={tiltDirection} 
+            gap={carouselGap}
+            perspectiveMultiplier={carouselPerspective}
+            dTheta={dTheta}
+            w_card={w_card}
+            blurStrength={blurStrength}
+            dimStrength={dimStrength}
+            displayCount={displayCount}
             onComplete={handleCarouselComplete} 
           />
         )}

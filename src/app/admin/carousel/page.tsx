@@ -15,6 +15,77 @@ interface CarouselImage {
 export default function AdminCarousel() {
   const [images, setImages] = useState<CarouselImage[]>([]);
   const [tiltDirection, setTiltDirection] = useState<"inward" | "outward">("inward");
+  type ConfigMode = "inward" | "outward" | "inward-reverse-scale";
+  
+  const defaultConfig = {
+    gap: 16,
+    perspective: 1.5,
+    dTheta: 14,
+    wCard: 260,
+    blurStrength: 1.0,
+    dimStrength: 1.0,
+    displayCount: 7
+  };
+
+  const [configs, setConfigs] = useState<Record<ConfigMode, typeof defaultConfig>>({
+    "inward": { ...defaultConfig },
+    "outward": { ...defaultConfig, gap: 20, perspective: 2.0 },
+    "inward-reverse-scale": { ...defaultConfig, gap: 10, dTheta: 12 }
+  });
+
+  const activeConfig = configs[tiltDirection];
+  
+  const updateConfig = (key: keyof typeof defaultConfig, value: number) => {
+    setConfigs(prev => ({
+      ...prev,
+      [tiltDirection]: {
+        ...prev[tiltDirection],
+        [key]: value
+      }
+    }));
+  };
+  
+  // History for Undo/Redo
+  const [history, setHistory] = useState<any[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+
+  const saveToHistory = () => {
+    const nextHistory = history.slice(0, historyIndex + 1);
+    nextHistory.push(configs);
+    setHistory(nextHistory);
+    setHistoryIndex(nextHistory.length - 1);
+  };
+
+  const handleUndo = () => {
+    if (historyIndex >= 0) {
+      if (historyIndex === history.length - 1 && history.length > 0) {
+        // We are at current state, push current before moving back
+        const current = configs;
+        const nextHistory = [...history, current];
+        setHistory(nextHistory);
+        const prev = nextHistory[historyIndex];
+        applyState(prev);
+        setHistoryIndex(historyIndex);
+      } else {
+        const prev = history[historyIndex];
+        applyState(prev);
+        setHistoryIndex(historyIndex - 1);
+      }
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      const next = history[historyIndex + 1];
+      applyState(next);
+      setHistoryIndex(historyIndex + 1);
+    }
+  };
+
+  const applyState = (state: any) => {
+    setConfigs(state);
+  };
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newUrl, setNewUrl] = useState("");
@@ -43,8 +114,27 @@ export default function AdminCarousel() {
         .eq("id", "hero_carousel")
         .single();
         
-      if (data && data.data && Array.isArray((data.data as any).images)) {
-        setImages((data.data as any).images);
+      if (data && data.data) {
+        if (Array.isArray(data.data.images)) setImages(data.data.images);
+        if (data.data.tiltDirection) setTiltDirection(data.data.tiltDirection);
+        if (data.data.configs) {
+          setConfigs(data.data.configs);
+        } else {
+          // Fallback for old flat data
+          const fallback = { ...defaultConfig };
+          if (data.data.gap !== undefined) fallback.gap = data.data.gap;
+          if (data.data.perspective !== undefined) fallback.perspective = data.data.perspective;
+          if (data.data.dTheta !== undefined) fallback.dTheta = data.data.dTheta;
+          if (data.data.w_card !== undefined) fallback.wCard = data.data.w_card;
+          if (data.data.blurStrength !== undefined) fallback.blurStrength = data.data.blurStrength;
+          if (data.data.dimStrength !== undefined) fallback.dimStrength = data.data.dimStrength;
+          if (data.data.displayCount !== undefined) fallback.displayCount = data.data.displayCount;
+          setConfigs({
+            "inward": { ...fallback },
+            "outward": { ...fallback },
+            "inward-reverse-scale": { ...fallback }
+          });
+        }
       }
     } catch (e) {
       console.error(e);
@@ -58,7 +148,7 @@ export default function AdminCarousel() {
       setSaving(true);
       const { error } = await createClient()
         .from("site_content")
-        .upsert({ id: "hero_carousel", data: { images, tiltDirection } });
+        .upsert({ id: "hero_carousel", data: { images, tiltDirection, configs } });
         
       if (error) throw error;
       showToast("Đã lưu thành công!", "success");
@@ -156,13 +246,29 @@ export default function AdminCarousel() {
           <h1 className="text-3xl font-black tracking-tight">Quản lý Carousel Trang chủ</h1>
           <p className="text-zinc-400 mt-2">Tuỳ chỉnh không giới hạn ảnh và thứ tự cho hiệu ứng lướt 3D</p>
         </div>
-        <button 
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-zinc-100 text-zinc-950 px-6 py-2 rounded-lg font-bold hover:bg-white disabled:opacity-50"
-        >
-          {saving ? "Đang lưu..." : "Lưu thay đổi"}
-        </button>
+        <div className="flex items-center gap-4">
+          {toast && (
+            <div className={`px-4 py-2 rounded-lg flex items-center gap-2 animate-in slide-in-from-right-5 fade-in duration-300 ${
+              toast.type === 'success' 
+                ? 'bg-emerald-500/10 text-emerald-400' 
+                : 'bg-red-500/10 text-red-400'
+            }`}>
+              {toast.type === 'success' ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              )}
+              <span className="font-medium text-sm">{toast.message}</span>
+            </div>
+          )}
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-zinc-100 text-zinc-950 px-6 py-2 rounded-lg font-bold hover:bg-white disabled:opacity-50 whitespace-nowrap"
+          >
+            {saving ? "Đang lưu..." : "Lưu thay đổi"}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -263,10 +369,10 @@ export default function AdminCarousel() {
                 Replay Animation
               </button>
               <button 
-                onClick={() => setTiltDirection(prev => prev === 'inward' ? 'outward' : 'inward')}
+                onClick={() => setTiltDirection(prev => prev === 'inward' ? 'outward' : prev === 'outward' ? 'inward-reverse-scale' : 'inward')}
                 className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors ml-4"
               >
-                Nghiêng: {tiltDirection === 'inward' ? 'Hướng vào (Inward)' : 'Hướng ra (Outward)'}
+                Nghiêng: {tiltDirection === 'inward' ? 'Hướng xen kẽ (Inward)' : tiltDirection === 'outward' ? 'Hướng ra (Outward)' : 'Lớn dần ra ngoài'}
               </button>
               <div className="flex bg-zinc-950 border border-zinc-800 rounded-lg p-1">
                 <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded ${previewMode === "desktop" ? "bg-zinc-800 text-white" : "text-zinc-500"}`}>
@@ -290,28 +396,94 @@ export default function AdminCarousel() {
                 "w-[1440px] h-[900px] rounded-2xl scale-[0.4]"
               }`}
             >
-              <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} tiltDirection={tiltDirection} />
+              <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} tiltDirection={tiltDirection} gap={activeConfig.gap} perspectiveMultiplier={activeConfig.perspective} dTheta={activeConfig.dTheta} w_card={activeConfig.wCard} blurStrength={activeConfig.blurStrength} dimStrength={activeConfig.dimStrength} displayCount={activeConfig.displayCount} />
+            </div>
+          </div>
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <h2 className="text-xl font-semibold mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <span>Cấu hình 3D ({tiltDirection === 'inward' ? 'Hướng xen kẽ' : tiltDirection === 'outward' ? 'Hướng ra' : 'Lớn dần ra ngoài'})</span>
+                <div className="flex bg-zinc-950 border border-zinc-800 rounded-lg p-1">
+                  <button onClick={handleUndo} disabled={history.length === 0 || (historyIndex <= 0 && history.length > 1)} className="p-1 rounded hover:bg-zinc-800 disabled:opacity-30 disabled:hover:bg-transparent" title="Undo">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                  </button>
+                  <button onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="p-1 rounded hover:bg-zinc-800 disabled:opacity-30 disabled:hover:bg-transparent" title="Redo">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6" /></svg>
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => { saveToHistory(); updateConfig('perspective', 2.5); updateConfig('dTheta', 8); updateConfig('gap', 20); updateConfig('blurStrength', 0.6); updateConfig('dimStrength', 0.6); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Subtle</button>
+                <button onClick={() => { saveToHistory(); updateConfig('perspective', 1.5); updateConfig('dTheta', 14); updateConfig('gap', 16); updateConfig('blurStrength', 1); updateConfig('dimStrength', 1); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Default</button>
+                <button onClick={() => { saveToHistory(); updateConfig('perspective', 1.0); updateConfig('dTheta', 18); updateConfig('gap', 14); updateConfig('blurStrength', 1.2); updateConfig('dimStrength', 1.2); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Deep</button>
+                <button onClick={() => { saveToHistory(); updateConfig('perspective', 0.8); updateConfig('dTheta', 22); updateConfig('gap', 12); updateConfig('blurStrength', 1.5); updateConfig('dimStrength', 1.5); updateConfig('displayCount', 9); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Dramatic</button>
+              </div>
+            </h2>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Space Padding (Khoảng cách giữa các thẻ)</label>
+                    <span className="text-sm font-medium">{activeConfig.gap}px</span>
+                  </div>
+                  <input type="range" min="0" max="80" step="1" value={activeConfig.gap} onPointerDown={saveToHistory} onChange={(e) => updateConfig("gap", parseInt(e.target.value))} className="w-full accent-white" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Độ sâu Perspective (Multiplier)</label>
+                    <span className="text-sm font-medium">{activeConfig.perspective}x</span>
+                  </div>
+                  <input type="range" min="0.5" max="3" step="0.1" value={activeConfig.perspective} onPointerDown={saveToHistory} onChange={(e) => updateConfig("perspective", parseFloat(e.target.value))} className="w-full accent-white" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Số lượng thẻ hiển thị</label>
+                    <span className="text-sm font-medium">{activeConfig.displayCount} thẻ</span>
+                  </div>
+                  <input type="range" min="3" max="9" step="2" value={activeConfig.displayCount} onPointerDown={saveToHistory} onChange={(e) => updateConfig("displayCount", parseInt(e.target.value))} className="w-full accent-white" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Độ cong vòng cung (dTheta)</label>
+                    <span className="text-sm font-medium">{activeConfig.dTheta}°</span>
+                  </div>
+                  <input type="range" min="4" max="24" step="0.5" value={activeConfig.dTheta} onPointerDown={saveToHistory} onChange={(e) => updateConfig("dTheta", parseFloat(e.target.value))} className="w-full accent-white" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Chiều rộng thẻ (Width)</label>
+                    <span className="text-sm font-medium">{activeConfig.wCard}px</span>
+                  </div>
+                  <input type="range" min="160" max="360" step="4" value={activeConfig.wCard} onPointerDown={saveToHistory} onChange={(e) => updateConfig("wCard", parseInt(e.target.value))} className="w-full accent-white" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Cường độ Blur</label>
+                    <span className="text-sm font-medium">{activeConfig.blurStrength}x</span>
+                  </div>
+                  <input type="range" min="0" max="2" step="0.05" value={activeConfig.blurStrength} onPointerDown={saveToHistory} onChange={(e) => updateConfig("blurStrength", parseFloat(e.target.value))} className="w-full accent-white" />
+                </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm text-zinc-400">Cường độ Tối (Dim)</label>
+                    <span className="text-sm font-medium">{activeConfig.dimStrength}x</span>
+                  </div>
+                  <input type="range" min="0" max="2" step="0.05" value={activeConfig.dimStrength} onPointerDown={saveToHistory} onChange={(e) => updateConfig("dimStrength", parseFloat(e.target.value))} className="w-full accent-white" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className={`px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-3 ${
-            toast.type === 'success' 
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-              : 'bg-red-500/10 border-red-500/20 text-red-400'
-          }`}>
-            {toast.type === 'success' ? (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-            )}
-            <span className="font-medium text-sm">{toast.message}</span>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

@@ -15,17 +15,10 @@ interface HeroIntroCarouselProps {
   onComplete: () => void;
   isAdminPreview?: boolean;
   deviceMode?: "desktop" | "tablet" | "mobile";
-  tiltDirection?: "inward" | "outward" | "inward-reverse-scale";
-  gap?: number;
-  perspectiveMultiplier?: number;
-  dTheta?: number;
-  w_card?: number;
-  blurStrength?: number;
-  dimStrength?: number;
-  displayCount?: number;
+  tiltDirection?: "inward" | "outward";
 }
 
-export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward", gap = 16, perspectiveMultiplier = 1.5, dTheta = 14, w_card = 260, blurStrength = 1, dimStrength = 1, displayCount = 7 }: HeroIntroCarouselProps) {
+export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward" }: HeroIntroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">("enter");
   const [isShrunk, setIsShrunk] = useState(false);
@@ -144,44 +137,8 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
       transition={{ duration: 1.2, ease: "easeInOut" }}
     >
       <div className="absolute inset-0 w-full h-full flex items-center justify-center" style={{ maskImage: isMobileDevice ? "none" : "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)", WebkitMaskImage: isMobileDevice ? "none" : "linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)" }}>
-        {/* Mathematical Cylinder Constants */}
-        {(() => {
-          const w_card_val = w_card;
-          const g_card = gap;
-          const thetaDeg = dTheta;
-          const thetaRad = thetaDeg * (Math.PI / 180);
-          const R = (w_card_val + g_card) / (2 * Math.tan(thetaRad / 2));
-          const zSign = tiltDirection === 'inward-reverse-scale' ? -1 : 1;
-          const ringZ = tiltDirection === 'inward' ? 0 : -zSign * R;
-          const perspectiveValue = Math.round(R * perspectiveMultiplier);
-          
-          return (
-            <div className="w-full h-full flex items-center justify-center" style={{ perspective: isMobileDevice ? 1200 : perspectiveValue }}>
-              <motion.div 
-                id="carousel-ring"
-                className="relative w-full max-w-[100vw] h-[500px] flex items-center justify-center" 
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{ z: isMobileDevice ? 0 : ringZ }}
-                transition={{ duration: 1.2, ease: "easeInOut" }}
-                onAnimationComplete={() => {
-                  if (!isMobileDevice && typeof window !== 'undefined') {
-                    const cards = document.querySelectorAll('.test-card-measure');
-                    const results = [];
-                    cards.forEach(c => {
-                       const rect = c.getBoundingClientRect();
-                       const offset = parseInt(c.getAttribute('data-offset'));
-                       results.push({ offset, width: rect.width, height: rect.height, top: rect.top, x: rect.x });
-                    });
-                    results.sort((a,b) => a.offset - b.offset);
-                    // Add gaps
-                    for(let i=0; i<results.length - 1; i++) {
-                       results[i].gap = results[i+1].x - (results[i].x + results[i].width);
-                    }
-                    console.table(results);
-                    fetch('http://localhost:3000/api/log', { method: 'POST', body: JSON.stringify(results) }).catch(()=> {});
-                  }
-                }}
-              >
+        <div className="w-full h-full flex items-center justify-center" style={{ perspective: 1200 }}>
+          <div className="relative w-full max-w-7xl h-[500px] flex items-center justify-center" style={{ transformStyle: "preserve-3d" }}>
             {displayProjects.map((project, index) => {
             // Circular offset logic for balanced sides
             let rawOffset = index - currentIndex;
@@ -196,64 +153,80 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
             
 
             
-            // Rule 6 variables repeated for map scope
-            const w_card_val = w_card;
-            const g_card = gap;
-            const thetaDeg = dTheta;
-            const thetaRad = thetaDeg * (Math.PI / 180);
-            const R = (w_card_val + g_card) / (2 * Math.tan(thetaRad / 2));
-            let x = 0, y = 0, z = 0, ry = 0, rz = 0, scale = 1;
-            let opacity = 1;
+            // Desktop/Tablet: Flat 2.5D Carousel (No rotation, strict gaps, exact aspect ratio)
+            let x = 0;
+            let z = 0; // Flat Z
+            let ry = 0;
+            let rz = 0;
+            let scale = 1;
+            
+            const gap = 24; // 24px padding between cards
+            
+            if (offset === 0) {
+              x = 0;
+              z = 0;
+              ry = 0;
+              scale = 1.0; 
+            } else {
+              const sign = Math.sign(offset);
+              const abs = Math.abs(offset);
+              
+              if (abs === 1) {
+                x = sign * 280; 
+                z = -100;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35; // Slant for perspective effect
+                scale = 0.85;
+              } else if (abs === 2) {
+                x = sign * 480; 
+                z = -200;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
+                scale = 0.7;
+              } else if (abs === 3) {
+                x = sign * 640;
+                z = -300;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
+                scale = 0.55;
+              } else {
+                x = sign * 780;
+                z = -400;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
+                scale = 0.4;
+              }
+            }
+            
+            let opacity = Math.abs(offset) >= 4 ? 0 : 1; 
             let zIndex = 100 - Math.abs(offset);
             let cardOpacity = 1;
-            let cardBlur = 0;
-            let cardBrightness = 1;
-            
+            let cardBlur = Math.abs(offset) >= 2 ? (Math.abs(offset) - 1) * 4 : 0;
+            let y = 0;
+
             if (isMobileDevice) {
-              const distance = Math.abs(offset);
-              if (offset < 0) {
-                // Drop down with a tilt
-                y = 500; z = 0; scale = 0.8; x = -50; ry = 0; rz = -25; zIndex = 101; cardOpacity = 1; cardBlur = 0; opacity = 0; 
-              } else {
-                y = distance * -30 + 20; z = -distance * 50; scale = 1 - distance * 0.04; x = 0; ry = 0; rz = distance * 4; zIndex = 100 - distance;
-                cardOpacity = distance > 2 ? 0 : (1 - distance * 0.15); cardBlur = distance > 0 ? distance * 1.0 : 0; opacity = distance > 2 ? 0 : 1; 
-              }
-            } else {
-              const absOffset = Math.abs(offset);
+              let distance = (index - currentIndex + N) % N;
               
-              if (tiltDirection === 'inward') {
-                // Linear V-Shape (Hướng xen kẽ)
-                x = offset * (w_card_val + g_card);
-                z = -absOffset * (perspectiveMultiplier * 100);
-                ry = -offset * thetaDeg; // Face inward
-                
-                if (absOffset <= 1) {
-                  opacity = 1; cardBlur = 0; cardBrightness = 1;
-                } else if (absOffset === 2) {
-                  opacity = 1; cardBlur = 3 * blurStrength; cardBrightness = 1 - (0.25 * dimStrength);
-                } else {
-                  opacity = 0.85; cardBlur = 8 * blurStrength; cardBrightness = 1 - (0.5 * dimStrength);
-                  if (absOffset > 3) opacity = 0;
-                }
+              if (distance === N - 1) {
+                // FALLING CARD: Fall far down, tilt left
+                y = 800; 
+                z = 50;  
+                scale = 0.4; 
+                x = -200; // Trượt sang trái
+                ry = 0;
+                rz = -15; // Nghiêng nhẹ qua trái
+                zIndex = 101; 
+                cardOpacity = 1; 
+                cardBlur = 0;
+                opacity = 0; 
               } else {
-                // Pure Cylinder (Hướng ra & Lớn dần ra ngoài)
-                let zSign = tiltDirection === 'inward-reverse-scale' ? -1 : 1;
-                // For cylinder, ry must match the position offset to stay on the correct side
-                // outward (convex): ry = positive for right side (Faces Outward)
-                // inward-reverse (concave): ry = negative for right side (Faces Inward)
-                let rySign = tiltDirection === 'inward-reverse-scale' ? -1 : 1;
-                
-                ry = rySign * offset * thetaDeg;
-                z = zSign * R;
-                
-                if (absOffset <= 1) {
-                  opacity = 1; cardBlur = 0; cardBrightness = 1;
-                } else if (absOffset === 2) {
-                  opacity = 1; cardBlur = 3 * blurStrength; cardBrightness = 1 - (0.25 * dimStrength);
-                } else {
-                  opacity = 0.85; cardBlur = 8 * blurStrength; cardBrightness = 1 - (0.5 * dimStrength);
-                  if (absOffset > 3) opacity = 0;
-                }
+                // STACKED CARDS BEHIND: Lộ ra nhiều hơn, nghiêng nhẹ, show 3 cards
+                y = -distance * 75; 
+                z = -distance * 50;
+                scale = 1 - distance * 0.04; 
+                x = 0;
+                ry = 0;
+                rz = distance * 4; // Nghiêng xuống bên phải 1 chút
+                zIndex = 100 - distance;
+                cardOpacity = distance > 2 ? 0 : (1 - distance * 0.15); 
+                cardBlur = distance > 0 ? distance * 1.0 : 0; 
+                opacity = distance > 2 ? 0 : 1; // Chỉ show 3 card (distance 0, 1, 2)
               }
             }
 
@@ -261,15 +234,8 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
             return (
               <motion.div
                 key={`${project.id}-${index}`}
-                data-offset={offset}
-                className={`test-card-measure absolute ${isMobileDevice ? "w-[260px]" : ""} aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 bg-[var(--bg-surface)]`}
-                style={{ zIndex, width: isMobileDevice ? undefined : `${w_card}px` }}
-                transformTemplate={({ x, y, z, rotateY, rotateZ, scale }) => {
-                  if (isMobileDevice) {
-                    return `translateX(${x}) translateY(${y}) translateZ(${z}) scale(${scale}) rotateX(0deg) rotateY(${rotateY}) rotateZ(${rotateZ})`;
-                  }
-                  return `translateX(${x}) translateY(${y}) rotateY(${rotateY}) translateZ(${z}) scale(${scale}) rotateZ(${rotateZ})`;
-                }}
+                className={`absolute ${isMobileDevice ? "w-[260px]" : "w-[320px]"} aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 bg-[var(--bg-surface)]`}
+                style={{ zIndex }}
                 initial={{ 
                   opacity: 0, 
                   x, 
@@ -277,9 +243,9 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                   z,
                   rotateY: ry,
                   rotateZ: rz,
-                  rotateX: 0,
+                  rotateX: 45,
                   scale: scale * 0.8,
-                  filter: "blur(0px) brightness(1)"
+                  filter: "blur(0px)"
                 }}
                 animate={{
                   pointerEvents: phase === "hidden" ? "none" : "auto",
@@ -291,7 +257,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                   rotateZ: rz,
                   rotateX: 0,
                   scale,
-                  filter: `blur(${cardBlur}px) brightness(${cardBrightness})`
+                  filter: `blur(${cardBlur}px)`
                 }}
                 transition={{
                   type: phase === "enter" ? "spring" : "tween",
@@ -313,17 +279,15 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                   className="absolute inset-0 bg-black"
                   animate={{
                     pointerEvents: phase === "hidden" ? "none" : "auto", 
-                    opacity: isMobileDevice ? (1 - cardOpacity) : 0 
+                    opacity: isMobileDevice ? (1 - cardOpacity) : (Math.abs(offset) > 1 ? 0.6 : 0) 
                   }}
                   transition={{ duration: 0.4 }}
                 />
               </motion.div>
             );
           })}
-              </motion.div>
-            </div>
-          );
-        })()}
+          </div>
+        </div>
       </div>
     </motion.div>
   );
