@@ -29,8 +29,9 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
     if (mounted && lines.length >= 2) {
       window.dispatchEvent(new CustomEvent('typographyStarted'));
       const numLetters = lines[0].replace(' ', '').length;
-      const line0Done = (numLetters - 1) * 0.08 + 0.4;
-      const highlightDone = line0Done + 0.6;
+      const line0Done = (numLetters - 1) * 0.08 + 1.7;
+      const highlightStart = line0Done - 0.4;
+      const highlightDone = highlightStart + 0.6;
       const typeStart = highlightDone + 0.2;
       const typeDur = (locText || (lines.length > 2 ? lines.slice(2).join('\n') : '')).split('').length * 0.05;
       const wipeOutStart = typeStart + typeDur + 1.0;
@@ -53,11 +54,11 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
   const letterDuration  = 0.4;
   const numLetters      = lines[0].replace(' ', '').length;
   // Visual finishes at:
-  const line0Done       = (numLetters - 1) * letterStagger + letterDuration; // ~ 5*0.08 + 0.4 = 0.8s
+  const line0Done       = (numLetters - 1) * letterStagger + 1.7; // 1.7s is the new visual pop duration
 
   // Line 1: Highlight
   // Appear IMMEDIATELY after Visual is done
-  const highlightStart  = line0Done;          // 0.8s
+  const highlightStart  = line0Done - 0.4;    // Start 0.4s before Visual fully finishes gathering
   const highlightSweep  = 0.6;                // sweep in duration
   const highlightDone   = highlightStart + highlightSweep; // 1.4s
 
