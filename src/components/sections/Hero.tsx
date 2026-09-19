@@ -145,13 +145,14 @@ export function Hero({ sectionId = "hero", initialContent, initialProjects, cust
   useEffect(() => {
     const handleFinished = () => {
       setTimeout(() => setScrollVisible(true), 1350);
+      window.dispatchEvent(new Event("introFinished"));
     };
     const handleStart = () => {
       setScrollVisible(false);
     };
     window.addEventListener('typographyFinished', handleFinished);
     window.addEventListener('typographyStarted', handleStart);
-    const fallback = setTimeout(() => setScrollVisible(true), 12000);
+    const fallback = setTimeout(() => { setScrollVisible(true); window.dispatchEvent(new Event("introFinished")); }, 12000);
     return () => {
       window.removeEventListener('typographyFinished', handleFinished);
       window.removeEventListener('typographyStarted', handleStart);

@@ -141,10 +141,10 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
       initial={isSkipMount ? false : { opacity: 1, filter: "blur(0px)" }}
       animate={{
         pointerEvents: phase === "hidden" ? "none" : "auto", 
-        opacity: phase === "hidden" ? 0 : (isShrunk ? 0.15 : 1), 
-        scale: isShrunk ? 0.8 : 1,
-        filter: isShrunk ? "blur(8px)" : "blur(0px)",
-        y: isShrunk ? -40 : 0
+        opacity: phase === "hidden" ? 0 : (isShrunk && !isAdminPreview ? 0.15 : 1), 
+        scale: isShrunk && !isAdminPreview ? 0.8 : 1,
+        filter: isShrunk && !isAdminPreview ? "blur(8px)" : "blur(0px)",
+        y: isShrunk && !isAdminPreview ? -40 : 0
       }}
       transition={{ duration: 1.2, ease: "easeInOut" }}
     >

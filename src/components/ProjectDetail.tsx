@@ -1,6 +1,7 @@
 "use client";
 
 import { cleanHtmlColors } from "@/lib/sanitize";
+import Loading from "@/app/loading";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Pencil, X, ChevronLeft, ChevronRight, Star } from "lucide-react";
@@ -80,6 +81,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
 
   // Force scroll to top on mount / project change
   useEffect(() => {
+    window.scrollTo(0, 0);
     if (typeof window !== "undefined") {
       // Check if we are inside the admin preview container
       const customScrollbar = document.querySelector('.custom-scrollbar');

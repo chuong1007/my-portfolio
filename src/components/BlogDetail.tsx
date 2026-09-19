@@ -1,6 +1,7 @@
 "use client";
 
 import { cleanHtmlColors } from "@/lib/sanitize";
+import Loading from "@/app/loading";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, Pencil, ArrowUpRight } from "lucide-react";
@@ -24,9 +25,11 @@ export function BlogDetail({ slug }: { slug: string }) {
   const [blog, setBlog] = useState<DbBlog | null>(null);
   const [suggestedPosts, setSuggestedPosts] = useState<DbBlog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCompleting, setIsCompleting] = useState(false);
   const { isAdmin, isEditMode } = useAdmin();
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     async function fetchBlog() {
       const supabase = createClient();
       
@@ -53,17 +56,14 @@ export function BlogDetail({ slug }: { slug: string }) {
         }
       }
       
-      setLoading(false);
+      setIsCompleting(true);
+      setTimeout(() => setLoading(false), 400);
     }
     fetchBlog();
   }, [slug]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[var(--bg-base)] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[var(--border-default)] border-t-zinc-200 rounded-full animate-spin"></div>
-      </div>
-    );
+    return <Loading isCompleting={isCompleting} />;
   }
 
   if (!blog) {
@@ -198,7 +198,7 @@ export function BlogDetail({ slug }: { slug: string }) {
           <div className="mt-32 pb-24">
             <div className="flex items-center justify-between mb-12">
               <h3 className="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Bài viết gợi ý</h3>
-              <Link href="/blog" className="group/all flex items-center gap-1.5 text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
+              <Link href="/blog" className="group/all flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-400 font-medium transition-colors">
                 Xem tất cả
                 <ArrowUpRight className="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-0.5 group-hover/all:-translate-y-0.5" />
               </Link>
@@ -221,7 +221,7 @@ export function BlogDetail({ slug }: { slug: string }) {
                     <span className="w-1 h-1 rounded-full bg-zinc-800" />
                     <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : '---'}</span>
                   </div>
-                  <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-emerald-400 transition-colors line-clamp-2 leading-snug">
+                  <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-blue-500 transition-colors line-clamp-2 leading-snug">
                     {typeof post?.title === 'string' ? post?.title : String(post?.title || '')}
                   </h4>
                 </Link>

@@ -422,7 +422,10 @@ export default function AdminCarousel() {
               </div>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center overflow-hidden flex-1 min-h-[600px]">
+            <div 
+              className="bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center overflow-hidden transition-all duration-300" 
+              style={{ height: previewMode === "mobile" ? "570px" : previewMode === "tablet" ? "564px" : "527px" }}
+            >
               <div 
                 className={`relative bg-zinc-950 overflow-hidden transition-all duration-300 border border-zinc-700 shadow-[0_0_50px_rgba(0,0,0,0.5)] origin-center flex-shrink-0 ${
                   previewMode === "mobile" ? "w-[375px] h-[812px] rounded-[3rem] scale-[0.7]" : 
@@ -436,8 +439,8 @@ export default function AdminCarousel() {
           </div>
           
           {/* Cột Cấu hình */}
-          <div className="h-full flex flex-col">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex-1 flex flex-col">
+          <div className="flex flex-col">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col">
               <h2 className="text-xl font-semibold mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div className="flex items-center gap-3">
                   <span>Cấu hình 3D ({tiltDirection === 'inward' ? 'Hướng xen kẽ' : tiltDirection === 'outward' ? 'Hướng ra' : 'Lớn dần ra ngoài'})</span>
@@ -454,7 +457,7 @@ export default function AdminCarousel() {
               
               
               
-              <div className="space-y-5 flex-1">
+              <div className="space-y-5">
                 <div>
                   <div className="flex justify-between mb-2">
                     <label className="text-sm text-zinc-400">Space Padding (Khoảng cách giữa các thẻ)</label>

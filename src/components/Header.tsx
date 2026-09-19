@@ -23,6 +23,8 @@ export function Header() {
   const pathname = usePathname();
   const { isAdmin, isEditMode, toggleEditMode, globalPreviewMode, setGlobalPreviewMode } = useAdmin();
   const [scrolled, setScrolled] = useState(false);
+  const [introFinished, setIntroFinished] = useState(false);
+
   const [loginOpen, setLoginOpen] = useState(false);
   const [dynamicNavItems, setDynamicNavItems] = useState<{ label: string, href: string }[]>([]);
   const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: ResponsiveValue, url: ResponsiveValue, color?: ResponsiveValue, height: ResponsiveValue }>({
@@ -148,6 +150,21 @@ export function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [adminMenuOpen]);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setIntroFinished(true);
+    } else {
+      setIntroFinished(false); // ALWAYS hide on homepage initially
+    }
+
+    const onIntroFinished = () => {
+      setIntroFinished(true);
+    };
+    window.addEventListener("introFinished", onIntroFinished);
+
+    return () => window.removeEventListener("introFinished", onIntroFinished);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
