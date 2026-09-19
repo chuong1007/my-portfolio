@@ -163,24 +163,6 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                 style={{ transformStyle: "preserve-3d" }}
                 animate={{ z: isMobileDevice ? 0 : ringZ }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
-                onAnimationComplete={() => {
-                  if (!isMobileDevice && typeof window !== 'undefined') {
-                    const cards = document.querySelectorAll('.test-card-measure');
-                    const results = [];
-                    cards.forEach(c => {
-                       const rect = c.getBoundingClientRect();
-                       const offset = parseInt(c.getAttribute('data-offset'));
-                       results.push({ offset, width: rect.width, height: rect.height, top: rect.top, x: rect.x });
-                    });
-                    results.sort((a,b) => a.offset - b.offset);
-                    // Add gaps
-                    for(let i=0; i<results.length - 1; i++) {
-                       results[i].gap = results[i+1].x - (results[i].x + results[i].width);
-                    }
-                    console.table(results);
-                    fetch('http://localhost:3000/api/log', { method: 'POST', body: JSON.stringify(results) }).catch(()=> {});
-                  }
-                }}
               >
             {displayProjects.map((project, index) => {
             // Circular offset logic for balanced sides
