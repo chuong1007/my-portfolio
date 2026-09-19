@@ -10,7 +10,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
   useEffect(() => { setMounted(true); }, []);
 
   let text = html
-    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/(p|h[1-6]|div)>/gi, '\n')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<[^>]+>/g, '')
     .trim();
@@ -20,7 +20,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
   let locText = "";
   if (locationHtml) {
     locText = locationHtml
-      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/(p|h[1-6]|div)>/gi, '\n')
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<[^>]+>/g, '')
       .trim();
