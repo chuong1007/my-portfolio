@@ -83,6 +83,20 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
 
 export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailProps) {
   const { isAdmin, globalPreviewMode } = useAdmin();
+
+  // Force scroll to top on mount / project change
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Check if we are inside the admin preview container
+      const customScrollbar = document.querySelector('.custom-scrollbar');
+      if (customScrollbar) {
+        customScrollbar.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+  }, [project.id]);
+
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const allImages = useMemo(() => {
