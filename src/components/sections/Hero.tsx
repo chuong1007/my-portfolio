@@ -467,7 +467,7 @@ const formatFs = (val: string, fallback: string) => {
                 lineHeight: locationData.lineHeight?.[effectiveMode] || '1.1',
                 letterSpacing: `${locationData.letterSpacing?.[effectiveMode] || '0'}px`,
                 fontFamily: locationData.fontFamily?.[effectiveMode] || 'Syne, sans-serif',
-                fontWeight: locationData.fontWeight?.[effectiveMode] || \'300\',
+                fontWeight: locationData.fontWeight?.[effectiveMode] || '300',
                 paddingTop: `${getResponsiveValue(subTextPadding, effectiveMode) || '0'}px`,
                 color: locationData.textColor?.[effectiveMode] === 'inherit' ? undefined : locationData.textColor?.[effectiveMode],
               }}
