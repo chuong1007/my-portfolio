@@ -173,7 +173,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   boxDecorationBreak: 'slice',
                   display: 'inline',
                 }}
-                initial={{ WebkitMaskPosition: '100% 0%' }}
+                initial={{ WebkitMaskPosition: '100% 0%' } as any}
                                                     animate={{
                   WebkitMaskPosition: [
                     '100% 0%', 
@@ -182,7 +182,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     '0% 0%',
                     '0% 0%'
                   ]
-                }}
+                } as any}
                 transition={{
                   duration: T,
                   times: [
@@ -219,7 +219,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     boxDecorationBreak: 'slice',
                     display: 'inline',
                   }}
-                  initial={{ WebkitMaskPosition: '100% 0%' }}
+                  initial={{ WebkitMaskPosition: '100% 0%' } as any}
                   animate={{
                     WebkitMaskPosition: [
                       '100% 0%',
@@ -230,7 +230,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       '0% 0%',
                       '0% 0%'
                     ]
-                  }}
+                  } as any}
                   transition={{
                     duration: T,
                     times: [
