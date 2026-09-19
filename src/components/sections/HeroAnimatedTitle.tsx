@@ -110,66 +110,78 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
       </div>
 
       {/* ── LINE 1: "Graphic Designer" ── */}
-      <div className="w-full flex justify-center overflow-hidden"><div className="relative flex justify-center items-center font-black tracking-tight px-[0.12em] max-w-full">
-        {/* Invisible text to dictate container height */}
-        <span className="opacity-0 whitespace-pre-wrap break-words text-center w-full pointer-events-none">
-          {lines[1]}
-        </span>
-
-        {/* Base text: White text (Original Font) */}
-        <motion.div
-          className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden"
-          initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
-          animate={{
-            clipPath: [
-              'inset(0% 100% 0% 0%)', 
-              'inset(0% 100% 0% 0%)',
-              'inset(0% 0% 0% 0%)',   
-            ],
-          }}
-          transition={{
-            duration: T,
-            times: [0, wipeOutStart / T, 1],
-            ease: ['linear', 'easeInOut'],
-          }}
-        >
-          <span className="whitespace-pre-wrap break-words text-center w-full">{lines[1]}</span>
-        </motion.div>
-
-        {/* Yellow mask: Black text */}
-        <motion.div
-          className="absolute top-[0.1em] bottom-[-0.06em] left-0 right-0 overflow-hidden bg-yellow-400 z-10"
-          initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
-          animate={{
-            clipPath: [
-              'inset(0% 100% 0% 0%)',  
-              'inset(0% 100% 0% 0%)',  
-              'inset(0% 0%   0% 0%)',  
-              'inset(0% 0%   0% 0%)',  
-              'inset(0% 0%   0% 100%)',
-            ],
-          }}
-          transition={{
-            duration: T,
-            times: [
-              0,
-              highlightStart / T,
-              highlightDone  / T,
-              wipeOutStart   / T,
-              1,
-            ],
-            ease: ['linear', 'easeInOut', 'linear', 'easeInOut'],
-          }}
-        >
-          <div
-            className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden"
-            style={{ top: '-0.1em', bottom: '0.06em' }}
+      <div className="w-full flex justify-center overflow-hidden">
+        <div className="relative flex justify-center items-center font-black tracking-tight max-w-full">
+          
+          {/* Invisible text to dictate container height & width */}
+          <span 
+            className="opacity-0 whitespace-pre-wrap break-words text-center pointer-events-none"
+            style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
           >
-            <span className="whitespace-pre-wrap break-words text-center w-full">{lines[1]}</span>
-          </div>
-        </motion.div>
-      </div>
+            {lines[1]}
+          </span>
 
+          {/* Base text: White text (Original Font) */}
+          <motion.div
+            className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden"
+            initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
+            animate={{
+              clipPath: [
+                'inset(0% 100% 0% 0%)', 
+                'inset(0% 100% 0% 0%)',
+                'inset(0% 0% 0% 0%)',   
+              ],
+            }}
+            transition={{
+              duration: T,
+              times: [0, wipeOutStart / T, 1],
+              ease: ['linear', 'easeInOut'],
+            }}
+          >
+            <span 
+              className="whitespace-pre-wrap break-words text-center"
+              style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+            >
+              {lines[1]}
+            </span>
+          </motion.div>
+
+          {/* Yellow mask: Black text with inline background */}
+          <motion.div
+            className="absolute inset-0 z-10 overflow-hidden"
+            initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
+            animate={{
+              clipPath: [
+                'inset(0% 100% 0% 0%)',  
+                'inset(0% 100% 0% 0%)',  
+                'inset(0% 0%   0% 0%)',  
+                'inset(0% 0%   0% 0%)',  
+                'inset(0% 0%   0% 100%)',
+              ],
+            }}
+            transition={{
+              duration: T,
+              times: [
+                0,
+                highlightStart / T,
+                highlightDone  / T,
+                wipeOutStart   / T,
+                1,
+              ],
+              ease: ['linear', 'easeInOut', 'linear', 'easeInOut'],
+            }}
+          >
+            <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
+              <span 
+                className="bg-yellow-400 whitespace-pre-wrap break-words text-center"
+                style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+              >
+                {lines[1]}
+              </span>
+            </div>
+          </motion.div>
+          
+        </div>
       </div>
       {/* ── LINE 2: "based in..." ── */}
       <div className="flex justify-center items-center font-light hero-location px-4 text-center break-words max-w-full" style={{ minHeight: '1.4em', ...locationStyle }}>
