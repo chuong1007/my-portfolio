@@ -438,12 +438,7 @@ export default function AdminCarousel() {
                 </div>
               </h2>
               
-              <div className="flex flex-wrap gap-2 mb-8">
-                <button onClick={() => { saveToHistory(); updateConfig('perspective', 2.5); updateConfig('dTheta', 8); updateConfig('gap', 20); updateConfig('blurStrength', 0.6); updateConfig('dimStrength', 0.6); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Subtle</button>
-                <button onClick={() => { saveToHistory(); updateConfig('perspective', 1.5); updateConfig('dTheta', 14); updateConfig('gap', 16); updateConfig('blurStrength', 1); updateConfig('dimStrength', 1); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Default</button>
-                <button onClick={() => { saveToHistory(); updateConfig('perspective', 1.0); updateConfig('dTheta', 18); updateConfig('gap', 14); updateConfig('blurStrength', 1.2); updateConfig('dimStrength', 1.2); updateConfig('displayCount', 7); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Deep</button>
-                <button onClick={() => { saveToHistory(); updateConfig('perspective', 0.8); updateConfig('dTheta', 22); updateConfig('gap', 12); updateConfig('blurStrength', 1.5); updateConfig('dimStrength', 1.5); updateConfig('displayCount', 9); }} className="px-3 py-1.5 bg-zinc-800 text-xs rounded hover:bg-zinc-700 font-medium">Dramatic</button>
-              </div>
+              
               
               <div className="space-y-8 flex-1">
                 <div>
