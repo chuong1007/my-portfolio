@@ -87,26 +87,31 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
 
       {/* ── LINE 0: "Visual" ── */}
       <div className="flex flex-wrap justify-center font-black tracking-tight w-full overflow-hidden" style={{ overflow: 'visible' }}>
-        {lines[0].split('').map((char, i) => (
-          <motion.span
-            key={i}
-            initial={{ scale: 0, y: '50%', opacity: 0 }}
-            animate={{ 
-              scale: [0, 1.4, 1], 
-              y: ['50%', '-10%', '0%'], 
-              opacity: [0, 1, 1] 
-            }}
-            transition={{
-              duration: letterDuration,
-              delay: i * letterStagger,
-              ease: "easeOut",
-              times: [0, 0.6, 1]
-            }}
-            style={{ display: 'inline-block', transformOrigin: 'center bottom' }}
-          >
-            <span style={{ whiteSpace: 'pre-wrap' }}>{char}</span>
-          </motion.span>
-        ))}
+        {lines[0].split('').map((char, i, arr) => {
+          const center = (arr.length - 1) / 2;
+          const initialX = `${(i - center) * 0.8}em`;
+          return (
+            <motion.span
+              key={i}
+              initial={{ scale: 0, y: '50%', x: initialX, opacity: 0 }}
+              animate={{ 
+                scale: [0, 1.4, 1], 
+                y: ['50%', '-10%', '0%'], 
+                x: [initialX, initialX, 0], 
+                opacity: [0, 1, 1] 
+              }}
+              transition={{
+                duration: letterDuration * 1.2,
+                delay: i * letterStagger,
+                ease: "easeOut",
+                times: [0, 0.4, 1]
+              }}
+              style={{ display: 'inline-block', transformOrigin: 'center bottom' }}
+            >
+              <span style={{ whiteSpace: 'pre-wrap' }}>{char}</span>
+            </motion.span>
+          );
+        })}
       </div>
 
       {/* ── LINE 1: "Graphic Designer" ── */}
