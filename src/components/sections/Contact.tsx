@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanHtmlColors } from "@/lib/sanitize";
 import { motion } from "framer-motion";
 import { Phone, Mail, Facebook, MessageSquare } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -11,14 +12,7 @@ import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "@/components/builder/RichTextEditor";
 
-const cleanHtmlColors = (html?: string | null) => {
-  if (!html) return "";
-  return html
-    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
-    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
-    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
-    .replace(/background-clip:\s*text/gi, '');
-};
+
 
 const getSafeColor = (color?: string | null) => {
   if (!color || color === 'inherit') return undefined;

@@ -1,4 +1,4 @@
-'use server'
+new_content = """'use server'
 
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
@@ -32,3 +32,7 @@ export async function revalidateCache(path: string = '/') {
     console.error('Revalidate error:', error)
   }
 }
+"""
+
+with open('src/app/actions.ts', 'w') as f:
+    f.write(new_content)

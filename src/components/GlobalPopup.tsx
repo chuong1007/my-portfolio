@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanHtmlColors } from "@/lib/sanitize";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
@@ -107,7 +108,7 @@ export function GlobalPopup({ isVisible, rawContent }: { isVisible: boolean, raw
             <div className="p-6 sm:p-8 overflow-y-auto custom-scrollbar flex flex-col justify-center">
               <div 
                 className="prose prose-invert max-w-none text-zinc-300 [&_img]:rounded-xl [&_img]:mx-auto"
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(htmlContent) }}
               />
               
               {rawContent?.ctaEnabled && (

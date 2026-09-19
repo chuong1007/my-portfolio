@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanHtmlColors } from "@/lib/sanitize";
 import { RowData, ColumnData, BlockData } from "@/store/useBuilderStore";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
@@ -117,7 +118,7 @@ function RenderBlock({ block }: { block: BlockData }) {
     content = (
       <div 
         className="prose prose-invert max-w-none text-zinc-300 custom-tiptap-content ProseMirror tiptap"
-        dangerouslySetInnerHTML={{ __html: getResponsiveValue(block?.content, globalPreviewMode || 'desktop') || "" }}
+        dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(block?.content, globalPreviewMode || 'desktop') || "") }}
       />
     );
   } else if (block?.type === 'image') {

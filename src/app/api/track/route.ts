@@ -29,11 +29,17 @@ function parseUserAgent(ua: string) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { visitor_id, page_path, page_title, referrer } = body;
+    let { visitor_id, page_path, page_title, referrer } = body;
 
-    if (!page_path) {
+    if (!page_path || typeof page_path !== 'string') {
       return NextResponse.json({ error: 'page_path is required' }, { status: 400 });
     }
+
+    // Input Validation & Truncation (Security)
+    page_path = page_path.substring(0, 255);
+    page_title = typeof page_title === 'string' ? page_title.substring(0, 255) : '';
+    referrer = typeof referrer === 'string' ? referrer.substring(0, 255) : '';
+    visitor_id = typeof visitor_id === 'string' ? visitor_id.substring(0, 100) : undefined;
 
     const userAgent = request.headers.get('user-agent') || 'unknown';
 

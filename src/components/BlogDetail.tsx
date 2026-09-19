@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanHtmlColors } from "@/lib/sanitize";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, Pencil, ArrowUpRight } from "lucide-react";
@@ -8,14 +9,7 @@ import { createClient } from "@/lib/supabase";
 import { useAdmin } from "@/context/AdminContext";
 import type { DbBlog } from "@/lib/types";
 
-const cleanHtmlColors = (html?: string | null) => {
-  if (!html) return "";
-  return html
-    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
-    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
-    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
-    .replace(/background-clip:\s*text/gi, '');
-};
+
 
 const getSafeColor = (color?: string | null) => {
   if (!color || color === 'inherit') return undefined;

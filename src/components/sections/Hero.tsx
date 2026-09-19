@@ -1,5 +1,6 @@
 "use client";
 
+import { cleanHtmlColors } from "@/lib/sanitize";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
@@ -12,14 +13,7 @@ import type { RichTextData } from "@/components/RichTextEditor";
 import { cn } from "@/lib/utils";
 import { getAllProjects } from "@/lib/data";
 
-const cleanHtmlColors = (html?: string | null) => {
-  if (!html) return "";
-  return html
-    .replace(/color:\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))/gi, 'color: inherit')
-    .replace(/-webkit-text-fill-color:\s*transparent/gi, '')
-    .replace(/background:\s*linear-gradient[^;"']+;?/gi, '')
-    .replace(/background-clip:\s*text/gi, '');
-};
+
 
 const getSafeColor = (color?: string | null) => {
   if (!color || color === 'inherit') return undefined;
