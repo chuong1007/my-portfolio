@@ -183,15 +183,15 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         key={cIdx}
                         style={{ 
                           display: 'inline-block',
-                          padding: '0.05em 0.03em 0.18em',
-                          margin: '0 -0.03em',
+                          padding: '0.05em 0 0.18em',
+                          margin: '0',
                           whiteSpace: 'pre-wrap'
                         }}
+                        
                         initial={{ opacity: 0 }}
                         animate={{
                           opacity:         [0,               0,               1,         1,         1,               1],
-                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
-                          color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
+                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
                         }}
                         transition={{
                           duration: T,
@@ -206,7 +206,26 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                           ease: "linear"
                         }}
                       >
-                        {char}
+                        <motion.span
+                          style={{ position: 'relative', zIndex: 10 }}
+                          animate={{
+                            color: ['#000000', '#000000', '#000000', '#000000', '#ffffff', '#ffffff']
+                          }}
+                          transition={{
+                            duration: T,
+                            times: [
+                              0,
+                              tHighlight / T,
+                              (tHighlight + 0.01) / T,
+                              tWipe / T,
+                              (tWipe + 0.01) / T,
+                              1
+                            ],
+                            ease: "linear"
+                          }}
+                        >
+                          {char}
+                        </motion.span>
                       </motion.span>
                     );
                   })}
@@ -222,15 +241,15 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         key="space"
                         style={{ 
                           display: 'inline-block',
-                          padding: '0.05em 0.03em 0.18em',
-                          margin: '0 -0.03em',
+                          padding: '0.05em 0 0.18em',
+                          margin: '0',
                           whiteSpace: 'pre-wrap'
                         }}
+                        
                         initial={{ opacity: 0 }}
                         animate={{
                           opacity:         [0,               0,               1,         1,         1,               1],
-                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
-                          color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
+                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
                         }}
                         transition={{
                           duration: T,
@@ -245,7 +264,26 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                           ease: "linear"
                         }}
                       >
-                        {`\u00A0`}
+                        <motion.span
+                          style={{ position: 'relative', zIndex: 10 }}
+                          animate={{
+                            color: ['#000000', '#000000', '#000000', '#000000', '#ffffff', '#ffffff']
+                          }}
+                          transition={{
+                            duration: T,
+                            times: [
+                              0,
+                              tHighlight / T,
+                              (tHighlight + 0.01) / T,
+                              tWipe / T,
+                              (tWipe + 0.01) / T,
+                              1
+                            ],
+                            ease: "linear"
+                          }}
+                        >
+                          {`\u00A0`}
+                        </motion.span>
                       </motion.span>
                     );
                   })()}
