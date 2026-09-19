@@ -297,9 +297,19 @@ export function Header() {
                 </button>
 
                 {adminMenuOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-[var(--bg-surface)] backdrop-blur-xl border border-[var(--border-default)] rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[1000] animate-in fade-in zoom-in-95 duration-200">
+                                    <div className="absolute top-full left-0 mt-2 w-56 bg-[var(--bg-surface)] backdrop-blur-xl border border-[var(--border-default)] rounded-2xl shadow-2xl overflow-hidden py-1.5 z-[1000] animate-in fade-in zoom-in-95 duration-200">
                     <Link
                       href="/admin"
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-purple-400 hover:bg-purple-500/10 transition-colors"
+                      onClick={() => setAdminMenuOpen(false)}
+                    >
+                      <Layout className="w-4 h-4" />
+                      DASHBOARD
+                    </Link>
+                    <Link
+                      href="/admin/projects"
+                      target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-amber-400 hover:bg-amber-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >
@@ -308,6 +318,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/admin/blogs"
+                      target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >
@@ -316,6 +327,7 @@ export function Header() {
                     </Link>
                     <Link
                       href="/admin/pages"
+                      target="_blank" rel="noopener noreferrer"
                       className="flex items-center gap-3 px-4 py-2 text-xs font-bold uppercase tracking-widest text-blue-400 hover:bg-blue-500/10 transition-colors"
                       onClick={() => setAdminMenuOpen(false)}
                     >

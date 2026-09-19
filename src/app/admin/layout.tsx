@@ -93,6 +93,7 @@ export default function AdminLayout({
             <div className="flex items-center gap-6 shrink-0">
               
               <Link href="/admin/blogs" className={`text-sm transition-colors ${pathname === '/admin/blogs' ? 'font-bold text-white' : 'font-medium text-zinc-500 hover:text-zinc-300'}`}>Blog</Link>
+              <Link href="/admin/carousel" className={`text-sm transition-colors ${pathname === '/admin/carousel' ? 'font-bold text-white' : 'font-medium text-zinc-500 hover:text-zinc-300'}`}>Carousel</Link>
               <Link href="/admin/pages" className={`text-sm transition-colors ${pathname === '/admin/pages' ? 'font-bold text-white' : 'font-medium text-zinc-500 hover:text-zinc-300'}`}>Trang phụ</Link>
               <Link href="/admin/projects" className={`text-sm transition-colors ${pathname === '/admin/projects' ? 'font-bold text-white' : 'font-medium text-zinc-500 hover:text-zinc-300'}`}>Dự án</Link>
               <Link href="/admin?tab=homepage" className={`text-sm transition-colors ${pathname === '/admin' && tab === 'homepage' ? 'font-bold text-white' : 'font-medium text-zinc-500 hover:text-zinc-300'}`}>Trang chủ</Link>

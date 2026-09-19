@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 const stepEase = (t: number) => Math.floor(t * 16) / 16;
 
-export function HeroAnimatedTitle({ html, locationHtml, className, style, locationStyle }: { html: string, locationHtml?: string, className?: string, style?: any, locationStyle?: any }) {
+export function HeroAnimatedTitle({ html, locationHtml, className, style, locationStyle, startDelay = 0 }: { html: string, locationHtml?: string, className?: string, style?: any, locationStyle?: any, startDelay?: number }) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
@@ -41,7 +41,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
 
       const timer = setTimeout(() => {
         window.dispatchEvent(new CustomEvent('typographyFinished'));
-      }, totalDur * 1000);
+      }, (startDelay + totalDur) * 1000);
       return () => clearTimeout(timer);
     }
   }, [mounted, html]);
@@ -106,9 +106,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                 x:       [initialX, initialX, initialX, initialX, 0], 
                 opacity: [0,      1,       1,       1,       1] 
               }}
-              transition={{
-                duration: 1.7,
-                delay: i * letterStagger,
+              transition={{ duration: 1.7,
+                delay: startDelay + i * letterStagger,
                 ease: ["easeOut", "easeInOut", "linear", "easeInOut"],
                 times: [0, 0.28, 0.47, 0.76, 1]
               }}
@@ -134,7 +133,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               opacity: [0, 0, 1, 1, 1, 0, 0],
               scale:   [1,     1,     0.9,    0.9,    0.9,    1,      1]
             }}
-            transition={{
+            transition={{ delay: startDelay,
               duration: T,
               times: [
                 0,
@@ -192,7 +191,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       left: ['0%', '0%', '0%', '100%', '100%', '100%', '100%', '0%', '0%', '0%'],
                       opacity: [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
                     }}
-                    transition={{
+                    transition={{ delay: startDelay,
                       duration: T,
                       times: [
                         0,
@@ -244,7 +243,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                           opacity:         [0,               0,               1,         1,         1,               1],
                           backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
                         }}
-                        transition={{
+                        transition={{ delay: startDelay,
                           duration: T,
                           times: [
                             0,
@@ -260,9 +259,9 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         <motion.span
                           style={{ position: 'relative', zIndex: 10 }}
                           animate={{
-                            color: ['#000000', '#000000', '#000000', '#000000', '#ffffff', '#ffffff']
+                            color: ['#000000', '#000000', '#000000', '#000000', 'var(--text-primary)', 'var(--text-primary)']
                           }}
-                          transition={{
+                          transition={{ delay: startDelay,
                             duration: T,
                             times: [
                               0,
@@ -302,7 +301,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                           opacity:         [0,               0,               1,         1,         1,               1],
                           backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
                         }}
-                        transition={{
+                        transition={{ delay: startDelay,
                           duration: T,
                           times: [
                             0,
@@ -318,9 +317,9 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         <motion.span
                           style={{ position: 'relative', zIndex: 10 }}
                           animate={{
-                            color: ['#000000', '#000000', '#000000', '#000000', '#ffffff', '#ffffff']
+                            color: ['#000000', '#000000', '#000000', '#000000', 'var(--text-primary)', 'var(--text-primary)']
                           }}
-                          transition={{
+                          transition={{ delay: startDelay,
                             duration: T,
                             times: [
                               0,
@@ -353,7 +352,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               key={i}
               initial={{ display: 'none' }}
               animate={{ display: 'inline' }}
-              transition={{ delay: typeStart + i * typeCharDur }}
+              transition={{ delay: startDelay + typeStart + i * typeCharDur }}
             >
               {char === '\n' ? <br /> : <span style={{ whiteSpace: 'pre-wrap' }}>{char}</span>}
             </motion.span>
@@ -370,7 +369,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                 0, 0,           // blink 2 -> disappear
               ],
             }}
-            transition={{
+            transition={{ delay: startDelay,
               duration: T,
               ease: 'linear',
               times: [

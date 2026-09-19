@@ -5,10 +5,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 import { SectionEditor } from "@/components/SectionEditor";
 import { HeroAnimatedTitle } from "./HeroAnimatedTitle";
+import { HeroIntroCarousel } from "./HeroIntroCarousel";
 import { useAdmin } from "@/context/AdminContext";
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "@/components/RichTextEditor";
 import { cn } from "@/lib/utils";
+import { getAllProjects } from "@/lib/data";
 
 const cleanHtmlColors = (html?: string | null) => {
   if (!html) return "";
@@ -69,9 +71,11 @@ const normalize = (val: any): RichTextData => {
 type HeroProps = {
   sectionId?: string;
   initialContent?: any;
+  initialProjects?: any[];
+  customCarouselImages?: any[];
 };
 
-export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
+export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages }: HeroProps) {
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { 
     content: "Visual Designer based in Ho Chi Minh City", 
     fontSize: { desktop: 80, tablet: 60, mobile: 32 },
@@ -90,9 +94,33 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
   const [logoImageUrl, setLogoImageUrl] = useState(() => initialContent?.logoImageUrl ?? '');
   const [logoColor, setLogoColor] = useState(() => initialContent?.logoColor ?? '#FFFFFF');
   const [logoHeight, setLogoHeight] = useState<ResponsiveValue>(() => initialContent?.logoHeight ?? "40");
+    
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
+  const isEditor = isAdmin && isEditMode;
+  
+  let finalProjects = [];
+  if (customCarouselImages && customCarouselImages.length > 0) {
+    finalProjects = customCarouselImages.map(img => ({
+      id: img.id,
+      title: "Hero Project",
+      imageUrl: img.url
+    }));
+  } else {
+    finalProjects = (initialProjects && initialProjects.length > 0) ? initialProjects : getAllProjects();
+  }
+
+  const [showCarousel, setShowCarousel] = useState(finalProjects.length > 0);
+
+  let carouselDelay = 3.0; // 0.6s wait + 8*0.25s slide + 0.8s fade // 0.8s wait + 8*0.25s slide + 0.8s fade
+  if (showCarousel && finalProjects.length > 0) {
+    const numCards = Math.min(finalProjects.length, 8);
+    carouselDelay = 3.0; // 0.6s wait + 8*0.25s slide + 0.8s fade // 0.8s wait + 8*0.25s slide + 0.8s fade // Added 0.8s for background to fade before text appears
+  }
+
+  console.log("Hero render - showCarousel:", showCarousel, "initialProjects:", initialProjects?.length, "isEditor:", isEditor);
   const heroRef = useRef<HTMLElement>(null);
   const [scrollVisible, setScrollVisible] = useState(false);
+  const handleCarouselComplete = useCallback(() => {}, []);
 
   // Track actual browser width for public mode (guests)
   const [actualDeviceMode, setActualDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -258,7 +286,6 @@ const formatFs = (val: string, fallback: string) => {
   return val;
 };
 
-  const isEditor = isAdmin && isEditMode;
 
   // Parity 1:1 current values for Editor mode
   const ptOffset = 80;
@@ -396,12 +423,20 @@ const formatFs = (val: string, fallback: string) => {
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`
         } as React.CSSProperties}
       >
+        {/* 3D Intro Carousel */}
+        {showCarousel && (
+          <HeroIntroCarousel 
+            projects={finalProjects} 
+            onComplete={handleCarouselComplete} 
+          />
+        )}
+
         <motion.div className="flex flex-col items-center w-full" >
             <motion.div className="flex flex-col items-center w-full" style={{ scale: scrollScale, opacity: scrollOpacity, filter: scrollFilter }}>
             <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: carouselDelay }}
             className={cn("hero-title", !isEditor && "not-is-editor", isEditor && "is-editor",
               "tracking-tighter text-[var(--text-primary)] text-balance mx-auto whitespace-pre-wrap transition-all duration-300"
             )}
@@ -450,7 +485,7 @@ const formatFs = (val: string, fallback: string) => {
             } as any}
           >
             {/* Using arbitrary values with CSS variables for responsive styling */}
-            <HeroAnimatedTitle
+            <HeroAnimatedTitle startDelay={carouselDelay}
               className={cn("hero-title-inner", !isEditor && "not-is-editor", isEditor && "is-editor",
                 "w-full whitespace-pre-wrap [&_p]:m-0 [&_p]:leading-[inherit]"
               )}
