@@ -130,68 +130,84 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
           </div>
 
           {/* Base text: White text (Original Font) */}
-          <motion.div
-            className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden"
-            initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
-            animate={{
-              clipPath: [
-                'inset(0% 100% 0% 0%)', 
-                'inset(0% 100% 0% 0%)',
-                'inset(0% 0% 0% 0%)',   
-              ],
-            }}
-            transition={{
-              duration: T,
-              times: [0, wipeOutStart / T, 1],
-              ease: ['linear', 'easeInOut'],
-            }}
-          >
+          <div className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden">
             <div className="text-center">
-              <span 
-                className="whitespace-pre-wrap break-words"
-                style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+              <motion.span
+                style={{
+                  WebkitMaskImage: 'linear-gradient(to right, black 50%, transparent 50%)',
+                  WebkitMaskSize: '200% 100%',
+                  WebkitBoxDecorationBreak: 'slice',
+                  boxDecorationBreak: 'slice',
+                  display: 'inline',
+                }}
+                initial={{ WebkitMaskPosition: '100% 0%' }}
+                animate={{
+                  WebkitMaskPosition: [
+                    '100% 0%', 
+                    '100% 0%',
+                    '0% 0%',   
+                  ]
+                }}
+                transition={{
+                  duration: T,
+                  times: [0, wipeOutStart / T, 1],
+                  ease: ['linear', 'linear'],
+                }}
               >
-                {lines[1]}
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Yellow mask: Black text with inline background */}
-          <motion.div
-            className="absolute inset-0 z-10 overflow-hidden"
-            initial={{ clipPath: 'inset(0% 100% 0% 0%)' }}
-            animate={{
-              clipPath: [
-                'inset(0% 100% 0% 0%)',  
-                'inset(0% 100% 0% 0%)',  
-                'inset(0% 0%   0% 0%)',  
-                'inset(0% 0%   0% 0%)',  
-                'inset(0% 0%   0% 100%)',
-              ],
-            }}
-            transition={{
-              duration: T,
-              times: [
-                0,
-                highlightStart / T,
-                highlightDone  / T,
-                wipeOutStart   / T,
-                1,
-              ],
-              ease: ['linear', 'easeInOut', 'linear', 'easeInOut'],
-            }}
-          >
-            <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
-              <div className="text-center">
                 <span 
-                  className="bg-yellow-400 whitespace-pre-wrap break-words"
+                  className="whitespace-pre-wrap break-words"
                   style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
                 >
                   {lines[1]}
                 </span>
+              </motion.span>
+            </div>
+          </div>
+
+          {/* Yellow mask: Black text with inline background AND line-by-line selection sweep */}
+          <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+            <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
+              <div className="text-center">
+                <motion.span
+                  style={{
+                    WebkitMaskImage: 'linear-gradient(to right, transparent 33.333%, black 33.333%, black 66.666%, transparent 66.666%)',
+                    WebkitMaskSize: '300% 100%',
+                    WebkitBoxDecorationBreak: 'slice',
+                    boxDecorationBreak: 'slice',
+                    display: 'inline',
+                  }}
+                  initial={{ WebkitMaskPosition: '100% 0%' }}
+                  animate={{
+                    WebkitMaskPosition: [
+                      '100% 0%',
+                      '100% 0%',
+                      '50% 0%',
+                      '50% 0%',
+                      '0% 0%',
+                    ]
+                  }}
+                  transition={{
+                    duration: T,
+                    times: [
+                      0,
+                      highlightStart / T,
+                      highlightDone  / T,
+                      wipeOutStart   / T,
+                      1,
+                    ],
+                    ease: ['linear', 'linear', 'linear', 'linear'],
+                  }}
+                >
+                  <span 
+                    className="bg-yellow-400 whitespace-pre-wrap break-words"
+                    style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+                  >
+                    {lines[1]}
+                  </span>
+                </motion.span>
               </div>
             </div>
-          </motion.div>
+          </div>
           
         </div>
       </div>
