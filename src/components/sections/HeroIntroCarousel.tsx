@@ -234,7 +234,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
             return (
               <motion.div
                 key={`${project.id}-${index}`}
-                className={`absolute ${isMobileDevice ? "w-[220px]" : "w-[320px]"} aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 bg-[var(--bg-surface)]`}
+                className={`absolute ${isMobileDevice ? "w-[235px]" : "w-[320px]"} aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-transparent dark:border-white/10 bg-[var(--bg-surface)]`}
                 style={{ zIndex }}
                 initial={{ 
                   opacity: 0, 
