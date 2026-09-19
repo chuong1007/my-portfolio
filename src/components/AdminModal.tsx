@@ -153,8 +153,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
         paddingTop: normResp(initialData?.paddingTop, '0'),
         paddingBottom: normResp(initialData?.paddingBottom, '0'),
         scrollOffset: normResp(initialData?.scrollOffset, '48'),
-        paddingTopTextScroll: normResp(initialData?.paddingTopTextScroll, \'0\'),
-        subTextPadding: normResp(initialData?.subTextPadding, \'0\'),
+        paddingTopTextScroll: normResp(initialData?.paddingTopTextScroll, '0'),
+        subTextPadding: normResp(initialData?.subTextPadding, '0'),
         logoHeight: normResp(initialData?.logoHeight, '40'),
       });
       setIsInitialized(true);
