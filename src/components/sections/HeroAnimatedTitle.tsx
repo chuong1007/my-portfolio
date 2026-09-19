@@ -171,12 +171,63 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             const wipeCharDur = wipeOutDur / numChars;
 
             return words.map((word, wIdx) => {
+              
+              const wordStartIndex = absoluteIndex;
+              const wordCharCount = word.length + (wIdx < words.length - 1 ? 1 : 0);
+              const wordEndIndex = wordStartIndex + wordCharCount;
+              
+              const tWordHighlightStart = highlightStart + wordStartIndex * highlightCharDur;
+              const tWordHighlightEnd = highlightStart + wordEndIndex * highlightCharDur;
+              const tWordWipeStart = wipeOutStart + (numChars - 1 - (wordEndIndex - 1)) * wipeCharDur;
+              const tWordWipeEnd = wipeOutStart + (numChars - 1 - wordStartIndex) * wipeCharDur + wipeCharDur;
+
               return (
-                <span key={wIdx} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+                <span key={wIdx} className="relative" style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+                  {/* WORD-LEVEL SWEEPING CURSOR */}
+                  <motion.div
+                    className="absolute z-20 pointer-events-none"
+                    style={{ top: '50%', x: '-50%', y: '-50%' }}
+                    initial={{ left: '0%', opacity: 0 }}
+                    animate={{
+                      left: ['0%', '0%', '0%', '100%', '100%', '100%', '100%', '0%', '0%', '0%'],
+                      opacity: [0, 0, 1, 1, 0, 0, 1, 1, 0, 0]
+                    }}
+                    transition={{
+                      duration: T,
+                      times: [
+                        0,
+                        Math.max(0, (tWordHighlightStart - 0.01)) / T,
+                        tWordHighlightStart / T,
+                        tWordHighlightEnd / T,
+                        Math.min(1, (tWordHighlightEnd + 0.01)) / T,
+                        
+                        Math.max(0, (tWordWipeStart - 0.01)) / T,
+                        tWordWipeStart / T,
+                        tWordWipeEnd / T,
+                        Math.min(1, (tWordWipeEnd + 0.01)) / T,
+                        1
+                      ],
+                      ease: "linear"
+                    }}
+                  >
+                    <svg width="0.25em" height="0.95em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
+                      <g stroke="white" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                        <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                        <line x1="30" y1="100" x2="70" y2="100" />
+                      </g>
+                      <g stroke="black" strokeWidth="10" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                        <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                        <line x1="30" y1="100" x2="70" y2="100" />
+                      </g>
+                    </svg>
+                  </motion.div>
+
                   {word.split('').map((char, cIdx) => {
                     const i = absoluteIndex++;
                     const tHighlight = highlightStart + i * highlightCharDur;
-                    const tWipe = wipeOutStart + i * wipeCharDur;
+                    const tWipe = wipeOutStart + (numChars - 1 - i) * wipeCharDur;
 
                     return (
                       <motion.span
@@ -234,7 +285,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   {wIdx < words.length - 1 && (() => {
                     const i = absoluteIndex++;
                     const tHighlight = highlightStart + i * highlightCharDur;
-                    const tWipe = wipeOutStart + i * wipeCharDur;
+                    const tWipe = wipeOutStart + (numChars - 1 - i) * wipeCharDur;
 
                     return (
                       <motion.span
