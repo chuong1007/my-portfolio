@@ -148,8 +148,17 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               ease: "linear"
             }}
           >
-            <svg width="0.15em" height="0.8em" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-              <path d="M10 8 h12 v3 h-4.5 v42 h4.5 v3 h-12 v-3 h4.5 v-42 h-4.5 z" fill="black" stroke="white" strokeWidth="1.5" strokeLinejoin="miter"/>
+            <svg width="0.35em" height="1.1em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
+              <g stroke="white" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                <line x1="30" y1="100" x2="70" y2="100" />
+              </g>
+              <g stroke="black" strokeWidth="10" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
+                <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
+                <line x1="30" y1="100" x2="70" y2="100" />
+              </g>
             </svg>
           </motion.div>
 
@@ -167,9 +176,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                 key={i}
                 style={{ 
                   display: 'inline-block',
-                  padding: '0.05em 0',
-                  margin: '0',
-                  borderRadius: '2px',
+                  padding: '0.05em 0.03em',
+                  margin: '0 -0.03em',
                   whiteSpace: 'pre-wrap'
                 }}
                 initial={{ opacity: 0 }}
