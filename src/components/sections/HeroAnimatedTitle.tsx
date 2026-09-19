@@ -162,47 +162,97 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             </svg>
           </motion.div>
 
-          {/* Characters */}
-          {lines[1].split('').map((char, i, arr) => {
-            const numChars = arr.length;
+          {/* Characters Grouped by Words to Prevent Mid-Word Wrapping */}
+          {(() => {
+            let absoluteIndex = 0;
+            const words = lines[1].split(' ');
+            const numChars = lines[1].length;
             const highlightCharDur = highlightSweep / numChars;
-            const tHighlight = highlightStart + i * highlightCharDur;
-            
             const wipeCharDur = wipeOutDur / numChars;
-            const tWipe = wipeOutStart + i * wipeCharDur;
 
-            return (
-              <motion.span
-                key={i}
-                style={{ 
-                  display: 'inline-block',
-                  padding: '0.05em 0.03em',
-                  margin: '0 -0.03em',
-                  whiteSpace: 'pre-wrap'
-                }}
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity:         [0,               0,               1,         1,         1,               1],
-                  backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
-                  color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
-                }}
-                transition={{
-                  duration: T,
-                  times: [
-                    0,
-                    tHighlight / T,
-                    (tHighlight + 0.01) / T,
-                    tWipe / T,
-                    (tWipe + 0.01) / T,
-                    1
-                  ],
-                  ease: "linear"
-                }}
-              >
-                {char === ' ' ? '\u00A0' : char}
-              </motion.span>
-            );
-          })}
+            return words.map((word, wIdx) => {
+              return (
+                <span key={wIdx} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+                  {word.split('').map((char, cIdx) => {
+                    const i = absoluteIndex++;
+                    const tHighlight = highlightStart + i * highlightCharDur;
+                    const tWipe = wipeOutStart + i * wipeCharDur;
+
+                    return (
+                      <motion.span
+                        key={cIdx}
+                        style={{ 
+                          display: 'inline-block',
+                          padding: '0.05em 0.03em',
+                          margin: '0 -0.03em',
+                          whiteSpace: 'pre-wrap'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{
+                          opacity:         [0,               0,               1,         1,         1,               1],
+                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
+                          color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
+                        }}
+                        transition={{
+                          duration: T,
+                          times: [
+                            0,
+                            tHighlight / T,
+                            (tHighlight + 0.01) / T,
+                            tWipe / T,
+                            (tWipe + 0.01) / T,
+                            1
+                          ],
+                          ease: "linear"
+                        }}
+                      >
+                        {char}
+                      </motion.span>
+                    );
+                  })}
+                  
+                  {/* Space character between words */}
+                  {wIdx < words.length - 1 && (() => {
+                    const i = absoluteIndex++;
+                    const tHighlight = highlightStart + i * highlightCharDur;
+                    const tWipe = wipeOutStart + i * wipeCharDur;
+
+                    return (
+                      <motion.span
+                        key="space"
+                        style={{ 
+                          display: 'inline-block',
+                          padding: '0.05em 0.03em',
+                          margin: '0 -0.03em',
+                          whiteSpace: 'pre-wrap'
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{
+                          opacity:         [0,               0,               1,         1,         1,               1],
+                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
+                          color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
+                        }}
+                        transition={{
+                          duration: T,
+                          times: [
+                            0,
+                            tHighlight / T,
+                            (tHighlight + 0.01) / T,
+                            tWipe / T,
+                            (tWipe + 0.01) / T,
+                            1
+                          ],
+                          ease: "linear"
+                        }}
+                      >
+                        {`\u00A0`}
+                      </motion.span>
+                    );
+                  })()}
+                </span>
+              );
+            });
+          })()}
         </div>
       </div>
 
