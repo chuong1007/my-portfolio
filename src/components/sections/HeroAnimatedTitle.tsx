@@ -114,12 +114,14 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
         <div className="relative flex justify-center items-center font-black tracking-tight max-w-full">
           
           {/* Invisible text to dictate container height & width */}
-          <span 
-            className="opacity-0 whitespace-pre-wrap break-words text-center pointer-events-none"
-            style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-          >
-            {lines[1]}
-          </span>
+          <div className="text-center pointer-events-none opacity-0">
+            <span 
+              className="whitespace-pre-wrap break-words"
+              style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+            >
+              {lines[1]}
+            </span>
+          </div>
 
           {/* Base text: White text (Original Font) */}
           <motion.div
@@ -138,12 +140,14 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               ease: ['linear', 'easeInOut'],
             }}
           >
-            <span 
-              className="whitespace-pre-wrap break-words text-center"
-              style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-            >
-              {lines[1]}
-            </span>
+            <div className="text-center">
+              <span 
+                className="whitespace-pre-wrap break-words"
+                style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+              >
+                {lines[1]}
+              </span>
+            </div>
           </motion.div>
 
           {/* Yellow mask: Black text with inline background */}
@@ -172,12 +176,14 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             }}
           >
             <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
-              <span 
-                className="bg-yellow-400 whitespace-pre-wrap break-words text-center"
-                style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-              >
-                {lines[1]}
-              </span>
+              <div className="text-center">
+                <span 
+                  className="bg-yellow-400 whitespace-pre-wrap break-words"
+                  style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
+                >
+                  {lines[1]}
+                </span>
+              </div>
             </div>
           </motion.div>
           
