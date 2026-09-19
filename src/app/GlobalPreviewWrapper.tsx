@@ -16,6 +16,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const isBuilder = pathname === "/admin/builder";
   const isAdminPage = pathname.startsWith("/admin");
+  const isComingSoon = pathname === "/coming-soon";
   const { globalPreviewMode, setGlobalPreviewMode, isAdmin, isEditMode, toggleEditMode, modalState, closeEditor } = useAdmin();
 
   useEffect(() => {
@@ -45,7 +46,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {!isPreviewActive && !isAdminPage && <Header />}
+      {!isPreviewActive && !isAdminPage && !isComingSoon && <Header />}
 
       {isPreviewActive ? (
         // Device Frame Container
@@ -111,11 +112,11 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
 
             {/* Scrollable Content Area */}
             <div className="flex-1 w-full overflow-y-auto overflow-x-hidden custom-scrollbar bg-[var(--bg-base)] relative">
-              {!isAdminPage && <Header />}
+              {!isAdminPage && !isComingSoon && <Header />}
               <main className="min-h-full">
                 {children}
               </main>
-              {!isAdminPage && <Contact />}
+              {!isAdminPage && !isComingSoon && <Contact />}
             </div>
 
             {/* Device Bottom Bar */}
@@ -129,8 +130,8 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
           <main className="flex-grow">
             {children}
           </main>
-          {!isAdminPage && <Contact />}
-          {!isBuilder && <AdminEditButton />}
+          {!isAdminPage && !isComingSoon && <Contact />}
+          {!isBuilder && !isComingSoon && <AdminEditButton />}
         </>
       )}
 

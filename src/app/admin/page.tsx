@@ -79,6 +79,7 @@ export default function AdminPage() {
   });
   const [savingContent, setSavingContent] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
+  const [isPublished, setIsPublished] = useState(true);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [editingProject, setEditingProject] = useState<(DbProject & { images: DbProjectImage[] }) | null>(null);
 
@@ -140,6 +141,9 @@ export default function AdminPage() {
 
       for (const row of siteData) {
         const d = row.data as Record<string, unknown>;
+        if (row.id === 'global_settings') {
+          setIsPublished(d.isPublished !== false);
+        }
         if (row.id === 'hero') setHeroData({ 
           title: getRawText(d.title), 
           subtitle: getRawText(d.subtitle),
@@ -214,6 +218,18 @@ export default function AdminPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const togglePublishStatus = async () => {
+    const newStatus = !isPublished;
+    setIsPublished(newStatus);
+    const supabase = createClient();
+    await supabase.from('site_content').upsert({
+      id: 'global_settings',
+      data: { isPublished: newStatus },
+      updated_at: new Date().toISOString()
+    });
+    revalidateCache('/');
+  };
 
   const handleToggleProjectVisibility = async (id: string, currentStatus: boolean) => {
     const supabase = createClient();
@@ -493,9 +509,30 @@ export default function AdminPage() {
       {/* ── BẢNG ĐIỀU KHIỂN DASHBOARD ── */}
       {activeTab === 'dashboard' && !loading && (
         <div className="mt-8 space-y-8 w-full max-w-6xl mx-auto">
-          <h1 className="text-3xl font-black text-white tracking-tight">Dashboard</h1>
+          <div className="flex flex-wrap gap-4 items-center justify-between">
+            <h1 className="text-3xl font-black text-white tracking-tight">Dashboard</h1>
+            
+            {/* Global Publish Toggle */}
+            <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-full py-1.5 px-2 shadow-sm">
+              <div className="flex items-center gap-2 pl-3 pr-2 border-r border-zinc-800">
+                <span className={`w-2 h-2 rounded-full ${isPublished ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
+                <span className={`text-xs font-bold uppercase tracking-wider ${isPublished ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                  {isPublished ? 'Public' : 'Coming Soon'}
+                </span>
+              </div>
+              <button
+                onClick={togglePublishStatus}
+                title={isPublished ? "Tắt Website (Về chế độ Coming Soon)" : "Mở Website (Publish ra công chúng)"}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${isPublished ? "bg-emerald-500" : "bg-zinc-700"}`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isPublished ? "translate-x-6" : "translate-x-1"}`}
+                />
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Projects Card */}
+{/* Projects Card */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
               <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>

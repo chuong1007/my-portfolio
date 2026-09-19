@@ -36,6 +36,29 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Check if site is published
+  const { data: globalSettings } = await supabase
+    .from('site_content')
+    .select('data')
+    .eq('id', 'global_settings')
+    .single();
+
+  const isPublished = globalSettings?.data?.isPublished !== false; // Default to true if not set
+
+  // If site is unpublished, redirect non-admins to coming-soon (except /admin routes)
+  if (!isPublished && !user && !request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/coming-soon') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/coming-soon'
+    return NextResponse.redirect(url)
+  }
+
+  // If site IS published, and they are on /coming-soon, redirect to home
+  if (isPublished && request.nextUrl.pathname === '/coming-soon') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
+
   // Protect all /admin routes
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (!user) {

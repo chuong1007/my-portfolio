@@ -26,6 +26,7 @@ export function Header() {
   const [introFinished, setIntroFinished] = useState(false);
 
   const [loginOpen, setLoginOpen] = useState(false);
+  const [isPublished, setIsPublished] = useState(true);
   const [dynamicNavItems, setDynamicNavItems] = useState<{ label: string, href: string }[]>([]);
   const [logoConfig, setLogoConfig] = useState<{ type: 'text' | 'image', text: ResponsiveValue, url: ResponsiveValue, color?: ResponsiveValue, height: ResponsiveValue }>({
     type: 'text',
@@ -48,6 +49,18 @@ export function Header() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const togglePublishStatus = async () => {
+    const newStatus = !isPublished;
+    setIsPublished(newStatus);
+    const supabase = createClient();
+    await supabase.from('site_content').upsert({
+      id: 'global_settings',
+      data: { isPublished: newStatus },
+      updated_at: new Date().toISOString()
+    });
+    window.dispatchEvent(new Event('contentUpdated'));
+  };
+
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -62,6 +75,10 @@ export function Header() {
       const { data: contentData } = await supabase.from('site_content').select('id, data');
       if (contentData) {
         // Logo config from hero
+        const globalRow = contentData.find(row => row?.id === 'global_settings');
+        if (globalRow?.data) {
+          setIsPublished((globalRow.data as any).isPublished !== false);
+        }
         const heroRow = contentData.find(row => row?.id === 'hero');
         if (heroRow?.data) {
           const hd = heroRow.data as any;
@@ -256,6 +273,31 @@ export function Header() {
             "items-center gap-6",
             isAdmin && globalPreviewMode !== 'desktop' ? "hidden" : "hidden lg:flex"
           )}>
+            {isAdmin && (
+              <button
+                onClick={togglePublishStatus}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all border active:scale-95",
+                  isPublished
+                    ? "bg-transparent text-emerald-400 border-emerald-400/50 hover:bg-emerald-500/10"
+                    : "bg-red-600 text-white border-red-500 shadow-lg shadow-red-500/20 hover:bg-red-500 animate-pulse"
+                )}
+                title={isPublished ? "Website đang Live. Bấm để tắt (Coming Soon)." : "Website đang Offline. Bấm để bật (Live)."}
+              >
+                {isPublished ? (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    LIVE
+                  </>
+                ) : (
+                  <>
+                    <span className="w-2 h-2 rounded-full bg-white" />
+                    OFFLINE
+                  </>
+                )}
+              </button>
+            )}
+            
             {isAdmin && (
               <button
                 onClick={toggleEditMode}
