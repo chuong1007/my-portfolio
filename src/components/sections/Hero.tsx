@@ -431,7 +431,7 @@ const formatFs = (val: string, fallback: string) => {
       >
         {/* 3D Intro Carousel */}
         {showCarousel && (
-          <HeroIntroCarousel isAdminPreview={isAdmin} deviceMode={effectiveMode} 
+          <HeroIntroCarousel isAdminPreview={false} deviceMode={effectiveMode} 
             projects={finalProjects}
             tiltDirection={tiltDirection} 
             gap={carouselGap}
