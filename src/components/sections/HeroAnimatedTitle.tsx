@@ -134,24 +134,25 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
           {/* I-beam Mouse Cursor for realistic selection effect */}
           <motion.div
             className="absolute z-50 pointer-events-none"
-            initial={{ left: '0%', top: '20%', opacity: 0, x: '-50%', y: '-50%' }}
+            initial={{ left: '10%', top: '40%', opacity: 0, x: '-50%', y: '-50%' }}
             animate={{
-              left: ['0%', '0%', '0%', '100%', '100%', '100%'],
-              top: ['20%', '20%', '20%', '80%', '80%', '80%'],
-              opacity: [0, 0, 1, 1, 0, 0],
-              scale: [1, 1, 0.9, 0.9, 1, 1] // slight press effect
+              left: ['10%', '10%', '0%', '0%', '100%', '105%', '105%'],
+              top: ['40%', '40%', '20%', '20%', '80%', '90%', '90%'],
+              opacity: [0, 0, 1, 1, 1, 0, 0],
+              scale: [1, 1, 1, 0.9, 0.9, 1, 1] // press down right before sweep
             }}
             transition={{
               duration: T,
               times: [
                 0,
-                (highlightStart - 0.2) / T, // stay hidden until just before sweep
-                highlightStart / T,
-                highlightDone  / T,
-                (highlightDone + 0.1) / T,
+                (highlightStart - 0.5) / T, // wait
+                (highlightStart - 0.1) / T, // move into start position
+                highlightStart / T,         // press down
+                highlightDone  / T,         // sweep across
+                (highlightDone + 0.2) / T,  // release and move away
                 1,
               ],
-              ease: ['linear', 'easeOut', 'linear', 'easeOut', 'linear'],
+              ease: ['linear', 'easeOut', 'easeOut', 'linear', 'easeOut', 'linear'],
             }}
           >
             <svg width="32" height="64" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
