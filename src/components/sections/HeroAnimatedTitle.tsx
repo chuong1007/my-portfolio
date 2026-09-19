@@ -92,7 +92,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
       <div className="flex flex-wrap justify-center font-black tracking-tight w-full overflow-hidden" style={{ overflow: 'visible' }}>
         {lines[0].split('').map((char, i, arr) => {
           const center = (arr.length - 1) / 2;
-          const initialX = `${(i - center) * 0.8}em`;
+          const initialX = `calc(${(i - center)} * min(0.8em, 5vw))`;
           return (
             <motion.span
               key={i}
@@ -155,7 +155,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               ease: ['linear', 'easeOut', 'easeOut', 'linear', 'easeOut', 'linear'],
             }}
           >
-            <svg width="32" height="64" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+            <svg width="0.45em" height="0.9em" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
               <path d="M10 8 h12 v3 h-4.5 v42 h4.5 v3 h-12 v-3 h4.5 v-42 h-4.5 z" fill="black" stroke="white" strokeWidth="1.5" strokeLinejoin="miter"/>
             </svg>
           </motion.div>
