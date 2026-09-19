@@ -22,6 +22,12 @@ export default function AdminCarousel() {
   const [previewKey, setPreviewKey] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [toast, setToast] = useState<{message: string, type: "success" | "error"} | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
 
   useEffect(() => {
@@ -55,9 +61,9 @@ export default function AdminCarousel() {
         .upsert({ id: "hero_carousel", data: { images, tiltDirection } });
         
       if (error) throw error;
-      alert("Đã lưu thành công!");
+      showToast("Đã lưu thành công!", "success");
     } catch (e: any) {
-      alert("Lỗi: " + e.message);
+      showToast("Lỗi: " + e.message, "error");
     } finally {
       setSaving(false);
     }
@@ -96,7 +102,7 @@ export default function AdminCarousel() {
       }
       setImages(prev => [...prev, ...newImages]);
     } catch (error: any) {
-      alert("Lỗi upload: " + error.message);
+      showToast("Lỗi upload: " + error.message, "error");
     } finally {
       setUploading(false);
       // Reset the file input
@@ -289,6 +295,23 @@ export default function AdminCarousel() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className={`px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-3 ${
+            toast.type === 'success' 
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+              : 'bg-red-500/10 border-red-500/20 text-red-400'
+          }`}>
+            {toast.type === 'success' ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            )}
+            <span className="font-medium text-sm">{toast.message}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

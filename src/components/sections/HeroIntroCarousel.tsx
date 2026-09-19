@@ -22,6 +22,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">("enter");
   const [isShrunk, setIsShrunk] = useState(false);
+  const [slideConfig, setSlideConfig] = useState({ duration: 0.32, ease: "linear" });
   
   const [isMobileDevice, setIsMobileDevice] = useState(deviceMode === "mobile");
   
@@ -69,28 +70,49 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
       setPhase("slide");
       
       let step = 0;
-      // We can slide through N cards
-      const maxSteps = 8; // Only slide one original loop 
-      
-      const interval = setInterval(() => {
+      const maxSteps = 8; // Only slide one original loop
+      let currentTimeout: NodeJS.Timeout;
+
+      const nextSlide = () => {
         if (step < maxSteps) {
           step++;
           setCurrentIndex(step % N);
           
-          // Khi lướt tới nhịp cuối (quay về ảnh đầu tiên), lập tức kích hoạt mờ dần luôn
+          // Tính toán tốc độ trượt (chậm dần đều ở những bước cuối)
+          let currentDelay = 320; 
+          let currentEase = "linear";
+          
+          if (step === maxSteps - 2) {
+             currentDelay = 450;
+             currentEase = "linear";
+          } else if (step === maxSteps - 1) {
+             currentDelay = 650;
+             currentEase = "easeOut";
+          } else if (step === maxSteps) {
+             currentDelay = 1000;
+             currentEase = "easeOut";
+          }
+          
+          setSlideConfig({ duration: currentDelay / 1000, ease: currentEase });
+
           if (step === maxSteps) {
-            setPhase("finished");
-            clearInterval(interval);
-            onComplete();
-            
-            setTimeout(() => {
-              setPhase("hidden");
-            }, 6450);
+            // Khi đã chạy tới bước cuối, chờ animation cuối hoàn thành rồi mới chuyển phase
+            currentTimeout = setTimeout(() => {
+              setPhase("finished");
+              onComplete();
+              setTimeout(() => {
+                setPhase("hidden");
+              }, 6450);
+            }, currentDelay);
+          } else {
+            currentTimeout = setTimeout(nextSlide, currentDelay);
           }
         }
-      }, 320);
+      };
       
-      return () => clearInterval(interval);
+      currentTimeout = setTimeout(nextSlide, 320);
+      
+      return () => clearTimeout(currentTimeout);
     }, 600); // Super tight start for the bottom pop-up to mostly finish, then immediately slide
 
     return () => clearTimeout(enterTimeout);
@@ -242,8 +264,8 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                   stiffness: 200,
                   damping: 20,
                   delay: phase === "enter" ? Math.abs(offset) * 0.08 : 0, 
-                  ease: phase === "slide" ? "linear" : undefined,
-                  duration: phase === "slide" ? 0.32 : undefined
+                  ease: phase === "slide" ? slideConfig.ease : undefined,
+                  duration: phase === "slide" ? slideConfig.duration : undefined
                 }}
               >
                 {(project.cover_image || project.imageUrl) && (
