@@ -86,7 +86,12 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
   const T = totalDur;
 
   return (
-    <div className={className} style={style}>
+    <div className={className} style={{
+      ...style, 
+      fontSize: (typeof window !== 'undefined' && window.innerWidth < 768) 
+        ? `min(${style?.fontSize || '40px'}, 8.5vw)` 
+        : style?.fontSize
+    }}>
 
       {/* ── LINE 0: "Visual" ── */}
       <div className="flex flex-wrap justify-center font-black tracking-tight w-full overflow-hidden" style={{ overflow: 'visible' }}>
