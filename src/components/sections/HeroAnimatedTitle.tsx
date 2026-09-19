@@ -134,21 +134,22 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             className="absolute z-50 pointer-events-none"
             initial={{ left: '0%', top: '20%', opacity: 0, x: '-50%', y: '-50%' }}
             animate={{
-              left: ['0%', '0%', '100%', '100%', '100%'],
-              top: ['20%', '20%', '80%', '80%', '80%'],
-              opacity: [0, 1, 1, 0, 0],
-              scale: [1, 1, 0.9, 0.9, 0.9] // slight press effect
+              left: ['0%', '0%', '0%', '100%', '100%', '100%'],
+              top: ['20%', '20%', '20%', '80%', '80%', '80%'],
+              opacity: [0, 0, 1, 1, 0, 0],
+              scale: [1, 1, 0.9, 0.9, 1, 1] // slight press effect
             }}
             transition={{
               duration: T,
               times: [
                 0,
+                (highlightStart - 0.2) / T, // stay hidden until just before sweep
                 highlightStart / T,
                 highlightDone  / T,
                 (highlightDone + 0.1) / T,
                 1,
               ],
-              ease: ['linear', 'linear', 'linear', 'linear'],
+              ease: ['linear', 'easeOut', 'linear', 'easeOut', 'linear'],
             }}
           >
             <svg width="24" height="48" viewBox="0 0 24 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
@@ -171,17 +172,25 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   display: 'inline',
                 }}
                 initial={{ WebkitMaskPosition: '100% 0%' }}
-                                  animate={{
+                                                    animate={{
                   WebkitMaskPosition: [
                     '100% 0%', 
                     '75% 0%',
-                    '50% 0%',   
+                    '50% 0%',
+                    '0% 0%',
+                    '0% 0%'
                   ]
                 }}
                 transition={{
                   duration: T,
-                  times: [0, wipeOutStart / T, (wipeOutStart + highlightSweep) / T],
-                  ease: ['linear', 'linear'],
+                  times: [
+                    0, 
+                    wipeOutStart / T, 
+                    (wipeOutStart + highlightSweep) / T,
+                    (wipeOutStart + highlightSweep + 0.01) / T,
+                    1
+                  ],
+                  ease: ['linear', 'linear', 'linear', 'linear'],
                 }}
               >
                 <span 
@@ -216,6 +225,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       '66.666% 0%',
                       '33.333% 0%',
                       '16.666% 0%',
+                      '0% 0%',
+                      '0% 0%'
                     ]
                   }}
                   transition={{
@@ -226,8 +237,10 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       highlightDone  / T,
                       wipeOutStart   / T,
                       (wipeOutStart + highlightSweep) / T,
+                      (wipeOutStart + highlightSweep + 0.01) / T,
+                      1
                     ],
-                    ease: ['linear', 'linear', 'linear', 'linear'],
+                    ease: ['linear', 'linear', 'linear', 'linear', 'linear', 'linear'],
                   }}
                 >
                   <span 
