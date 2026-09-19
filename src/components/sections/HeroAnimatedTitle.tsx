@@ -88,9 +88,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
   return (
     <div className={className} style={{
       ...style, 
-      fontSize: (typeof window !== 'undefined' && window.innerWidth < 768) 
-        ? `min(${style?.fontSize || '40px'}, 8.5vw)` 
-        : style?.fontSize
+      fontSize: style?.fontSize
     }}>
 
       {/* ── LINE 0: "Visual" ── */}
@@ -122,147 +120,83 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
         })}
       </div>
 
-      {/* ── LINE 1: "Graphic Designer" ── */}
-      <div className="w-full flex justify-center">
-        <div className="relative flex justify-center items-center font-black tracking-tight max-w-full">
+            {/* ── LINE 1: "Graphic Designer" (Character by Character) ── */}
+      <div className="w-full flex justify-center mt-2 mb-2">
+        <div className="relative flex justify-center items-center font-black tracking-tight max-w-full flex-wrap text-center leading-[1.1]">
           
-          {/* Invisible text to dictate container height & width */}
-          <div className="text-center pointer-events-none opacity-0">
-            <span 
-              className="whitespace-nowrap"
-              style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-            >
-              {lines[1]}
-            </span>
-          </div>
-
-          {/* I-beam Mouse Cursor for realistic selection effect */}
+          {/* I-beam Mouse Cursor */}
           <motion.div
-            className="absolute z-50 pointer-events-none"
+            className="absolute z-50 pointer-events-none text-white"
             initial={{ left: '10%', top: '40%', opacity: 0, x: '-50%', y: '-50%' }}
             animate={{
-              left: ['10%', '10%', '0%', '0%', '100%', '105%', '105%'],
-              top: ['40%', '40%', '20%', '20%', '80%', '90%', '90%'],
-              opacity: [0, 0, 1, 1, 1, 0, 0],
-              scale: [1, 1, 1, 0.9, 0.9, 1, 1] // press down right before sweep
+              left:    ['10%', '10%', '0%',   '0%',   '100%', '105%', '105%'],
+              top:     ['40%', '40%', '20%',  '20%',  '80%',  '90%',  '90%'],
+              opacity: [0,     1,     1,      1,      1,      1,      0],
+              scale:   [1,     1,     0.9,    0.9,    0.9,    1,      1]
             }}
             transition={{
               duration: T,
               times: [
                 0,
-                (highlightStart - 0.5) / T, // wait
-                (highlightStart - 0.1) / T, // move into start position
-                highlightStart / T,         // press down
-                highlightDone  / T,         // sweep across
-                (highlightDone + 0.2) / T,  // release and move away
-                1,
+                (highlightStart - 0.4) / T,
+                (highlightStart - 0.1) / T,
+                highlightStart / T,
+                highlightDone / T,
+                (highlightDone + 0.2) / T,
+                1
               ],
-              ease: ['linear', 'easeOut', 'easeOut', 'linear', 'easeOut', 'linear'],
+              ease: "linear"
             }}
           >
-            <svg width="0.45em" height="0.9em" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+            <svg width="0.15em" height="0.8em" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
               <path d="M10 8 h12 v3 h-4.5 v42 h4.5 v3 h-12 v-3 h4.5 v-42 h-4.5 z" fill="black" stroke="white" strokeWidth="1.5" strokeLinejoin="miter"/>
             </svg>
           </motion.div>
 
-          {/* Base text: White text (Original Font) */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-0 max-w-full overflow-hidden">
-            <div className="text-center">
+          {/* Characters */}
+          {lines[1].split('').map((char, i, arr) => {
+            const numChars = arr.length;
+            const highlightCharDur = highlightSweep / numChars;
+            const tHighlight = highlightStart + i * highlightCharDur;
+            
+            const wipeCharDur = wipeOutDur / numChars;
+            const tWipe = wipeOutStart + i * wipeCharDur;
+
+            return (
               <motion.span
-                style={{
-                  WebkitMaskImage: 'linear-gradient(to right, black 60%, transparent 60%)',
-                  WebkitMaskSize: '500% 100%',
-                  WebkitMaskRepeat: 'no-repeat',
-                  maskRepeat: 'no-repeat',
-                  WebkitBoxDecorationBreak: 'clone',
-                  boxDecorationBreak: 'clone',
-                  display: 'inline',
+                key={i}
+                style={{ 
+                  display: 'inline-block',
+                  padding: '0.05em 0',
+                  margin: '0',
+                  borderRadius: '2px',
+                  whiteSpace: 'pre-wrap'
                 }}
-                initial={{ WebkitMaskPosition: '100% 0%' } as any}
-                                                    animate={{
-                  WebkitMaskPosition: [
-                    '100% 0%', 
-                    '75% 0%',
-                    '50% 0%',
-                    '0% 0%',
-                    '0% 0%'
-                  ]
-                } as any}
+                initial={{ backgroundColor: 'transparent', color: 'transparent' }}
+                animate={{
+                  backgroundColor: ['transparent', 'transparent', '#facc15', '#facc15', 'transparent', 'transparent'],
+                  color:           ['transparent', 'transparent', '#000000', '#000000', '#ffffff',    '#ffffff']
+                }}
                 transition={{
                   duration: T,
                   times: [
-                    0, 
-                    wipeOutStart / T, 
-                    (wipeOutStart + highlightSweep) / T,
-                    (wipeOutStart + highlightSweep + 0.01) / T,
+                    0,
+                    tHighlight / T,
+                    (tHighlight + 0.01) / T,
+                    tWipe / T,
+                    (tWipe + 0.01) / T,
                     1
                   ],
-                  ease: ['linear', stepEase, 'linear', 'linear'],
+                  ease: "linear"
                 }}
               >
-                <span 
-                  className="whitespace-nowrap"
-                  style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-                >
-                  {lines[1]}
-                </span>
+                {char === ' ' ? '\u00A0' : char}
               </motion.span>
-            </div>
-          </div>
-
-          {/* Yellow mask: Black text with inline background AND line-by-line selection sweep */}
-          <div className="absolute inset-0 z-10 pointer-events-none">
-            <div className="text-[#09090b] absolute inset-0 flex flex-col items-center justify-center max-w-full overflow-hidden">
-              <div className="text-center">
-                <motion.span
-                  style={{
-                    WebkitMaskImage: 'linear-gradient(to right, transparent 28.5%, black 28.5%, black 71.5%, transparent 71.5%)',
-                    WebkitMaskSize: '700% 100%',
-                    WebkitMaskRepeat: 'no-repeat',
-                    maskRepeat: 'no-repeat',
-                    WebkitBoxDecorationBreak: 'clone',
-                    boxDecorationBreak: 'clone',
-                    display: 'inline',
-                  }}
-                  initial={{ WebkitMaskPosition: '100% 0%' } as any}
-                  animate={{
-                    WebkitMaskPosition: [
-                      '100% 0%',
-                      '83.333% 0%',
-                      '66.666% 0%',
-                      '33.333% 0%',
-                      '16.666% 0%',
-                      '0% 0%',
-                      '0% 0%'
-                    ]
-                  } as any}
-                  transition={{
-                    duration: T,
-                    times: [
-                      0,
-                      highlightStart / T,
-                      highlightDone  / T,
-                      wipeOutStart   / T,
-                      (wipeOutStart + highlightSweep) / T,
-                      (wipeOutStart + highlightSweep + 0.01) / T,
-                      1
-                    ],
-                    ease: ['linear', stepEase, 'linear', stepEase, 'linear', 'linear'],
-                  }}
-                >
-                  <span 
-                    className="bg-yellow-400 whitespace-nowrap"
-                    style={{ padding: '0.1em 0.12em 0.06em', boxDecorationBreak: 'clone', WebkitBoxDecorationBreak: 'clone' }}
-                  >
-                    {lines[1]}
-                  </span>
-                </motion.span>
-              </div>
-            </div>
-          </div>
-          
+            );
+          })}
         </div>
       </div>
+
       {/* ── LINE 2: "based in..." ── */}
       <div className="flex justify-center items-center font-light hero-location px-4 text-center break-words max-w-full" style={{ minHeight: '1.4em', ...locationStyle }}>
         <span style={{ display: 'inline-block', position: 'relative', maxWidth: '100%' }}>
