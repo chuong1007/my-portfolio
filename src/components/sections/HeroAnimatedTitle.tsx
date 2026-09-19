@@ -131,7 +131,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
             animate={{
               left:    ['10%', '10%', '0%',   '0%',   '100%', '105%', '105%'],
               top:     ['40%', '40%', '20%',  '20%',  '80%',  '90%',  '90%'],
-              opacity: [0,     1,     1,      1,      1,      1,      0],
+              opacity: [0, 1, 1, 1, 1, 0, 0],
               scale:   [1,     1,     0.9,    0.9,    0.9,    1,      1]
             }}
             transition={{
@@ -148,7 +148,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               ease: "linear"
             }}
           >
-            <svg width="0.35em" height="1.1em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
+            <svg width="0.25em" height="0.95em" viewBox="0 0 100 200" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-md" style={{ transform: 'translateY(-0.05em)' }}>
               <g stroke="white" strokeWidth="20" fill="none" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M 25 25 C 45 25 50 35 50 50 L 50 150 C 50 165 45 175 25 175" />
                 <path d="M 75 25 C 55 25 50 35 50 50 L 50 150 C 50 165 55 175 75 175" />
@@ -183,7 +183,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         key={cIdx}
                         style={{ 
                           display: 'inline-block',
-                          padding: '0.05em 0.03em',
+                          padding: '0.05em 0.03em 0.18em',
                           margin: '0 -0.03em',
                           whiteSpace: 'pre-wrap'
                         }}
@@ -222,7 +222,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                         key="space"
                         style={{ 
                           display: 'inline-block',
-                          padding: '0.05em 0.03em',
+                          padding: '0.05em 0.03em 0.18em',
                           margin: '0 -0.03em',
                           whiteSpace: 'pre-wrap'
                         }}
