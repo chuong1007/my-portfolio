@@ -83,6 +83,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "0");
   const [scrollPadding, setScrollPadding] = useState<ResponsiveValue>(() => initialContent?.scrollPadding ?? initialContent?.paddingTopTextScroll ?? "0");
+  const [subTextPadding, setSubTextPadding] = useState<ResponsiveValue>(() => initialContent?.subTextPadding ?? "0");
   const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
   const [logoType, setLogoType] = useState<'text' | 'image'>(() => initialContent?.logoType ?? 'text');
   const [logoText, setLogoText] = useState(() => initialContent?.logoText ?? 'CHUONG.GRAPHIC');
@@ -153,6 +154,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
         if (d.title !== undefined) setTitleData(normalize(d.title));
         if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.location !== undefined) setLocationData(normalize(d.location));
+    if (d.subTextPadding !== undefined) setSubTextPadding(d.subTextPadding);
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
         
         // Preserve responsive objects if they exist
@@ -188,6 +190,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
     if (d.title !== undefined) setTitleData(normalize(d.title));
     if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
     if (d.location !== undefined) setLocationData(normalize(d.location));
+    if (d.subTextPadding !== undefined) setSubTextPadding(d.subTextPadding);
     if (d.scrollOffset !== undefined) setScrollOffset(d.scrollOffset);
     if (d.logoText !== undefined) setLogoText(d.logoText);
     if (d.logoImageUrl !== undefined) setLogoImageUrl(d.logoImageUrl);
@@ -238,6 +241,7 @@ export function Hero({ sectionId = "hero", initialContent }: HeroProps) {
     title: titleData,
     subtitle: subtitleData,
     location: locationData,
+    subTextPadding,
     scrollOffset: scrollOffset,
     scrollPadding: scrollPadding,
     logoType,
@@ -463,7 +467,8 @@ const formatFs = (val: string, fallback: string) => {
                 lineHeight: locationData.lineHeight?.[effectiveMode] || '1.1',
                 letterSpacing: `${locationData.letterSpacing?.[effectiveMode] || '0'}px`,
                 fontFamily: locationData.fontFamily?.[effectiveMode] || 'Syne, sans-serif',
-                fontWeight: locationData.fontWeight?.[effectiveMode] || '300',
+                fontWeight: locationData.fontWeight?.[effectiveMode] || \'300\',
+                paddingTop: `${getResponsiveValue(subTextPadding, effectiveMode) || \'0\'}px`,
                 color: locationData.textColor?.[effectiveMode] === 'inherit' ? undefined : locationData.textColor?.[effectiveMode],
               }}
             />

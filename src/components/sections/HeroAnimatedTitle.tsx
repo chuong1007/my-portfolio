@@ -110,7 +110,7 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
       </div>
 
       {/* ── LINE 1: "Graphic Designer" ── */}
-      <div className="w-full flex justify-center overflow-hidden"><div className="relative flex justify-center items-center font-black tracking-tight px-[0.12em] max-w-full w-full">
+      <div className="w-full flex justify-center overflow-hidden"><div className="relative flex justify-center items-center font-black tracking-tight px-[0.12em] max-w-full">
         {/* Invisible text to dictate container height */}
         <span className="opacity-0 whitespace-pre-wrap break-words text-center w-full pointer-events-none">
           {lines[1]}

@@ -153,7 +153,8 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
         paddingTop: normResp(initialData?.paddingTop, '0'),
         paddingBottom: normResp(initialData?.paddingBottom, '0'),
         scrollOffset: normResp(initialData?.scrollOffset, '48'),
-        paddingTopTextScroll: normResp(initialData?.paddingTopTextScroll, '0'),
+        paddingTopTextScroll: normResp(initialData?.paddingTopTextScroll, \'0\'),
+        subTextPadding: normResp(initialData?.subTextPadding, \'0\'),
         logoHeight: normResp(initialData?.logoHeight, '40'),
       });
       setIsInitialized(true);
@@ -465,7 +466,7 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
 
               <div className="space-y-4 mt-4">
                 <RichTextEditor
-                  label="Location Text (based in...)"
+                  label="SUB TEXT"
                   value={data.location}
                   onChange={(val) => setData({ ...data, location: val })}
                   enterAsBreak={true}
@@ -473,6 +474,23 @@ export function AdminModal({ isOpen, onClose, sectionId, initialData, onSave }: 
               </div>
 
               {/* Font sizes are now controlled inside RichTextEditor */}
+
+              {/* Sub Text Padding */}
+              <div className="space-y-3 p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)]">Sub Text Padding Top (px)</label>
+                  <span className="text-xs font-mono text-[var(--text-muted)]">{getResponsiveValue(data.subTextPadding, globalPreviewMode) || 0}px</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="300"
+                  step="1"
+                  value={getResponsiveValue(data.subTextPadding, globalPreviewMode) || "0"}
+                  onChange={(e) => setData({ ...data, subTextPadding: setResponsiveValue(data.subTextPadding, globalPreviewMode, e.target.value) })}
+                  className="w-full h-1 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                />
+              </div>
 
               {/* Sliders for Max Width & Padding */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-zinc-800/20 border border-[var(--border-default)] rounded-2xl mt-4">
