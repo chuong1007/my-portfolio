@@ -238,20 +238,20 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
           className={cn(
             "gap-x-4",
             globalPreviewMode === "mobile" 
-              ? (project.gallery_columns_mobile === 2 ? "grid-cols-2" : project.gallery_columns_mobile === 3 ? "grid-cols-3" : "grid-cols-1")
+              ? (project.gallery_columns_mobile == 2 ? "grid-cols-2" : project.gallery_columns_mobile == 3 ? "grid-cols-3" : "grid-cols-1")
               : globalPreviewMode === "tablet"
-                ? (project.gallery_columns_tablet === 3 ? "grid-cols-3" : project.gallery_columns_tablet === 4 ? "grid-cols-4" : "grid-cols-2")
+                ? (project.gallery_columns_tablet == 3 ? "grid-cols-3" : project.gallery_columns_tablet == 4 ? "grid-cols-4" : "grid-cols-2")
                 : [
                     // Desktop / Normal View (uses Tailwind media queries based on browser window)
-                    project.gallery_columns_mobile === 2 ? "grid-cols-2" : project.gallery_columns_mobile === 3 ? "grid-cols-3" : "grid-cols-1",
+                    project.gallery_columns_mobile == 2 ? "grid-cols-2" : project.gallery_columns_mobile == 3 ? "grid-cols-3" : "grid-cols-1",
                     
-                    project.gallery_columns_tablet === 2 ? "sm:grid-cols-2" : 
-                    project.gallery_columns_tablet === 3 ? "sm:grid-cols-3" : 
-                    project.gallery_columns_tablet === 4 ? "sm:grid-cols-4" : "sm:grid-cols-2",
+                    project.gallery_columns_tablet == 2 ? "sm:grid-cols-2" : 
+                    project.gallery_columns_tablet == 3 ? "sm:grid-cols-3" : 
+                    project.gallery_columns_tablet == 4 ? "sm:grid-cols-4" : "sm:grid-cols-2",
                     
-                    project.gallery_columns === 2 ? "md:grid-cols-2" : 
-                    project.gallery_columns === 3 ? "md:grid-cols-3" : 
-                    project.gallery_columns === 5 ? "md:grid-cols-5" : "md:grid-cols-4"
+                    project.gallery_columns == 2 ? "md:grid-cols-2" : 
+                    project.gallery_columns == 3 ? "md:grid-cols-3" : 
+                    project.gallery_columns == 5 ? "md:grid-cols-5" : "md:grid-cols-4"
                   ]
           )}
         >
