@@ -483,8 +483,12 @@ const formatFs = (val: string, fallback: string) => {
   animate={{ opacity: scrollVisible ? 1 : 0 }}
   transition={{ duration: 1 }}
   className={cn("hero-scroll", !isEditor && "not-is-editor", isEditor && "is-editor",
-    "flex flex-col items-center gap-2 text-[var(--text-muted)]"
+    "flex flex-col items-center gap-2 text-[var(--text-muted)] cursor-pointer hover:opacity-80 transition-opacity"
   )}
+  onClick={() => {
+    const about = document.getElementById('about');
+    if (about) about.scrollIntoView({ behavior: 'smooth' });
+  }}
   style={{
     marginTop: isEditor ? `${currentScroll}px` : undefined,
     "--scroll-desk": `${getResponsiveValue(scrollPadding, 'desktop') ?? getResponsiveValue(scrollOffset, 'desktop') ?? 0}px`,
