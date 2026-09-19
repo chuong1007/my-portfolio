@@ -196,15 +196,15 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                       duration: T,
                       times: [
                         0,
-                        Math.max(0, (tWordHighlightStart - 0.01)) / T,
+                        Math.max(0, (tWordHighlightStart - 0.01) / T),
                         tWordHighlightStart / T,
                         tWordHighlightEnd / T,
-                        Math.min(1, (tWordHighlightEnd + 0.01)) / T,
+                        Math.min(1, (tWordHighlightEnd + 0.01) / T),
                         
-                        Math.max(0, (tWordWipeStart - 0.01)) / T,
+                        Math.max(0, (tWordWipeStart - 0.01) / T),
                         tWordWipeStart / T,
                         tWordWipeEnd / T,
-                        Math.min(1, (tWordWipeEnd + 0.01)) / T,
+                        Math.min(1, (tWordWipeEnd + 0.01) / T),
                         1
                       ],
                       ease: "linear"
