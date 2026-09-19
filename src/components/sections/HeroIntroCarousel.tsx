@@ -30,9 +30,10 @@ interface HeroIntroCarouselProps {
 }
 
 export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward", gap = 16, perspectiveMultiplier = 1.5, dTheta = 14, w_card = 260, blurStrength = 1, dimStrength = 1, displayCount = 7, yOffsetMobile = 48, yOffsetTablet = 112, yOffsetDesktop = 152, skipAnimation = false }: HeroIntroCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(skipAnimation ? 8 : 0);
-  const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">(skipAnimation ? "finished" : "enter");
-  const [isShrunk, setIsShrunk] = useState(skipAnimation);
+  const isSkipMount = useRef(skipAnimation).current;
+  const [currentIndex, setCurrentIndex] = useState(isSkipMount ? 8 : 0);
+  const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">(isSkipMount ? "finished" : "enter");
+  const [isShrunk, setIsShrunk] = useState(isSkipMount);
   const [slideConfig, setSlideConfig] = useState<{ duration: number; ease: any }>({ duration: 0.32, ease: "linear" });
   
   const [isMobileDevice, setIsMobileDevice] = useState(deviceMode === "mobile");
@@ -137,7 +138,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
       ref={containerRef}
       className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none"
       
-      initial={skipAnimation ? false : { opacity: 1, filter: "blur(0px)" }}
+      initial={isSkipMount ? false : { opacity: 1, filter: "blur(0px)" }}
       animate={{
         pointerEvents: phase === "hidden" ? "none" : "auto", 
         opacity: phase === "hidden" ? 0 : (isShrunk ? 0.15 : 1), 
@@ -165,7 +166,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                 id="carousel-ring"
                 className="relative w-full max-w-[100vw] h-[500px] flex items-center justify-center mt-[var(--mt-mob)] md:mt-[var(--mt-tab)] lg:mt-[var(--mt-desk)]" 
                 style={{ transformStyle: "preserve-3d" }}
-                initial={skipAnimation ? false : { z: isMobileDevice ? 0 : ringZ }}
+                initial={isSkipMount ? false : { z: isMobileDevice ? 0 : ringZ }}
                 animate={{ z: isMobileDevice ? 0 : ringZ }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
               >

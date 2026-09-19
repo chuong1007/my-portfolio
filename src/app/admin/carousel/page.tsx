@@ -392,7 +392,6 @@ export default function AdminCarousel() {
                         setPreviewKey(k => k + 1);
                       } else {
                         setIsPlaying(false);
-                        setPreviewKey(k => k + 1);
                       }
                     }} 
                     className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${isPlaying ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'}`}
