@@ -152,9 +152,8 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               ease: ['linear', 'easeOut', 'linear', 'easeOut', 'linear'],
             }}
           >
-            <svg width="24" height="48" viewBox="0 0 24 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
-              <path d="M12 6V42M6 6H18M6 42H18" stroke="white" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M12 6V42M6 6H18M6 42H18" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            <svg width="32" height="64" viewBox="0 0 32 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="drop-shadow-sm">
+              <path d="M10 8 h12 v3 h-4.5 v42 h4.5 v3 h-12 v-3 h4.5 v-42 h-4.5 z" fill="black" stroke="white" strokeWidth="1.5" strokeLinejoin="miter"/>
             </svg>
           </motion.div>
 
