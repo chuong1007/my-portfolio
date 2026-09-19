@@ -191,56 +191,52 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     const i = absoluteIndex++;
                     const tHighlight = highlightStart + i * highlightCharDur;
                     const tWipe = wipeOutStart + (numChars - 1 - i) * wipeCharDur;
+                    
+                    const commonTransition = {
+                      delay: startDelay,
+                      duration: T,
+                      times: [
+                        0,
+                        tHighlight / T,
+                        (tHighlight + 0.01) / T,
+                        tWipe / T,
+                        (tWipe + 0.01) / T,
+                        1
+                      ],
+                      ease: "linear" as const
+                    };
 
                     return (
-                      <motion.span
+                      <span
                         key={cIdx}
                         style={{ 
                           display: 'inline-block',
+                          position: 'relative',
                           padding: '0.05em 0 0.18em',
-                          margin: '0',
                           whiteSpace: 'pre-wrap'
-                        }}
-                        
-                        initial={{ opacity: 0 }}
-                        animate={{
-                          opacity:         [0,               0,               1,         1,         1,               1],
-                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
-                        }}
-                        transition={{ delay: startDelay,
-                          duration: T,
-                          times: [
-                            0,
-                            tHighlight / T,
-                            (tHighlight + 0.01) / T,
-                            tWipe / T,
-                            (tWipe + 0.01) / T,
-                            1
-                          ],
-                          ease: "linear"
                         }}
                       >
                         <motion.span
-                          style={{ position: 'relative', zIndex: 10 }}
+                          style={{ position: 'absolute', inset: '0 -1px', zIndex: -1 }}
+                          initial={{ opacity: 0 }}
                           animate={{
+                            opacity: [0, 0, 1, 1, 1, 1],
+                            backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
+                          }}
+                          transition={commonTransition}
+                        />
+                        <motion.span
+                          style={{ position: 'relative', zIndex: 1, display: 'inline-block' }}
+                          initial={{ opacity: 0 }}
+                          animate={{
+                            opacity: [0, 0, 1, 1, 1, 1],
                             color: ['#000000', '#000000', '#000000', '#000000', 'var(--text-primary)', 'var(--text-primary)']
                           }}
-                          transition={{ delay: startDelay,
-                            duration: T,
-                            times: [
-                              0,
-                              tHighlight / T,
-                              (tHighlight + 0.01) / T,
-                              tWipe / T,
-                              (tWipe + 0.01) / T,
-                              1
-                            ],
-                            ease: "linear"
-                          }}
+                          transition={commonTransition}
                         >
                           {char}
                         </motion.span>
-                      </motion.span>
+                      </span>
                     );
                   })}
                   
@@ -249,56 +245,52 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                     const i = absoluteIndex++;
                     const tHighlight = highlightStart + i * highlightCharDur;
                     const tWipe = wipeOutStart + (numChars - 1 - i) * wipeCharDur;
+                    
+                    const commonTransition = {
+                      delay: startDelay,
+                      duration: T,
+                      times: [
+                        0,
+                        tHighlight / T,
+                        (tHighlight + 0.01) / T,
+                        tWipe / T,
+                        (tWipe + 0.01) / T,
+                        1
+                      ],
+                      ease: "linear" as const
+                    };
 
                     return (
-                      <motion.span
+                      <span
                         key="space"
                         style={{ 
                           display: 'inline-block',
+                          position: 'relative',
                           padding: '0.05em 0 0.18em',
-                          margin: '0',
                           whiteSpace: 'pre-wrap'
-                        }}
-                        
-                        initial={{ opacity: 0 }}
-                        animate={{
-                          opacity:         [0,               0,               1,         1,         1,               1],
-                          backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
-                        }}
-                        transition={{ delay: startDelay,
-                          duration: T,
-                          times: [
-                            0,
-                            tHighlight / T,
-                            (tHighlight + 0.01) / T,
-                            tWipe / T,
-                            (tWipe + 0.01) / T,
-                            1
-                          ],
-                          ease: "linear"
                         }}
                       >
                         <motion.span
-                          style={{ position: 'relative', zIndex: 10 }}
+                          style={{ position: 'absolute', inset: '0 -1px', zIndex: -1 }}
+                          initial={{ opacity: 0 }}
                           animate={{
+                            opacity: [0, 0, 1, 1, 1, 1],
+                            backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)']
+                          }}
+                          transition={commonTransition}
+                        />
+                        <motion.span
+                          style={{ position: 'relative', zIndex: 1, display: 'inline-block' }}
+                          initial={{ opacity: 0 }}
+                          animate={{
+                            opacity: [0, 0, 1, 1, 1, 1],
                             color: ['#000000', '#000000', '#000000', '#000000', 'var(--text-primary)', 'var(--text-primary)']
                           }}
-                          transition={{ delay: startDelay,
-                            duration: T,
-                            times: [
-                              0,
-                              tHighlight / T,
-                              (tHighlight + 0.01) / T,
-                              tWipe / T,
-                              (tWipe + 0.01) / T,
-                              1
-                            ],
-                            ease: "linear"
-                          }}
+                          transition={commonTransition}
                         >
-                          {`\u00A0`}
+                          {` `}
                         </motion.span>
-                      </motion.span>
+                      </span>
                     );
                   })()}
                 </span>

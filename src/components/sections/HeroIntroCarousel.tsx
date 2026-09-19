@@ -23,12 +23,16 @@ interface HeroIntroCarouselProps {
   blurStrength?: number;
   dimStrength?: number;
   displayCount?: number;
+  yOffsetMobile?: number;
+  yOffsetTablet?: number;
+  yOffsetDesktop?: number;
+  skipAnimation?: boolean;
 }
 
-export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward", gap = 16, perspectiveMultiplier = 1.5, dTheta = 14, w_card = 260, blurStrength = 1, dimStrength = 1, displayCount = 7 }: HeroIntroCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">("enter");
-  const [isShrunk, setIsShrunk] = useState(false);
+export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward", gap = 16, perspectiveMultiplier = 1.5, dTheta = 14, w_card = 260, blurStrength = 1, dimStrength = 1, displayCount = 7, yOffsetMobile = 48, yOffsetTablet = 112, yOffsetDesktop = 152, skipAnimation = false }: HeroIntroCarouselProps) {
+  const [currentIndex, setCurrentIndex] = useState(skipAnimation ? 8 : 0);
+  const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">(skipAnimation ? "finished" : "enter");
+  const [isShrunk, setIsShrunk] = useState(skipAnimation);
   const [slideConfig, setSlideConfig] = useState<{ duration: number; ease: any }>({ duration: 0.32, ease: "linear" });
   
   const [isMobileDevice, setIsMobileDevice] = useState(deviceMode === "mobile");
@@ -133,12 +137,12 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
       ref={containerRef}
       className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden pointer-events-none"
       
-      initial={{ opacity: 1, filter: "blur(0px)" }}
+      initial={skipAnimation ? false : { opacity: 1, filter: "blur(0px)" }}
       animate={{
         pointerEvents: phase === "hidden" ? "none" : "auto", 
-        opacity: phase === "hidden" && !isAdminPreview ? 0 : (isShrunk && !isAdminPreview ? 0.15 : 1), 
+        opacity: phase === "hidden" ? 0 : (isShrunk ? 0.15 : 1), 
         scale: isShrunk ? 0.8 : 1,
-        filter: isShrunk && !isAdminPreview ? "blur(8px)" : "blur(0px)",
+        filter: isShrunk ? "blur(8px)" : "blur(0px)",
         y: isShrunk ? -40 : 0
       }}
       transition={{ duration: 1.2, ease: "easeInOut" }}
@@ -156,11 +160,12 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
           const perspectiveValue = Math.round(R * perspectiveMultiplier);
           
           return (
-            <div className="w-full h-full flex items-center justify-center" style={{ perspective: isMobileDevice ? 1200 : perspectiveValue }}>
+            <div className="w-full h-full flex items-center justify-center" style={{ perspective: isMobileDevice ? 1200 : perspectiveValue, '--mt-mob': `${yOffsetMobile}px`, '--mt-tab': `${yOffsetTablet}px`, '--mt-desk': `${yOffsetDesktop}px` } as React.CSSProperties}>
               <motion.div 
                 id="carousel-ring"
-                className="relative w-full max-w-[100vw] h-[500px] flex items-center justify-center" 
+                className="relative w-full max-w-[100vw] h-[500px] flex items-center justify-center mt-[var(--mt-mob)] md:mt-[var(--mt-tab)] lg:mt-[var(--mt-desk)]" 
                 style={{ transformStyle: "preserve-3d" }}
+                initial={skipAnimation ? false : { z: isMobileDevice ? 0 : ringZ }}
                 animate={{ z: isMobileDevice ? 0 : ringZ }}
                 transition={{ duration: 1.2, ease: "easeInOut" }}
               >
@@ -279,7 +284,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
                   type: phase === "enter" ? "spring" : "tween",
                   stiffness: 200,
                   damping: 20,
-                  delay: phase === "enter" ? Math.abs(offset) * 0.08 : 0, 
+                  delay: phase === "enter" ? (isMobileDevice ? 0 : Math.abs(offset) * 0.08) : 0, 
                   ease: phase === "slide" ? slideConfig.ease : undefined,
                   duration: phase === "slide" ? slideConfig.duration : undefined
                 }}

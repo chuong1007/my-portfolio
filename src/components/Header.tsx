@@ -223,9 +223,9 @@ export function Header() {
     <>
       <header
         className={cn(
-          (isAdmin && globalPreviewMode !== "desktop") || isEditor ? "sticky" : "fixed",
-          "top-0 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
-          (scrolled || globalPreviewMode !== 'desktop' || isEditor)
+          "fixed",
+          (isAdmin && globalPreviewMode !== "desktop") ? "top-6 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-6 py-4 md:px-8 transition-all duration-300" : "top-0 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
+          (scrolled)
             ? "bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-subtle)]"
             : "bg-transparent"
         )}

@@ -24,7 +24,10 @@ export default function AdminCarousel() {
     wCard: 260,
     blurStrength: 1.0,
     dimStrength: 1.0,
-    displayCount: 7
+    displayCount: 7,
+    yOffsetMobile: 48,
+    yOffsetTablet: 112,
+    yOffsetDesktop: 152
   };
 
   const [configs, setConfigs] = useState<Record<ConfigMode, typeof defaultConfig>>({
@@ -91,6 +94,7 @@ export default function AdminCarousel() {
   const [newUrl, setNewUrl] = useState("");
   const [previewMode, setPreviewMode] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [previewKey, setPreviewKey] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{message: string, type: "success" | "error"} | null>(null);
@@ -373,16 +377,27 @@ export default function AdminCarousel() {
         </div>
 
         {/* ROW 2: Preview & Cấu hình */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           
           {/* Cột Preview */}
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6 xl:col-span-2">
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <h2 className="text-xl font-bold">Live Preview</h2>
-                  <button onClick={() => setPreviewKey(k => k + 1)} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-sm rounded-lg transition-colors">
-                    Replay Animation
+                  <button 
+                    onClick={() => {
+                      if (!isPlaying) {
+                        setIsPlaying(true);
+                        setPreviewKey(k => k + 1);
+                      } else {
+                        setIsPlaying(false);
+                        setPreviewKey(k => k + 1);
+                      }
+                    }} 
+                    className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${isPlaying ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'}`}
+                  >
+                    {isPlaying ? 'Dừng Animation' : 'Play Animation'}
                   </button>
                 </div>
                 
@@ -408,22 +423,22 @@ export default function AdminCarousel() {
               </div>
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center overflow-hidden" style={{ height: "600px" }}>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl flex items-center justify-center overflow-hidden flex-1 min-h-[600px]">
               <div 
                 className={`relative bg-zinc-950 overflow-hidden transition-all duration-300 border border-zinc-700 shadow-[0_0_50px_rgba(0,0,0,0.5)] origin-center flex-shrink-0 ${
-                  previewMode === "mobile" ? "w-[375px] h-[812px] rounded-[3rem] scale-[0.65]" : 
-                  previewMode === "tablet" ? "w-[768px] h-[1024px] rounded-3xl scale-[0.5]" : 
-                  "w-[1440px] h-[900px] rounded-2xl scale-[0.4]"
+                  previewMode === "mobile" ? "w-[375px] h-[812px] rounded-[3rem] scale-[0.7]" : 
+                  previewMode === "tablet" ? "w-[768px] h-[1024px] rounded-3xl scale-[0.55]" : 
+                  "w-[1440px] h-[810px] rounded-2xl scale-[0.65]"
                 }`}
               >
-                <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} tiltDirection={tiltDirection} gap={activeConfig.gap} perspectiveMultiplier={activeConfig.perspective} dTheta={activeConfig.dTheta} w_card={activeConfig.wCard} blurStrength={activeConfig.blurStrength} dimStrength={activeConfig.dimStrength} displayCount={activeConfig.displayCount} />
+                <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} tiltDirection={tiltDirection} gap={activeConfig.gap} perspectiveMultiplier={activeConfig.perspective} dTheta={activeConfig.dTheta} w_card={activeConfig.wCard} blurStrength={activeConfig.blurStrength} dimStrength={activeConfig.dimStrength} displayCount={activeConfig.displayCount} yOffsetMobile={activeConfig.yOffsetMobile} yOffsetTablet={activeConfig.yOffsetTablet} yOffsetDesktop={activeConfig.yOffsetDesktop} skipAnimation={!isPlaying} />
               </div>
             </div>
           </div>
           
           {/* Cột Cấu hình */}
-          <div className="space-y-6">
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 h-full flex flex-col">
+          <div className="h-full flex flex-col">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex-1 flex flex-col">
               <h2 className="text-xl font-semibold mb-6 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div className="flex items-center gap-3">
                   <span>Cấu hình 3D ({tiltDirection === 'inward' ? 'Hướng xen kẽ' : tiltDirection === 'outward' ? 'Hướng ra' : 'Lớn dần ra ngoài'})</span>
@@ -440,7 +455,7 @@ export default function AdminCarousel() {
               
               
               
-              <div className="space-y-8 flex-1">
+              <div className="space-y-5 flex-1">
                 <div>
                   <div className="flex justify-between mb-2">
                     <label className="text-sm text-zinc-400">Space Padding (Khoảng cách giữa các thẻ)</label>
@@ -493,6 +508,42 @@ export default function AdminCarousel() {
                     <span className="text-sm font-medium">{activeConfig.dimStrength}x</span>
                   </div>
                   <input type="range" min="0" max="2" step="0.05" value={activeConfig.dimStrength} onPointerDown={saveToHistory} onChange={(e) => updateConfig("dimStrength", parseFloat(e.target.value))} className="w-full accent-white" />
+                </div>
+
+                <div className="pt-5 border-t border-zinc-800">
+                  <h3 className="text-zinc-300 font-semibold mb-3">Vị trí Y (Độ cao)</h3>
+                  
+                  <div className="space-y-5">
+                    {previewMode === "desktop" && (
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <label className="text-sm text-zinc-400">Desktop (Máy tính)</label>
+                          <span className="text-sm font-medium">{activeConfig.yOffsetDesktop}px</span>
+                        </div>
+                        <input type="range" min="-100" max="300" step="4" value={activeConfig.yOffsetDesktop} onPointerDown={saveToHistory} onChange={(e) => updateConfig("yOffsetDesktop", parseInt(e.target.value))} className="w-full accent-white" />
+                      </div>
+                    )}
+
+                    {previewMode === "tablet" && (
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <label className="text-sm text-zinc-400">Tablet (Máy tính bảng)</label>
+                          <span className="text-sm font-medium">{activeConfig.yOffsetTablet}px</span>
+                        </div>
+                        <input type="range" min="-100" max="300" step="4" value={activeConfig.yOffsetTablet} onPointerDown={saveToHistory} onChange={(e) => updateConfig("yOffsetTablet", parseInt(e.target.value))} className="w-full accent-white" />
+                      </div>
+                    )}
+
+                    {previewMode === "mobile" && (
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <label className="text-sm text-zinc-400">Mobile (Điện thoại)</label>
+                          <span className="text-sm font-medium">{activeConfig.yOffsetMobile}px</span>
+                        </div>
+                        <input type="range" min="-100" max="300" step="4" value={activeConfig.yOffsetMobile} onPointerDown={saveToHistory} onChange={(e) => updateConfig("yOffsetMobile", parseInt(e.target.value))} className="w-full accent-white" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

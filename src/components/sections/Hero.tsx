@@ -75,9 +75,12 @@ type HeroProps = {
   blurStrength?: number;
   dimStrength?: number;
   displayCount?: number;
+  yOffsetMobile?: number;
+  yOffsetTablet?: number;
+  yOffsetDesktop?: number;
 };
 
-export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages, tiltDirection = "inward", carouselGap, carouselPerspective, dTheta, w_card, blurStrength, dimStrength, displayCount }: HeroProps) {
+export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages, tiltDirection = "inward", carouselGap, carouselPerspective, dTheta, w_card, blurStrength, dimStrength, displayCount, yOffsetMobile = 48, yOffsetTablet = 112, yOffsetDesktop = 152 }: HeroProps) {
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { 
     content: "Visual Designer based in Ho Chi Minh City", 
     fontSize: { desktop: 80, tablet: 60, mobile: 32 },
@@ -141,7 +144,7 @@ export function Hero({ sectionId = "hero", initialContent, initialProjects, cust
 
   useEffect(() => {
     const handleFinished = () => {
-      setTimeout(() => setScrollVisible(true), 1000);
+      setTimeout(() => setScrollVisible(true), 1350);
     };
     const handleStart = () => {
       setScrollVisible(false);
@@ -427,7 +430,7 @@ const formatFs = (val: string, fallback: string) => {
       >
         {/* 3D Intro Carousel */}
         {showCarousel && (
-          <HeroIntroCarousel 
+          <HeroIntroCarousel isAdminPreview={isAdmin} deviceMode={effectiveMode} 
             projects={finalProjects}
             tiltDirection={tiltDirection} 
             gap={carouselGap}
@@ -437,6 +440,9 @@ const formatFs = (val: string, fallback: string) => {
             blurStrength={blurStrength}
             dimStrength={dimStrength}
             displayCount={displayCount}
+            yOffsetMobile={yOffsetMobile}
+            yOffsetTablet={yOffsetTablet}
+            yOffsetDesktop={yOffsetDesktop}
             onComplete={handleCarouselComplete} 
           />
         )}
