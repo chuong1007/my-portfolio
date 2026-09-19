@@ -95,16 +95,16 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
               key={i}
               initial={{ scale: 0, y: '50%', x: initialX, opacity: 0 }}
               animate={{ 
-                scale: [0, 1.4, 1], 
-                y: ['50%', '-10%', '0%'], 
-                x: [initialX, initialX, 0], 
-                opacity: [0, 1, 1] 
+                scale:   [0,      1.4,     1,       1,       1], 
+                y:       ['50%', '-10%',  '0%',    '0%',    '0%'], 
+                x:       [initialX, initialX, initialX, initialX, 0], 
+                opacity: [0,      1,       1,       1,       1] 
               }}
               transition={{
-                duration: letterDuration * 1.2,
+                duration: 1.7,
                 delay: i * letterStagger,
-                ease: "easeOut",
-                times: [0, 0.4, 1]
+                ease: ["easeOut", "easeInOut", "linear", "easeInOut"],
+                times: [0, 0.28, 0.47, 0.76, 1]
               }}
               style={{ display: 'inline-block', transformOrigin: 'center bottom' }}
             >
