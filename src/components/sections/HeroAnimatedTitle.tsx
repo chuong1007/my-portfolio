@@ -172,10 +172,11 @@ export function HeroAnimatedTitle({ html, locationHtml, className, style, locati
                   borderRadius: '2px',
                   whiteSpace: 'pre-wrap'
                 }}
-                initial={{ backgroundColor: 'transparent', color: 'transparent' }}
+                initial={{ opacity: 0 }}
                 animate={{
-                  backgroundColor: ['transparent', 'transparent', '#facc15', '#facc15', 'transparent', 'transparent'],
-                  color:           ['transparent', 'transparent', '#000000', '#000000', '#ffffff',    '#ffffff']
+                  opacity:         [0,               0,               1,         1,         1,               1],
+                  backgroundColor: ['rgba(0,0,0,0)', 'rgba(0,0,0,0)', '#facc15', '#facc15', 'rgba(0,0,0,0)', 'rgba(0,0,0,0)'],
+                  color:           ['#000000',       '#000000',       '#000000', '#000000', '#ffffff',    '#ffffff']
                 }}
                 transition={{
                   duration: T,
