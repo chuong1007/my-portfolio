@@ -15,9 +15,10 @@ interface HeroIntroCarouselProps {
   onComplete: () => void;
   isAdminPreview?: boolean;
   deviceMode?: "desktop" | "tablet" | "mobile";
+  tiltDirection?: "inward" | "outward";
 }
 
-export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop" }: HeroIntroCarouselProps) {
+export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false, deviceMode = "desktop", tiltDirection = "inward" }: HeroIntroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">("enter");
   const [isShrunk, setIsShrunk] = useState(false);
@@ -151,22 +152,22 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
               if (abs === 1) {
                 x = sign * 280; 
                 z = -100;
-                ry = -sign * 35; // Slant for perspective effect
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35; // Slant for perspective effect
                 scale = 0.85;
               } else if (abs === 2) {
                 x = sign * 480; 
                 z = -200;
-                ry = -sign * 35;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
                 scale = 0.7;
               } else if (abs === 3) {
                 x = sign * 640;
                 z = -300;
-                ry = -sign * 35;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
                 scale = 0.55;
               } else {
                 x = sign * 780;
                 z = -400;
-                ry = -sign * 35;
+                ry = tiltDirection === 'outward' ? sign * 35 : -sign * 35;
                 scale = 0.4;
               }
             }

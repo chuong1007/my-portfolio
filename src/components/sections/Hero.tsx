@@ -73,9 +73,10 @@ type HeroProps = {
   initialContent?: any;
   initialProjects?: any[];
   customCarouselImages?: any[];
+  tiltDirection?: "inward" | "outward";
 };
 
-export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages }: HeroProps) {
+export function Hero({ sectionId = "hero", initialContent, initialProjects, customCarouselImages, tiltDirection = "inward" }: HeroProps) {
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { 
     content: "Visual Designer based in Ho Chi Minh City", 
     fontSize: { desktop: 80, tablet: 60, mobile: 32 },
@@ -426,7 +427,8 @@ const formatFs = (val: string, fallback: string) => {
         {/* 3D Intro Carousel */}
         {showCarousel && (
           <HeroIntroCarousel 
-            projects={finalProjects} 
+            projects={finalProjects}
+            tiltDirection={tiltDirection} 
             onComplete={handleCarouselComplete} 
           />
         )}

@@ -14,6 +14,7 @@ interface CarouselImage {
 
 export default function AdminCarousel() {
   const [images, setImages] = useState<CarouselImage[]>([]);
+  const [tiltDirection, setTiltDirection] = useState<"inward" | "outward">("inward");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [newUrl, setNewUrl] = useState("");
@@ -51,7 +52,7 @@ export default function AdminCarousel() {
       setSaving(true);
       const { error } = await createClient()
         .from("site_content")
-        .upsert({ id: "hero_carousel", data: { images } });
+        .upsert({ id: "hero_carousel", data: { images, tiltDirection } });
         
       if (error) throw error;
       alert("Đã lưu thành công!");
@@ -79,7 +80,7 @@ export default function AdminCarousel() {
   const uploadFiles = async (files: File[]) => {
     setUploading(true);
     try {
-      const newImages = [];
+      const newImages: CarouselImage[] = [];
       for (const file of files) {
         // Nén ảnh HD sắc nét
         const compressed = await compressImage(file, { maxWidth: 1920, maxHeight: 1920, quality: 0.85, maxSizeMB: 1 });
@@ -255,6 +256,12 @@ export default function AdminCarousel() {
               <button onClick={handleReplay} className="text-xs bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg font-medium mr-2">
                 Replay Animation
               </button>
+              <button 
+                onClick={() => setTiltDirection(prev => prev === 'inward' ? 'outward' : 'inward')}
+                className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors ml-4"
+              >
+                Nghiêng: {tiltDirection === 'inward' ? 'Hướng vào (Inward)' : 'Hướng ra (Outward)'}
+              </button>
               <div className="flex bg-zinc-950 border border-zinc-800 rounded-lg p-1">
                 <button onClick={() => setPreviewMode("desktop")} className={`p-1.5 rounded ${previewMode === "desktop" ? "bg-zinc-800 text-white" : "text-zinc-500"}`}>
                   <Monitor className="w-4 h-4" />
@@ -277,7 +284,7 @@ export default function AdminCarousel() {
                 "w-[1440px] h-[900px] rounded-2xl scale-[0.4]"
               }`}
             >
-              <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} />
+              <HeroIntroCarousel key={previewKey} projects={previewProjects} onComplete={() => {}} isAdminPreview={true} deviceMode={previewMode} tiltDirection={tiltDirection} />
             </div>
           </div>
         </div>
