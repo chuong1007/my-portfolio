@@ -22,7 +22,7 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
   const [currentIndex, setCurrentIndex] = useState(0);
   const [phase, setPhase] = useState<"enter" | "slide" | "finished" | "hidden">("enter");
   const [isShrunk, setIsShrunk] = useState(false);
-  const [slideConfig, setSlideConfig] = useState({ duration: 0.32, ease: "linear" });
+  const [slideConfig, setSlideConfig] = useState<{ duration: number; ease: any }>({ duration: 0.32, ease: "linear" });
   
   const [isMobileDevice, setIsMobileDevice] = useState(deviceMode === "mobile");
   
