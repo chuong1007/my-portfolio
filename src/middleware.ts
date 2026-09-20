@@ -38,20 +38,36 @@ export async function middleware(request: NextRequest) {
   let isPublished = true;
   
   try {
-    const authResult = await supabase.auth.getUser();
-    user = authResult.data?.user;
+    // 1. Check session first (no network request, just reads cookies)
+    const { data: { session } } = await supabase.auth.getSession();
 
-    // Check if site is published
-    const { data: globalSettings } = await supabase
-      .from('site_content')
-      .select('data')
-      .eq('id', 'global_settings')
-      .single();
+    // 2. Fetch global_settings using REST API with caching to save Disk IO
+    const settingsUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/site_content?id=eq.global_settings&select=data`;
+    const res = await fetch(settingsUrl, {
+      headers: {
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!}`
+      },
+      next: { revalidate: 60 } // Cache for 60s
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.length > 0) {
+        isPublished = data[0]?.data?.isPublished !== false;
+      }
+    }
 
-    isPublished = globalSettings?.data?.isPublished !== false; // Default to true if not set
+    // 3. Only verify user via DB if accessing /admin OR if site is offline and they have a session cookie
+    const isProtectingAdmin = request.nextUrl.pathname.startsWith('/admin');
+    const needsUserCheck = isProtectingAdmin || (!isPublished && session);
+
+    if (needsUserCheck) {
+      const authResult = await supabase.auth.getUser();
+      user = authResult.data?.user;
+    }
   } catch (err) {
     console.error("Middleware Supabase fetch error:", err);
-    // On error, we assume it's published to avoid breaking the public site
   }
 
   // If site is unpublished, redirect non-admins to coming-soon (except /admin routes)
