@@ -42,7 +42,7 @@ export default function TagProjectGrid({ projects }: { projects: Project[] }) {
               )}
 
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-[var(--text-primary)] backdrop-blur-sm bg-white/10">
+                <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-white backdrop-blur-sm bg-white/10">
                   Xem ngay
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
