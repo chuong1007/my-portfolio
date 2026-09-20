@@ -92,3 +92,19 @@ Tất cả các thay đổi đáng chú ý của dự án sẽ được ghi lạ
 | `src/components/sections/Gallery.tsx` | Modified | Fix lỗi padding |
 | `src/components/sections/About.tsx` | Modified | Xóa viền emoji, thêm CSS variables |
 | `src/components/sections/Contact.tsx` | Modified | CSS variables |
+
+## [2026-09-20] - AI Chatbot & UX Enhancement
+### Added
+- Tính năng bật/tắt hiển thị Chatbot AI Public từ Admin Dashboard, đồng bộ vào `site_content (global_settings)`.
+- Fallback message hiển thị thêm 3 câu hỏi FAQ gợi ý khi AI không tìm thấy câu trả lời.
+- Cải thiện UX nhập Keywords trong form Admin thành dạng Tag Input cao cấp, tự động gán nhãn và hỗ trợ phím tắt (Enter, Comma, Backspace).
+
+### Fixed
+- Lỗi tìm kiếm Fuse.js không hoạt động với array, fix bug "alo" bị điều hướng sai câu trả lời.
+- Lỗi component `m.div` tàng hình do thiếu bọc `<LazyMotion>`.
+- Lỗi giao diện Toast Success bị đè, thiếu hiển thị trạng thái và bị giới hạn layout fixed.
+- Text và Icon (Zoom Kính lúp) trên Hover Overlay bị đổi thành màu đen khi ở giao diện Light Mode. Sửa thành cứng `text-white`.
+- Đổi cách xưng hô từ "Anh/chị" thành "Anh/ Chị" trên toàn hệ thống (dữ liệu mẫu & tin nhắn mặc định).
+
+### Changed
+- Dọn dẹp các tệp mã nguồn python/js dư thừa trong dự án để repo gọn gàng.

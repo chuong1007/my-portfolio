@@ -36,7 +36,10 @@
     "gotchas": [
       "Không bao giờ chặn scroll event bằng setTimeout lâu gây cản trở cuộn của user. Luôn dùng requestAnimationFrame và có cơ chế cancel bằng wheel/touchstart.",
       "Check kỹ điều kiện hiển thị CSS class, nếu có variant homepage coi chừng nuốt mất class styling cơ bản (Lỗi xảy ra ở Gallery.tsx).",
-      "Khi thiết kế layout cho Admin Preview, dùng !isAdmin thay vì !isEditor để breakpoint giả lập không bị ghi đè bởi kích thước màn hình vật lý (Tailwind md:)."
+      "Khi thiết kế layout cho Admin Preview, dùng !isAdmin thay vì !isEditor để breakpoint giả lập không bị ghi đè bởi kích thước màn hình vật lý (Tailwind md:).",
+      "Fuse.js với cấu hình getFn khi map qua Array có thể tự động bọc phần tử trong Object {v, i}. Chú ý khi xử lý tìm kiếm với keywords: string[].",
+      "Framer Motion: Khi dùng các component tối ưu m.div, bắt buộc phải wrap toàn bộ ở ngoài bằng <LazyMotion features={domAnimation}> nếu không component sẽ không được render một cách âm thầm (silent failure).",
+      "Light/Dark Mode: Khi làm hover overlay nền đen, icon/text nằm trên overlay đó phải dùng text-white cứng thay vì text-[var(--text-primary)] (vì text-primary sẽ bị đổi thành đen trong Light Mode gây chìm mất chữ/icon)."
     ],
     "conventions": [
       "Biến màu trong code phải lấy từ biến CSS (VD: var(--bg-base)) để hỗ trợ Dark Mode"
