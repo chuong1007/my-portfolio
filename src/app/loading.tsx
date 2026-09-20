@@ -18,9 +18,13 @@ export default function Loading({ isCompleting = false }: { isCompleting?: boole
 
   return (
     <div className={`fixed inset-0 z-[100] w-screen h-screen flex flex-col items-center justify-center bg-[var(--bg-base)] transition-opacity duration-300 ${isCompleting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      <div className="flex flex-col items-center gap-4 w-full max-w-[200px] overflow-hidden">
+      <div className="flex flex-col items-center gap-6 w-full max-w-[200px] overflow-hidden">
+        {/* Apple-style Logo */}
+        <div className="text-[var(--text-primary)] font-black tracking-widest text-xl mb-2 animate-pulse">
+          CHUONG.GRAPHIC
+        </div>
         {/* Apple-style indeterminate progress bar */}
-        <div className="h-[3px] w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
+        <div className="h-[3px] w-full bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden relative">
           <div 
             className="absolute top-0 bottom-0 left-0 h-full rounded-full"
             style={{
