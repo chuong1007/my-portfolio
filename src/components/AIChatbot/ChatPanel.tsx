@@ -16,7 +16,7 @@ type Message = {
   isSuggestions?: boolean;
 };
 
-const FALLBACK_MESSAGE = "Em chưa có thông tin chính xác cho ý này. Anh/chị vui lòng chọn các gợi ý bên dưới hoặc nhấn nút 'Liên hệ trực tiếp' để trao đổi với Chương nhé!";
+const FALLBACK_MESSAGE = "Em chưa có thông tin chính xác cho ý này. Anh/ Chị vui lòng chọn các gợi ý bên dưới hoặc nhấn nút 'Liên hệ trực tiếp' để trao đổi với Chương nhé!";
 
 const DEFAULT_KNOWLEDGE = [
   { id: '1', category: 'Giới thiệu', question: 'Giới thiệu một chút về Chương được không?', answer: 'Chào anh/chị, em là AI của Trần Thanh Chương. Sếp em là một Senior Graphic / Web UI & Packaging Designer với hơn 7 năm kinh nghiệm thực chiến. Sếp chuyên trị việc xây dựng hình ảnh thương hiệu đa nền tảng, từ ấn phẩm truyền thông, bao bì sản phẩm cho đến giao diện Website.', keywords: ['chuong la ai', 'gioi thieu', 'ban la ai'], sort_order: 1, is_active: true },
@@ -27,7 +27,7 @@ const DEFAULT_KNOWLEDGE = [
   { id: '6', category: 'Kinh nghiệm', question: 'Chương có biết làm việc chung với team Marketing không?', answer: 'Rất rành là đằng khác ạ! Sếp em từng tự tay chạy quảng cáo Google & Facebook và lên kế hoạch từ khóa, nên sếp phối hợp với team Marketing/Content cực kỳ ăn ý để cho ra các thiết kế bám sát mục tiêu chiến dịch.', keywords: ['marketing', 'content', 'quang cao'], sort_order: 6, is_active: true },
   { id: '7', category: 'Mục tiêu', question: 'Định hướng công việc của Chương là gì?', answer: 'Mục tiêu của sếp em là đào sâu nghiên cứu tâm lý thị giác và hành vi người dùng, từ đó dẫn dắt các dự án sáng tạo định vị thương hiệu toàn diện, mang lại trải nghiệm số hoàn hảo nhất.', keywords: ['dinh huong', 'muc tieu', 'ke hoach'], sort_order: 7, is_active: true },
   { id: '8', category: 'Sở thích', question: 'Ngoài giờ làm, Chương thích làm gì?', answer: 'Sếp em thích viết lách, nghe nhạc, xem phim, du lịch. Và đam mê lớn nhất vẫn là đọc các tài liệu về tâm lý học ứng dụng vào thiết kế.', keywords: ['so thich', 'cuoc song'], sort_order: 8, is_active: true },
-  { id: '9', category: 'Liên hệ', question: 'Làm sao để liên lạc trực tiếp trao đổi dự án với Chương?', answer: 'Anh/chị gọi ngay hoặc add Zalo sếp em qua số 038 429 7019 nhé. Hoặc gửi yêu cầu chi tiết qua email chuong.thanh1007@gmail.com. Sếp em rep cực nhanh ạ!', keywords: ['lien he', 'zalo', 'sdt', 'email', 'contact'], sort_order: 9, is_active: true },
+  { id: '9', category: 'Liên hệ', question: 'Làm sao để liên lạc trực tiếp trao đổi dự án với Chương?', answer: 'Anh/ Chị gọi ngay hoặc add Zalo sếp em qua số 038 429 7019 nhé. Hoặc gửi yêu cầu chi tiết qua email chuong.thanh1007@gmail.com. Sếp em rep cực nhanh ạ!', keywords: ['lien he', 'zalo', 'sdt', 'email', 'contact'], sort_order: 9, is_active: true },
 ];
 
 export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
