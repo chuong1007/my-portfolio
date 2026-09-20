@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BarChart3, ChevronRight, ChevronUp, ChevronDown, Image as ImageIcon, LayoutDashboard, LogOut, Pencil, Plus, Settings, Target, Trash2, Tag, GripVertical, MoreHorizontal, Save, FileText, Eye, EyeOff, Star, Palette } from "lucide-react";
 import { Reorder } from "framer-motion";
 import { createClient } from "@/lib/supabase";
@@ -12,6 +12,7 @@ import { ProjectForm } from "@/components/admin/ProjectForm";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { AITab } from "@/components/admin/AITab";
 import { PopupPreview } from "@/components/admin/PopupPreview";
 import dynamic from "next/dynamic";
 
@@ -40,13 +41,14 @@ function getMockProjectsAsDb(): (DbProject & { images: DbProjectImage[]; isMock?
 
 export default function AdminPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const editId = searchParams.get("edit");
   const tabParam = searchParams.get("tab");
 
   const [projects, setProjects] = useState<(DbProject & { images: DbProjectImage[]; isMock?: boolean })[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics' | 'popup' | 'dashboard'>(
+  const [activeTab, setActiveTab] = useState<'projects' | 'homepage' | 'analytics' | 'popup' | 'dashboard' | 'ai'>(
     tabParam === 'popup' ? 'popup' :
     tabParam === 'homepage' ? 'homepage' : 
     tabParam === 'analytics' ? 'analytics' : 'dashboard'
@@ -58,7 +60,10 @@ export default function AdminPage() {
   
   useEffect(() => {
     if (tabParam === 'homepage') setActiveTab('homepage');
-    if (tabParam === 'analytics') setActiveTab('analytics');
+    else if (tabParam === 'analytics') setActiveTab('analytics');
+    else if (tabParam === 'popup') setActiveTab('popup');
+    else if (tabParam === 'ai') setActiveTab('ai');
+    else setActiveTab('dashboard');
   }, [tabParam]);
 
   // Site content state
@@ -80,6 +85,7 @@ export default function AdminPage() {
   const [savingContent, setSavingContent] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState('');
   const [isPublished, setIsPublished] = useState(true);
+  const [isChatbotActive, setIsChatbotActive] = useState(true);
   const [showProjectForm, setShowProjectForm] = useState(false);
   const [editingProject, setEditingProject] = useState<(DbProject & { images: DbProjectImage[] }) | null>(null);
 
@@ -143,6 +149,7 @@ export default function AdminPage() {
         const d = row.data as Record<string, unknown>;
         if (row.id === 'global_settings') {
           setIsPublished(d.isPublished !== false);
+          setIsChatbotActive(d.isChatbotActive !== false);
         }
         if (row.id === 'hero') setHeroData({ 
           title: getRawText(d.title), 
@@ -229,6 +236,29 @@ export default function AdminPage() {
       updated_at: new Date().toISOString()
     });
     revalidateCache('/');
+  };
+
+  const toggleChatbotStatus = async () => {
+    const newStatus = !isChatbotActive;
+    setIsChatbotActive(newStatus);
+    const supabase = createClient();
+    
+    // Fetch current settings to merge
+    const { data: currentSettings } = await supabase
+      .from('site_content')
+      .select('data')
+      .eq('id', 'global_settings')
+      .single();
+    
+    const currentData = (currentSettings?.data as Record<string, any>) || {};
+
+    await supabase
+      .from('site_content')
+      .upsert({
+        id: 'global_settings',
+        data: { ...currentData, isChatbotActive: newStatus },
+        updated_at: new Date().toISOString()
+      });
   };
 
   const handleToggleProjectVisibility = async (id: string, currentStatus: boolean) => {
@@ -533,75 +563,110 @@ export default function AdminPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 {/* Projects Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-blue-500/10 text-blue-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Dự án ({projects?.length || 0})</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Quản lý, thêm mới và sắp xếp các dự án hiển thị trên trang chủ.</p>
+              <h3 className="text-xl font-bold text-white leading-tight">Dự án ({projects?.length || 0})</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Quản lý, thêm mới và sắp xếp các dự án hiển thị trên trang chủ.</p>
               <Link href="/admin/projects" className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
                 Quản lý Dự án
               </Link>
             </div>
 
             {/* Homepage Content Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-purple-500/10 text-purple-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Trang chủ</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Tùy chỉnh nội dung text, thông tin About, và thông tin liên hệ.</p>
-              <button onClick={() => setActiveTab('homepage')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
+              <h3 className="text-xl font-bold text-white leading-tight">Trang chủ</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Tùy chỉnh nội dung text, thông tin About, và thông tin liên hệ.</p>
+              <button onClick={() => router.push('/admin?tab=homepage')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
                 Tùy chỉnh Nội dung
               </button>
             </div>
 
             {/* Blogs Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Bài viết Blog</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Viết và xuất bản các bài viết chia sẻ kiến thức mới.</p>
+              <h3 className="text-xl font-bold text-white leading-tight">Bài viết Blog</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Viết và xuất bản các bài viết chia sẻ kiến thức mới.</p>
               <Link href="/admin/blogs" className="flex items-center justify-center w-full py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg transition-colors text-sm font-medium">
                 Quản lý Blog
               </Link>
             </div>
 
             {/* Analytics Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Thống kê</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Theo dõi lượt truy cập và hiệu suất của website.</p>
-              <button onClick={() => setActiveTab('analytics')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
+              <h3 className="text-xl font-bold text-white leading-tight">Thống kê</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Theo dõi lượt truy cập và hiệu suất của website.</p>
+              <button onClick={() => router.push('/admin?tab=analytics')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
                 Xem Thống kê
               </button>
             </div>
 
             {/* Popup Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-pink-500/10 text-pink-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-pink-500/10 text-pink-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Popup Quảng cáo</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Thiết lập popup hiển thị khi người dùng vào trang.</p>
-              <button onClick={() => setActiveTab('popup')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
+              <h3 className="text-xl font-bold text-white leading-tight">Popup Quảng cáo</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Thiết lập popup hiển thị khi người dùng vào trang.</p>
+              <button onClick={() => router.push('/admin?tab=popup')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
                 Cài đặt Popup
               </button>
             </div>
             
             {/* Pages Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group">
-              <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Trang phụ</h3>
-              <p className="text-zinc-400 text-sm mb-6 min-h-[40px]">Quản lý các trang nội dung tĩnh khác.</p>
+              <h3 className="text-xl font-bold text-white leading-tight">Trang phụ</h3>
+            </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Quản lý các trang nội dung tĩnh khác.</p>
               <Link href="/admin/pages" className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
                 Quản lý Trang
               </Link>
+            </div>
+
+            {/* AI Chatbot Card */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all group flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-cyan-500/10 text-cyan-400 rounded-lg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white leading-tight">Trợ lý AI (Q&A)</h3>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleChatbotStatus(); }}
+                  title={isChatbotActive ? "Tắt Chatbot ngoài trang chủ" : "Bật Chatbot ngoài trang chủ"}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${isChatbotActive ? "bg-emerald-500" : "bg-zinc-700"}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isChatbotActive ? "translate-x-6" : "translate-x-1"}`} />
+                </button>
+              </div>
+              <p className="text-zinc-400 text-sm mb-6 flex-grow">Tùy chỉnh câu hỏi và trả lời tự động cho AI Chatbot.</p>
+              <button onClick={() => router.push('/admin?tab=ai')} className="flex items-center justify-center w-full py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm font-medium">
+                Quản lý Dữ liệu AI
+              </button>
             </div>
           </div>
         </div>
@@ -1331,6 +1396,29 @@ export default function AdminPage() {
               ctaLink={popupData.ctaLink}
             />
           </div>
+        </div>
+      )}
+      {activeTab === 'ai' && !loading && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold">Quản lý AI Chatbot</h1>
+            <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 rounded-full py-1.5 px-2 shadow-sm">
+              <div className="flex items-center gap-2 pl-3 pr-2 border-r border-zinc-800">
+                <span className={`w-2 h-2 rounded-full ${isChatbotActive ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
+                <span className={`text-xs font-bold uppercase tracking-wider ${isChatbotActive ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                  {isChatbotActive ? 'Chatbot Bật' : 'Chatbot Tắt'}
+                </span>
+              </div>
+              <button
+                onClick={toggleChatbotStatus}
+                title={isChatbotActive ? "Tắt Chatbot ngoài trang chủ" : "Bật Chatbot ngoài trang chủ"}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-300 focus:outline-none ${isChatbotActive ? "bg-emerald-500" : "bg-zinc-700"}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${isChatbotActive ? "translate-x-6" : "translate-x-1"}`} />
+              </button>
+            </div>
+          </div>
+          <AITab />
         </div>
       )}
     </div>

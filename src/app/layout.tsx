@@ -75,6 +75,7 @@ import { GlobalPreviewWrapper } from "./GlobalPreviewWrapper";
 import { Analytics } from "@vercel/analytics/next";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { SmoothScrollSnap } from "@/components/SmoothScrollSnap";
+import ChatbotGate from "@/components/AIChatbot/ChatbotGate";
 
 export default function RootLayout({
   children,
@@ -111,6 +112,7 @@ export default function RootLayout({
               {children}
             </GlobalPreviewWrapper>
             <SmoothScrollSnap />
+            <ChatbotGate />
           </AdminProvider>
         </ThemeProvider>
         <Analytics />

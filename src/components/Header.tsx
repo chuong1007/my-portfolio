@@ -185,11 +185,19 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (window.scrollY > 20) {
+        setScrolled(true);
+        if (!introFinished) {
+          setIntroFinished(true);
+          window.dispatchEvent(new Event("introFinished"));
+        }
+      } else {
+        setScrolled(false);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [introFinished]);
 
   // Remove special hiding for home-2 to allow guest mode
   // if (pathname === '/admin/builder') return null;
@@ -258,13 +266,23 @@ export function Header() {
       <header
         className={cn(
           "fixed",
-          (isAdmin && globalPreviewMode !== "desktop") ? "top-6 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-6 py-4 md:px-8 transition-all duration-300" : "top-0 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-300",
+          (isAdmin && globalPreviewMode !== "desktop") ? "top-6 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-6 py-4 md:px-8 transition-all duration-700" : "top-0 left-0 right-0 z-[1010] flex items-center justify-between gap-4 px-4 py-3 md:px-6 md:py-4 lg:px-12 transition-all duration-700",
           (scrolled)
             ? "bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-subtle)]"
-            : "bg-transparent"
+            : "bg-transparent",
+          !introFinished && "opacity-0 -translate-y-full pointer-events-none"
         )}
       >
-        <Link href="/" className="flex items-center group flex-shrink-0">
+        <Link 
+          href="/" 
+          className="flex items-center group flex-shrink-0"
+          onClick={(e) => {
+            if (pathname === "/") {
+              e.preventDefault();
+              window.location.reload();
+            }
+          }}
+        >
           {renderLogo()}
         </Link>
 
