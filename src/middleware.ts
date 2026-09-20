@@ -34,16 +34,25 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null;
+  let isPublished = true;
+  
+  try {
+    const authResult = await supabase.auth.getUser();
+    user = authResult.data?.user;
 
-  // Check if site is published
-  const { data: globalSettings } = await supabase
-    .from('site_content')
-    .select('data')
-    .eq('id', 'global_settings')
-    .single();
+    // Check if site is published
+    const { data: globalSettings } = await supabase
+      .from('site_content')
+      .select('data')
+      .eq('id', 'global_settings')
+      .single();
 
-  const isPublished = globalSettings?.data?.isPublished !== false; // Default to true if not set
+    isPublished = globalSettings?.data?.isPublished !== false; // Default to true if not set
+  } catch (err) {
+    console.error("Middleware Supabase fetch error:", err);
+    // On error, we assume it's published to avoid breaking the public site
+  }
 
   // If site is unpublished, redirect non-admins to coming-soon (except /admin routes)
   if (!isPublished && !user && !request.nextUrl.pathname.startsWith('/admin') && request.nextUrl.pathname !== '/coming-soon') {
