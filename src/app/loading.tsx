@@ -6,7 +6,6 @@ export default function Loading({ isCompleting = false }: { isCompleting?: boole
   
   useEffect(() => {
     if (isCompleting) {
-      // Allow the exit transition to play
       const timer = setTimeout(() => setShow(false), 300);
       return () => clearTimeout(timer);
     } else {
@@ -18,31 +17,17 @@ export default function Loading({ isCompleting = false }: { isCompleting?: boole
 
   return (
     <div className={`fixed inset-0 z-[100] w-screen h-screen flex flex-col items-center justify-center bg-[var(--bg-base)] transition-opacity duration-300 ${isCompleting ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      <div className="flex flex-col items-center gap-6 w-full max-w-[200px] overflow-hidden">
-        {/* Apple-style Logo */}
-        <div className="text-[var(--text-primary)] font-black tracking-widest text-xl mb-2 animate-pulse">
-          CHUONG.GRAPHIC
-        </div>
-        {/* Apple-style indeterminate progress bar */}
-        <div className="h-[3px] w-full bg-zinc-300 dark:bg-zinc-700 rounded-full overflow-hidden relative">
-          <div 
-            className="absolute top-0 bottom-0 left-0 h-full rounded-full"
-            style={{
-              width: "50%",
-              color: "var(--text-primary)",
-              background: "linear-gradient(to right, transparent, currentColor)",
-              animation: "indeterminate-slide 2s infinite ease-in-out"
-            }}
-          />
+      <div className="w-full max-w-[200px] overflow-hidden">
+        {/* Nền xám nhạt ở dưới cùng (cố định) */}
+        <div className="h-[3px] w-full bg-zinc-800 rounded-full overflow-hidden relative">
+          
+          {/* Thanh trắng thứ 1 */}
+          <div className="comet-bar" />
+          {/* Thanh trắng thứ 2 xuất hiện sớm hơn (delay 1s) để nối đuôi */}
+          <div className="comet-bar" style={{ animationDelay: '0.75s' }} />
+          
         </div>
       </div>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes indeterminate-slide {
-          0% { transform: translateX(-100%); }
-          75% { transform: translateX(200%); }
-          100% { transform: translateX(200%); }
-        }
-      `}} />
     </div>
   );
 }
