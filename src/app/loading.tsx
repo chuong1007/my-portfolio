@@ -22,8 +22,11 @@ export default function Loading({ isCompleting = false }: { isCompleting?: boole
         {/* Apple-style indeterminate progress bar */}
         <div className="h-[3px] w-full bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden relative">
           <div 
-            className="absolute top-0 bottom-0 left-0 h-full w-1/2 bg-gradient-to-r from-transparent to-zinc-900 dark:to-zinc-100 rounded-full"
+            className="absolute top-0 bottom-0 left-0 h-full rounded-full"
             style={{
+              width: "50%",
+              color: "var(--text-primary)",
+              background: "linear-gradient(to right, transparent, currentColor)",
               animation: "indeterminate-slide 2s infinite ease-in-out"
             }}
           />
