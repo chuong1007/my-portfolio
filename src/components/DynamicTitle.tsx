@@ -5,7 +5,6 @@ import { useEffect } from "react";
 export function DynamicTitle() {
   useEffect(() => {
     let originalTitle = document.title;
-    let timeoutId: NodeJS.Timeout;
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -21,7 +20,6 @@ export function DynamicTitle() {
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      clearTimeout(timeoutId);
     };
   }, []);
 

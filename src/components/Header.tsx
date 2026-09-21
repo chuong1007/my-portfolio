@@ -185,7 +185,13 @@ export function Header() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
+      let currentScroll = window.scrollY;
+      const scrollContainer = document.querySelector('.custom-scrollbar');
+      if (scrollContainer) {
+        currentScroll = Math.max(currentScroll, scrollContainer.scrollTop);
+      }
+
+      if (currentScroll > 20) {
         setScrolled(true);
         if (!introFinished) {
           setIntroFinished(true);
@@ -195,8 +201,10 @@ export function Header() {
         setScrolled(false);
       }
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    
+    // Use capture phase to catch scroll events from .custom-scrollbar
+    window.addEventListener("scroll", handleScroll, { capture: true });
+    return () => window.removeEventListener("scroll", handleScroll, { capture: true });
   }, [introFinished]);
 
   // Remove special hiding for home-2 to allow guest mode

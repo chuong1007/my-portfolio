@@ -225,7 +225,7 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               className={cn(
-                "fixed inset-0 z-[998] bg-black/60 backdrop-blur-sm",
+                "fixed inset-0 z-[1015] bg-black/60 backdrop-blur-sm",
                 globalPreviewMode === 'desktop' ? "md:hidden" : (globalPreviewMode === 'mobile' ? "block" : "hidden")
               )}
               onClick={onClose}
@@ -237,7 +237,7 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-[calc(108px+env(safe-area-inset-bottom))] right-4 w-[380px] max-w-[calc(100%-2rem)] h-[75%] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[999] overflow-hidden sm:pb-0"
+              className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-[calc(108px+env(safe-area-inset-bottom))] right-4 w-[380px] max-w-[calc(100%-2rem)] h-[75%] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[1016] overflow-hidden sm:pb-0"
               role="dialog"
               aria-label="Cửa sổ AI Chatbot"
             >

@@ -120,7 +120,7 @@ export default function ChatbotGate() {
         onClick={handleToggle}
         aria-label={isOpen ? "Đóng Chatbot" : "Mở Chatbot"}
         className={cn(
-          "fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(2.5rem+env(safe-area-inset-bottom))] right-4 md:right-6 w-14 h-14 bg-blue-600 text-white flex items-center justify-center shadow-lg transition-all z-[1000] outline-none focus:outline-none focus-visible:outline-none focus:ring-0",
+          "fixed bottom-[calc(0.5rem+env(safe-area-inset-bottom))] md:bottom-[calc(2.5rem+env(safe-area-inset-bottom))] right-4 md:right-6 w-14 h-14 bg-blue-600 text-white flex items-center justify-center shadow-lg transition-all z-[1017] outline-none focus:outline-none focus-visible:outline-none focus:ring-0",
           showGate 
             ? "scale-100 opacity-100 duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.1)]" 
             : "scale-0 opacity-0 duration-300 pointer-events-none",
