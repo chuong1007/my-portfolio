@@ -289,9 +289,9 @@ export function Header() {
         <div className="flex items-center gap-6">
           <nav className={cn(
             "items-center gap-6",
-            isAdmin && globalPreviewMode !== 'desktop' ? "hidden" : "hidden lg:flex"
+            globalPreviewMode !== 'desktop' ? "hidden" : "hidden lg:flex"
           )}>
-            {isAdmin && (
+            {isAdmin && isEditMode && (
               <button
                 onClick={togglePublishStatus}
                 className={cn(
@@ -415,6 +415,16 @@ export function Header() {
               </div>
             )}
 
+            {/* Freelance Badge - bên trái chữ PROJECTS */}
+            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-tighter border border-blue-500 text-blue-500 bg-transparent">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[20px] h-[20px] text-blue-500 shrink-0 overflow-visible">
+                <circle cx="12" cy="12" r="12" fill="currentColor" className="animate-custom-glow blur-[2px]" />
+                <circle cx="12" cy="12" r="8" fill="currentColor" />
+                <path d="M8.5 12L10.5 14L15.5 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Available for freelance & remote work
+            </div>
+
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]
               .filter((item, index, self) =>
                 index === self.findIndex((t) => t.href === item.href)
@@ -455,11 +465,24 @@ export function Header() {
             </div>
           </nav>
 
-          {/* Mobile: ThemeToggle + Menu Toggle */}
+          {/* Mobile/Tablet controls */}
           <div className={cn(
-            "flex items-center gap-2",
-            isAdmin && globalPreviewMode !== 'desktop' ? "" : "lg:hidden"
+            "flex items-center gap-3",
+            globalPreviewMode !== 'desktop' ? "flex" : "lg:hidden"
           )}>
+            {/* Tablet Only Badge */}
+            <div className={cn(
+              "items-center justify-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-tighter border border-blue-500 text-blue-500 bg-transparent",
+              globalPreviewMode === 'mobile' ? "hidden" : globalPreviewMode === 'tablet' ? "flex" : "hidden md:flex lg:hidden"
+            )}>
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[18px] h-[18px] text-blue-500 shrink-0 overflow-visible">
+                <circle cx="12" cy="12" r="12" fill="currentColor" className="animate-custom-glow blur-[2px]" />
+                <circle cx="12" cy="12" r="8" fill="currentColor" />
+                <path d="M8.5 12L10.5 14L15.5 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Available for freelance
+            </div>
+
             <ThemeToggle size="sm" />
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -475,6 +498,16 @@ export function Header() {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[1000] bg-[var(--bg-base)]/98 backdrop-blur-md flex flex-col items-center pt-24 pb-10 px-6 animate-in fade-in duration-300">
+          
+          {/* Mobile Visitor Badge */}
+          <div className="flex items-center justify-center gap-2 px-4 py-2 mt-8 -mb-4 rounded-full text-[13px] font-semibold tracking-tighter border border-blue-500 text-blue-500 bg-transparent">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-[24px] h-[24px] text-blue-500 shrink-0 overflow-visible">
+              <circle cx="12" cy="12" r="12" fill="currentColor" className="animate-custom-glow blur-[2px]" />
+              <circle cx="12" cy="12" r="8" fill="currentColor" />
+              <path d="M8.5 12L10.5 14L15.5 9" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Available for freelance & remote work
+          </div>
 
           <nav className="flex flex-col items-center gap-8 w-full mt-12 overflow-y-auto">
             {[...STATIC_NAV_ITEMS, ...dynamicNavItems]

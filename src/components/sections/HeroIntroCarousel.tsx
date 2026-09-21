@@ -42,26 +42,22 @@ export function HeroIntroCarousel({ projects, onComplete, isAdminPreview = false
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // If it's explicitly passed as admin preview, just use it
-    if (isAdminPreview && deviceMode) {
-      setIsMobileDevice(deviceMode === "mobile");
-      return;
-    }
-
+    // If deviceMode is explicitly mobile via props (like in Admin), we can use it.
+    // But since it might be resizing, let's just use the ResizeObserver.
     const container = containerRef.current;
     if (!container) return;
 
     // Use ResizeObserver to detect ACTUAL container width
-    // This perfectly supports device simulator frames and real mobile devices
+    // Threshold 640px to separate mobile from tablet. Tablet (>= 640) will use desktop 3D carousel.
     const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
-        setIsMobileDevice(entry.contentRect.width < 768);
+        setIsMobileDevice(entry.contentRect.width < 640);
       }
     });
 
     resizeObserver.observe(container);
     return () => resizeObserver.disconnect();
-  }, [isAdminPreview, deviceMode]);
+  }, [deviceMode]);
 
 
   const displayProjects = [...projects.slice(0, 8), ...projects.slice(0, 8)];

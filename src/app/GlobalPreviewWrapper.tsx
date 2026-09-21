@@ -9,6 +9,7 @@ import { useAdmin } from "@/context/AdminContext";
 import { cn } from "@/lib/utils";
 import { AdminModal } from "@/components/AdminModal";
 import { Edit2, Eye, Monitor, Smartphone, Tablet } from "lucide-react";
+import ChatbotGate from "@/components/AIChatbot/ChatbotGate";
 
 function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -38,6 +39,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         <Contact />
+        {!isAdminPage && !isComingSoon && <ChatbotGate />}
       </div>
     );
   }
@@ -50,7 +52,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
 
       {isPreviewActive ? (
         // Device Frame Container
-        <div className="fixed inset-0 z-40 bg-[var(--bg-base)] flex items-start justify-center pt-24 overflow-auto pb-12">
+        <div className="fixed inset-0 z-40 bg-[var(--bg-base)] overflow-hidden">
           {/* Dark overlay behind device */}
           <div className="absolute inset-0 bg-[var(--bg-base)]" />
 
@@ -61,48 +63,46 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
             <button
               onClick={() => toggleEditMode()}
               className={cn(
-                "flex items-center justify-center gap-3 px-6 py-2.5 rounded-full text-sm font-bold uppercase tracking-widest transition-all border",
+                "flex items-center justify-center gap-3 px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-xl backdrop-blur-md border",
                 isEditMode
-                  ? "bg-blue-600 text-white border-blue-500 shadow-lg shadow-blue-500/20"
-                  : "bg-[var(--bg-elevated)] text-[var(--text-muted)] border-[var(--border-default)] hover:text-[var(--text-primary)]"
+                  ? "bg-blue-600/90 text-white border-blue-500/50 shadow-blue-500/20"
+                  : "bg-green-500/10 text-green-400 border-green-500/20 shadow-green-500/10"
               )}
             >
               {isEditMode ? <Edit2 className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               {isEditMode ? "Admin Mode: ON" : "Edit Mode: OFF"}
             </button>
-            
-            {/* Device Toggle */}
-            <div className="flex bg-[var(--bg-elevated)] rounded-full border border-[var(--border-default)] p-1 shadow-lg shadow-black/50">
+
+            {/* Device Toggles */}
+            <div className="flex bg-zinc-900/90 backdrop-blur-md rounded-full border border-zinc-800 p-1 shadow-xl">
               {([
                 { mode: 'desktop' as const, icon: Monitor, label: 'Desktop' },
                 { mode: 'tablet' as const, icon: Tablet, label: 'Tablet' },
                 { mode: 'mobile' as const, icon: Smartphone, label: 'Mobile' },
-              ]).map(({ mode, icon: Icon }) => (
+              ]).map(({ mode, icon: Icon, label }) => (
                 <button
                   key={mode}
                   onClick={() => setGlobalPreviewMode(mode)}
                   className={cn(
-                    "p-3 rounded-full transition-all duration-200",
+                    "p-2.5 rounded-full transition-all duration-200",
                     globalPreviewMode === mode
-                      ? "text-blue-500 bg-blue-500/10"
-                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                      ? "bg-blue-600/20 text-blue-400"
+                      : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800"
                   )}
-                  title={mode}
+                  title={label}
                 >
-                  <Icon className="w-5 h-5" />
+                  <Icon className="w-4 h-4" />
                 </button>
               ))}
             </div>
-            
           </div>
 
-          
-          {/* Device Frame - Use Div instead of Iframe to prevent crash with {children} */}
+          {/* Device Frame */}
           <div
             className={cn(
-              "relative z-10 transition-all duration-500 ease-in-out flex flex-col overflow-hidden",
-              "border-[12px] border-[var(--border-default)] rounded-[3rem] shadow-2xl shadow-black/80 bg-[var(--bg-base)]",
-              globalPreviewMode === 'mobile' ? "w-[375px] h-[812px] scale-[0.85] origin-top" : "w-[768px] h-[1024px] scale-[0.65] origin-top"
+              "absolute top-1/2 left-1/2 z-10 transition-all duration-500 ease-in-out flex flex-col overflow-hidden",
+              "border-[12px] border-[var(--border-default)] rounded-[3rem] shadow-2xl shadow-black/80 bg-[var(--bg-base)] -translate-x-1/2 -translate-y-1/2",
+              globalPreviewMode === 'mobile' ? "w-[375px] h-[812px] scale-[0.85]" : "w-[768px] h-[1024px] scale-[0.65]"
             )}
           >
             {/* Device Notch */}
@@ -117,6 +117,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
                 {children}
               </main>
               {!isAdminPage && !isComingSoon && <Contact />}
+              {!isAdminPage && !isComingSoon && <ChatbotGate />}
             </div>
 
             {/* Device Bottom Bar */}
@@ -131,6 +132,7 @@ function GlobalPreviewContent({ children }: { children: React.ReactNode }) {
             {children}
           </main>
           {!isAdminPage && !isComingSoon && <Contact />}
+          {!isAdminPage && !isComingSoon && <ChatbotGate />}
           {!isBuilder && !isComingSoon && <AdminEditButton />}
         </>
       )}

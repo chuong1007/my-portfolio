@@ -110,6 +110,9 @@
   /* Accent */
   --accent:       #3b82f6; /* blue-500 */
   --accent-hover: #2563eb; /* blue-600 */
+
+  /* Loading Track */
+  --loading-track: #d4d4d8; /* zinc-300 */
 }
 
 /* ─── DARK MODE ─────────────────────────────────────────── */
@@ -119,6 +122,7 @@
 
   --bg-base:     #09090b;   /* zinc-950 */
   --bg-surface:  #18181b;   /* zinc-900 */
+  --loading-track: #27272a; /* zinc-800 */
   --bg-elevated: #27272a;   /* zinc-800 */
   --bg-overlay:  rgba(9,9,11,0.85);
 
@@ -355,27 +359,18 @@ body {
 }
 
 
-@keyframes loading-bar {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(300%); }
-}
+/* ── LOADING BAR (Comet Effect) ─────────────────────────────────────────── */
 
-.animate-apple-loading {
-  animation: loading-bar 1.5s ease-in-out infinite;
-}
-
-
+/* Keyframe: slide từ trái sang phải, dừng ở ngoài phải */
 @keyframes comet-slide {
-  0% { transform: translateX(-100%); }
-  66.666% { transform: translateX(200%); }
-  100% { transform: translateX(200%); }
-}
-.animate-comet {
-  animation: comet-slide 2s infinite ease-in-out;
+  0%        { transform: translateX(-100%); }
+  66.666%   { transform: translateX(200%);  }
+  100%      { transform: translateX(200%);  }
 }
 
+/* BASE (Light mode): thanh tối chạy qua nền sáng */
 .comet-bar {
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+  background: linear-gradient(to right, rgba(9, 9, 11, 0) 0%, rgba(9, 9, 11, 0.8) 100%);
   width: 50%;
   height: 100%;
   position: absolute;
@@ -383,4 +378,32 @@ body {
   left: 0;
   border-radius: 9999px;
   animation: comet-slide 1.5s infinite linear both;
+}
+.comet-bar + .comet-bar {
+  animation: comet-slide 1.5s 0.75s infinite linear both;
+}
+
+/* DARK MODE: thanh trắng chạy qua nền xám - GIỐNG HỆT BẢN GỐC */
+.dark .comet-bar {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+}
+.dark .comet-bar + .comet-bar {
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+/* Custom SVG Glow Animation */
+:root {
+  --glow-max: 0.35;
+  --glow-min: 0.08;
+}
+.dark {
+  --glow-max: 0.50;
+  --glow-min: 0.25;
+}
+@keyframes custom-glow {
+  0%, 100% { fill-opacity: var(--glow-max); }
+  50% { fill-opacity: var(--glow-min); }
+}
+.animate-custom-glow {
+  animation: custom-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

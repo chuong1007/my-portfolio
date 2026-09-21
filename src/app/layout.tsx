@@ -63,9 +63,6 @@ export const metadata: Metadata = {
     description: 'Visual Designer based in Ho Chi Minh City.',
     images: ['/og-image.png'],
   },
-  icons: {
-    icon: '/favicon.ico',
-  },
 };
 
 import { AdminProvider } from "@/context/AdminContext";
@@ -76,6 +73,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { PageViewTracker } from "@/components/PageViewTracker";
 import { SmoothScrollSnap } from "@/components/SmoothScrollSnap";
 import ChatbotGate from "@/components/AIChatbot/ChatbotGate";
+import { DynamicTitle } from "@/components/DynamicTitle";
 
 export default function RootLayout({
   children,
@@ -106,13 +104,13 @@ export default function RootLayout({
             `,
           }}
         />
+        <DynamicTitle />
         <ThemeProvider>
                     <AdminProvider>
             <GlobalPreviewWrapper>
               {children}
             </GlobalPreviewWrapper>
             <SmoothScrollSnap />
-            <ChatbotGate />
           </AdminProvider>
         </ThemeProvider>
         <Analytics />

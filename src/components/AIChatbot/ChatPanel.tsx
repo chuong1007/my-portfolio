@@ -30,12 +30,12 @@ const DEFAULT_KNOWLEDGE = [
   { id: '9', category: 'Liên hệ', question: 'Làm sao để liên lạc trực tiếp trao đổi dự án với Chương?', answer: 'Anh/ Chị gọi ngay hoặc add Zalo sếp em qua số 038 429 7019 nhé. Hoặc gửi yêu cầu chi tiết qua email chuong.thanh1007@gmail.com. Sếp em rep cực nhanh ạ!', keywords: ['lien he', 'zalo', 'sdt', 'email', 'contact'], sort_order: 9, is_active: true },
 ];
 
+const DEFAULT_WELCOME = "Chào Anh/ Chị! Em là Trợ lý AI của Trần Thanh Chương. Em có thể giúp gì cho Anh/ Chị hôm nay?";
+
 export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [knowledgeBase, setKnowledgeBase] = useState<AIKnowledgeRecord[]>([]);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "welcome", sender: "ai", text: "Chào anh/chị! Em là Trợ lý AI của Trần Thanh Chương. Em có thể giúp gì cho anh/chị hôm nay?" },
-    { id: "sugg_init", sender: "ai", text: "", isSuggestions: true }
-  ]);
+  const [welcomeMessage, setWelcomeMessage] = useState(DEFAULT_WELCOME);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [isDBReady, setIsDBReady] = useState(false);
@@ -57,6 +57,22 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
     const fetchDB = async () => {
       try {
         const supabase = createClient();
+
+        // Fetch welcome message from site_content
+        const { data: settingsData } = await supabase
+          .from("site_content")
+          .select("data")
+          .eq("id", "ai_settings")
+          .single();
+        const welcome = settingsData?.data?.welcomeMessage || DEFAULT_WELCOME;
+        setWelcomeMessage(welcome);
+
+        // Init messages with dynamic welcome
+        setMessages([
+          { id: "welcome", sender: "ai", text: welcome },
+          { id: "sugg_init", sender: "ai", text: "", isSuggestions: true }
+        ]);
+
         const { data, error } = await supabase
           .from("ai_knowledge")
           .select("*").eq("is_active", true).order("sort_order", { ascending: true });
@@ -68,6 +84,12 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
         }
       } catch (err) {
         console.error("Chatbot fetch error:", err);
+        // Still initialize messages with default welcome on error
+        setMessages([
+          { id: "welcome", sender: "ai", text: DEFAULT_WELCOME },
+          { id: "sugg_init", sender: "ai", text: "", isSuggestions: true }
+        ]);
+        setKnowledgeBase(DEFAULT_KNOWLEDGE);
       } finally {
         setIsDBReady(true);
       }
@@ -167,10 +189,9 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[108px] right-4 md:right-6 w-[calc(100vw-32px)] md:w-[380px] h-[75vh] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[999] overflow-hidden sm:pb-0"
+            className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-[calc(108px+env(safe-area-inset-bottom))] right-4 w-[380px] max-w-[calc(100%-2rem)] h-[75%] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[999] overflow-hidden sm:pb-0"
             role="dialog"
             aria-label="Cửa sổ AI Chatbot"
-            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             {/* Header */}
             <div className="px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 flex items-center gap-3">

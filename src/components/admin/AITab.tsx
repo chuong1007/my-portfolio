@@ -49,6 +49,11 @@ export function AITab() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState<string>("All");
 
+  // Welcome message state
+  const DEFAULT_WELCOME = "Chào Anh/ Chị! Em là Trợ lý AI của Trần Thanh Chương. Em có thể giúp gì cho Anh/ Chị hôm nay?";
+  const [welcomeMessage, setWelcomeMessage] = useState(DEFAULT_WELCOME);
+  const [welcomeSaving, setWelcomeSaving] = useState(false);
+
   const supabase = createClient();
 
   const fetchData = async () => {
@@ -72,8 +77,34 @@ export function AITab() {
     setLoading(false);
   };
 
+  const fetchWelcomeMessage = async () => {
+    const { data } = await supabase
+      .from("site_content")
+      .select("data")
+      .eq("id", "ai_settings")
+      .single();
+    if (data?.data?.welcomeMessage) {
+      setWelcomeMessage(data.data.welcomeMessage);
+    }
+  };
+
+  const handleSaveWelcome = async () => {
+    setWelcomeSaving(true);
+    const { error } = await supabase
+      .from("site_content")
+      .upsert({ id: "ai_settings", data: { welcomeMessage: welcomeMessage.trim() } });
+    if (error) {
+      alert("Lỗi lưu câu chào: " + error.message);
+    } else {
+      setSuccessMsg("Đã lưu câu chào!");
+      setTimeout(() => setSuccessMsg(""), 3000);
+    }
+    setWelcomeSaving(false);
+  };
+
   useEffect(() => {
     fetchData();
+    fetchWelcomeMessage();
   }, []);
 
 
@@ -221,6 +252,33 @@ export function AITab() {
         )}
       </AnimatePresence>
 
+
+      {/* Welcome Message Card */}
+      <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+        <div className="flex items-center gap-2 mb-4">
+          <BotMessageSquare size={18} className="text-blue-400" />
+          <h2 className="text-lg font-semibold">Câu chào mở đầu của Chatbot</h2>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <textarea
+            value={welcomeMessage}
+            onChange={(e) => setWelcomeMessage(e.target.value)}
+            rows={2}
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg p-2.5 text-zinc-100 text-sm resize-none focus:outline-none focus:border-blue-500 transition-colors"
+            placeholder="Chào Anh/ Chị! Em là Trợ lý AI của..."
+          />
+          <button
+            onClick={handleSaveWelcome}
+            disabled={welcomeSaving}
+            className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors flex items-center gap-2 shrink-0 self-end sm:self-auto"
+          >
+            <Check size={16} />
+            {welcomeSaving ? "Đang lưu..." : "Lưu câu chào"}
+          </button>
+        </div>
+        <p className="text-xs text-zinc-500 mt-2">Câu này sẽ hiển thị đầu tiên khi khách mở Chatbot.</p>
+      </div>
+
       {/* Form Area */}
       <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl space-y-4">
         <div className="flex items-center justify-between">
@@ -239,7 +297,7 @@ export function AITab() {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2.5 pr-10 text-zinc-100 bg-[position:right_20px_center]"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-2.5 pr-12 text-zinc-100 appearance-none bg-no-repeat bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1aa%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_16px_center]"
               >
                 {AI_KNOWLEDGE_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -454,7 +512,7 @@ export function AITab() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 pr-10 text-sm text-zinc-100 w-full sm:w-auto bg-[position:right_20px_center]"
+              className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 pr-10 text-sm text-zinc-100 w-full sm:w-auto appearance-none bg-no-repeat bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23a1a1aa%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center]"
             >
               <option value="All">Tất cả nhóm</option>
               {AI_KNOWLEDGE_CATEGORIES.map((cat) => (

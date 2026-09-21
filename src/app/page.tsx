@@ -7,27 +7,45 @@ import { GlobalPopup } from "@/components/GlobalPopup";
 import { PageRenderer } from "@/components/builder/PageRenderer";
 import { createClient } from "@/lib/supabase-server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
+
+// Timeout wrapper: if Supabase is slow / network is down, don't block SSR
+function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))
+  ])
+}
 
 export default async function Home() {
-  const supabase = await createClient();
+  const supabase = await createClient()
 
-  const [
-    { data: siteContent },
-    { data: dbProjects },
-    { data: dbBlogs }
-  ] = await Promise.all([
-    supabase.from('site_content').select('*'),
-    supabase.from('projects')
-      .select('*')
-      .eq('is_visible', true)
-      .order('is_featured', { ascending: false })
-      .order('featured_order', { ascending: true })
-      .order('display_order', { ascending: true })
-      .order('created_at', { ascending: false })
-      .limit(12),
-    supabase.from('blogs').select('*').order('created_at', { ascending: false })
-  ]);
+  let siteContent: any[] | null = null
+  let dbProjects: any[] | null = null
+  let dbBlogs: any[] | null = null
+
+  try {
+    const [contentResult, projectsResult, blogsResult] = await Promise.all([
+      withTimeout(supabase.from('site_content').select('*')),
+      withTimeout(
+        supabase
+          .from('projects')
+          .select('*')
+          .eq('is_visible', true)
+          .order('is_featured', { ascending: false })
+          .order('featured_order', { ascending: true })
+          .order('display_order', { ascending: true })
+          .order('created_at', { ascending: false })
+          .limit(12)
+      ),
+      withTimeout(supabase.from('blogs').select('*').order('created_at', { ascending: false }))
+    ])
+    siteContent = (contentResult as any)?.data ?? null
+    dbProjects = (projectsResult as any)?.data ?? null
+    dbBlogs = (blogsResult as any)?.data ?? null
+  } catch (err) {
+    console.error('Home page data fetch error:', err)
+  }
 
   const contentMap = siteContent?.reduce((acc: any, item: any) => ({ ...acc, [item.id]: item.data }), {}) || {};
 
