@@ -34,7 +34,7 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
     <MasonryItem
       isWide={false}
       gap={16} // Standard vertical gap used in span calculation
-      className="group cursor-pointer mb-4 md:mb-6"
+      className="group cursor-pointer"
       onClick={onClick}
     >
       <motion.div
@@ -156,7 +156,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
   return (
     <div className="w-full">
       {/* Sub Navigation */}
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 pt-28 pb-4">
+      <div className={cn("max-w-7xl mx-auto flex items-center justify-between pt-28 pb-4", containerPadding)}>
         <Link
           href="/#dự-án"
           className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
@@ -181,7 +181,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="max-w-7xl mx-auto px-6 md:px-12 pt-16 pb-12"
+        className={cn("max-w-7xl mx-auto pt-16 pb-12", containerPadding)}
       >
         {/* Project Info */}
         <div className="flex flex-col gap-6">
@@ -225,12 +225,12 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
       </motion.section>
 
       {/* Separator */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className={cn("max-w-7xl mx-auto", containerPadding)}>
         <div className="border-t border-[var(--border-default)]" />
       </div>
 
       {/* Gallery Section - Pinterest Style Masonry */}
-      <section className="max-w-7xl mx-auto px-6 md:px-12 py-16">
+      <section className={cn("max-w-7xl mx-auto py-16", containerPadding)}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
