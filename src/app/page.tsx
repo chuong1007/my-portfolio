@@ -10,9 +10,9 @@ import { createClient } from "@/lib/supabase-server";
 export const dynamic = 'force-dynamic'
 
 // Timeout wrapper: if Supabase is slow / network is down, don't block SSR
-function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T | null> {
+function withTimeout<T>(promise: Promise<T> | PromiseLike<T>, ms = 5000): Promise<T | null> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))
   ])
 }

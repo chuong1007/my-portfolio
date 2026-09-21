@@ -7,6 +7,8 @@ import Fuse from "fuse.js";
 import { normalizeVietnamese, linkify } from "@/lib/text-utils";
 import type { AIKnowledgeRecord } from "@/lib/ai-constants";
 import { Send, BotMessageSquare, List, MessageCircleQuestion, ChevronDown, ChevronUp } from "lucide-react";
+import { useAdmin } from "@/context/AdminContext";
+import { cn } from "@/lib/utils";
 
 type Message = {
   id: string;
@@ -33,6 +35,7 @@ const DEFAULT_KNOWLEDGE = [
 const DEFAULT_WELCOME = "Chào Anh/ Chị! Em là Trợ lý AI của Trần Thanh Chương. Em có thể giúp gì cho Anh/ Chị hôm nay?";
 
 export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+  const { globalPreviewMode } = useAdmin();
   const [knowledgeBase, setKnowledgeBase] = useState<AIKnowledgeRecord[]>([]);
   const [welcomeMessage, setWelcomeMessage] = useState(DEFAULT_WELCOME);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -111,6 +114,36 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
     }
   }, [isOpen]);
 
+  // Lock scroll on mobile when chat is open
+  useEffect(() => {
+    if (isOpen) {
+      const scrollContainer = document.querySelector('.custom-scrollbar') as HTMLElement;
+      const isMobileWindow = window.innerWidth < 768;
+      const isMobilePreview = scrollContainer && scrollContainer.clientWidth < 768;
+
+      if (isMobileWindow || isMobilePreview) {
+        document.body.style.overflow = 'hidden';
+        if (scrollContainer) {
+          scrollContainer.style.overflow = 'hidden';
+        }
+      }
+    } else {
+      document.body.style.overflow = '';
+      const scrollContainer = document.querySelector('.custom-scrollbar') as HTMLElement;
+      if (scrollContainer) {
+        scrollContainer.style.overflow = '';
+      }
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      const scrollContainer = document.querySelector('.custom-scrollbar') as HTMLElement;
+      if (scrollContainer) {
+        scrollContainer.style.overflow = '';
+      }
+    };
+  }, [isOpen]);
+
   const handleAsk = (query: string) => {
     if (!query.trim() || isProcessingRef.current) return;
     isProcessingRef.current = true;
@@ -184,15 +217,30 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
     <LazyMotion features={domAnimation}>
       <AnimatePresence>
         {isOpen && (
-          <m.div
-            initial={{ opacity: 0, y: 20, scale: 0.95, originX: 1, originY: 1 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-[calc(108px+env(safe-area-inset-bottom))] right-4 w-[380px] max-w-[calc(100%-2rem)] h-[75%] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[999] overflow-hidden sm:pb-0"
-            role="dialog"
-            aria-label="Cửa sổ AI Chatbot"
-          >
+          <>
+            {/* Mobile Backdrop */}
+            <m.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className={cn(
+                "fixed inset-0 z-[998] bg-black/60 backdrop-blur-sm",
+                globalPreviewMode === 'desktop' ? "md:hidden" : (globalPreviewMode === 'mobile' ? "block" : "hidden")
+              )}
+              onClick={onClose}
+              aria-hidden="true"
+            />
+
+            <m.div
+              initial={{ opacity: 0, y: 20, scale: 0.95, originX: 1, originY: 1 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] md:bottom-[calc(108px+env(safe-area-inset-bottom))] right-4 w-[380px] max-w-[calc(100%-2rem)] h-[75%] max-h-[600px] flex flex-col bg-[var(--bg-base)]/95 backdrop-blur-xl border border-[var(--border-subtle)] rounded-2xl shadow-2xl z-[999] overflow-hidden sm:pb-0"
+              role="dialog"
+              aria-label="Cửa sổ AI Chatbot"
+            >
             {/* Header */}
             <div className="px-5 py-4 border-b border-[var(--border-subtle)] bg-[var(--bg-surface)]/50 flex items-center gap-3">
               <div className="relative flex-shrink-0">
@@ -317,6 +365,7 @@ export default function ChatPanel({ isOpen, onClose }: { isOpen: boolean, onClos
               </div>
             </div>
           </m.div>
+          </>
         )}
       </AnimatePresence>
     </LazyMotion>
