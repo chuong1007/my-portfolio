@@ -78,6 +78,7 @@ function MasonryDetailImage({ image, index, isAdmin, onClick }: { image: any, in
 
 export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailProps) {
   const { isAdmin, globalPreviewMode } = useAdmin();
+  const containerPadding = globalPreviewMode === "mobile" ? "px-6" : globalPreviewMode === "tablet" ? "px-8" : "px-6 md:px-12";
 
   // Force scroll to top on mount / project change
   useEffect(() => {
