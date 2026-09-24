@@ -62,7 +62,7 @@ export default function AdminAboutPage() {
       if (d.expandedBlocks && d.expandedBlocks.length > 0) {
         const parsedBlocks = d.expandedBlocks.map((b: any) => {
           if (b.title !== undefined) return b; 
-          const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>(.*)/s);
+          const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>([\s\S]*)/);
           if (match) {
             return { ...b, title: match[1].replace(/^\d+\.\s*/, ''), content: match[2] };
           }
