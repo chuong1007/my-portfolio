@@ -98,7 +98,7 @@ export function AboutTest({ sectionId = "about" }: { sectionId?: string }) {
         if (d.heading !== undefined) setHeading(normalize(d.heading));
         if (d.subheading !== undefined) setSubheading(normalize(d.subheading));
         if (Array.isArray(d.paragraphs) && d.paragraphs.length > 0) {
-          setParagraphs(d.paragraphs.map(p => normalize(p)));
+          setParagraphs(d.paragraphs.map((p: any) => normalize(p)));
         }
         if (d.avatarUrl !== undefined) setAvatarUrl(d.avatarUrl);
         

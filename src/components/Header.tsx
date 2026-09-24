@@ -103,7 +103,7 @@ export function Header() {
         .order('created_at', { ascending: true });
 
       if (pagesData) {
-        setDynamicNavItems(pagesData.map(p => ({
+        setDynamicNavItems(pagesData.map((p: any) => ({
           label: p?.title || 'Trang',
           href: p?.slug === 'home' || p?.slug === '/' ? '/' : `/${(p?.slug || '').replace(/^\//, '')}`
         })));

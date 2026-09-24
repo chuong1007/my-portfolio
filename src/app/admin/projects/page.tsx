@@ -144,7 +144,7 @@ export default function ProjectsPage() {
         if (row.id === 'about') setAboutData({ 
           heading: getRawText(d.heading), 
           subheading: getRawText(d.subheading), 
-          paragraphs: Array.isArray(d.paragraphs) ? d.paragraphs.map(p => getRawText(p)) : [''],
+          paragraphs: Array.isArray(d.paragraphs) ? d.paragraphs.map((p: any) => getRawText(p)) : [''],
           isVisible: d.isVisible !== false
         });
         if (row.id === 'contact') setContactData({ 
