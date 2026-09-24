@@ -152,7 +152,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
           // Xử lý migrate tự động title cho nội dung cũ nếu chưa có title
           const parsedBlocks = d.expandedBlocks.map((b: any) => {
             if (b.title !== undefined) return b; // Đã có cấu trúc mới
-            const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>(.*)/s);
+            const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>([\s\S]*)/);
             if (match) {
               return { ...b, title: match[1].replace(/^\d+\.\s*/, ''), content: match[2] };
             }

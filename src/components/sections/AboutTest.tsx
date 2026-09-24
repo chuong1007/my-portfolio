@@ -104,7 +104,7 @@ export function AboutTest({ sectionId = "about" }: { sectionId?: string }) {
         
         if (d.expandedBlocks !== undefined) {
           const parsedBlocks = d.expandedBlocks.map((b: any) => {
-            const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>(.*)/s);
+            const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>([\s\S]*)/);
             if (match) {
               return { ...b, title: match[1].replace(/^\d+\.\s*/, ''), content: match[2] };
             }
