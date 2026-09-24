@@ -414,7 +414,7 @@ export function ProjectDetail({ project, relatedProjects = [] }: ProjectDetailPr
                       )}
                     </div>
                     <div className="px-1">
-                      <h3 className="text-lg font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
+                      <h3 className="text-[17px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
                         {p.title}
                       </h3>
                     </div>

@@ -221,7 +221,7 @@ export function BlogDetail({ slug }: { slug: string }) {
                     <span className="w-1 h-1 rounded-full bg-zinc-800" />
                     <span>{post?.created_at ? new Date(post.created_at).toLocaleDateString("vi-VN") : '---'}</span>
                   </div>
-                  <h4 className="text-lg font-bold text-[var(--text-primary)] group-hover:text-blue-500 transition-colors line-clamp-2 leading-snug">
+                  <h4 className="text-[17px] font-semibold text-[var(--text-primary)] group-hover:text-blue-500 transition-colors line-clamp-2 leading-snug">
                     {typeof post?.title === 'string' ? post?.title : String(post?.title || '')}
                   </h4>
                 </Link>

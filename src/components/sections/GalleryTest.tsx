@@ -215,7 +215,7 @@ export function GalleryTest({ sectionId = "gallery" }: { sectionId?: string }) {
                         </div>
                       </div>
                       <div className="px-2 flex flex-col mt-2">
-                        <h3 className="text-xl font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">
+                        <h3 className="text-[17px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">
                           {project.title}
                         </h3>
                       </div>

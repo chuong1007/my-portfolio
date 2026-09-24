@@ -519,7 +519,7 @@ function BlogCard({ post, index }: { post: DbBlog; index: number }) {
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--bg-elevated)]" />
             <span className="text-blue-500">{post.tags?.[0] || "Blog"}</span>
           </div>
-          <h3 className="font-bold text-[var(--text-primary)] mb-4 group-hover:text-[var(--text-primary)] transition-colors leading-tight text-xl line-clamp-2">
+          <h3 className="font-semibold text-[var(--text-primary)] mb-4 group-hover:text-[var(--text-primary)] transition-colors leading-tight text-[17px] line-clamp-2">
             {post.title}
           </h3>
           <p className="text-[var(--text-muted)] leading-relaxed text-sm line-clamp-2 mt-auto">

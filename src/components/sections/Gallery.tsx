@@ -198,7 +198,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
         <div ref={targetRef} className="relative h-[300vh]">
           
           <div 
-            className="sticky h-screen flex flex-col justify-start overflow-hidden pt-[80px] pb-8"
+            className="sticky h-screen flex flex-col justify-start overflow-hidden pt-[24px] pb-8"
             style={{ 
               top: 'var(--header-height, 0px)',
               transition: 'top 0.7s ease-out'
@@ -268,7 +268,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                           </div>
                         </div>
                         <div className="px-2 flex flex-col mt-2">
-                          <h3 className="text-xl font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">{project.title}</h3>
+                          <h3 className="text-[17px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">{project.title}</h3>
                         </div>
                       </Link>
                       <div className="px-2 flex flex-wrap gap-x-2 gap-y-1">
