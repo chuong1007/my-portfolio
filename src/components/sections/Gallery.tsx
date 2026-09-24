@@ -1,30 +1,18 @@
 "use client";
 
 import { cleanHtmlColors } from "@/lib/sanitize";
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight, ArrowDown, Star } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import { ArrowRight, Star } from "lucide-react";
 import { getAllProjects } from "@/lib/data";
 import { cn, generateSlug } from "@/lib/utils";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { SectionEditor } from "@/components/SectionEditor";
 import { useAdmin } from "@/context/AdminContext";
-
 import { getResponsiveValue, type ResponsiveValue } from "@/lib/responsive-helpers";
 import type { RichTextData } from "@/components/builder/RichTextEditor";
 import { usePathname } from "next/navigation";
-
-
-
-const getSafeColor = (color?: string | null) => {
-  if (!color || color === 'inherit') return undefined;
-  const upper = color.toUpperCase();
-  if (upper === '#FFFFFF' || upper === '#FFF' || upper === 'RGB(255, 255, 255)') {
-    return 'var(--text-primary)';
-  }
-  return color;
-};
 
 const normalize = (val: any): RichTextData => {
   const defaultFS = { mobile: 16, tablet: 18, desktop: 20 };
@@ -54,80 +42,53 @@ const normalize = (val: any): RichTextData => {
 };
 
 const FALLBACK_CATEGORIES = ["All", "Poster", "Branding", "Logo Design", "UX/UI"];
-
-// Use cached projects from data layer
 const MOCK_PROJECTS = getAllProjects();
 
-type GalleryProps = {
-  sectionId?: string;
-  variant?: 'homepage' | 'subpage';
-  initialContent?: any;
-  initialProjects?: any[];
-};
-
-export function Gallery({ sectionId = "gallery", variant = 'homepage', initialContent, initialProjects }: GalleryProps) {
+export function Gallery({ sectionId = "gallery", variant = 'homepage', initialContent, initialProjects }: any) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [isVisible, setIsVisible] = useState(() => initialContent?.isVisible ?? true);
   const [paddingTopData, setPaddingTopData] = useState<ResponsiveValue>(() => initialContent?.paddingTop ?? "0");
   const [paddingBottomData, setPaddingBottomData] = useState<ResponsiveValue>(() => initialContent?.paddingBottom ?? "128");
-  const [itemsToShowData, setItemsToShowData] = useState<ResponsiveValue>(() => initialContent?.itemsToShow ?? null);
-  const [showSeeAll, setShowSeeAll] = useState(() => initialContent?.showSeeAll ?? false);
-  const [seeAllLabel, setSeeAllLabel] = useState(() => initialContent?.seeAllLabel ?? "Xem tất cả dự án");
-  const [seeAllLink, setSeeAllLink] = useState(() => initialContent?.seeAllLink ?? "/projects");
-  const [seeAllPositionData, setSeeAllPositionData] = useState<ResponsiveValue>(() => initialContent?.seeAllPosition ?? "bottom");
   const [dbProjects, setDbProjects] = useState<any[]>(() => initialProjects || []);
   const [loading, setLoading] = useState(initialProjects ? false : true);
   const [titleData, setTitleData] = useState<RichTextData>(() => initialContent?.title ? normalize(initialContent.title) : { content: "Dự án", fontSize: { desktop: 48, tablet: 40, mobile: 32 }, lineHeight: { desktop: "1.2", tablet: "1.2", mobile: "1.2" } });
   const [subtitleData, setSubtitleData] = useState<RichTextData>(() => initialContent?.subtitle ? normalize(initialContent.subtitle) : { content: "Các dự án thiết kế nổi bật", fontSize: { desktop: 18, tablet: 16, mobile: 14 }, lineHeight: { desktop: "1.5", tablet: "1.5", mobile: "1.5" } });
   const [columnsData, setColumnsData] = useState<ResponsiveValue>(() => initialContent?.columns ?? "3");
   const [dbCategories, setDbCategories] = useState<string[]>(FALLBACK_CATEGORIES);
+  
   const { isAdmin, isEditMode, globalPreviewMode } = useAdmin();
-  const pathname = usePathname();
-  const isProjectsPage = pathname === '/projects';
 
-  const [visibleCount, setVisibleCount] = useState(variant === 'subpage' ? 12 : 16);
+  // Framer motion scroll setup
+  const targetRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [scrollRange, setScrollRange] = useState(0);
+
+  const { scrollYProgress } = useScroll({ target: targetRef });
+  const smoothProgress = useSpring(scrollYProgress, { damping: 20, stiffness: 100, mass: 0.1 });
+  const x = useTransform(smoothProgress, [0, 1], ["0px", `-${scrollRange}px`]);
 
   const fetchContent = useCallback(async () => {
     try {
       const supabase = createClient();
-      
       const { data: sectionData } = await supabase.from('site_content').select('data').eq('id', sectionId).single();
       if (sectionData?.data) {
         const d = sectionData.data as any;
         if (d.title !== undefined) setTitleData(normalize(d.title));
         if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
         if (d.isVisible !== undefined) setIsVisible(d.isVisible);
-        if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
-        if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-        if (d.itemsToShow !== undefined) setItemsToShowData(d.itemsToShow);
-        if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
-        if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
-        if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
-        if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
         if (d.columns !== undefined) setColumnsData(d.columns);
       }
 
       const { data: projectsData } = await supabase
-        .from('projects')
-        .select('*')
+        .from('projects').select('*')
         .order('is_featured', { ascending: false })
         .order('featured_order', { ascending: true })
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
+      if (projectsData) setDbProjects(projectsData);
 
-      if (projectsData) {
-        setDbProjects(projectsData);
-      }
-
-      // Fetch dynamic categories
-      const { data: tagsData } = await supabase
-        .from('project_tags')
-        .select('name')
-        .order('display_order', { ascending: true });
-      
-      if (tagsData && tagsData.length > 0) {
-        setDbCategories(["All", ...tagsData.map(t => t.name)]);
-      }
+      const { data: tagsData } = await supabase.from('project_tags').select('name').order('display_order', { ascending: true });
+      if (tagsData && tagsData.length > 0) setDbCategories(["All", ...tagsData.map(t => t.name)]);
     } catch (e) {
       console.error("Gallery section error:", e);
     } finally {
@@ -135,9 +96,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
     }
   }, [sectionId]);
 
-  useEffect(() => {
-    fetchContent();
-  }, [fetchContent]);
+  useEffect(() => { fetchContent(); }, [fetchContent]);
 
   useEffect(() => {
     const applyUpdate = (d: any) => {
@@ -145,27 +104,16 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       if (d.title !== undefined) setTitleData(normalize(d.title));
       if (d.subtitle !== undefined) setSubtitleData(normalize(d.subtitle));
       if (d.isVisible !== undefined) setIsVisible(d.isVisible);
-      if (d.paddingTop !== undefined) setPaddingTopData(d.paddingTop);
-      if (d.paddingBottom !== undefined) setPaddingBottomData(d.paddingBottom);
-      if (d.itemsToShow !== undefined) setItemsToShowData(d.itemsToShow);
-      if (d.showSeeAll !== undefined) setShowSeeAll(d.showSeeAll);
-      if (d.seeAllLabel !== undefined) setSeeAllLabel(d.seeAllLabel);
-      if (d.seeAllLink !== undefined) setSeeAllLink(d.seeAllLink);
-      if (d.seeAllPosition !== undefined) setSeeAllPositionData(d.seeAllPosition);
       if (d.columns !== undefined) setColumnsData(d.columns);
     };
 
     const handlePreviewUpdate = (e: Event) => {
       const customEvent = e as CustomEvent;
-      if (customEvent.detail.sectionId === sectionId) {
-        applyUpdate(customEvent.detail.data);
-      }
+      if (customEvent.detail.sectionId === sectionId) applyUpdate(customEvent.detail.data);
     };
 
     const handleParentMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'PREVIEW_UPDATE' && event.data.sectionId === sectionId) {
-        applyUpdate(event.data.data);
-      }
+      if (event.data?.type === 'PREVIEW_UPDATE' && event.data.sectionId === sectionId) applyUpdate(event.data.data);
     };
 
     window.addEventListener('previewUpdate', handlePreviewUpdate);
@@ -178,99 +126,40 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
   }, [sectionId]);
 
   const projectsToDisplay = useMemo(() => {
-    return dbProjects.length > 0 
-      ? dbProjects.filter(p => isAdmin || p.is_visible)
-      : MOCK_PROJECTS;
+    return dbProjects.length > 0 ? dbProjects.filter(p => isAdmin || p.is_visible) : MOCK_PROJECTS;
   }, [dbProjects, isAdmin]);
 
   const filteredProjects = useMemo(() => {
-    const base = projectsToDisplay.map(p => ({
-      ...p,
-      imageUrl: p.cover_image || p.imageUrl, 
-      tags: p.tags || []
-    }));
-
+    const base = projectsToDisplay.map(p => ({ ...p, imageUrl: p.cover_image || p.imageUrl, tags: p.tags || [] }));
     if (activeCategory === "All") return base;
     return base.filter((p) => p.tags.includes(activeCategory));
   }, [activeCategory, projectsToDisplay]);
 
-  const currentDevice = globalPreviewMode ?? 'desktop';
-  const itemsToShow = variant === 'homepage' 
-    ? Math.max(1, parseInt(getResponsiveValue(itemsToShowData, currentDevice, "16")) || 16)
-    : visibleCount;
-
-  const displayedProjects = useMemo(() => {
-    if (!Array.isArray(filteredProjects)) return [];
-    // Show all projects per request (100% like admin, no limit/scroll)
-    return filteredProjects;
-  }, [filteredProjects]);
-
-  const hasMore = useMemo(() => {
-    return itemsToShow < filteredProjects.length;
-  }, [itemsToShow, filteredProjects.length]);
-
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 4);
-  };
+  useEffect(() => {
+    const updateScrollRange = () => {
+      if (trackRef.current) {
+        const scrollWidth = trackRef.current.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        setScrollRange(Math.max(0, scrollWidth - viewportWidth));
+      }
+    };
+    updateScrollRange();
+    window.addEventListener('resize', updateScrollRange);
+    const timeoutId = setTimeout(updateScrollRange, 100);
+    return () => { window.removeEventListener('resize', updateScrollRange); clearTimeout(timeoutId); };
+  }, [filteredProjects, activeCategory, columnsData, globalPreviewMode]);
 
   if (!isVisible && !isAdmin) return null;
 
-  const initialData = { 
-    isVisible, 
-    paddingTop: paddingTopData,
-    paddingBottom: paddingBottomData,
-    title: titleData,
-    subtitle: subtitleData,
-    itemsToShow: itemsToShowData,
-    showSeeAll,
-    seeAllLabel,
-    seeAllLink,
-    seeAllPosition: seeAllPositionData,
-    columns: columnsData
-  };
-
-    const desktopCols = getResponsiveValue(columnsData, 'desktop') || "3";
-    const tabletCols = getResponsiveValue(columnsData, 'tablet') || "2";
-    const mobileCols = getResponsiveValue(columnsData, 'mobile') || "1";
-
-    const ptDesk = getResponsiveValue(paddingTopData, 'desktop') || 0;
-    const ptTab = getResponsiveValue(paddingTopData, 'tablet') || 0;
-    const ptMob = getResponsiveValue(paddingTopData, 'mobile') || 0;
-
-    const pbDesk = getResponsiveValue(paddingBottomData, 'desktop') || 0;
-    const pbTab = getResponsiveValue(paddingBottomData, 'tablet') || 0;
-    const pbMob = getResponsiveValue(paddingBottomData, 'mobile') || 0;
-
+  const currentDevice = globalPreviewMode ?? 'desktop';
   const isEditor = isAdmin && isEditMode;
-  const currentCols = getResponsiveValue(columnsData, globalPreviewMode || 'desktop') || "1";
-  const currentPt = getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0;
-  const currentPb = getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0;
 
-  const currentSeeAllPos = getResponsiveValue(seeAllPositionData, currentDevice) || 'bottom';
+  const currentCols = parseInt(getResponsiveValue(columnsData, currentDevice)?.toString() || "3") || 3;
+  const colsDesk = parseInt(getResponsiveValue(columnsData, 'desktop')?.toString() || "3") || 3;
+  const colsTab = parseInt(getResponsiveValue(columnsData, 'tablet')?.toString() || "2") || 2;
+  const colsMob = parseInt(getResponsiveValue(columnsData, 'mobile')?.toString() || "1") || 1;
 
-  const getGridColsClass = (cols: any, device: 'mobile' | 'tablet' | 'desktop') => {
-    const c = parseInt(cols?.toString() || "1") || 1;
-    if (device === 'mobile') {
-      if (c <= 1) return "grid-cols-1";
-      if (c === 2) return "grid-cols-2";
-      if (c === 3) return "grid-cols-3";
-      return "grid-cols-4";
-    }
-    if (device === 'tablet') {
-      if (c <= 1) return "md:grid-cols-1";
-      if (c === 2) return "md:grid-cols-2";
-      if (c === 3) return "md:grid-cols-3";
-      return "md:grid-cols-4";
-    }
-    if (c <= 1) return "lg:grid-cols-1";
-    if (c === 2) return "lg:grid-cols-2";
-    if (c === 3) return "lg:grid-cols-3";
-    return "lg:grid-cols-4";
-  };
-
-  const gridClass = isEditor 
-    ? getGridColsClass(currentCols, 'mobile').replace('lg:', '').replace('md:', '')
-    : `${getGridColsClass(mobileCols, 'mobile')} ${getGridColsClass(tabletCols, 'tablet')} ${getGridColsClass(desktopCols, 'desktop')}`;
+  const initialData = { isVisible, paddingTop: paddingTopData, paddingBottom: paddingBottomData, title: titleData, subtitle: subtitleData, columns: columnsData };
 
   return (
     <SectionEditor 
@@ -280,312 +169,122 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       isVisible={isVisible}
       extraActions={
         isAdmin && isEditMode ? (
-          <Link
-            href="/admin/projects"
-            className="px-4 py-3 bg-[var(--bg-surface)]/80 backdrop-blur-md hover:bg-[var(--bg-elevated)] border border-[var(--border-default)]/50 rounded-full transition-all duration-300 shadow-xl group/admin-btn"
-          >
-            <span className="text-[10px] font-bold text-[var(--text-muted)] group-hover/admin-btn:text-[var(--text-primary)] uppercase tracking-widest">
-              Quản lý dự án
-            </span>
+          <Link href="/admin/projects" className="px-4 py-3 bg-[var(--bg-surface)]/80 backdrop-blur-md hover:bg-[var(--bg-elevated)] border border-[var(--border-default)]/50 rounded-full transition-all duration-300 shadow-xl group/admin-btn">
+            <span className="text-[10px] font-bold text-[var(--text-muted)] group-hover/admin-btn:text-[var(--text-primary)] uppercase tracking-widest">Quản lý dự án</span>
           </Link>
         ) : null
       }
     >
-      
       <style dangerouslySetInnerHTML={{ __html: `
-        .gallery-title:not(.is-editor) {
-          font-size: var(--g-fs-mob);
-          line-height: var(--g-lh-mob);
-          font-family: var(--g-ff-mob);
-          font-weight: var(--g-fw-mob);
+        :root {
+          --card-w-mob: calc((100vw - 2rem - (${colsMob} - 1) * 1.5rem) / ${colsMob});
+          --card-w-tab: calc((100vw - 6rem - (${colsTab} - 1) * 1.5rem) / ${colsTab});
+          --card-w-desk: calc((min(100vw, 1280px) - 6rem - (${colsDesk} - 1) * 2rem) / ${colsDesk});
         }
-        .gallery-container:not(.is-editor) {
-          padding-top: var(--pt-mob);
-          padding-bottom: var(--pb-mob);
-        }
+        .gallery-card { width: var(--card-w-mob); }
+        .gallery-track-pad { padding-left: calc(50vw - (var(--card-w-mob) / 2)); padding-right: calc(50vw - (var(--card-w-mob) / 2)); }
+        
         @media (min-width: 768px) {
-          .gallery-title:not(.is-editor) {
-            font-size: var(--g-fs-tab);
-            line-height: var(--g-lh-tab);
-            font-family: var(--g-ff-tab);
-            font-weight: var(--g-fw-tab);
-          }
-          .gallery-container:not(.is-editor) {
-            padding-top: var(--pt-tab);
-            padding-bottom: var(--pb-tab);
-          }
+           .gallery-card { width: var(--card-w-tab); }
+           .gallery-track-pad { padding-left: calc(50vw - (var(--card-w-tab) / 2)); padding-right: calc(50vw - (var(--card-w-tab) / 2)); }
         }
         @media (min-width: 1024px) {
-          .gallery-title:not(.is-editor) {
-            font-size: var(--g-fs-desk);
-            line-height: var(--g-lh-desk);
-            font-family: var(--g-ff-desk);
-            font-weight: var(--g-fw-desk);
-          }
-          .gallery-container:not(.is-editor) {
-            padding-top: var(--pt-desk);
-            padding-bottom: var(--pb-desk);
-          }
+           .gallery-card { width: var(--card-w-desk); }
+           .gallery-track-pad { padding-left: calc(50vw - (var(--card-w-desk) / 2)); padding-right: calc(50vw - (var(--card-w-desk) / 2)); }
         }
       `}} />
 
-      <section id="projects" 
-        className={cn(
-          "bg-[var(--bg-base)] relative",
-          !isEditor && "px-4 md:px-12",
-          isEditor && globalPreviewMode === 'mobile' && "px-4",
-          isEditor && globalPreviewMode === 'tablet' && "px-8",
-          isEditor && globalPreviewMode === 'desktop' && "px-12",
-          !isEditor && "gallery-container not-is-editor",
-          isEditor && "is-editor"
-        )}
-        style={{
-          paddingTop: variant === 'homepage' ? '0px' : (isEditor ? `${currentPt}px` : undefined),
-          paddingBottom: isEditor ? `${currentPb}px` : undefined,
-          "--pt-desk": variant === 'homepage' ? '0px' : `${ptDesk}px`,
-          "--pt-tab": variant === 'homepage' ? '0px' : `${ptTab}px`,
-          "--pt-mob": variant === 'homepage' ? '0px' : `${ptMob}px`,
-          "--pb-desk": `${pbDesk}px`,
-          "--pb-tab": `${pbTab}px`,
-          "--pb-mob": `${pbMob}px`,
-        } as any}
-      >
-        <div className="max-w-7xl mx-auto">
-          {/* Section Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-10 flex items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-8"
+      <section id="projects" className="bg-[var(--bg-base)] relative">
+        <div ref={targetRef} className="relative h-[300vh]">
+          
+          <div 
+            className="sticky h-screen flex flex-col justify-start overflow-hidden pt-[80px] pb-8"
+            style={{ 
+              top: 'var(--header-height, 0px)',
+              transition: 'top 0.7s ease-out'
+            }}
           >
-            <div className="flex flex-col gap-2">
-              <div 
-                className={cn(
-                  "tracking-tighter text-[var(--text-primary)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                  !isEditor && "gallery-title not-is-editor", isEditor && "is-editor"
+            
+            <div className="w-full shrink-0 max-w-7xl mx-auto mb-8 px-4 md:px-12">
+              <div className="flex items-end justify-between gap-4 border-b border-[var(--border-subtle)] pb-6 mb-8">
+                <div className="flex flex-col gap-2">
+                  <h2 
+                    className="tracking-tighter text-[var(--text-primary)] font-bold [&_p]:m-0 py-1"
+                    style={{ fontSize: isEditor ? `${titleData.fontSize?.[currentDevice] || 48}px` : `${titleData.fontSize?.desktop || 48}px`, lineHeight: titleData.lineHeight?.[currentDevice] || '1.1', color: titleData.textColor?.[currentDevice] === 'inherit' ? undefined : titleData.textColor?.[currentDevice] }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(titleData.content, currentDevice) || "Dự án") }} 
+                  />
+                  <div 
+                    className="text-[var(--text-muted)] [&_p]:m-0"
+                    style={{ fontSize: isEditor ? `${subtitleData.fontSize?.[currentDevice] || 18}px` : `${subtitleData.fontSize?.desktop || 18}px`, lineHeight: subtitleData.lineHeight?.[currentDevice] || '1.5', color: subtitleData.textColor?.[currentDevice] === 'inherit' ? undefined : subtitleData.textColor?.[currentDevice] }}
+                    dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, currentDevice) || "Các dự án thiết kế nổi bật") }} 
+                  />
+                </div>
+                {!isEditor && (
+                  <Link href="/projects" className="hidden lg:flex group items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-semibold tracking-tight">
+                    Xem tất cả <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 )}
-                style={{ 
-                  fontSize: isEditor ? `${titleData.fontSize?.[globalPreviewMode || 'desktop'] || 48}px` : undefined,
-                  lineHeight: isEditor ? (titleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.1') : undefined,
-                  fontFamily: isEditor ? (titleData.fontFamily?.[globalPreviewMode || 'desktop'] || 'inherit') : undefined,
-                  fontWeight: isEditor ? (titleData.fontWeight?.[globalPreviewMode || 'desktop'] || '700') : undefined,
-                  "--g-fs-desk": `${titleData.fontSize?.desktop || 48}px`,
-                  "--g-fs-tab": `${titleData.fontSize?.tablet || 40}px`,
-                  "--g-fs-mob": `${titleData.fontSize?.mobile || 32}px`,
-                  "--g-lh-desk": titleData.lineHeight?.desktop || '1.1',
-                  "--g-lh-tab": titleData.lineHeight?.tablet || '1.1',
-                  "--g-lh-mob": titleData.lineHeight?.mobile || '1.1',
-                  "--g-ff-desk": titleData.fontFamily?.desktop || 'inherit',
-                  "--g-ff-tab": titleData.fontFamily?.tablet || 'inherit',
-                  "--g-ff-mob": titleData.fontFamily?.mobile || 'inherit',
-                  "--g-fw-desk": titleData.fontWeight?.desktop === '400' ? '700' : (titleData.fontWeight?.desktop || '700'),
-                  "--g-fw-tab": titleData.fontWeight?.tablet === '400' ? '700' : (titleData.fontWeight?.tablet || '700'),
-                  "--g-fw-mob": titleData.fontWeight?.mobile === '400' ? '700' : (titleData.fontWeight?.mobile || '700'),
-                  "--g-color-desk": getSafeColor(titleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.desktop),
-                  "--g-color-tab": getSafeColor(titleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.tablet),
-                  "--g-color-mob": getSafeColor(titleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(titleData.textColor?.mobile),
-                  color: isEditor ? (titleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : titleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--g-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--g-color-tab)' : 'var(--g-color-desk)'),
-                } as any}
-                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(titleData.content, globalPreviewMode || 'desktop') || "") }} 
-              />
-              <div 
-                className={cn(
-                  "text-[var(--text-muted)] whitespace-pre-wrap transition-all duration-300 [&_p]:m-0 [&_h1]:m-0 [&_h2]:m-0 [&_h3]:m-0",
-                  !isEditor && "text-[length:var(--gs-fs-mob)] md:text-[length:var(--gs-fs-tab)] lg:text-[length:var(--gs-fs-desk)] leading-[var(--gs-lh-mob)] md:leading-[var(--gs-lh-tab)] lg:leading-[var(--gs-lh-desk)]"
-                )}
-                style={{ 
-                  fontSize: isEditor ? `${subtitleData.fontSize?.[globalPreviewMode || 'desktop'] || 18}px` : undefined,
-                  lineHeight: isEditor ? (subtitleData.lineHeight?.[globalPreviewMode || 'desktop'] || '1.5') : undefined,
-                  "--gs-fs-desk": `${subtitleData.fontSize?.desktop || 18}px`,
-                  "--gs-fs-tab": `${subtitleData.fontSize?.tablet || 16}px`,
-                  "--gs-fs-mob": `${subtitleData.fontSize?.mobile || 14}px`,
-                  "--gs-lh-desk": subtitleData.lineHeight?.desktop || '1.5',
-                  "--gs-lh-tab": subtitleData.lineHeight?.tablet || '1.5',
-                  "--gs-lh-mob": subtitleData.lineHeight?.mobile || '1.5',
-                  "--gs-color-desk": getSafeColor(subtitleData.textColor?.desktop) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.desktop),
-                  "--gs-color-tab": getSafeColor(subtitleData.textColor?.tablet) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.tablet),
-                  "--gs-color-mob": getSafeColor(subtitleData.textColor?.mobile) === 'inherit' ? undefined : getSafeColor(subtitleData.textColor?.mobile),
-                  color: isEditor ? (subtitleData.textColor?.[globalPreviewMode || 'desktop'] === 'inherit' ? undefined : subtitleData.textColor?.[globalPreviewMode || 'desktop']) : (globalPreviewMode === 'mobile' ? 'var(--gs-color-mob)' : globalPreviewMode === 'tablet' ? 'var(--gs-color-tab)' : 'var(--gs-color-desk)'),
-                } as any}
-                dangerouslySetInnerHTML={{ __html: cleanHtmlColors(getResponsiveValue(subtitleData.content, globalPreviewMode || 'desktop') || "") }} 
-              />
+              </div>
+              
+              <div className="relative w-full">
+                <div className="flex flex-nowrap items-center justify-start gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-1 pr-12">
+                  {dbCategories.map((category) => (
+                    <button key={category} onClick={() => setActiveCategory(category)} className={cn("shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border cursor-pointer", activeCategory === category ? "bg-[var(--text-primary)] text-[var(--bg-base)] border-[var(--text-primary)]" : "bg-transparent text-[var(--text-muted)] border-[var(--border-default)] hover:border-zinc-500 hover:text-[var(--text-secondary)]")}>
+                      {category}
+                    </button>
+                  ))}
+                </div>
+                <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[var(--bg-base)] to-transparent z-10" />
+              </div>
             </div>
 
-            {((showSeeAll && currentSeeAllPos === 'top' && !isProjectsPage) || (!showSeeAll && !isProjectsPage)) && (
-              <Link 
-                href={showSeeAll ? (getResponsiveValue(seeAllLink, currentDevice) || "/projects") : "/projects"}
-                className="hidden lg:flex group items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-semibold tracking-tight"
+            <div className="w-full flex items-center flex-1">
+              <motion.div 
+                ref={trackRef}
+                style={{ x }} 
+                className="flex items-start w-max py-4 gallery-track-pad gap-6 md:gap-8"
               >
-                {showSeeAll ? (getResponsiveValue(seeAllLabel, currentDevice) || "Xem tất cả") : "Xem tất cả"}
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            )}
-          </motion.div>
- 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center justify-start gap-3 mb-10">
-            {dbCategories.map((category) => {
-              const isActive = activeCategory === category;
-              return (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={cn(
-                    "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 border",
-                    isActive
-                      ? "bg-[var(--text-primary)] text-[var(--bg-base)] border-[var(--text-primary)]"
-                      : "bg-transparent text-[var(--text-muted)] border-[var(--border-default)] hover:border-zinc-500 hover:text-[var(--text-secondary)]"
-                  )}
-                >
-                  {category}
-                </button>
-              );
-            })}
-          </div>
- 
-          <div 
-            className={cn(
-              "grid",
-              !isEditor && "gap-6 md:gap-8",
-              gridClass
-            )}
-            style={{
-              gap: isEditor ? (currentDevice === 'mobile' ? '1.5rem' : '2rem') : undefined,
-              '--cols-mob': mobileCols,
-              '--cols-tab': tabletCols,
-              '--cols-desk': desktopCols
-            } as any}
-          >
-            {loading && dbProjects.length === 0 ? (
-              [1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="flex flex-col gap-3 animate-pulse">
-                  <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]" />
-                  <div className="space-y-2">
-                    <div className="h-4 bg-[var(--bg-surface)] rounded-md w-2/3" />
-                    <div className="h-3 bg-[var(--bg-surface)] rounded-md w-full" />
-                  </div>
-                </div>
-              ))
-            ) : (
-              displayedProjects.map((project, index) => (
-                <motion.div
-                  key={project.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "50px" }}
-                  transition={{ duration: 0.5, delay: (index % 10) * 0.05 }}
-                  className="group flex flex-col gap-3"
-                >
-                  <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3">
-                    <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50">
-                      <img
-                        src={project.imageUrl}
-                        alt={project.title}
-                        loading="lazy"
-                        referrerPolicy="no-referrer"
-                        className={cn(
-                          "w-full h-full object-cover transition-all duration-700 ease-in-out",
-                          isAdmin && project.is_visible === false && "opacity-40 grayscale"
-                        )}
-                      />
-                      {project.is_featured && (
-                        <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/50 backdrop-blur-md border border-white/10 rounded-full shadow-2xl transition-transform group-hover:scale-110">
-                          <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
+                {loading && dbProjects.length === 0 ? (
+                  [1, 2, 3].map((i) => (
+                    <div key={i} className="gallery-card flex flex-col gap-3 animate-pulse shrink-0">
+                      <div className="relative w-full aspect-[4/5] rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]" />
+                    </div>
+                  ))
+                ) : (
+                  filteredProjects.map((project, index) => (
+                    <div key={project.id || index} className="gallery-card group flex flex-col gap-3 shrink-0">
+                      <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3 relative block">
+                        <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50 shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
+                          <img src={project.imageUrl} alt={project.title} loading="lazy" referrerPolicy="no-referrer" className={cn("w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105", isAdmin && project.is_visible === false && "opacity-40 grayscale")} />
+                          {project.is_featured && (
+                            <div className="absolute top-3 right-3 flex items-center justify-center w-8 h-8 bg-black/50 backdrop-blur-md border border-white/10 rounded-full shadow-2xl transition-transform group-hover:scale-110">
+                              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-t from-black/80 via-black/20 to-transparent">
+                            <span className="absolute bottom-6 left-6 flex items-center gap-2 px-5 py-2.5 border border-zinc-50/20 rounded-full text-sm font-semibold text-white backdrop-blur-md bg-white/10 shadow-xl transition-transform duration-300 translate-y-4 group-hover:translate-y-0">
+                              Xem ngay <ArrowRight className="w-4 h-4" />
+                            </span>
+                          </div>
                         </div>
-                      )}
-                      {isAdmin && project.is_visible === false && (
-                        <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-[var(--bg-base)]/80 border border-[var(--border-default)] rounded-full text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
-                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-                          Đang ẩn
+                        <div className="px-2 flex flex-col mt-2">
+                          <h3 className="text-xl font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">{project.title}</h3>
                         </div>
-                      )}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/60">
-                        <span className="absolute bottom-4 left-4 flex items-center gap-2 px-4 py-2 border border-zinc-50 rounded-full text-xs font-medium text-white backdrop-blur-sm bg-white/10">
-                          {isAdmin && project.is_visible === false ? "Xem nháp" : "Xem ngay"}
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </span>
+                      </Link>
+                      <div className="px-2 flex flex-wrap gap-x-2 gap-y-1">
+                        {project.tags.map((tag: string, i: number) => (
+                          <Link key={tag} href={`/tag/${generateSlug(tag)}`} className="text-sm font-medium text-[var(--text-muted)] hover:text-blue-400 transition-colors">
+                            {tag}{i < project.tags.length - 1 ? "," : ""}
+                          </Link>
+                        ))}
                       </div>
                     </div>
-                    <div className="px-1 flex flex-col">
-                      <h3 className="text-lg font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-[-0.5pt]">
-                        {project.title}
-                      </h3>
-                    </div>
-                  </Link>
-                  <div className="px-1 flex flex-wrap gap-x-1.5 gap-y-1">
-                    {project.tags.map((tag: string, i: number) => (
-                      <Link 
-                        key={tag} 
-                        href={`/tag/${generateSlug(tag)}`}
-                        className="text-sm text-[var(--text-muted)] hover:text-blue-400 transition-colors"
-                      >
-                        {tag}{i < project.tags.length - 1 ? "," : ""}
-                      </Link>
-                    ))}
-                  </div>
-                </motion.div>
-              ))
-            )}
+                  ))
+                )}
+              </motion.div>
+            </div>
+            
           </div>
-
-          {variant === 'subpage' && hasMore && (
-            <div className="mt-16 flex justify-center">
-              <button
-                onClick={handleLoadMore}
-                className="group relative flex items-center gap-3 px-10 py-5 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center shadow-2xl"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-[0.2em] transition-colors relative z-10">
-                  Xem thêm
-                </span>
-                <div className="relative z-10 w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 shrink-0">
-                  <ArrowDown className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
-                </div>
-              </button>
-            </div>
-          )}
-
-          {variant === 'homepage' && ((showSeeAll && currentSeeAllPos === 'bottom' && !isProjectsPage) || (!showSeeAll && !isProjectsPage)) && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className={cn(
-                "mt-20 flex justify-center",
-                !showSeeAll && "lg:hidden"
-              )}
-            >
-              {showSeeAll ? (
-                <Link 
-                  href={getResponsiveValue(seeAllLink, currentDevice) || seeAllLink || "/projects"}
-                  className="group relative flex items-center gap-3 px-8 py-4 bg-[var(--bg-surface)]/50 border border-[var(--border-default)] hover:border-zinc-500 rounded-2xl transition-all duration-500 overflow-hidden w-full md:w-auto text-center justify-center"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                  <span className="text-sm font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] uppercase tracking-widest transition-colors">
-                    {getResponsiveValue(seeAllLabel, currentDevice) || seeAllLabel}
-                  </span>
-                  <div className="w-8 h-8 rounded-full bg-[var(--bg-elevated)] group-hover:bg-zinc-100 flex items-center justify-center transition-all duration-500 group-hover:rotate-[-45deg] shrink-0">
-                    <ArrowRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-zinc-950" />
-                  </div>
-                </Link>
-              ) : (
-                <Link 
-                  href="/projects"
-                  className="group flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-sm font-bold uppercase tracking-widest border border-[var(--border-default)] px-6 py-3 rounded-full hover:border-zinc-500"
-                >
-                  Xem tất cả dự án
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              )}
-            </motion.div>
-          )}
-
-          {filteredProjects.length === 0 && (
-            <div className="w-full py-20 text-center text-[var(--text-muted)]">
-              No projects found for this category.
-            </div>
-          )}
         </div>
       </section>
     </SectionEditor>

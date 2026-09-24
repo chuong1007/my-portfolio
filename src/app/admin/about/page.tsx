@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import { Save, Loader2, ArrowLeft, Plus, Trash2, User } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { revalidateCache } from "@/app/actions";
-import { ImageUpload } from "@/components/admin/ImageUpload";
 import { AvatarSelector } from "@/components/admin/AvatarSelector";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -24,7 +23,7 @@ export default function AdminAboutPage() {
   const [heading, setHeading] = useState("");
   const [subheading, setSubheading] = useState("");
   const [paragraphs, setParagraphs] = useState<string[]>([""]);
-  type ExpandedBlock = { id: string; type: 'full' | 'half'; content: string; };
+  type ExpandedBlock = { id: string; type: 'full' | 'half'; title?: string; content: string; };
   const [expandedBlocks, setExpandedBlocks] = useState<ExpandedBlock[]>([]);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -61,29 +60,23 @@ export default function AdminAboutPage() {
       }
       setAvatarUrl(d.avatarUrl || "");
       if (d.expandedBlocks && d.expandedBlocks.length > 0) {
-        setExpandedBlocks(d.expandedBlocks);
+        const parsedBlocks = d.expandedBlocks.map((b: any) => {
+          if (b.title !== undefined) return b; 
+          const match = b.content.match(/<p><strong>(.*?)<\/strong><\/p>(.*)/s);
+          if (match) {
+            return { ...b, title: match[1].replace(/^\d+\.\s*/, ''), content: match[2] };
+          }
+          return { ...b, title: "Untitled", content: b.content };
+        });
+        setExpandedBlocks(parsedBlocks);
       } else {
         setAvatarUrl('/avatar-emoji.svg');
         const blocks: ExpandedBlock[] = [
           {
             id: crypto.randomUUID(),
-            type: "half",
-            content: "<p><strong>1. Giới thiệu bản thân</strong></p><p>Graphic Designer với hơn 7 năm kinh nghiệm xây dựng hình ảnh thương hiệu và ấn phẩm truyền thông đa nền tảng - từ nhận diện thương hiệu, bao bì, giao diện website đến các ấn phẩm chiến dịch (Banner, Poster, Social Media post, KV).</p><p>Có kinh nghiệm dựng và chỉnh sửa video bằng Capcut, đồng thời ứng dụng công cụ AI để tạo video từ hình ảnh tĩnh, phục vụ nội dung marketing nhanh và hiệu quả.</p><p>Kết hợp tư duy chiến lược với thẩm mỹ hiện đại, quen thuộc với việc phối hợp cùng đội ngũ Content và Marketing để phát triển ý tưởng hình ảnh, đảm bảo tính đồng bộ và bám sát mục tiêu chiến dịch. Khả năng thích ứng nhanh, làm việc tốt dưới áp lực deadline và luôn cập nhật xu hướng thiết kế, công nghệ AI mới.</p>"
-          },
-          {
-            id: crypto.randomUUID(),
-            type: "half",
-            content: "<p><strong>2. Kỹ năng chuyên môn</strong></p><ul><li><strong>Thiết kế:</strong> Photoshop, Illustrator (Sử dụng thành thạo). Ứng dụng AI vào thiết kế đồ họa.</li><li><strong>Dựng phim:</strong> Adobe Premiere, Capcut,... Ứng dụng AI vào dựng và edit clip.</li><li><strong>Kỹ năng mềm:</strong> Làm việc nhóm & Quản lý tiến độ, Giao tiếp & Thuyết trình ý tưởng, Tiếng Anh giao tiếp công việc.</li></ul>"
-          },
-          {
-            id: crypto.randomUUID(),
             type: "full",
-            content: "<p><strong>3. Mục tiêu & Sở thích</strong></p><ul><li><strong>Mục tiêu:</strong> Không ngừng nghiên cứu tâm lý thị giác và hành vi người dùng ứng dụng vào thiết kế; hướng tới việc dẫn dắt các dự án sáng tạo toàn diện từ định vị thương hiệu, tối ưu trải nghiệm số cho đến hoàn thiện bao bì sản phẩm.</li><li><strong>Sở thích:</strong> Viết lách, nghe nhạc, xem phim, du lịch và đặc biệt hứng thú nghiên cứu về tâm lý học ứng dụng vào thiết kế.</li></ul>"
-          },
-          {
-            id: crypto.randomUUID(),
-            type: "full",
-            content: "<p><strong>4. Kinh nghiệm làm việc</strong></p><p><strong>FREELANCER DESIGNER (02/2020 - Nay)</strong><br><strong>Senior Graphic / Web UI & Packaging Designer</strong></p><ul><li>Nghiên cứu, lên khung cấu trúc và thiết kế giao diện Website/Landing Page chuẩn UI/UX trên nền tảng Figma, đảm bảo tính thẩm mỹ và tối ưu bàn giao cho lập trình viên.</li><li>Định hướng phong cách hình ảnh chiến dịch (Key Visual, Poster, Banner), bảo đảm tính đồng bộ thị giác và độ nhận diện thương hiệu trên mọi điểm chạm.</li><li>Phụ trách thiết kế trọn gói từ bộ nhận diện thương hiệu (Logo, Brand Guidelines), bao bì sản phẩm đến các ấn phẩm truyền thông số cho nhiều nhóm khách hàng doanh nghiệp.</li></ul><br><p><strong>CÔNG TY CPDV AZSEO (09/2018 - 02/2020)</strong><br><strong>Leader Team Graphic, thiết kế giao diện Website / Chạy quảng cáo Google - Facebook.</strong></p><ul><li>Quản lý nhóm thiết kế, trực tiếp phân chia khối lượng công việc, kiểm soát chất lượng và tiến độ bàn giao ấn phẩm cho các dự án khách hàng của công ty.</li><li>Thiết kế giao diện Website (UI) chuẩn responsive cho các dự án trên nền tảng WordPress.</li><li>Phối hợp cùng phòng Marketing lên ý tưởng hình ảnh, tối ưu định dạng ấn phẩm quảng cáo chạy Ads (Google, Facebook) nhằm nâng cao tỷ lệ chuyển đổi.</li></ul><br><p><strong>VIỆN THẨM MỸ JENNA THANH (07/2016 - 08/2017)</strong><br><strong>Nhân viên thiết kế đồ họa / Chạy quảng cáo Google - Facebook</strong></p><ul><li>Thiết kế hình ảnh social, tối ưu cho quảng cáo Google, Facebook.</li><li>Thiết kế các ấn phẩm in ấn: Brochure, Name card, Thẻ bảo hành, Standee.</li><li>Sáng tạo nội dung (Copywriting), chăm sóc Fanpage và Website.</li><li>Lên kế hoạch từ khóa và tối ưu hóa ngân sách Ads.</li></ul>"
+            title: "Giới thiệu bản thân",
+            content: "<p>Graphic Designer với hơn 7 năm kinh nghiệm...</p>"
           }
         ];
         setExpandedBlocks(blocks);
@@ -97,15 +90,19 @@ export default function AdminAboutPage() {
     fetchData();
   }, [fetchData]);
 
-  const addBlock = (type: 'full' | 'half') => {
-    setExpandedBlocks([...expandedBlocks, { id: crypto.randomUUID(), type, content: "" }]);
+  const addBlock = () => {
+    setExpandedBlocks([...expandedBlocks, { id: crypto.randomUUID(), type: 'full', title: "", content: "" }]);
   };
 
   const removeBlock = (id: string) => {
     setExpandedBlocks(expandedBlocks.filter(b => b.id !== id));
   };
 
-  const updateBlock = (id: string, content: string) => {
+  const updateBlockTitle = (id: string, title: string) => {
+    setExpandedBlocks(expandedBlocks.map(b => b.id === id ? { ...b, title } : b));
+  };
+
+  const updateBlockContent = (id: string, content: string) => {
     setExpandedBlocks(expandedBlocks.map(b => b.id === id ? { ...b, content } : b));
   };
 
@@ -167,7 +164,7 @@ export default function AdminAboutPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -180,10 +177,10 @@ export default function AdminAboutPage() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-3">
               <User className="w-6 h-6 text-blue-500" />
-              About Block Editor
+              About Editor (Giao diện 2 cột)
             </h1>
             <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-bold">
-              Chỉnh sửa nội dung giới thiệu trên trang chủ
+              Chỉnh sửa nội dung trực quan giống layout trang chủ
             </p>
           </div>
         </div>
@@ -205,8 +202,7 @@ export default function AdminAboutPage() {
         </button>
       </div>
 
-      {/* Visibility Toggle */}
-      <div className="flex items-center gap-3 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800">
+      <div className="flex items-center gap-3 p-4 bg-zinc-900/50 rounded-2xl border border-zinc-800 max-w-4xl">
         <input
           type="checkbox"
           id="about-visible"
@@ -219,153 +215,149 @@ export default function AdminAboutPage() {
         </label>
       </div>
 
-      {/* Avatar Control */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-blue-500" />
-          Ảnh đại diện (Avatar)
-        </h3>
-        <AvatarSelector
-          value={avatarUrl}
-          onChange={(url) => setAvatarUrl(url)}
-        />
-      </div>
+      {/* --- MÔ PHỎNG LAYOUT TRANG CHỦ --- */}
 
-      {/* Heading */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          Tiêu đề Section
-        </h3>
-        <RichTextEditor
-          content={heading}
-          onChange={(html: string) => setHeading(html)}
-          editable={true}
-          placeholder="Ví dụ: About"
-          minHeight="60px"
-        />
-      </div>
-
-      {/* Subheading */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
-        <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-500" />
-          Phụ đề / Chức danh
-        </h3>
-        <RichTextEditor
-          content={subheading}
-          onChange={(html: string) => setSubheading(html)}
-          editable={true}
-          placeholder="Ví dụ: Senior Graphic Designer | 7 Years of Experience"
-          minHeight="60px"
-        />
-      </div>
-
-      {/* Paragraphs */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-purple-500" />
-            Nội dung giới thiệu mở đầu
-          </h3>
-          <button
-            onClick={() => setParagraphs([...paragraphs, ""])}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-emerald-400 transition-colors bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-700 hover:border-emerald-500/30"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Thêm đoạn
-          </button>
-        </div>
-        <div className="space-y-4">
-          {paragraphs.map((p, idx) => (
-            <div key={idx} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-zinc-600 font-medium">Đoạn {idx + 1}</span>
-                {paragraphs.length > 1 && (
-                  <button
-                    onClick={() => setParagraphs(paragraphs.filter((_, i) => i !== idx))}
-                    className="flex items-center gap-1 text-xs text-zinc-600 hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                    Xóa
-                  </button>
-                )}
-              </div>
+      {/* INTRO SECTION: 2 CỘT */}
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+        <h2 className="text-lg font-bold text-white mb-6 flex items-center gap-2 border-b border-zinc-800 pb-4">
+          Phần mở đầu (Intro)
+        </h2>
+        
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
+          {/* CỘT TRÁI (5/12) */}
+          <div className="w-full md:w-5/12 space-y-6">
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Avatar</label>
+              <AvatarSelector value={avatarUrl} onChange={(url) => setAvatarUrl(url)} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Tiêu đề chính</label>
               <RichTextEditor
-                content={p}
-                onChange={(html: string) => {
-                  const newParagraphs = [...paragraphs];
-                  newParagraphs[idx] = html;
-                  setParagraphs(newParagraphs);
-                }}
+                content={heading}
+                onChange={(html: string) => setHeading(html)}
                 editable={true}
-                placeholder={`Nội dung đoạn ${idx + 1}...`}
-                minHeight="100px"
+                placeholder="Ví dụ: About me"
+                minHeight="50px"
               />
             </div>
-          ))}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Phụ đề</label>
+              <RichTextEditor
+                content={subheading}
+                onChange={(html: string) => setSubheading(html)}
+                editable={true}
+                placeholder="Chức danh / Số năm kinh nghiệm"
+                minHeight="50px"
+              />
+            </div>
+          </div>
+
+          {/* CỘT PHẢI (7/12) */}
+          <div className="w-full md:w-7/12 space-y-6 md:pt-[72px]">
+             <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Đoạn văn giới thiệu</label>
+              <button
+                onClick={() => setParagraphs([...paragraphs, ""])}
+                className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-emerald-400 transition-colors bg-zinc-800 px-3 py-1.5 rounded-lg border border-zinc-700 hover:border-emerald-500/30"
+              >
+                <Plus className="w-3.5 h-3.5" /> Thêm đoạn
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {paragraphs.map((p, idx) => (
+                <div key={idx} className="relative group">
+                  <RichTextEditor
+                    content={p}
+                    onChange={(html: string) => {
+                      const newParagraphs = [...paragraphs];
+                      newParagraphs[idx] = html;
+                      setParagraphs(newParagraphs);
+                    }}
+                    editable={true}
+                    placeholder={`Nội dung đoạn ${idx + 1}...`}
+                    minHeight="100px"
+                  />
+                  {paragraphs.length > 1 && (
+                    <button
+                      onClick={() => setParagraphs(paragraphs.filter((_, i) => i !== idx))}
+                      className="absolute top-2 right-2 p-1.5 bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity rounded hover:bg-red-500/20"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Expanded Content Blocks */}
-      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
-            Nội dung chi tiết (Nhiều cột)
-          </h3>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => addBlock('full')}
-              className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-medium transition-colors border border-zinc-700"
-              title="Thêm cột chiếm toàn bộ chiều ngang"
-            >
-              <Plus className="w-3.5 h-3.5" /> Fullwidth
-            </button>
-            <button 
-              onClick={() => addBlock('half')}
-              className="flex items-center gap-1 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-xs font-medium transition-colors border border-zinc-700"
-              title="Thêm cột chiếm 1/2 chiều ngang"
-            >
-              <Plus className="w-3.5 h-3.5" /> Cột 1/2
-            </button>
-          </div>
+      {/* EXPANDED BLOCKS SECTION: 2 CỘT */}
+      <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-8">
+        <div className="flex items-center justify-between mb-6 border-b border-zinc-800 pb-4">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            Phần chi tiết (Xem thêm)
+          </h2>
+          <button 
+            onClick={addBlock}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg text-sm font-bold transition-colors border border-blue-500/20"
+          >
+            <Plus className="w-4 h-4" /> Thêm dòng nội dung
+          </button>
         </div>
 
-        <p className="text-xs text-zinc-500 mb-6">
-          Nội dung này sẽ hiển thị khi người dùng bấm nút &quot;Xem chi tiết&quot; trên trang chủ. Bạn có thể thêm cột Fullwidth (100% ngang) hoặc cột 1/2 (50% ngang, sẽ xếp cột cạnh nhau trên Desktop).
-        </p>
-
-        <div className="flex flex-col gap-8">
+        <div className="space-y-12">
           {expandedBlocks.map((block, index) => (
-            <div key={block.id} className="space-y-3 relative group">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                  Cột {index + 1} ({block.type === 'full' ? 'Fullwidth' : 'Cột 1/2'})
-                </span>
-                <button 
+            <div key={block.id} className="relative group border border-zinc-800/50 rounded-2xl p-6 hover:border-zinc-700 transition-colors bg-zinc-950/50">
+               <button 
                   onClick={() => removeBlock(block.id)}
-                  className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
-                  title="Xóa cột này"
+                  className="absolute -top-3 -right-3 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:scale-110 shadow-lg"
+                  title="Xóa dòng này"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
-              </div>
-              <div className="min-h-[250px] border border-zinc-800 rounded-xl overflow-hidden focus-within:border-zinc-700 transition-colors">
-                <RichTextEditor
-                  content={block.content}
-                  onChange={(html: string) => updateBlock(block.id, html)}
-                  editable={true}
-                  placeholder={`Nội dung cột ${index + 1}...`}
-                  minHeight="250px"
-                />
+                
+              <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
+                {/* CỘT TRÁI (5/12) */}
+                <div className="w-full md:w-5/12 space-y-2">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="w-6 h-6 rounded-full border border-zinc-600 flex items-center justify-center text-xs text-zinc-400 shrink-0">
+                      {index + 1}
+                    </span>
+                    <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Tiêu đề (Sticky)</label>
+                  </div>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden focus-within:border-blue-500 transition-colors">
+                    <RichTextEditor
+                      content={block.title || ""}
+                      onChange={(html: string) => updateBlockTitle(block.id, html)}
+                      editable={true}
+                      placeholder={`Ví dụ: Kinh nghiệm làm việc...`}
+                      minHeight="50px"
+                    />
+                  </div>
+                </div>
+
+                {/* CỘT PHẢI (7/12) */}
+                <div className="w-full md:w-7/12 space-y-2">
+                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest block mb-2">Nội dung chi tiết</label>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden focus-within:border-blue-500 transition-colors">
+                    <RichTextEditor
+                      content={block.content}
+                      onChange={(html: string) => updateBlockContent(block.id, html)}
+                      editable={true}
+                      placeholder={`Nội dung...`}
+                      minHeight="200px"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
+
           {expandedBlocks.length === 0 && (
-            <div className="text-center py-10 bg-zinc-800/20 rounded-xl border border-dashed border-zinc-700">
-              <p className="text-zinc-500 text-sm">Chưa có cột nội dung nào. Bấm nút Thêm ở trên để tạo.</p>
+            <div className="text-center py-16 bg-zinc-900/30 rounded-2xl border border-dashed border-zinc-800">
+              <p className="text-zinc-500">Chưa có nội dung chi tiết. Bấm "Thêm dòng nội dung" để bắt đầu.</p>
             </div>
           )}
         </div>
@@ -373,7 +365,7 @@ export default function AdminAboutPage() {
 
       {/* Sticky Bottom Save Button */}
       <div className="sticky bottom-0 z-50 bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent pt-6 pb-6 -mx-4 px-4">
-        <div className="flex justify-end">
+        <div className="flex justify-end max-w-7xl mx-auto">
           <button
             onClick={handleSave}
             disabled={saving}

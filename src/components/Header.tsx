@@ -4,7 +4,7 @@ import { User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { createClient } from "@/lib/supabase";
 
@@ -24,6 +24,8 @@ export function Header() {
   const { isAdmin, isEditMode, toggleEditMode, globalPreviewMode, setGlobalPreviewMode } = useAdmin();
   const [scrolled, setScrolled] = useState(false);
   const [introFinished, setIntroFinished] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
 
   const [loginOpen, setLoginOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(true);
@@ -200,12 +202,41 @@ export function Header() {
       } else {
         setScrolled(false);
       }
+
+      // Hide header when scrolling down, show when scrolling up
+      if (currentScroll > lastScrollY.current && currentScroll > 100) {
+        setIsHidden(true);
+      } else if (currentScroll < lastScrollY.current || currentScroll <= 100) {
+        setIsHidden(false);
+      }
+      lastScrollY.current = currentScroll;
     };
     
     // Use capture phase to catch scroll events from .custom-scrollbar
     window.addEventListener("scroll", handleScroll, { capture: true });
     return () => window.removeEventListener("scroll", handleScroll, { capture: true });
   }, [introFinished]);
+
+  useEffect(() => {
+    const updateHeaderOffset = () => {
+      const headerEl = document.querySelector('header');
+      if (headerEl) {
+        // Only set offset if intro is finished (so it doesn't leave gaps during intro)
+        const height = (isHidden || !introFinished) ? 0 : headerEl.clientHeight;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+      }
+    };
+    
+    updateHeaderOffset();
+    window.addEventListener('resize', updateHeaderOffset);
+    // Timeout to ensure DOM is fully rendered
+    const tm = setTimeout(updateHeaderOffset, 100);
+    
+    return () => {
+      window.removeEventListener('resize', updateHeaderOffset);
+      clearTimeout(tm);
+    };
+  }, [isHidden, introFinished]);
 
   // Remove special hiding for home-2 to allow guest mode
   // if (pathname === '/admin/builder') return null;
@@ -278,7 +309,8 @@ export function Header() {
           (scrolled)
             ? "bg-[var(--bg-overlay)] backdrop-blur-md border-b border-[var(--border-subtle)]"
             : "bg-transparent",
-          !introFinished && "opacity-0 -translate-y-full pointer-events-none"
+          (!introFinished || (isHidden && !isMobileMenuOpen)) && "-translate-y-full",
+          !introFinished && "opacity-0 pointer-events-none"
         )}
       >
         <Link 
