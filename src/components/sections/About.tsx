@@ -253,8 +253,10 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
       <section id="about"
         className={cn("relative bg-[var(--bg-base)] transition-all duration-700", !isEditor && "not-is-editor", isEditor && "is-editor")}
         style={{
-          paddingTop: isEditor ? (Number(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0) >= 0 ? `${getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0}px` : '0px') : `${getResponsiveValue(paddingTopData, 'desktop')}px`,
-          paddingBottom: isEditor ? (Number(getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || (isExpanded ? 80 : 0)) >= 0 ? `${getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || (isExpanded ? 80 : 0)}px` : '0px') : `${getResponsiveValue(paddingBottomData, 'desktop')}px`,
+          paddingTop: isEditor ? Math.max(0, Number(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0)) + 'px' : Math.max(0, Number(getResponsiveValue(paddingTopData, 'desktop') || 0)) + 'px',
+          marginTop: isEditor ? Math.min(0, Number(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0)) + 'px' : Math.min(0, Number(getResponsiveValue(paddingTopData, 'desktop') || 0)) + 'px',
+          paddingBottom: isEditor ? Math.max(0, Number(getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || (isExpanded ? 80 : 0))) + 'px' : Math.max(0, Number(getResponsiveValue(paddingBottomData, 'desktop') || 0)) + 'px',
+          marginBottom: isEditor ? Math.min(0, Number(getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0)) + 'px' : Math.min(0, Number(getResponsiveValue(paddingBottomData, 'desktop') || 0)) + 'px',
         } as React.CSSProperties}
       >
         <div

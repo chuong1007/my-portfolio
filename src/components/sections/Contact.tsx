@@ -160,8 +160,10 @@ export function Contact() {
       
       <style dangerouslySetInnerHTML={{ __html: `
         .contact-container:not(.is-editor) {
-          padding-top: var(--pt-mob);
-          padding-bottom: var(--pb-mob);
+          padding-top: max(0px, var(--pt-mob));
+          margin-top: min(0px, var(--pt-mob));
+          padding-bottom: max(0px, var(--pb-mob));
+          margin-bottom: min(0px, var(--pb-mob));
           padding-left: 16px;
           padding-right: 16px;
         }
@@ -181,8 +183,10 @@ export function Contact() {
 
         @media (min-width: 768px) {
           .contact-container:not(.is-editor) {
-            padding-top: var(--pt-tab);
-            padding-bottom: var(--pb-tab);
+            padding-top: max(0px, var(--pt-tab));
+            margin-top: min(0px, var(--pt-tab));
+            padding-bottom: max(0px, var(--pb-tab));
+            margin-bottom: min(0px, var(--pb-tab));
             padding-left: 48px;
             padding-right: 48px;
           }
@@ -203,8 +207,10 @@ export function Contact() {
 
         @media (min-width: 1024px) {
           .contact-container:not(.is-editor) {
-            padding-top: var(--pt-desk);
-            padding-bottom: var(--pb-desk);
+            padding-top: max(0px, var(--pt-desk));
+            margin-top: min(0px, var(--pt-desk));
+            padding-bottom: max(0px, var(--pb-desk));
+            margin-bottom: min(0px, var(--pb-desk));
           }
           .contact-heading:not(.is-editor) {
             font-size: var(--h-fs-desk);
@@ -237,8 +243,10 @@ export function Contact() {
           "--pb-tab": `${getResponsiveValue(paddingBottomData, 'tablet') || 0}px`,
           "--pb-mob": `${getResponsiveValue(paddingBottomData, 'mobile') || 0}px`,
           ...(isEditor ? {
-             paddingTop: `${getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0}px`,
-             paddingBottom: `${getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0}px`
+             paddingTop: Math.max(0, Number(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0)) + 'px',
+             marginTop: Math.min(0, Number(getResponsiveValue(paddingTopData, globalPreviewMode || 'desktop') || 0)) + 'px',
+             paddingBottom: Math.max(0, Number(getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0)) + 'px',
+             marginBottom: Math.min(0, Number(getResponsiveValue(paddingBottomData, globalPreviewMode || 'desktop') || 0)) + 'px'
           } : {})
         } as any}
       >

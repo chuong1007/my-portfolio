@@ -161,6 +161,16 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
 
   const initialData = { isVisible, paddingTop: paddingTopData, paddingBottom: paddingBottomData, title: titleData, subtitle: subtitleData, columns: columnsData };
 
+  const pTop = getResponsiveValue(paddingTopData, isEditor ? globalPreviewMode : currentDevice);
+  const pBottom = getResponsiveValue(paddingBottomData, isEditor ? globalPreviewMode : currentDevice);
+  
+  const sectionStyle = {
+    marginTop: Number(pTop) < 0 ? `${pTop}px` : undefined,
+    paddingTop: Number(pTop) >= 0 ? `${pTop}px` : undefined,
+    marginBottom: Number(pBottom) < 0 ? `${pBottom}px` : undefined,
+    paddingBottom: Number(pBottom) >= 0 ? `${pBottom}px` : undefined,
+  };
+
   return (
     <SectionEditor 
       sectionId={sectionId} 
@@ -193,8 +203,7 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
            .gallery-track-pad { padding-left: calc(50vw - (var(--card-w-desk) / 2)); padding-right: calc(50vw - (var(--card-w-desk) / 2)); }
         }
       `}} />
-
-      <section id="projects" className="bg-[var(--bg-base)] relative">
+      <section id="projects" className="bg-[var(--bg-base)] relative transition-all duration-700" style={sectionStyle}>
         <div ref={targetRef} className="relative md:h-[300vh]">
           
           <div 
