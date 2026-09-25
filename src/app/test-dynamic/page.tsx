@@ -1,2 +1,2 @@
 export const dynamic = 'force-dynamic';
-export default function Page() { return <div>Dynamic</div>; }
+export default function Page() { return <div>{Object.keys(process.env).join(', ')}</div>; }
