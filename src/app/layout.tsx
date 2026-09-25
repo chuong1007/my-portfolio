@@ -89,8 +89,7 @@ export const metadata: Metadata = {
     creator: '@chuong_graphic',
   },
   verification: {
-    // Thêm Google Search Console verification sau khi đăng ký
-    // google: 'YOUR_GOOGLE_VERIFICATION_CODE',
+    google: 'EMADNfVUAgMBNuCMnRltyU65gGwfQYpZRJyv3kmLJvY',
   },
 };
 
