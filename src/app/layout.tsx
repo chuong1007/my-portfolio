@@ -35,11 +35,34 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'CHUONG.PORTFOLIO | Visual Designer',
+  title: {
+    default: 'CHUONG.PORTFOLIO | Visual Designer',
+    template: '%s | CHUONG.PORTFOLIO',
+  },
   description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
+  keywords: [
+    'thiết kế đồ họa', 'graphic designer', 'brand identity', 'nhận diện thương hiệu',
+    'thiết kế bao bì', 'packaging design', 'thiết kế quảng cáo', 'ấn phẩm đồ hoạ',
+    'visual designer', 'freelance designer', 'designer TPHCM', 'designer Hồ Chí Minh',
+    'logo design', 'branding', 'CHUONG.GRAPHIC', 'portfolio thiết kế'
+  ],
+  authors: [{ name: 'Thanh Chương', url: 'https://chuong-graphic.vercel.app' }],
+  creator: 'Thanh Chương',
+  publisher: 'CHUONG.PORTFOLIO',
   metadataBase: new URL('https://chuong-graphic.vercel.app'),
   alternates: {
     canonical: '/',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   },
   openGraph: {
     title: 'CHUONG.PORTFOLIO | Visual Designer',
@@ -51,7 +74,8 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'CHUONG.PORTFOLIO | Visual Designer',
+        alt: 'CHUONG.PORTFOLIO | Visual Designer tại TP.HCM',
+        type: 'image/png',
       },
     ],
     locale: 'vi_VN',
@@ -62,6 +86,11 @@ export const metadata: Metadata = {
     title: 'CHUONG.PORTFOLIO | Visual Designer',
     description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
     images: ['/og-image.png'],
+    creator: '@chuong_graphic',
+  },
+  verification: {
+    // Thêm Google Search Console verification sau khi đăng ký
+    // google: 'YOUR_GOOGLE_VERIFICATION_CODE',
   },
 };
 

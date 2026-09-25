@@ -2,6 +2,7 @@ import { getProjectById } from "@/lib/data";
 import { ProjectDetail } from "@/components/ProjectDetail";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
+import type { Metadata } from "next";
 
 // Always fetch fresh data from Supabase (no stale static cache)
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,48 @@ export const dynamic = 'force-dynamic';
 type PageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+  try {
+    const supabase = await createClient();
+    const { data: project } = await supabase
+      .from("projects")
+      .select("title, description, cover_image, tags")
+      .eq(isUuid ? "id" : "slug", id)
+      .single();
+
+    if (!project) {
+      return { title: 'Dự án không tìm thấy' };
+    }
+
+    const title = project.title || 'Dự án thiết kế';
+    const description = project.description || 'Xem chi tiết dự án thiết kế từ CHUONG.GRAPHIC';
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title: `${title} | CHUONG.PORTFOLIO`,
+        description,
+        images: project.cover_image
+          ? [{ url: project.cover_image, width: 1200, height: 630, alt: title }]
+          : [{ url: '/og-image.png', width: 1200, height: 630 }],
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${title} | CHUONG.PORTFOLIO`,
+        description,
+        images: project.cover_image ? [project.cover_image] : ['/og-image.png'],
+      },
+    };
+  } catch {
+    return { title: 'Dự án thiết kế | CHUONG.PORTFOLIO' };
+  }
+}
 
 export default async function ProjectPage({ params }: PageProps) {
   const { id } = await params;
