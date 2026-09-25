@@ -195,10 +195,10 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
       `}} />
 
       <section id="projects" className="bg-[var(--bg-base)] relative">
-        <div ref={targetRef} className="relative h-[300vh]">
+        <div ref={targetRef} className="relative md:h-[300vh]">
           
           <div 
-            className="sticky h-screen flex flex-col justify-start overflow-hidden pt-[24px] pb-8"
+            className="md:sticky max-md:relative md:h-screen flex flex-col justify-start max-md:overflow-visible overflow-hidden pt-[24px] pb-8"
             style={{ 
               top: 'var(--header-height, 0px)',
               transition: 'top 0.7s ease-out'
@@ -242,17 +242,17 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
               <motion.div 
                 ref={trackRef}
                 style={{ x }} 
-                className="flex items-start w-max py-4 gallery-track-pad gap-6 md:gap-8"
+                className="flex max-md:flex-col max-md:!transform-none max-md:w-full max-md:items-center max-md:px-4 max-md:!pl-4 max-md:!pr-4 md:items-start md:w-max py-4 gallery-track-pad gap-6 md:gap-8"
               >
                 {loading && dbProjects.length === 0 ? (
                   [1, 2, 3].map((i) => (
-                    <div key={i} className="gallery-card flex flex-col gap-3 animate-pulse shrink-0">
+                    <div key={i} className="gallery-card flex flex-col gap-3 animate-pulse shrink-0 max-md:!w-full max-md:max-w-md">
                       <div className="relative w-full aspect-[4/5] rounded-xl bg-[var(--bg-surface)] border border-[var(--border-subtle)]" />
                     </div>
                   ))
                 ) : (
                   filteredProjects.map((project, index) => (
-                    <div key={project.id || index} className="gallery-card group flex flex-col gap-3 shrink-0">
+                    <div key={project.id || index} className="gallery-card group flex flex-col gap-3 shrink-0 max-md:!w-full max-md:max-w-md">
                       <Link href={`/project/${project.slug || project.id}`} className="group flex flex-col gap-3 relative block">
                         <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)]/50 shadow-2xl transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]">
                           <img src={project.imageUrl} alt={project.title} loading="lazy" referrerPolicy="no-referrer" className={cn("w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105", isAdmin && project.is_visible === false && "opacity-40 grayscale")} />
