@@ -405,30 +405,32 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                       return (
                         <div key={block.id} className="w-full flex flex-col">
                           {index > 0 && <div className="w-full h-[1px] bg-zinc-800/80 my-16 md:my-24 shadow-none" />}
-                          <div className={cn("flex flex-col gap-8 md:gap-16", !isAdmin ? "md:flex-row" : (globalPreviewMode !== 'desktop' ? "flex-col" : "flex-row"))}>
+                          <div className={cn("flex flex-col gap-8 md:gap-16", isExpanded ? "items-start" : "items-start", !isAdmin ? "md:flex-row" : (globalPreviewMode !== 'desktop' ? "flex-col" : "flex-row"))}>
                           {/* Title Cột trái (Sticky) */}
                           <div 
-                            className={cn("w-full flex items-center gap-4 h-fit", 
-                              !isAdmin ? "md:w-5/12 md:sticky" : (globalPreviewMode !== 'desktop' ? "w-full" : "w-5/12 sticky")
+                            className={cn("w-full flex gap-4 h-fit", 
+                              isExpanded ? "items-center" : "items-start",
+                              !isAdmin ? (isExpanded ? "md:w-5/12 md:sticky" : "md:w-5/12") : (globalPreviewMode !== 'desktop' ? "w-full" : (isExpanded ? "w-5/12 sticky" : "w-5/12"))
                             )}
-                            style={{ 
+                            style={isExpanded ? { 
                               top: 'calc(var(--header-height, 0px) + 80px)',
                               transition: 'top 0.7s ease-out'
-                            }}
+                            } : {}}
                           >
                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-zinc-500 text-[14px] font-normal text-[var(--text-muted)] bg-transparent shrink-0">
                               {index + 1}
                             </span>
                             <div 
-                              className="text-xl md:text-2xl font-bold text-[var(--text-primary)] [&_p]:m-0"
+                              className={cn("text-xl md:text-2xl font-bold text-[var(--text-primary)] [&_p]:m-0", !isExpanded && "mt-[2px]")}
                               dangerouslySetInnerHTML={{ __html: cleanHtmlColors(block.title || `Block ${index + 1}`) }}
                             />
                           </div>
                           {/* Nội dung Cột phải */}
                           <div
-                            className={cn("w-full text-[var(--text-muted)] leading-relaxed prose prose-sm dark:prose-invert max-w-none text-justify pt-1.5 [&_p]:mb-4 [&_ul]:my-2 [&_li]:my-2 [&_strong]:text-[var(--text-secondary)] [&_strong]:font-semibold [&_ul]:list-none [&_ul]:pl-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-800 [&_hr]:my-8 [&_hr]:shadow-none",
+                            className={cn("w-full text-[var(--text-muted)] leading-relaxed prose prose-sm dark:prose-invert max-w-none text-justify [&_p:first-child]:!mt-0 [&_p]:mb-4 [&_ul]:my-2 [&_li]:my-2 [&_strong]:text-[var(--text-secondary)] [&_strong]:font-semibold [&_ul]:list-none [&_ul]:pl-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-800 [&_hr]:my-8 [&_hr]:shadow-none",
                                 !isAdmin ? "md:w-7/12" : (globalPreviewMode !== 'desktop' ? "w-full" : "w-7/12")
                             )}
+                            style={!isExpanded ? { marginTop: '6px' } : {}}
                             dangerouslySetInnerHTML={{ __html: cleanHtmlColors(cleanContent) }}
                           />
                         </div>
@@ -439,7 +441,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   
                   {/* Overlay mờ khi rút gọn */}
                   {!isExpanded && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 to-transparent pointer-events-none z-10 backdrop-blur-[4px]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/60 to-transparent pointer-events-none z-10 backdrop-blur-[1.5px]" />
                   )}
                 </motion.div>
               )}

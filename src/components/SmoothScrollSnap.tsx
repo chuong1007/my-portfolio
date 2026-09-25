@@ -46,8 +46,10 @@ export function SmoothScrollSnap() {
           containerOffset = containerRect.top;
         }
         
-        const headerHeight = isMobile ? 56 : 64;
-        const minBreathingRoom = 60; 
+        const headerEl = document.querySelector('header');
+        const isHeaderHidden = headerEl ? headerEl.classList.contains('-translate-y-full') : false;
+        const headerHeight = isHeaderHidden ? 0 : (isMobile ? 56 : 64);
+        const minBreathingRoom = 24; 
         
         const computedStyle = window.getComputedStyle(section);
         const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
@@ -76,6 +78,7 @@ export function SmoothScrollSnap() {
       // Chỉ thực hiện animation nếu khoảng cách lớn hơn 10px (tránh giật tại chỗ)
       if (closestSection && minDistance > 10) {
         isSnappingRef.current = true;
+        (window as any).__isSnapScrolling = true;
         
         const startScroll = isWindow ? window.scrollY : (scrollContainer as HTMLElement).scrollTop;
         const distance = targetScroll - startScroll;
@@ -94,6 +97,7 @@ export function SmoothScrollSnap() {
           // Đợi 1 chút trước khi cho phép snap lại để tránh xung đột liên hoàn
           setTimeout(() => {
             isSnappingRef.current = false;
+            (window as any).__isSnapScrolling = false;
           }, 100);
 
           const container = document.querySelector('.custom-scrollbar') || window;
@@ -125,6 +129,7 @@ export function SmoothScrollSnap() {
             setTimeout(() => {
               cancelAnimation(); // Dọn dẹp sự kiện
               isSnappingRef.current = false;
+              (window as any).__isSnapScrolling = false;
             }, 50);
           }
         };
