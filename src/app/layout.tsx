@@ -35,15 +35,15 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'CHUONG.PORTFOLIO | Visual Designer & Brand Identity Specialist',
-  description: 'Portfolio của Chuong Thanh - Visual Designer chuyên nghiệp tại TP.HCM. Chuyên về nhận diện thương hiệu, thiết kế đồ họa và trải nghiệm thị giác.',
+  title: 'CHUONG.PORTFOLIO | Visual Designer',
+  description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
   metadataBase: new URL('https://chuong-graphic.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'CHUONG.PORTFOLIO | Visual Designer',
-    description: 'Visual Designer based in Ho Chi Minh City.',
+    description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
     url: 'https://chuong-graphic.vercel.app',
     siteName: 'CHUONG.PORTFOLIO',
     images: [
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'CHUONG.PORTFOLIO | Visual Designer',
-    description: 'Visual Designer based in Ho Chi Minh City.',
+    description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
     images: ['/og-image.png'],
   },
 };
