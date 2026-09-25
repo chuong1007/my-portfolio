@@ -276,17 +276,19 @@ export function Gallery({ sectionId = "gallery", variant = 'homepage', initialCo
                             </span>
                           </div>
                         </div>
-                        <div className="px-2 flex flex-col mt-2">
+                        <div className="flex flex-col mt-2">
                           <h3 className="text-[17px] font-semibold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors line-clamp-2 leading-[1.3] tracking-tight">{project.title}</h3>
                         </div>
                       </Link>
-                      <div className="px-2 flex flex-wrap gap-x-2 gap-y-1">
+                      {/* Hide tags as requested by user
+                      <div className="flex flex-wrap gap-x-2 gap-y-1">
                         {project.tags.map((tag: string, i: number) => (
                           <Link key={tag} href={`/tag/${generateSlug(tag)}`} className="text-sm font-medium text-[var(--text-muted)] hover:text-blue-400 transition-colors">
                             {tag}{i < project.tags.length - 1 ? "," : ""}
                           </Link>
                         ))}
                       </div>
+                      */}
                     </div>
                   ))
                 )}
