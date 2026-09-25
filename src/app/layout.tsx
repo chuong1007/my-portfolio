@@ -39,34 +39,14 @@ export const metadata: Metadata = {
     default: 'CHUONG.PORTFOLIO | Visual Designer',
     template: '%s | CHUONG.PORTFOLIO',
   },
-  description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
-  keywords: [
-    'thiết kế đồ họa', 'graphic designer', 'brand identity', 'nhận diện thương hiệu',
-    'thiết kế bao bì', 'packaging design', 'thiết kế quảng cáo', 'ấn phẩm đồ hoạ',
-    'visual designer', 'freelance designer', 'designer TPHCM', 'designer Hồ Chí Minh',
-    'logo design', 'branding', 'CHUONG.GRAPHIC', 'portfolio thiết kế'
-  ],
-  authors: [{ name: 'Thanh Chương', url: 'https://chuong-graphic.vercel.app' }],
-  creator: 'Thanh Chương',
-  publisher: 'CHUONG.PORTFOLIO',
+  description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM.',
   metadataBase: new URL('https://chuong-graphic.vercel.app'),
   alternates: {
     canonical: '/',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
-  },
   openGraph: {
     title: 'CHUONG.PORTFOLIO | Visual Designer',
-    description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
+    description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM.',
     url: 'https://chuong-graphic.vercel.app',
     siteName: 'CHUONG.PORTFOLIO',
     images: [
@@ -74,19 +54,11 @@ export const metadata: Metadata = {
         url: '/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'CHUONG.PORTFOLIO | Visual Designer tại TP.HCM',
-        type: 'image/png',
+        alt: 'CHUONG.PORTFOLIO',
       },
     ],
     locale: 'vi_VN',
     type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'CHUONG.PORTFOLIO | Visual Designer',
-    description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
-    images: ['/og-image.jpg'],
-    creator: '@chuong_graphic',
   },
   verification: {
     google: 'aqSYS6fzCStvSvHqick6zrJxLpEUEulLwkmZ2GvUqvk',
