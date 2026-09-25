@@ -52,11 +52,11 @@ export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": ["Person", "ProfessionalService"],
-    "name": "Thanh Chương",
-    "jobTitle": "Visual Designer & Brand Identity Specialist",
+    "name": "Trần Thanh Chương",
+    "jobTitle": "Visual Graphic Designer & Brand Identity Specialist",
     "url": "https://chuong-graphic.vercel.app",
     "image": "https://chuong-graphic.vercel.app/og-image.png",
-    "description": "Visual Designer chuyên nghiệp với hơn 7 năm kinh nghiệm tại TP.HCM. Chuyên thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng và thiết kế bao bì.",
+    "description": "Visual Graphic Designer với 7 năm kinh nghiệm tại TP.HCM. Chuyên thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng và thiết kế bao bì.",
     "address": {
       "@type": "PostalAddress",
       "addressLocality": "Hồ Chí Minh",
