@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'CHUONG.PORTFOLIO | Visual Designer',
     description: 'Thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng, thiết kế bao bì tại TP.HCM. Xem ngay các dự án sáng tạo nổi bật và hồ sơ năng lực.',
-    images: ['/og-image.png'],
+    images: ['/og-image.jpg'],
     creator: '@chuong_graphic',
   },
   verification: {
