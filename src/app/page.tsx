@@ -11,8 +11,12 @@ export const dynamic = 'force-dynamic'
 
 // Timeout wrapper: if Supabase is slow / network is down, don't block SSR
 function withTimeout<T>(promise: Promise<T> | PromiseLike<T>, ms = 5000): Promise<T | null> {
+  const p = Promise.resolve(promise).catch(err => {
+    console.error('Data fetch error:', err)
+    return null
+  })
   return Promise.race([
-    Promise.resolve(promise),
+    p,
     new Promise<null>((resolve) => setTimeout(() => resolve(null), ms))
   ])
 }
