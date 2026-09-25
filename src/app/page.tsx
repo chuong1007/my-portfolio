@@ -49,8 +49,28 @@ export default async function Home() {
 
   const contentMap = siteContent?.reduce((acc: any, item: any) => ({ ...acc, [item.id]: item.data }), {}) || {};
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": ["Person", "ProfessionalService"],
+    "name": "Thanh Chương",
+    "jobTitle": "Visual Designer & Brand Identity Specialist",
+    "url": "https://chuong-graphic.vercel.app",
+    "image": "https://chuong-graphic.vercel.app/og-image.png",
+    "description": "Visual Designer chuyên nghiệp với hơn 7 năm kinh nghiệm tại TP.HCM. Chuyên thiết kế nhận diện thương hiệu, ấn phẩm đồ hoạ, quảng cáo đa nền tảng và thiết kế bao bì.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Hồ Chí Minh",
+      "addressRegion": "Hồ Chí Minh",
+      "addressCountry": "VN"
+    }
+  };
+
   return (
     <main className="min-h-screen w-full">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <GlobalPopup isVisible={contentMap['popup']?.isVisible === true} rawContent={contentMap['popup']} />
       <Hero initialContent={contentMap['hero']} initialProjects={dbProjects || undefined} customCarouselImages={contentMap['hero_carousel']?.images || undefined} tiltDirection={contentMap['hero_carousel']?.tiltDirection || 'inward'} carouselGap={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.gap ?? contentMap['hero_carousel']?.gap} carouselPerspective={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.perspective ?? contentMap['hero_carousel']?.perspective} dTheta={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.dTheta ?? contentMap['hero_carousel']?.dTheta} w_card={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.wCard ?? contentMap['hero_carousel']?.w_card} blurStrength={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.blurStrength ?? contentMap['hero_carousel']?.blurStrength} dimStrength={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.dimStrength ?? contentMap['hero_carousel']?.dimStrength} displayCount={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.displayCount ?? contentMap['hero_carousel']?.displayCount} yOffsetMobile={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.yOffsetMobile ?? contentMap['hero_carousel']?.yOffsetMobile} yOffsetTablet={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.yOffsetTablet ?? contentMap['hero_carousel']?.yOffsetTablet} yOffsetDesktop={contentMap['hero_carousel']?.configs?.[contentMap['hero_carousel']?.tiltDirection]?.yOffsetDesktop ?? contentMap['hero_carousel']?.yOffsetDesktop} />
       <About initialContent={contentMap['about']} />
