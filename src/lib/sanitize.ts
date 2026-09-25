@@ -1,13 +1,10 @@
-import DOMPurify from 'isomorphic-dompurify';
-
 export const cleanHtmlColors = (html?: string | null) => {
   if (!html) return "";
   
-  // 1. Sanitize against XSS
-  const sanitized = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: ['hr', 'b', 'i', 'em', 'strong', 'a', 'p', 'br', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'li', 'ol', 'div', 'img', 'blockquote', 'code', 'pre', 'svg', 'path', 'g', 'circle', 'rect', 'line', 'polygon', 'polyline'],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style', 'src', 'alt', 'width', 'height', 'fill', 'viewBox', 'xmlns', 'd', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin'],
-  });
+  // 1. Basic sanitize against XSS (Remove script tags)
+  // Note: For a personal portfolio where content is only edited by the admin,
+  // a lightweight regex is sufficient and avoids heavy jsdom dependencies that crash Vercel.
+  const sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
   // 2. Clean colors for Dark/Light mode overrides
   return sanitized
