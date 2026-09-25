@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     creator: '@chuong_graphic',
   },
   verification: {
-    google: 'EMADNfVUAgMBNuCMnRltyU65gGwfQYpZRJyv3kmLJvY',
+    google: 'aqSYS6fzCStvSvHqick6zrJxLpEUEulLwkmZ2GvUqvk',
   },
 };
 
