@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ['isomorphic-dompurify', 'jsdom', 'html-encoding-sniffer'],
 };
 
 export default nextConfig;
