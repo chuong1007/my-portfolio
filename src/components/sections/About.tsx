@@ -105,17 +105,20 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
       setTimeout(() => {
         const firstBlock = expandRef.current!.querySelector('.w-full.flex.flex-col');
         if (firstBlock) {
+          (window as any).__isSnapScrolling = true;
           const targetY = firstBlock.getBoundingClientRect().top + window.scrollY;
-          const isScrollingDown = targetY > window.scrollY;
           const header = document.querySelector('header');
           const headerHeight = header ? header.getBoundingClientRect().height : 72;
           
-          // If we scroll down, header hides -> effective height is 0
-          // If we scroll up, header shows -> effective height is actual header height
-          const effectiveHeaderHeight = isScrollingDown ? 0 : headerHeight;
+          // If we are already scrolled down (> 100px), header is hidden so effective height is 0
+          const effectiveHeaderHeight = (window.scrollY > 100) ? 0 : headerHeight;
           
           // Snap so the content is 80px below the effective top
           window.scrollTo({ top: targetY - effectiveHeaderHeight - 80, behavior: 'smooth' });
+
+          setTimeout(() => {
+            (window as any).__isSnapScrolling = false;
+          }, 1000);
         } else {
           // Fallback
           const y = expandRef.current!.getBoundingClientRect().top + window.scrollY;
@@ -382,7 +385,10 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   isExpanded && isAnimationComplete ? "overflow-visible" : "overflow-hidden"
                 )}
               >
-                  <div className="mt-12 pt-24 border-t border-[var(--border-subtle)] flex flex-col">
+                  <div className={cn(
+                    "border-t border-[var(--border-subtle)] flex flex-col transition-all duration-700",
+                    isExpanded ? "mt-12 pt-24" : "mt-6 pt-6"
+                  )}>
                     {expandedBlocks.map((block, index) => {
                       let cleanContent = stripMentionClasses(block.content);
                       cleanContent = cleanContent
@@ -429,7 +435,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   
                   {/* Overlay mờ khi rút gọn */}
                   {!isExpanded && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/70 to-[var(--bg-base)]/0 pointer-events-none z-10 backdrop-blur-[2.5px]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)]/25 via-transparent to-transparent pointer-events-none z-10 backdrop-blur-[1.5px]" />
                   )}
                 </motion.div>
               )}

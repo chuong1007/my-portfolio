@@ -203,13 +203,30 @@ export function Header() {
         setScrolled(false);
       }
 
-      // Hide header when scrolling down, show when scrolling up
-      if (currentScroll > lastScrollY.current && currentScroll > 100) {
-        setIsHidden(true);
-      } else if (currentScroll < lastScrollY.current || currentScroll <= 100) {
-        setIsHidden(false);
+      // Don't toggle header during programmatic snap scrolling
+      if ((window as any).__isSnapScrolling) {
+        lastScrollY.current = currentScroll;
+        return;
       }
-      lastScrollY.current = currentScroll;
+
+      // Hide header when scrolling down, show when scrolling up with a threshold to prevent accidental pops
+      const diff = currentScroll - lastScrollY.current;
+      if (Math.abs(diff) >= 10) {
+        if (diff > 0 && currentScroll > 100) {
+          setIsHidden(true);
+        } else if (diff < 0) {
+          if (currentScroll <= 100) {
+            setIsHidden(false);
+          } else if (Math.abs(diff) >= 25) {
+            // Only show header when scrolling UP significantly (> 25px)
+            setIsHidden(false);
+          }
+        }
+        lastScrollY.current = currentScroll;
+      } else if (currentScroll <= 20) {
+        setIsHidden(false);
+        lastScrollY.current = currentScroll;
+      }
     };
     
     // Use capture phase to catch scroll events from .custom-scrollbar
