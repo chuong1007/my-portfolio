@@ -347,8 +347,12 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                     <div className="pt-2 flex flex-col items-start bg-transparent">
                       <button
                         onClick={() => {
+                          (window as any).__isSnapScrolling = true;
                           setIsExpanded(!isExpanded);
                           setIsAnimationComplete(false);
+                          setTimeout(() => {
+                            (window as any).__isSnapScrolling = false;
+                          }, 2500);
                         }}
                         className={cn(
                           "group flex items-center gap-2 text-sm font-medium px-6 py-2 rounded-full transition-all duration-300 border",
@@ -422,7 +426,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                           </div>
                           {/* Nội dung Cột phải */}
                           <div
-                            className={cn("w-full text-[var(--text-muted)] leading-relaxed prose prose-sm dark:prose-invert max-w-none text-justify [&_p]:mb-4 [&_ul]:my-2 [&_li]:my-2 [&_strong]:text-[var(--text-secondary)] [&_strong]:font-semibold [&_ul]:list-none [&_ul]:pl-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-800 [&_hr]:my-8 [&_hr]:shadow-none",
+                            className={cn("w-full text-[var(--text-muted)] leading-relaxed prose prose-sm dark:prose-invert max-w-none text-justify pt-1.5 [&_p]:mb-4 [&_ul]:my-2 [&_li]:my-2 [&_strong]:text-[var(--text-secondary)] [&_strong]:font-semibold [&_ul]:list-none [&_ul]:pl-0 [&_hr]:border-t [&_hr]:border-solid [&_hr]:border-zinc-800 [&_hr]:my-8 [&_hr]:shadow-none",
                                 !isAdmin ? "md:w-7/12" : (globalPreviewMode !== 'desktop' ? "w-full" : "w-7/12")
                             )}
                             dangerouslySetInnerHTML={{ __html: cleanHtmlColors(cleanContent) }}
@@ -435,7 +439,7 @@ export function About({ sectionId = "about", initialContent }: AboutProps) {
                   
                   {/* Overlay mờ khi rút gọn */}
                   {!isExpanded && (
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)]/25 via-transparent to-transparent pointer-events-none z-10 backdrop-blur-[1.5px]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-base)] via-[var(--bg-base)]/80 to-transparent pointer-events-none z-10 backdrop-blur-[4px]" />
                   )}
                 </motion.div>
               )}
