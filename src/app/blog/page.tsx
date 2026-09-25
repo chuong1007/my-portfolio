@@ -7,7 +7,7 @@ export const metadata = {
     title: 'Blog thiết kế | CHUONG.PORTFOLIO',
     description: 'Chia sẻ kiến thức, kinh nghiệm và xu hướng thiết kế đồ hoạ, nhận diện thương hiệu từ góc nhìn của một Visual Designer 7+ năm tại TP.HCM.',
     url: 'https://chuong-graphic.vercel.app/blog',
-    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
 };
 

@@ -38,14 +38,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description,
         images: project.cover_image
           ? [{ url: project.cover_image, width: 1200, height: 630, alt: title }]
-          : [{ url: '/og-image.png', width: 1200, height: 630 }],
+          : [{ url: '/og-image.jpg', width: 1200, height: 630 }],
         type: 'article',
       },
       twitter: {
         card: 'summary_large_image',
         title: `${title} | CHUONG.PORTFOLIO`,
         description,
-        images: project.cover_image ? [project.cover_image] : ['/og-image.png'],
+        images: project.cover_image ? [project.cover_image] : ['/og-image.jpg'],
       },
     };
   } catch {
